@@ -1,43 +1,49 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { createUserPlaylist } from '@/features/music/api';
 
-/**
- * Props for the {@link CreatePlaylistDialog} component.
- */
 interface CreatePlaylistDialogProps {
-  /** Closes the dialog and resets the input. */
   onClose: () => void;
-  /** Called after a playlist is successfully created (triggers playlist list refresh). */
   onCreated: () => void;
 }
 
-/**
- * Modal dialog for creating a new user playlist.
- *
- * Renders a centered overlay with a single text input. The user types a playlist
- * name and presses Enter to create it via the `createUserPlaylist` API. On success
- * a toast notification is shown and `onCreated` is invoked so the parent can
- * refresh the playlist list. Pressing Escape or clicking the backdrop closes the dialog.
- */
 export function CreatePlaylistDialog({
   onClose,
   onCreated,
 }: CreatePlaylistDialogProps) {
   const t = useTranslations('music');
   const [name, setName] = useState('');
+  const [visible, setVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+    inputRef.current?.focus();
+  }, []);
 
   const close = () => {
+    setVisible(false);
+    setTimeout(() => {
+      setName('');
+      onClose();
+    }, 200);
+  };
+
+  const submit = async () => {
+    if (!name.trim()) return;
+    await createUserPlaylist(name.trim());
     setName('');
     onClose();
+    toast.success(t('createPlaylist'));
+    onCreated();
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-200 ${visible ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0'}`}
       onClick={close}
       onKeyDown={(e) => {
         if (e.key === 'Escape') close();
@@ -45,30 +51,38 @@ export function CreatePlaylistDialog({
       role="dialog"
     >
       <div
-        className="bg-background border-[3px] border-border p-6 w-80"
+        className={`flex flex-col items-center transition-all duration-200 ${visible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={() => {}}
         role="dialog"
       >
-        <h3 className="font-headline font-black uppercase tracking-tighter text-lg mb-4">
-          {t('createPlaylist')}
-        </h3>
         <input
+          ref={inputRef}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t('playlistName')}
-          className="w-full bg-transparent border-none outline-none text-xl font-black font-headline uppercase text-foreground placeholder:text-muted-foreground/30 border-b-2 border-border focus:border-neo-yellow py-2"
+          className="w-80 bg-transparent border-b border-white/20 outline-none text-2xl font-black font-headline uppercase text-white placeholder:text-white/40 text-center py-3"
           onKeyDown={async (e) => {
-            if (e.key === 'Enter' && name.trim()) {
-              await createUserPlaylist(name.trim());
-              setName('');
-              onClose();
-              toast.success(t('createPlaylist'));
-              onCreated();
-            }
+            if (e.key === 'Enter') await submit();
             if (e.key === 'Escape') close();
           }}
         />
+        <div className="flex gap-6 mt-4">
+          <button
+            type="button"
+            className="text-white/60 text-xs font-headline uppercase tracking-wider cursor-pointer hover:text-white"
+            onClick={submit}
+          >
+            enter ↵
+          </button>
+          <button
+            type="button"
+            className="text-white/60 text-xs font-headline uppercase tracking-wider cursor-pointer hover:text-white"
+            onClick={close}
+          >
+            cancel
+          </button>
+        </div>
       </div>
     </div>
   );

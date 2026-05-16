@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Check,
   ListMusic,
   ListPlus,
   Plus,
@@ -21,7 +22,6 @@ import {
 } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 
-/** Minimal track shape required by the context menu (avoids coupling to full MusicTrack). */
 interface Track {
   id: string;
   title: string;
@@ -31,30 +31,11 @@ interface Track {
   duration: number;
 }
 
-/** Payload emitted through the event bus when a context menu is requested. */
 type MenuEvent = { x: number; y: number; song: Track; onRemove?: () => void };
-/** Subscriber callback type for the event bus. */
 type Listener = (e: MenuEvent) => void;
 
-/**
- * Simple in-memory pub/sub event bus (a `Set` of listeners).
- *
- * Producers call {@link showSongMenu} which broadcasts a `MenuEvent` to all
- * registered listeners. The singleton {@link SongContextMenu} component
- * subscribes on mount and renders the menu at the event coordinates.
- */
 const bus = new Set<Listener>();
 
-/**
- * Fires a context-menu event for a song at the pointer position.
- *
- * Call this from any component's `onContextMenu` handler to open the
- * global {@link SongContextMenu} without prop-drilling.
- *
- * @param e - The React mouse event (used for coordinates and `preventDefault`).
- * @param song - The track to show actions for.
- * @param onRemove - Optional callback for a "Remove from Playlist" action.
- */
 export function showSongMenu(
   e: React.MouseEvent,
   song: Track,
@@ -64,42 +45,26 @@ export function showSongMenu(
   for (const l of bus) l({ x: e.clientX, y: e.clientY, song, onRemove });
 }
 
-/**
- * Global right-click context menu for song actions.
- *
- * Subscribes to the {@link bus} event bus on mount and renders a positioned
- * `<menu>` element at the pointer coordinates when a {@link showSongMenu} event
- * is received. Available actions (shown conditionally):
- *
- * - **Remove from Playlist** — only if `onRemove` was provided by the caller.
- * - **Play Next** / **Add to Queue** — only if the song is not the currently playing track.
- * - **Start Song Radio** — creates an auto-generated radio queue from the song.
- * - **Add to Playlist** — expands an inline sub-menu listing the user's playlists
- *   (fetched on demand) with an option to create a new playlist inline.
- *
- * The menu auto-closes on outside click or scroll. This is a singleton component —
- * mount it once near the app root.
- */
 export function SongContextMenu() {
   const t = useTranslations('music');
   const { currentTrack, addToQueue, playNext, play } = useMusicPlayerContext();
   const [menu, setMenu] = useState<MenuEvent | null>(null);
-  const [pos, setPos] = useState<{ left: number; top: number }>({
-    left: 0,
-    top: 0,
-  });
-  const menuRef = useRef<HTMLMenuElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [panel, setPanel] = useState<'actions' | 'playlists'>('actions');
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
-  const [showPlaylists, setShowPlaylists] = useState(false);
+  const [addedTo, setAddedTo] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handler: Listener = (e) => {
       setMenu(e);
-      setShowPlaylists(false);
+      setPanel('actions');
       setCreating(false);
       setNewName('');
+      setAddedTo(new Set());
+      requestAnimationFrame(() => setVisible(true));
     };
     bus.add(handler);
     return () => {
@@ -107,132 +72,55 @@ export function SongContextMenu() {
     };
   }, []);
 
-  const close = useCallback(() => setMenu(null), []);
-
-  const reposition = useCallback(() => {
-    if (!menuRef.current || !menu) return;
-    requestAnimationFrame(() => {
-      if (!menuRef.current || !menu) return;
-      const rect = menuRef.current.getBoundingClientRect();
-      let { x: left, y: top } = menu;
-      if (top + rect.height > window.innerHeight) {
-        top = menu.y - rect.height;
-      }
-      if (left + rect.width > window.innerWidth) {
-        left = menu.x - rect.width;
-      }
-      if (top < 0) top = 0;
-      if (left < 0) left = 0;
-      setPos({ left, top });
-    });
-  }, [menu]);
-
-  useEffect(() => {
-    if (!menu || !menuRef.current) return;
-    const rect = menuRef.current.getBoundingClientRect();
-    let { x: left, y: top } = menu;
-    if (top + rect.height > window.innerHeight) {
-      top = menu.y - rect.height;
-    }
-    if (left + rect.width > window.innerWidth) {
-      left = menu.x - rect.width;
-    }
-    if (top < 0) top = 0;
-    if (left < 0) left = 0;
-    setPos({ left, top });
-  }, [menu]);
-
-  useEffect(() => {
-    if (!menu) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-song-menu]')) return;
-      close();
-    };
-    window.addEventListener('click', handler);
-    window.addEventListener('scroll', close, true);
-    return () => {
-      window.removeEventListener('click', handler);
-      window.removeEventListener('scroll', close, true);
-    };
-  }, [menu, close]);
+  const close = useCallback(() => {
+    setVisible(false);
+    setTimeout(() => setMenu(null), 200);
+  }, []);
 
   const handleAddToQueue = useCallback(async () => {
     if (!menu) return;
-    const { song } = menu;
-    setMenu(null);
+    close();
     try {
-      await addToQueue(song as MusicTrack);
+      await addToQueue(menu.song as MusicTrack);
       toast.success(t('addedToQueue'));
     } catch {
       toast.error(t('failedToAdd'));
     }
-  }, [menu, t, addToQueue]);
+  }, [menu, t, addToQueue, close]);
 
   const handlePlayNext = useCallback(() => {
     if (!menu) return;
-    const { song } = menu;
-    setMenu(null);
-    playNext(song as MusicTrack);
+    close();
+    playNext(menu.song as MusicTrack);
     toast.success(t('contextMenu.playingNext'));
-  }, [menu, playNext, t]);
+  }, [menu, playNext, t, close]);
 
   const handleStartRadio = useCallback(async () => {
     if (!menu) return;
-    const { song } = menu;
-    setMenu(null);
+    close();
     try {
-      const songs = await createSongRadio(song.id);
+      const songs = await createSongRadio(menu.song.id);
       if (songs.length > 0) play(songs[0], songs);
     } catch {
       toast.error(t('failedToAdd'));
     }
-  }, [menu, t, play]);
+  }, [menu, t, play, close]);
 
   const handleShowPlaylists = useCallback(async () => {
-    setShowPlaylists(true);
+    setPanel('playlists');
     try {
       const data = await getUserPlaylists();
       setPlaylists(data);
-      reposition();
     } catch {
       setPlaylists([]);
     }
-  }, [reposition]);
+  }, []);
 
   const handleAddToPlaylist = useCallback(
     async (playlistId: string) => {
-      if (!menu) return;
-      const { song } = menu;
-      setMenu(null);
+      if (!menu || addedTo.has(playlistId)) return;
       try {
         await addTrackToPlaylist(playlistId, {
-          trackId: song.id,
-          title: song.title,
-          artist: song.artist,
-          album: song.album,
-          image: song.image,
-          duration: song.duration,
-        });
-        toast.success(t('addedToPlaylist'));
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : '';
-        if (msg.includes('409') || msg.includes('Already')) {
-          toast.info(t('contextMenu.alreadyInPlaylist'));
-        } else {
-          toast.error(t('failedToAdd'));
-        }
-      }
-    },
-    [menu, t],
-  );
-
-  const handleCreate = useCallback(async () => {
-    if (!newName.trim()) return;
-    try {
-      const playlist = await createUserPlaylist(newName.trim());
-      if (menu) {
-        await addTrackToPlaylist(playlist.id, {
           trackId: menu.song.id,
           title: menu.song.title,
           artist: menu.song.artist,
@@ -240,142 +128,188 @@ export function SongContextMenu() {
           image: menu.song.image,
           duration: menu.song.duration,
         });
+        setAddedTo((prev) => new Set(prev).add(playlistId));
+        toast.success(t('addedToPlaylist'));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : '';
+        if (msg.includes('409') || msg.includes('Already')) {
+          setAddedTo((prev) => new Set(prev).add(playlistId));
+          toast.info(t('contextMenu.alreadyInPlaylist'));
+        } else {
+          toast.error(t('failedToAdd'));
+        }
       }
-      setMenu(null);
+    },
+    [menu, t, addedTo],
+  );
+
+  const handleCreate = useCallback(async () => {
+    if (!newName.trim() || !menu) return;
+    try {
+      const playlist = await createUserPlaylist(newName.trim());
+      await addTrackToPlaylist(playlist.id, {
+        trackId: menu.song.id,
+        title: menu.song.title,
+        artist: menu.song.artist,
+        album: menu.song.album,
+        image: menu.song.image,
+        duration: menu.song.duration,
+      });
+      close();
       toast.success(t('playlistCreated'));
     } catch {
       toast.error(t('failedToCreate'));
     }
-  }, [newName, menu, t]);
+  }, [newName, menu, t, close]);
 
   if (!menu) return null;
 
   return (
-    <menu
-      ref={menuRef}
-      data-song-menu
-      className="fixed z-[10000] bg-card border-[3px] border-border shadow-lg py-1 min-w-[200px] max-h-[80vh] overflow-y-auto list-none m-0 p-0"
-      style={{ left: pos.left, top: pos.top }}
+    <div
+      className={`fixed inset-0 z-[10000] flex items-center justify-center backdrop-blur-sm transition-all duration-200 ${visible ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0'}`}
+      onClick={close}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') close();
+      }}
+      role="dialog"
     >
-      {menu.onRemove && (
-        <>
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                menu.onRemove?.();
-                close();
-              }}
-              className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors text-red-400"
-            >
-              <Trash2 className="w-4 h-4" />
-              {t('contextMenu.removeFromPlaylist')}
-            </button>
-          </li>
-          <li className="h-[2px] bg-border mx-2 my-1" />
-        </>
-      )}
-      {menu.song.id !== currentTrack?.id && (
-        <>
-          <li>
-            <button
-              type="button"
-              onClick={handlePlayNext}
-              className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
-            >
-              <SkipForward className="w-4 h-4 text-foreground/40" />
-              {t('contextMenu.playNext')}
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              onClick={handleAddToQueue}
-              className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
-            >
-              <ListPlus className="w-4 h-4 text-foreground/40" />
-              {t('addToQueue')}
-            </button>
-          </li>
-          <li className="h-[2px] bg-border mx-2 my-1" />
-        </>
-      )}
-      <li>
-        <button
-          type="button"
-          onClick={handleStartRadio}
-          className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
-        >
-          <Radio className="w-4 h-4 text-foreground/40" />
-          {t('contextMenu.startRadio')}
-        </button>
-      </li>
-      <li className="h-[2px] bg-border mx-2 my-1" />
-      <li>
-        <button
-          type="button"
-          onClick={handleShowPlaylists}
-          className="w-full flex items-center gap-2 px-4 py-2 text-left font-headline font-bold uppercase text-xs tracking-wider hover:bg-neo-yellow/10 transition-colors"
-        >
-          <ListMusic className="w-4 h-4 text-foreground/40" />
-          {t('contextMenu.addToPlaylist')}
-        </button>
-      </li>
+      <div
+        className={`relative w-72 overflow-hidden transition-all duration-200 ${visible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={() => {}}
+        role="menu"
+      >
+        {/* Track info */}
+        <div className="text-center mb-4">
+          <p className="font-headline font-black text-sm uppercase tracking-tight text-white truncate">
+            {menu.song.title}
+          </p>
+          <p className="text-white/40 text-[10px] font-headline uppercase tracking-wider truncate">
+            {menu.song.artist}
+          </p>
+        </div>
 
-      {showPlaylists && (
-        <>
-          {playlists.length > 0 && (
-            <>
-              {playlists.map((p) => (
-                <li key={p.id}>
+        {/* Sliding panels */}
+        <div className="relative overflow-hidden">
+          <div
+            className={`flex transition-transform duration-300 ease-in-out ${panel === 'playlists' ? '-translate-x-full' : 'translate-x-0'}`}
+          >
+            {/* Panel 1: Actions */}
+            <div className="w-full flex-shrink-0 flex flex-col items-center gap-3 py-2">
+              {menu.onRemove && (
+                <button
+                  type="button"
+                  className="text-red-400 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-red-300 flex items-center gap-2"
+                  onClick={() => {
+                    menu.onRemove?.();
+                    close();
+                  }}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  {t('contextMenu.removeFromPlaylist')}
+                </button>
+              )}
+              {menu.song.id !== currentTrack?.id && (
+                <>
                   <button
                     type="button"
-                    onClick={() => handleAddToPlaylist(p.id)}
-                    className="w-full flex items-center gap-2 px-6 py-1.5 text-left font-headline font-bold text-[10px] uppercase tracking-wider hover:bg-neo-yellow/10 transition-colors"
+                    className="text-white/70 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white flex items-center gap-2"
+                    onClick={handlePlayNext}
                   >
-                    {p.coverUrl ? (
-                      <img
-                        src={p.coverUrl}
-                        alt=""
-                        className="w-5 h-5 border border-border object-cover shrink-0"
-                      />
-                    ) : (
-                      <ListMusic className="w-4 h-4 text-foreground/20 shrink-0" />
-                    )}
-                    <span className="truncate">{p.name}</span>
-                    <span className="text-foreground/20 ml-auto shrink-0">
-                      {p.trackCount}
-                    </span>
+                    <SkipForward className="w-3.5 h-3.5" />
+                    {t('contextMenu.playNext')}
                   </button>
-                </li>
-              ))}
-              <li className="h-[2px] bg-border mx-2 my-1" />
-            </>
-          )}
-          {!creating ? (
-            <li>
+                  <button
+                    type="button"
+                    className="text-white/70 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white flex items-center gap-2"
+                    onClick={handleAddToQueue}
+                  >
+                    <ListPlus className="w-3.5 h-3.5" />
+                    {t('addToQueue')}
+                  </button>
+                </>
+              )}
               <button
                 type="button"
-                onClick={() => setCreating(true)}
-                className="w-full flex items-center gap-2 px-6 py-1.5 text-left font-headline font-bold text-[10px] uppercase tracking-wider hover:bg-neo-yellow/10 transition-colors text-neo-yellow"
+                className="text-white/70 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white flex items-center gap-2"
+                onClick={handleStartRadio}
               >
-                <Plus className="w-4 h-4" />
-                {t('createPlaylist')}
+                <Radio className="w-3.5 h-3.5" />
+                {t('contextMenu.startRadio')}
               </button>
-            </li>
-          ) : (
-            <li className="px-4 py-2">
-              <input
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder={t('playlistName')}
-                className="w-full bg-background border-[2px] border-border px-2 py-1 font-headline font-bold text-[10px] uppercase tracking-wider outline-none focus:border-neo-yellow"
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-              />
-            </li>
-          )}
-        </>
-      )}
-    </menu>
+              <button
+                type="button"
+                className="text-white/70 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white flex items-center gap-2"
+                onClick={handleShowPlaylists}
+              >
+                <ListMusic className="w-3.5 h-3.5" />
+                {t('contextMenu.addToPlaylist')}
+              </button>
+            </div>
+
+            {/* Panel 2: Playlists */}
+            <div className="w-full flex-shrink-0 flex flex-col items-center gap-3 max-h-60 overflow-y-auto py-2">
+              <button
+                type="button"
+                className="text-white/40 text-[10px] font-headline uppercase tracking-wider cursor-pointer hover:text-white mb-1"
+                onClick={() => setPanel('actions')}
+              >
+                ← back
+              </button>
+              {playlists.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`text-xs font-headline font-bold uppercase tracking-wider flex items-center gap-2 w-full justify-center py-0.5 ${addedTo.has(p.id) ? 'text-white/30 cursor-default' : 'text-white/70 cursor-pointer hover:text-white'}`}
+                  onClick={() => handleAddToPlaylist(p.id)}
+                >
+                  {addedTo.has(p.id) ? (
+                    <Check className="w-3 h-3 text-green-400" />
+                  ) : (
+                    <ListMusic className="w-3 h-3 text-white/30" />
+                  )}
+                  <span className="truncate max-w-[180px]">{p.name}</span>
+                </button>
+              ))}
+              {!creating ? (
+                <button
+                  type="button"
+                  className="text-neo-yellow text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-neo-yellow/80 flex items-center gap-2 mt-1"
+                  onClick={() => {
+                    setCreating(true);
+                    setTimeout(() => inputRef.current?.focus(), 50);
+                  }}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {t('createPlaylist')}
+                </button>
+              ) : (
+                <input
+                  ref={inputRef}
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder={t('playlistName')}
+                  className="mt-1 w-48 bg-transparent border-b border-white/20 outline-none text-sm font-bold font-headline uppercase text-white placeholder:text-white/30 text-center py-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleCreate();
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Cancel */}
+        <div className="text-center mt-3">
+          <button
+            type="button"
+            className="text-white/40 text-[10px] font-headline uppercase tracking-wider cursor-pointer hover:text-white"
+            onClick={close}
+          >
+            cancel
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

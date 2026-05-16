@@ -16,6 +16,11 @@ vi.mock(
   () => import('./__mocks__/socket-provider'),
 );
 
+// Mock ServerProvider
+vi.mock('@/providers/server-provider', () => ({
+  useServer: () => ({ activeServer: 's1', setActiveServer: () => {} }),
+}));
+
 describe('ContinueWatching', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -32,7 +37,7 @@ describe('ContinueWatching', () => {
         contentId: 'show-1',
         contentType: ContentType.Series,
         title: 'Stranger Things',
-        posterUrl: 'https://example.com/poster.jpg',
+        posterUrl: '/poster.jpg',
         progressSeconds: 600,
         durationSeconds: 2400,
         progressPercent: 25,

@@ -77,13 +77,15 @@ export const Card = memo(function Card({
   const inner = (
     <div className="flex-shrink-0 w-36 md:w-40 cursor-pointer">
       <div className="aspect-square bg-card border-[3px] border-border overflow-hidden relative">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          sizes="(min-width: 768px) 160px, 144px"
-          className="object-cover hover:scale-105 transition-transform duration-300"
-        />
+        {image && (
+          <Image
+            src={image}
+            alt={title}
+            fill
+            sizes="(min-width: 768px) 160px, 144px"
+            className="object-cover hover:scale-105 transition-transform duration-300"
+          />
+        )}
       </div>
       <p className="font-headline font-bold text-[10px] uppercase tracking-wider mt-2 truncate">
         {title}

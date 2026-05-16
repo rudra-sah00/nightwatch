@@ -4,15 +4,6 @@ import { ArrowLeft, Camera, Music, Pause, Play, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import {
   deleteUserPlaylist,
@@ -293,31 +284,80 @@ export default function UserPlaylistDetailPage() {
         </>
       )}
 
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{tm('deletePlaylistTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {tm('deletePlaylistDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex justify-end gap-6 mt-6">
-            <AlertDialogCancel className="bg-transparent border-none p-0 font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 hover:text-foreground">
-              {tm('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-transparent border-none p-0 font-headline font-bold uppercase tracking-widest text-xs text-neo-red hover:text-neo-red/80"
-              onClick={async () => {
-                if (!playlist) return;
-                await deleteUserPlaylist(playlist.id);
-                router.back();
-              }}
-            >
-              {tm('deletePlaylist')}
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
+      {confirmDelete && (
+        <DeletePlaylistOverlay
+          onConfirm={async () => {
+            if (!playlist) return;
+            await deleteUserPlaylist(playlist.id);
+            router.back();
+          }}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function DeletePlaylistOverlay({
+  onConfirm,
+  onCancel,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const tm = useTranslations('music');
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+  }, []);
+
+  const close = () => {
+    setVisible(false);
+    setTimeout(onCancel, 200);
+  };
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-200 ${visible ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0'}`}
+      onClick={close}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') close();
+      }}
+      role="dialog"
+    >
+      <div
+        className={`flex flex-col items-center transition-all duration-200 ${visible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={() => {}}
+        role="dialog"
+      >
+        <p className="text-white text-lg font-black font-headline uppercase tracking-tight text-center">
+          {tm('deletePlaylistTitle')}
+        </p>
+        <p className="text-white/50 text-xs font-headline uppercase tracking-wider text-center mt-2">
+          {tm('deletePlaylistDescription')}
+        </p>
+        <div className="flex gap-6 mt-5">
+          <button
+            type="button"
+            className="text-red-400 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-red-300"
+            onClick={() => {
+              setVisible(false);
+              setTimeout(onConfirm, 200);
+            }}
+          >
+            {tm('deletePlaylist')}
+          </button>
+          <button
+            type="button"
+            className="text-white/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white"
+            onClick={close}
+          >
+            {tm('cancel')}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

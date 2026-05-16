@@ -42,7 +42,7 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   >([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [closing, setClosing] = useState(false);
+  const [visible, setVisible] = useState(false);
   const pageRef = useRef(1);
   const hasMoreRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +51,7 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   const longPressTriggered = useRef(false);
 
   useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
     // Don't auto-focus on mobile — causes iOS to zoom/scroll
     if (!window.Capacitor?.isNativePlatform?.()) {
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -66,7 +67,7 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   }, []);
 
   const close = () => {
-    setClosing(true);
+    setVisible(false);
     setTimeout(onClose, 200);
   };
 
@@ -118,10 +119,8 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] bg-black/40 backdrop-blur-sm transition-all duration-200 ${
-        closing
-          ? 'opacity-0 scale-95'
-          : 'animate-in fade-in zoom-in-95 duration-200'
+      className={`fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] backdrop-blur-sm transition-all duration-200 ${
+        visible ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0'
       }`}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -136,7 +135,9 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
       role="dialog"
       tabIndex={-1}
     >
-      <div className="w-full max-w-xl mx-4 max-h-[80vh] flex flex-col overflow-hidden">
+      <div
+        className={`w-full max-w-xl mx-4 max-h-[80vh] flex flex-col overflow-hidden transition-all duration-200 ${visible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+      >
         {/* Input */}
         <div className="flex items-center bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl px-5 py-3.5 gap-3 shrink-0">
           <Search className="w-5 h-5 text-white/40 shrink-0" />
