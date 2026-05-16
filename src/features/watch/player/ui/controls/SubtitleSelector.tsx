@@ -217,7 +217,13 @@ export function SubtitleSelector({
             )}
           >
             <span className="text-foreground text-xs font-bold font-headline uppercase tracking-widest">
-              {size.label}
+              {t(
+                size.label.replace('subtitles.', '') as
+                  | 'sizeSmall'
+                  | 'sizeMedium'
+                  | 'sizeLarge'
+                  | 'sizeExtraLarge',
+              )}
             </span>
             {subtitleSettings.fontSize === size.value ? (
               <Check className="w-4 h-4 text-foreground stroke-[3px]" />

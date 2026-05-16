@@ -82,7 +82,7 @@ export function UserPlaylists() {
               {pl.name}
             </p>
             <p className="text-foreground/30 text-[10px] font-headline uppercase tracking-wider truncate">
-              {pl.trackCount} {t('tracks')}
+              {t('tracks', { count: pl.trackCount })}
             </p>
           </Link>
         ))}
