@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.12.1](https://github.com/rudra-sah00/nightwatch/compare/v2.12.0...v2.12.1) (2026-05-16)
+
+
+### Bug Fixes
+
+* **ci:** trigger builds on release:published instead of release_created output ([80f1340](https://github.com/rudra-sah00/nightwatch/commit/80f1340d92912cbdbc31c57d1ea43ce7488f63a8))
+* close button in IPTV channel detail modal not working ([e7b6fbb](https://github.com/rudra-sah00/nightwatch/commit/e7b6fbbd185567506c7100756535a0b97b885692))
+* close button in live match modal not working ([9c7e0f7](https://github.com/rudra-sah00/nightwatch/commit/9c7e0f7ddd7daf59ce6f43d46a21e0df9fe2eb77))
+* IPTV channel modal close button not working in Electron ([a0b3b39](https://github.com/rudra-sah00/nightwatch/commit/a0b3b3928f7c7118e499c143d755096081ad8416))
+* IPTV modal close button - use onPointerDown + stopPropagation ([1b8f86f](https://github.com/rudra-sah00/nightwatch/commit/1b8f86fa82d51895a6c9ce2a050587fe97f3c29d))
+* modal close button in Electron + disable sidebars when modal open ([21d8321](https://github.com/rudra-sah00/nightwatch/commit/21d83219444c8e8ee0c291683da87a4ec7dbd328))
+* only show clip button in livestream watch parties ([5c98638](https://github.com/rudra-sah00/nightwatch/commit/5c986380398f075903bbd1674b53d76a148566ba))
+* prevent video refetch when entering/exiting PiP on desktop ([de151da](https://github.com/rudra-sah00/nightwatch/commit/de151da9ff5e9b5e056915b36645681b8d2a3c20))
+* remove -webkit-app-region:drag from LiveMatchModal header ([3f934b6](https://github.com/rudra-sah00/nightwatch/commit/3f934b6f605f7f723955b149aa66afa2bb2f0b27))
+* resolve i18n interpolation bugs in playlist track count and subtitle size labels ([8b44929](https://github.com/rudra-sah00/nightwatch/commit/8b44929cb025c9e0a537d247771c846c7119dd07))
+
 ## [2.12.0](https://github.com/rudra-sah00/nightwatch/compare/v2.11.0...v2.12.0) (2026-05-15)
 
 
