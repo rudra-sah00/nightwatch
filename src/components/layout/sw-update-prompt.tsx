@@ -16,7 +16,15 @@ export function SwUpdatePrompt() {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator))
       return;
 
+    // Track whether a controller existed at mount — if not, the first
+    // controllerchange is just the initial SW installation, not an update.
+    let hadController = !!navigator.serviceWorker.controller;
+
     const handleControllerChange = () => {
+      if (!hadController) {
+        hadController = true;
+        return;
+      }
       toast(t('title'), {
         description: t('description'),
         action: {
