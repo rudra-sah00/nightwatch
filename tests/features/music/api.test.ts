@@ -24,7 +24,7 @@ describe('Music API', () => {
 
       const result = await getTopPodcasts();
 
-      expect(mockApiFetch).toHaveBeenCalledWith('/api/music/podcasts');
+      expect(mockApiFetch).toHaveBeenCalledWith('/api/music/podcasts?page=1');
       expect(result).toEqual(mockData);
     });
   });

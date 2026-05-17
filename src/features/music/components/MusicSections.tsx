@@ -329,6 +329,14 @@ export function MusicSections({
                 href={`/music/podcast/${p.id}`}
               />
             ))}
+            <Link
+              href="/music/podcasts"
+              className="flex-shrink-0 w-36 md:w-40 flex items-center justify-center"
+            >
+              <span className="text-foreground/40 hover:text-foreground font-headline font-bold uppercase text-xs tracking-widest transition-colors">
+                {t('viewAll')}
+              </span>
+            </Link>
           </ScrollRow>
         </Section>
       )}

@@ -269,9 +269,9 @@ export async function getArtistAlbums(artistId: string, page = 1) {
  *
  * @returns Array of podcast entries.
  */
-export async function getTopPodcasts() {
+export async function getTopPodcasts(page = 1) {
   return apiFetch<{ id: string; title: string; image: string }[]>(
-    '/api/music/podcasts',
+    `/api/music/podcasts?page=${page}`,
   );
 }
 
