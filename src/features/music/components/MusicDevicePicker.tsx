@@ -1,8 +1,9 @@
 'use client';
 
-import { Monitor, Smartphone, X } from 'lucide-react';
+import { Monitor, Smartphone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import {
   useMusicPlaybackProgress,
@@ -64,7 +65,18 @@ export function MusicDevicePicker() {
     isRemoteControlling,
   } = player;
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
   const deviceName = getDeviceName();
+
+  const openModal = () => {
+    setOpen(true);
+    requestAnimationFrame(() => setVisible(true));
+  };
+
+  const closeModal = () => {
+    setVisible(false);
+    setTimeout(() => setOpen(false), 200);
+  };
 
   const {
     devices,
@@ -279,7 +291,7 @@ export function MusicDevicePicker() {
       {/* Trigger button in MiniPlayer */}
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => openModal()}
         className={`p-1.5 transition-colors ${isControlling || isRemoteControlling ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
         title={t('devicePicker.connectToDevice')}
       >
@@ -287,190 +299,184 @@ export function MusicDevicePicker() {
       </button>
 
       {/* Modal */}
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[9999] flex items-center justify-center"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setOpen(false);
-          }}
-        >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/60 animate-in fade-in duration-200" />
-          <div className="relative w-[340px] max-w-[90vw] bg-card border-2 border-border rounded-xl shadow-2xl animate-in slide-in-from-bottom-6 duration-400 ease-out overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 pt-5 pb-3">
-              <div className="flex items-center gap-2">
-                <ConnectIcon className="w-4 h-4 text-neo-yellow" />
-                <h3 className="text-sm font-bold font-headline uppercase tracking-wider">
-                  {t('devicePicker.connect')}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="p-1.5 text-foreground/40 hover:text-foreground rounded-full hover:bg-accent"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+      {open &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            className={`fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm transition-all duration-200 ${visible ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0'}`}
+            onClick={() => closeModal()}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') closeModal();
+            }}
+          >
+            <div
+              className={`flex flex-col items-center gap-4 transition-all duration-200 ${visible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={() => {}}
+              role="dialog"
+            >
+              <h3 className="text-sm font-black font-headline uppercase tracking-widest text-white/60">
+                {t('devicePicker.connect')}
+              </h3>
 
-            {/* Device list */}
-            <div className="px-3 pb-4 space-y-1">
-              {/* This device */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (isControlling || isRemoteControlling) {
-                    const trackToPlay = isControlling
-                      ? remoteState.track
-                      : player.remoteTrack;
-                    const prog = isControlling
-                      ? remoteProgressRef.current
-                      : player.remoteProgress;
-                    const q = isControlling
-                      ? remoteState.queue.length > 0
-                        ? remoteState.queue
-                        : remoteQueue
-                      : remoteQueue;
-                    if (isControlling) sendCommand('stop');
-                    // Signal reclaim so auto-sync doesn't re-enter remote mode
-                    window.dispatchEvent(
-                      new CustomEvent('music:reclaim-started'),
-                    );
-                    if (trackToPlay) {
-                      play(
-                        trackToPlay,
-                        q.length > 0 ? q : [trackToPlay],
-                        prog > 0 ? prog : undefined,
+              {/* Device list */}
+              <div className="flex flex-col items-center gap-2 w-72">
+                {/* This device */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isControlling || isRemoteControlling) {
+                      const trackToPlay = isControlling
+                        ? remoteState.track
+                        : player.remoteTrack;
+                      const prog = isControlling
+                        ? remoteProgressRef.current
+                        : player.remoteProgress;
+                      const q = isControlling
+                        ? remoteState.queue.length > 0
+                          ? remoteState.queue
+                          : remoteQueue
+                        : remoteQueue;
+                      if (isControlling) sendCommand('stop');
+                      window.dispatchEvent(
+                        new CustomEvent('music:reclaim-started'),
                       );
+                      if (trackToPlay) {
+                        play(
+                          trackToPlay,
+                          q.length > 0 ? q : [trackToPlay],
+                          prog > 0 ? prog : undefined,
+                        );
+                      }
+                      reclaimPlayback();
+                      setRemoteControlling(false);
+                      toast.success(t('devicePicker.playingHere'));
                     }
-                    reclaimPlayback();
-                    setRemoteControlling(false);
-                    toast.success(t('devicePicker.playingHere'));
-                  }
-                  setOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                  !isControlling && !isRemoteControlling
-                    ? 'bg-primary/10 border border-primary/20'
-                    : 'hover:bg-accent'
-                }`}
-              >
-                <DeviceIcon name={deviceName} />
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium">{deviceName}</p>
-                  {!isControlling && !isRemoteControlling && isPlaying && (
-                    <p className="text-[10px] text-primary">
-                      {t('devicePicker.listeningOn')}
-                    </p>
-                  )}
-                </div>
-                {!isControlling && !isRemoteControlling && isPlaying && (
-                  <span className="w-2.5 h-2.5 bg-neo-yellow rounded-full animate-pulse" />
-                )}
-              </button>
-
-              {/* Other devices */}
-              {devices.length > 0 ? (
-                devices.map((device) => {
-                  const isActive = activeTarget === device.socketId;
-                  return (
-                    <button
-                      key={device.socketId}
-                      type="button"
-                      disabled={!device.available}
-                      onClick={() => {
-                        if (!device.available) return;
-                        if (currentTrack) {
-                          // Set remote state BEFORE stop() so MiniPlayer doesn't flash away
-                          setRemoteControlling(true, currentTrack, isPlaying);
-                          transferToWithData(
-                            device.socketId,
-                            currentTrack,
-                            queue,
-                            progress,
-                            isPlaying,
-                            () => {
-                              // Transfer failed — reclaim
-                              setRemoteControlling(false);
-                              toast.error(
-                                t('devicePicker.connectFailed', {
-                                  device: device.deviceName,
-                                }),
-                              );
-                            },
-                            () => {
-                              // Transfer succeeded — now safe to stop local
-                              stop();
-                              toast.success(
-                                t('devicePicker.playingOn', {
-                                  device: device.deviceName,
-                                }),
-                              );
-                            },
-                            device.deviceId,
-                          );
-                        } else {
-                          transferTo(
-                            device.socketId,
-                            undefined,
-                            device.deviceId,
-                          );
-                          toast.success(
-                            t('devicePicker.playingOn', {
-                              device: device.deviceName,
-                            }),
-                          );
-                        }
-                        setOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
-                        isActive
-                          ? 'bg-primary/10 border border-primary/20'
-                          : device.available
-                            ? 'hover:bg-accent'
-                            : 'opacity-40 cursor-not-allowed'
-                      }`}
+                    closeModal();
+                  }}
+                  className="w-full flex items-center gap-3 py-2 transition-colors hover:text-white"
+                >
+                  <DeviceIcon name={deviceName} />
+                  <div className="flex-1 min-w-0 text-left">
+                    <p
+                      className={`text-sm font-headline font-bold uppercase tracking-wider ${!isControlling && !isRemoteControlling ? 'text-neo-yellow' : 'text-white/80'}`}
                     >
-                      <DeviceIcon name={device.deviceName} />
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="text-sm font-medium">
-                          {device.deviceName}
-                        </p>
-                        {!device.available ? (
-                          <p className="text-[10px] text-destructive/70">
-                            {t('devicePicker.watchingVideo')}
+                      {deviceName}
+                    </p>
+                    {!isControlling && !isRemoteControlling && isPlaying && (
+                      <p className="text-[10px] text-neo-yellow/70">
+                        {t('devicePicker.listeningOn')}
+                      </p>
+                    )}
+                  </div>
+                  {!isControlling && !isRemoteControlling && isPlaying && (
+                    <span className="w-2 h-2 bg-neo-yellow rounded-full animate-pulse" />
+                  )}
+                </button>
+
+                {/* Other devices */}
+                {devices.length > 0 ? (
+                  devices.map((device) => {
+                    const isActive = activeTarget === device.socketId;
+                    return (
+                      <button
+                        key={device.socketId}
+                        type="button"
+                        disabled={!device.available}
+                        onClick={() => {
+                          if (!device.available) return;
+                          if (currentTrack) {
+                            setRemoteControlling(true, currentTrack, isPlaying);
+                            transferToWithData(
+                              device.socketId,
+                              currentTrack,
+                              queue,
+                              progress,
+                              isPlaying,
+                              () => {
+                                setRemoteControlling(false);
+                                toast.error(
+                                  t('devicePicker.connectFailed', {
+                                    device: device.deviceName,
+                                  }),
+                                );
+                              },
+                              () => {
+                                stop();
+                                toast.success(
+                                  t('devicePicker.playingOn', {
+                                    device: device.deviceName,
+                                  }),
+                                );
+                              },
+                              device.deviceId,
+                            );
+                          } else {
+                            transferTo(
+                              device.socketId,
+                              undefined,
+                              device.deviceId,
+                            );
+                            toast.success(
+                              t('devicePicker.playingOn', {
+                                device: device.deviceName,
+                              }),
+                            );
+                          }
+                          closeModal();
+                        }}
+                        className={`w-full flex items-center gap-3 py-2 transition-colors ${
+                          device.available
+                            ? 'hover:text-white'
+                            : 'opacity-40 cursor-not-allowed'
+                        }`}
+                      >
+                        <DeviceIcon name={device.deviceName} />
+                        <div className="flex-1 min-w-0 text-left">
+                          <p
+                            className={`text-sm font-headline font-bold uppercase tracking-wider ${isActive ? 'text-neo-yellow' : 'text-white/80'}`}
+                          >
+                            {device.deviceName}
                           </p>
-                        ) : isActive ? (
-                          <p className="text-[10px] text-primary">
-                            {t('devicePicker.listeningOn')}
-                          </p>
-                        ) : device.isPlaying ? (
-                          <p className="text-[10px] text-neo-yellow font-bold">
-                            {t('devicePicker.nowPlaying')}
-                          </p>
-                        ) : null}
-                      </div>
-                      {(device.isPlaying || isActive) && device.available && (
-                        <span className="w-2.5 h-2.5 bg-neo-yellow rounded-full animate-pulse" />
-                      )}
-                    </button>
-                  );
-                })
-              ) : (
-                <p className="text-xs text-foreground/40 text-center py-4">
-                  {t('devicePicker.noDevices')}
-                </p>
-              )}
+                          {!device.available ? (
+                            <p className="text-[10px] text-destructive/70">
+                              {t('devicePicker.watchingVideo')}
+                            </p>
+                          ) : isActive ? (
+                            <p className="text-[10px] text-neo-yellow/70">
+                              {t('devicePicker.listeningOn')}
+                            </p>
+                          ) : device.isPlaying ? (
+                            <p className="text-[10px] text-neo-yellow font-bold">
+                              {t('devicePicker.nowPlaying')}
+                            </p>
+                          ) : null}
+                        </div>
+                        {(device.isPlaying || isActive) && device.available && (
+                          <span className="w-2 h-2 bg-neo-yellow rounded-full animate-pulse" />
+                        )}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-white/40 text-center py-4">
+                    {t('devicePicker.noDevices')}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="text-white/60 text-xs font-headline uppercase tracking-wider cursor-pointer hover:text-white mt-2"
+                onClick={() => closeModal()}
+              >
+                cancel
+              </button>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

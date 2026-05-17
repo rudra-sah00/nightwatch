@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import {
   useMusicPlaybackProgress,
@@ -105,6 +106,17 @@ export function MiniPlayer() {
     }
   };
   const [showQueue, setShowQueue] = useState(false);
+  const [queueVisible, setQueueVisible] = useState(false);
+
+  const openQueue = () => {
+    setShowQueue(true);
+    requestAnimationFrame(() => setQueueVisible(true));
+  };
+
+  const closeQueue = () => {
+    setQueueVisible(false);
+    setTimeout(() => setShowQueue(false), 200);
+  };
 
   // Show MiniPlayer if local track OR remote controlling
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
@@ -152,11 +164,11 @@ export function MiniPlayer() {
   if (!displayTrack) return null;
 
   return (
-    <div className="sticky bottom-0 z-10 bg-card">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-3rem)] max-w-3xl rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
       {/* Progress bar */}
       <button
         type="button"
-        className="absolute top-0 left-0 right-0 h-1 bg-border cursor-pointer"
+        className="absolute top-0 left-0 right-0 h-1 bg-white/10 cursor-pointer rounded-t-2xl overflow-hidden"
         onClick={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
           const percent = ((e.clientX - rect.left) / rect.width) * 100;
@@ -333,7 +345,7 @@ export function MiniPlayer() {
           <MusicDevicePicker />
           <button
             type="button"
-            onClick={() => setShowQueue((v) => !v)}
+            onClick={() => (showQueue ? closeQueue() : openQueue())}
             className={`p-1.5 transition-colors ${showQueue ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
             title={t('queueTitle')}
           >
@@ -343,56 +355,83 @@ export function MiniPlayer() {
       </div>
 
       {/* Queue panel */}
-      {showQueue && displayQueue.length > 0 && (
-        <div className="border-t-[2px] border-border max-h-48 overflow-y-auto px-4 py-2">
-          <p className="font-headline font-black uppercase tracking-widest text-[10px] text-foreground/30 mb-1">
-            Queue — {displayQueue.length}
-          </p>
-          {displayQueue.map((track, i) => (
-            <button
-              // biome-ignore lint/suspicious/noArrayIndexKey: queue allows duplicate track IDs, position is the identity
-              key={i}
-              type="button"
-              onClick={() => {
-                if (isRemoteControlling) {
-                  window.dispatchEvent(
-                    new CustomEvent('music:remote-command', {
-                      detail: { command: 'play_track', value: track },
-                    }),
-                  );
-                } else {
-                  player.play(track, queue);
-                }
-              }}
-              onContextMenu={(e) =>
-                showSongMenu(
-                  e,
-                  track,
-                  !isRemoteControlling && currentTrack?.id !== track.id
-                    ? () => removeFromQueue(i)
-                    : undefined,
-                )
-              }
-              className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:bg-card ${displayTrack?.id === track.id ? 'text-neo-yellow' : ''}`}
+      {showQueue &&
+        displayQueue.length > 0 &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-sm transition-all duration-200 ${queueVisible ? 'bg-black/40 opacity-100' : 'bg-black/0 opacity-0'}`}
+            onClick={() => closeQueue()}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') closeQueue();
+            }}
+            role="dialog"
+          >
+            <div
+              className={`flex flex-col items-center gap-3 w-80 max-h-[60vh] transition-all duration-200 ${queueVisible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={() => {}}
+              role="dialog"
             >
-              <span className="w-4 text-foreground/20 text-[9px] font-mono text-right shrink-0">
-                {i + 1}
-              </span>
-              <img
-                src={track.image}
-                alt=""
-                className="w-6 h-6 border border-border object-cover shrink-0"
-              />
-              <span className="font-headline font-bold text-[10px] uppercase tracking-wider truncate flex-1">
-                {track.title}
-              </span>
-              <span className="text-foreground/20 text-[9px] font-mono shrink-0">
-                {track.artist}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+              <p className="font-headline font-black uppercase tracking-widest text-[10px] text-white/40">
+                Queue — {displayQueue.length}
+              </p>
+              <div className="w-full overflow-y-auto max-h-[50vh] space-y-1">
+                {displayQueue.map((track, i) => (
+                  <button
+                    // biome-ignore lint/suspicious/noArrayIndexKey: queue allows duplicate track IDs, position is the identity
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      if (isRemoteControlling) {
+                        window.dispatchEvent(
+                          new CustomEvent('music:remote-command', {
+                            detail: { command: 'play_track', value: track },
+                          }),
+                        );
+                      } else {
+                        player.play(track, queue);
+                      }
+                      closeQueue();
+                    }}
+                    onContextMenu={(e) =>
+                      showSongMenu(
+                        e,
+                        track,
+                        !isRemoteControlling && currentTrack?.id !== track.id
+                          ? () => removeFromQueue(i)
+                          : undefined,
+                      )
+                    }
+                    className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:text-white ${displayTrack?.id === track.id ? 'text-neo-yellow' : 'text-white/80'}`}
+                  >
+                    <span className="w-4 text-white/20 text-[9px] font-mono text-right shrink-0">
+                      {i + 1}
+                    </span>
+                    <img
+                      src={track.image}
+                      alt=""
+                      className="w-6 h-6 rounded object-cover shrink-0"
+                    />
+                    <span className="font-headline font-bold text-[10px] uppercase tracking-wider truncate flex-1">
+                      {track.title}
+                    </span>
+                    <span className="text-white/30 text-[9px] font-mono shrink-0">
+                      {track.artist}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="text-white/60 text-xs font-headline uppercase tracking-wider cursor-pointer hover:text-white mt-2"
+                onClick={() => closeQueue()}
+              >
+                cancel
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
