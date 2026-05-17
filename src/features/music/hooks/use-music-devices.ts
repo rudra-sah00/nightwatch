@@ -13,7 +13,7 @@ export interface MusicDevice {
 }
 
 /** State of what's playing on the active target device */
-export interface RemoteMusicState {
+interface RemoteMusicState {
   track: MusicTrack | null;
   isPlaying: boolean;
   progress: number;

@@ -116,7 +116,7 @@ export async function getStreamUrl(
 }
 
 /** Aggregated data for the music home/discover page. */
-export interface MusicHomeData {
+interface MusicHomeData {
   charts: { id: string; title: string; image: string }[];
   featured: { id: string; title: string; image: string }[];
   artists: { id: string; name: string; image: string }[];

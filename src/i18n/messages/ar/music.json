@@ -98,6 +98,5 @@
     "failedToLoad": "Failed to load station"
   },
   "similarSongs": "Similar Songs",
-  "queue": "Queue — {count}",
-  "podcastComingSoon": "Podcasts coming soon"
+  "queue": "Queue — {count}"
 }

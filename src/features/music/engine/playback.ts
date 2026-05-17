@@ -2,10 +2,7 @@ import type { MusicTrack } from '../api';
 import { getSongRecommendations, getStreamUrl } from '../api';
 import type { EngineContext } from './types';
 
-export async function fadeOut(
-  ctx: EngineContext,
-  duration = 500,
-): Promise<void> {
+async function fadeOut(ctx: EngineContext, duration = 500): Promise<void> {
   if (!ctx.audio.src || ctx.audio.paused) return;
   const steps = 20;
   const stepTime = duration / steps;
