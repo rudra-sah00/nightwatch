@@ -6,6 +6,8 @@
   "playlists": "Playlists",
   "lyrics": "Lyrics",
   "noResults": "No results found",
+  "allResults": "All",
+  "artists": "Artists",
   "back": "Back",
   "overview": "Overview",
   "loadMore": "Load more",
@@ -96,5 +98,6 @@
     "failedToLoad": "Failed to load station"
   },
   "similarSongs": "Similar Songs",
-  "queue": "Queue — {count}"
+  "queue": "Queue — {count}",
+  "podcastComingSoon": "Podcasts coming soon"
 }

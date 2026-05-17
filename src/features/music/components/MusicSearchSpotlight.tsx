@@ -7,8 +7,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   getTopSearches,
   type MusicSearchResult,
+  searchAlbums,
+  searchArtists,
   searchMore,
   searchMusic,
+  searchPlaylists,
+  searchSongs,
 } from '../api';
 import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { formatTime } from '../utils';
@@ -43,6 +47,32 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<
+    'all' | 'songs' | 'albums' | 'artists' | 'playlists'
+  >('all');
+  const [facetedResults, setFacetedResults] = useState<{
+    songs: {
+      id: string;
+      title: string;
+      artist: string;
+      image: string;
+      duration: number;
+    }[];
+    albums: {
+      id: string;
+      title: string;
+      artist: string;
+      image: string;
+      year: number;
+    }[];
+    artists: { id: string; name: string; image: string; role: string }[];
+    playlists: {
+      id: string;
+      title: string;
+      image: string;
+      songCount: number;
+    }[];
+  }>({ songs: [], albums: [], artists: [], playlists: [] });
   const pageRef = useRef(1);
   const hasMoreRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -117,6 +147,32 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
     }
   }, [query, results, loadingMore]);
 
+  const handleTabChange = useCallback(
+    (tab: typeof activeTab) => {
+      setActiveTab(tab);
+      if (tab === 'all' || !query.trim()) return;
+      setLoading(true);
+      const fetcher =
+        tab === 'songs'
+          ? searchSongs(query).then((d) =>
+              setFacetedResults((p) => ({ ...p, songs: d.results })),
+            )
+          : tab === 'albums'
+            ? searchAlbums(query).then((d) =>
+                setFacetedResults((p) => ({ ...p, albums: d.results })),
+              )
+            : tab === 'artists'
+              ? searchArtists(query).then((d) =>
+                  setFacetedResults((p) => ({ ...p, artists: d.results })),
+                )
+              : searchPlaylists(query).then((d) =>
+                  setFacetedResults((p) => ({ ...p, playlists: d.results })),
+                );
+      fetcher.catch(() => {}).finally(() => setLoading(false));
+    },
+    [query],
+  );
+
   return (
     <div
       className={`fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] backdrop-blur-sm transition-all duration-200 ${
@@ -163,6 +219,7 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
               onClick={() => {
                 setQuery('');
                 setResults(null);
+                setActiveTab('all');
                 inputRef.current?.focus();
               }}
               className="text-white/40 hover:text-white"
@@ -171,6 +228,28 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
             </button>
           )}
         </div>
+
+        {/* Tabs (shown when query exists) */}
+        {query && (
+          <div className="flex gap-2 mt-2 px-1 shrink-0">
+            {(['all', 'songs', 'albums', 'artists', 'playlists'] as const).map(
+              (tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => handleTabChange(tab)}
+                  className={`px-3 py-1.5 text-[10px] font-headline font-bold uppercase tracking-widest rounded-full transition-colors ${
+                    activeTab === tab
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  {t(tab === 'all' ? 'allResults' : tab)}
+                </button>
+              ),
+            )}
+          </div>
+        )}
 
         {/* Top Searches (shown when no query) */}
         {!query && topSearches.length > 0 && (
@@ -204,7 +283,8 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
         )}
 
         {/* Results */}
-        {results &&
+        {activeTab === 'all' &&
+          results &&
           (results.songs.length > 0 ||
             results.albums.length > 0 ||
             results.playlists.length > 0) && (
@@ -344,7 +424,8 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
             </div>
           )}
 
-        {results &&
+        {activeTab === 'all' &&
+          results &&
           results.songs.length === 0 &&
           results.albums.length === 0 &&
           results.playlists.length === 0 && (
@@ -354,6 +435,133 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
               </p>
             </div>
           )}
+
+        {/* Faceted: Songs */}
+        {activeTab === 'songs' && facetedResults.songs.length > 0 && (
+          <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto p-3 min-h-0">
+            {facetedResults.songs.map((song) => (
+              <button
+                key={song.id}
+                type="button"
+                onClick={() => {
+                  player.play(
+                    song as Parameters<typeof player.play>[0],
+                    facetedResults.songs as Parameters<typeof player.play>[1],
+                  );
+                  close();
+                }}
+                onContextMenu={(e) =>
+                  showSongMenu(e, song as Parameters<typeof showSongMenu>[1])
+                }
+                className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+              >
+                <img
+                  src={song.image}
+                  alt={song.title}
+                  className="w-10 h-10 rounded object-cover flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">
+                    {song.title}
+                  </p>
+                  <p className="text-white/40 text-xs truncate">
+                    {song.artist}
+                  </p>
+                </div>
+                <span className="text-white/20 text-xs font-mono flex-shrink-0">
+                  {formatTime(song.duration)}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Faceted: Albums */}
+        {activeTab === 'albums' && facetedResults.albums.length > 0 && (
+          <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto p-3 min-h-0">
+            {facetedResults.albums.map((album) => (
+              <Link
+                key={album.id}
+                href={`/music/album/${album.id}`}
+                onClick={close}
+                className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <img
+                  src={album.image}
+                  alt={album.title}
+                  className="w-10 h-10 rounded object-cover flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">
+                    {album.title}
+                  </p>
+                  <p className="text-white/40 text-xs truncate">
+                    {album.artist}
+                  </p>
+                </div>
+                <span className="text-white/20 text-xs font-mono flex-shrink-0">
+                  {album.year}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Faceted: Artists */}
+        {activeTab === 'artists' && facetedResults.artists.length > 0 && (
+          <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto p-3 min-h-0">
+            {facetedResults.artists.map((artist) => (
+              <Link
+                key={artist.id}
+                href={`/music/artist/${artist.id}`}
+                onClick={close}
+                className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <img
+                  src={artist.image}
+                  alt={artist.name}
+                  className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">
+                    {artist.name}
+                  </p>
+                  <p className="text-white/40 text-xs truncate capitalize">
+                    {artist.role}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Faceted: Playlists */}
+        {activeTab === 'playlists' && facetedResults.playlists.length > 0 && (
+          <div className="mt-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl overflow-hidden max-h-[55vh] overflow-y-auto p-3 min-h-0">
+            {facetedResults.playlists.map((pl) => (
+              <Link
+                key={pl.id}
+                href={`/music/playlist/${pl.id}`}
+                onClick={close}
+                className="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <img
+                  src={pl.image}
+                  alt={pl.title}
+                  className="w-10 h-10 rounded object-cover flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">
+                    {pl.title}
+                  </p>
+                  <p className="text-white/40 text-xs truncate">
+                    {pl.songCount} songs
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

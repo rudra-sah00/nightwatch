@@ -275,6 +275,45 @@ export async function getTopPodcasts() {
   );
 }
 
+export interface PodcastEpisode {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  duration: number;
+  releaseDate: string;
+  seasonNo: number;
+  episodeNumber: number;
+  encryptedMediaUrl: string;
+}
+
+export interface PodcastShow {
+  id: string;
+  title: string;
+  image: string;
+  description: string;
+  seasons: { id: string; title: string }[];
+  episodes: PodcastEpisode[];
+}
+
+export async function getPodcastShow(showId: string) {
+  return apiFetch<PodcastShow>(`/api/music/podcast/${showId}`);
+}
+
+export async function getPodcastEpisodes(showId: string, season = 1, page = 1) {
+  return apiFetch<PodcastEpisode[]>(
+    `/api/music/podcast/${showId}/episodes?season=${season}&page=${page}`,
+  );
+}
+
+export async function getEpisodeStreamUrl(encryptedUrl: string) {
+  const data = await apiFetch<{ url: string }>(
+    `/api/music/podcast/episode/stream?url=${encodeURIComponent(encryptedUrl)}`,
+  );
+  return data.url;
+}
+
 /**
  * Fetch available radio stations, optionally filtered by language.
  *

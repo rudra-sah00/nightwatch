@@ -7,6 +7,7 @@ import {
   getMusicHome,
   getMusicLanguages,
   getSong,
+  getTopPodcasts,
   getTrending,
 } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
@@ -43,6 +44,7 @@ export function MusicView() {
     radio: [],
     trendingSongs: [],
     genres: [],
+    podcasts: [],
   });
   const [showSearch, setShowSearch] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
@@ -68,8 +70,9 @@ export function MusicView() {
       getMusicHome(),
       getTrending('song', 'hindi').catch(() => []),
       getBrowseModules().catch(() => ({ genres: [] })),
+      getTopPodcasts().catch(() => []),
     ])
-      .then(([home, trending, browse]) => {
+      .then(([home, trending, browse, podcasts]) => {
         setData({
           charts: home.charts,
           featured: home.featured,
@@ -78,6 +81,7 @@ export function MusicView() {
           radio: home.radio,
           trendingSongs: trending,
           genres: browse.genres,
+          podcasts,
         });
       })
       .catch(() => {})

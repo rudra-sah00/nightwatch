@@ -43,6 +43,8 @@ type TrendingItem = {
 };
 /** A genre/mood tile from the browse modules API. */
 type GenreItem = { id: string; title: string; image: string; type: string };
+/** A podcast/show entry. */
+type PodcastItem = { id: string; title: string; image: string };
 
 /**
  * Aggregate data shape for all content sections on the music home page.
@@ -58,6 +60,7 @@ export interface MusicSectionsData {
   radio: RadioItem[];
   trendingSongs: TrendingItem[];
   genres: GenreItem[];
+  podcasts: PodcastItem[];
 }
 
 /**
@@ -93,8 +96,16 @@ export function MusicSections({
   onPlay,
 }: MusicSectionsProps) {
   const t = useTranslations('music');
-  const { charts, featured, artists, releases, radio, trendingSongs, genres } =
-    data;
+  const {
+    charts,
+    featured,
+    artists,
+    releases,
+    radio,
+    trendingSongs,
+    genres,
+    podcasts,
+  } = data;
 
   /** Play a single song by ID. */
   const playSong = useCallback(
@@ -301,6 +312,21 @@ export function MusicSections({
                 onClick={
                   g.type !== 'playlist' ? () => playRadio(g.title) : undefined
                 }
+              />
+            ))}
+          </ScrollRow>
+        </Section>
+      )}
+
+      {podcasts.length > 0 && (
+        <Section title={t('podcasts')}>
+          <ScrollRow>
+            {podcasts.map((p) => (
+              <Card
+                key={p.id}
+                image={p.image}
+                title={p.title}
+                href={`/music/podcast/${p.id}`}
               />
             ))}
           </ScrollRow>
