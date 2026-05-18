@@ -1,7 +1,6 @@
 /**
- * S2 (Server 2) download provider for mobile.
- * S2 serves direct MP4 URLs.
- * Equivalent of electron/modules/downloads/providers/s2.js
+ * Direct MP4 download provider for mobile.
+ * Handles content served as direct MP4 URLs.
  */
 
 import { startHlsDownload } from '../processors/hls';

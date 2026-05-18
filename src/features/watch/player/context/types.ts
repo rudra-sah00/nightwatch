@@ -53,8 +53,8 @@ export interface VideoMetadata {
   posterUrl?: string;
   description?: string;
   year?: string;
-  providerId?: 's1' | 's1';
-  /** API-sourced duration in seconds used as fallback when video.duration is Infinity (S2 MP4). */
+  providerId?: string;
+  /** API-sourced duration in seconds used as fallback when video.duration is Infinity (MP4). */
   apiDurationSeconds?: number;
   /** Second logo/poster for live events (e.g. away team logo). */
   secondaryPosterUrl?: string;

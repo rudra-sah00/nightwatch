@@ -28,7 +28,7 @@ export async function addToWatchlist(item: {
   contentType: 'Movie' | 'Series';
   title: string;
   posterUrl?: string;
-  providerId?: 's1' | 's1';
+  providerId?: string;
 }): Promise<void> {
   await apiFetch('/api/user/watchlist', {
     method: 'POST',

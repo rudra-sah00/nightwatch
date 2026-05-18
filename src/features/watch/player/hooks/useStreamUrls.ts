@@ -3,11 +3,11 @@
 import {
   normalizeRawUrls,
   processResponse,
-  processS2Subtitles,
+  processSubtitles,
 } from '../services/StreamUrlService';
 
 /**
- * useStreamUrls — Unified stream URL management for all servers (S1, S2, S3).
+ * useStreamUrls — Unified stream URL management.
  *
  * This hook manages the shared state for the video player (streamUrl, captions, etc.)
  * and delegates server-specific normalization logic to the StreamUrlService.
@@ -40,7 +40,7 @@ interface StreamUrlsReturn {
   qualities: QualityOption[] | undefined;
   subtitleTracks: SubtitleTrack[] | undefined;
   apiDurationSeconds: number | undefined;
-  applyResponse: (server: 's1' | 's1', response: PlayResponse) => void;
+  applyResponse: (server: string, response: PlayResponse) => void;
   applySubtitles: (response: PlayResponse) => void;
 }
 
@@ -123,7 +123,7 @@ export function useStreamUrls({
   ]);
 
   const applyResponse = useCallback(
-    (server: 's1' | 's1', response: PlayResponse) => {
+    (server: string, response: PlayResponse) => {
       try {
         const normalized = processResponse(server, response);
         setStreamUrl(normalized.streamUrl);
@@ -138,7 +138,7 @@ export function useStreamUrls({
   );
 
   const applySubtitles = useCallback((response: PlayResponse) => {
-    const normalized = processS2Subtitles(response);
+    const normalized = processSubtitles(response);
     if (normalized.captionUrl !== undefined)
       setCaptionUrl(normalized.captionUrl);
     if (normalized.subtitleTracks) setSubtitleTracks(normalized.subtitleTracks);

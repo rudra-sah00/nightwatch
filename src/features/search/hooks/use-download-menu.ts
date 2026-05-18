@@ -26,7 +26,7 @@ interface UseDownloadOptions {
 /**
  * Hook that powers the download-quality picker menu.
  *
- * Lazily fetches available download qualities for Server 2 (s2) content,
+ * Lazily fetches available download qualities for direct-URL content,
  * tracks existing offline downloads, and initiates desktop/mobile
  * downloads via the Electron bridge or Capacitor plugin.
  *

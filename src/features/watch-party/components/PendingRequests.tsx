@@ -1,7 +1,6 @@
 import { Check, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
 import type { RoomMember } from '../room/types';
 
 interface PendingRequestsProps {
@@ -26,19 +25,16 @@ export function PendingRequests({
   }
 
   return (
-    <div className="mx-3 mt-3 mb-2 bg-neo-yellow border-[4px] border-border overflow-hidden flex-shrink-0 ">
-      <div className="px-3 py-2 flex items-center gap-2 border-b-[4px] border-border bg-background">
-        <UserPlus className="w-4 h-4 text-foreground stroke-[3px]" />
-        <span className="text-[10px] font-black font-headline text-foreground uppercase tracking-widest">
+    <div className="mx-3 mt-3 mb-2 flex-shrink-0">
+      <div className="px-2 py-1.5 flex items-center gap-2">
+        <UserPlus className="w-4 h-4 text-white/60 stroke-[3px]" />
+        <span className="text-[10px] font-black font-headline text-white/60 uppercase tracking-widest">
           {t('waitingToJoin', { count: pendingMembers.length })}
         </span>
       </div>
-      <div className="p-3 space-y-3 max-h-40 overflow-y-auto custom-scrollbar bg-neo-yellow">
+      <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
         {pendingMembers.map((pending) => (
-          <div
-            key={pending.id}
-            className="flex items-center gap-2 p-2 bg-background border-[3px] border-border  transition-transform"
-          >
+          <div key={pending.id} className="flex items-center gap-2 px-2 py-1.5">
             {/* Avatar */}
             {pending.profilePhoto ? (
               <Image
@@ -46,40 +42,40 @@ export function PendingRequests({
                 alt={pending.name}
                 width={28}
                 height={28}
-                className="w-7 h-7 border-[2px] border-border object-cover flex-shrink-0"
+                className="w-7 h-7 rounded-full object-cover flex-shrink-0"
                 unoptimized
               />
             ) : (
-              <div className="w-7 h-7 border-[2px] border-border bg-primary flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-black font-headline text-primary-foreground uppercase tracking-widest">
+              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-black font-headline text-white uppercase">
                   {pending.name.charAt(0)}
                 </span>
               </div>
             )}
 
             {/* Name */}
-            <span className="flex-1 text-[11px] font-black font-headline text-foreground uppercase tracking-widest truncate">
+            <span className="flex-1 text-[11px] font-bold text-white truncate">
               {pending.name}
             </span>
 
             {/* Actions */}
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <Button
+              <button
                 type="button"
                 onClick={() => onApprove(pending.id)}
-                className="p-1 border-[2px] border-border hover:bg-success hover:text-primary-foreground transition-colors bg-background text-success "
+                className="p-1 text-emerald-400 hover:text-emerald-300 transition-colors"
                 title={t('approve')}
               >
                 <Check aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
                 onClick={() => onReject(pending.id)}
-                className="p-1 border-[2px] border-border hover:bg-neo-red hover:text-primary-foreground transition-colors bg-background text-neo-red "
+                className="p-1 text-red-400 hover:text-red-300 transition-colors"
                 title={t('reject')}
               >
                 <X aria-hidden="true" className="w-4 h-4 stroke-[3px]" />
-              </Button>
+              </button>
             </div>
           </div>
         ))}

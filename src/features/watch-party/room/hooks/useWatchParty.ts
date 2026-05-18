@@ -281,7 +281,12 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     if (isRtmConnected && requestStatus === 'joined' && room?.id) {
       getPartyMessages(room.id).then((response) => {
         if (response.messages) {
-          chat.setMessages(response.messages);
+          const serverMessages = response.messages;
+          chat.setMessages((prev) => {
+            const serverIds = new Set(serverMessages.map((m) => m.id));
+            const newFromRtm = prev.filter((m) => !serverIds.has(m.id));
+            return [...serverMessages, ...newFromRtm];
+          });
         }
       });
     }
@@ -314,15 +319,6 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     requestJoin: lifecycle.requestJoin,
     cancelRequest: lifecycle.cancelRequest,
     leaveRoom: async () => {
-      if (room?.hostId === userId) {
-        // Broadcast to all members that the party is closed
-        await rtmSendMessage?.({
-          type: 'PARTY_CLOSED',
-          reason: tp('hostLeftRoom'),
-        });
-        // Give RTM a small window to ensure the broadcast is sent before we disconnect
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      }
       return lifecycle.leaveRoom();
     },
     approveMember: members.approveMember,

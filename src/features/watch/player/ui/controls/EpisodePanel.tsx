@@ -166,24 +166,24 @@ export function EpisodePanel({
           className={cn(
             'absolute right-[235px] md:right-[275px] lg:right-[305px] top-1/2 -translate-y-1/2',
             'max-w-[260px] md:max-w-[320px]',
-            'pointer-events-none z-10 bg-background border-[4px] border-border p-4 ',
+            'pointer-events-none z-10 bg-black/80 backdrop-blur-xl rounded-lg p-4',
             'motion-safe:animate-in motion-safe:slide-in-from-right-4 motion-safe:fade-in motion-safe:duration-300 motion-safe:ease-out motion-reduce:animate-none',
           )}
         >
           <div className="flex flex-col gap-2">
-            <span className="text-[10px] font-black font-headline text-foreground/70 uppercase tracking-widest">
+            <span className="text-[10px] font-black font-headline text-white/50 uppercase tracking-widest">
               {t('episode', { number: centerEp.episodeNumber })}
             </span>
-            <h3 className="text-xl md:text-2xl font-black font-headline uppercase text-foreground leading-tight">
+            <h3 className="text-xl md:text-2xl font-black font-headline uppercase text-white leading-tight">
               {centerEp.title || `Episode ${centerEp.episodeNumber}`}
             </h3>
             {centerEp.description && (
-              <p className="text-xs md:text-sm text-foreground font-bold md:line-clamp-3 leading-relaxed border-l-[3px] border-border pl-2">
+              <p className="text-xs md:text-sm text-white/80 font-bold md:line-clamp-3 leading-relaxed border-l-2 border-white/20 pl-2">
                 {centerEp.description}
               </p>
             )}
             {centerEp.duration && (
-              <span className="text-xs text-foreground font-bold font-headline uppercase px-2 py-0.5 border-[2px] border-border bg-background inline-block self-start mt-1">
+              <span className="text-xs text-white/70 font-bold font-headline uppercase px-2 py-0.5 border border-white/20 rounded inline-block self-start mt-1">
                 {t('min', { duration: centerEp.duration })}
               </span>
             )}
@@ -215,10 +215,10 @@ export function EpisodePanel({
               onClick={() => setSeasonOpen((p) => !p)}
               className={cn(
                 'flex items-center gap-3',
-                'bg-background border-[3px] border-border hover:bg-neo-yellow/80',
-                'px-5 py-2.5 ',
-                'text-sm font-black font-headline uppercase tracking-widest text-foreground',
-                'transition-colors duration-200',
+                'bg-black/60 backdrop-blur-sm rounded-lg',
+                'px-5 py-2.5',
+                'text-sm font-black font-headline uppercase tracking-widest text-white',
+                'transition-colors duration-200 hover:bg-white/20',
               )}
             >
               S{selectedSeason}
@@ -235,7 +235,7 @@ export function EpisodePanel({
               <div
                 className={cn(
                   'absolute top-full left-1/2 -translate-x-1/2 mt-2',
-                  'bg-background border-[4px] border-border ',
+                  'bg-black/80 backdrop-blur-xl rounded-lg',
                   'flex flex-col min-w-[140px]',
                   'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-200 motion-reduce:animate-none',
                 )}
@@ -249,11 +249,11 @@ export function EpisodePanel({
                       setSeasonOpen(false);
                     }}
                     className={cn(
-                      'w-full p-4 text-left font-bold font-headline uppercase tracking-widest text-foreground',
-                      'transition-colors border-b-[4px] border-border last:border-b-0',
+                      'w-full p-4 text-left font-bold font-headline uppercase tracking-widest',
+                      'transition-colors border-b border-white/10 last:border-b-0',
                       s.seasonNumber === selectedSeason
-                        ? 'bg-neo-yellow'
-                        : 'hover:bg-neo-yellow/80',
+                        ? 'bg-white/20 text-white'
+                        : 'text-white/80 hover:bg-white/10 hover:text-white',
                     )}
                   >
                     {t('season', { number: s.seasonNumber })}
@@ -376,8 +376,8 @@ function EpisodeThumb({
           'transition-[background-color,border-color] duration-500 ease-out',
           'focus:outline-none',
           isCenter
-            ? 'border-[4px] border-border bg-background '
-            : 'border-[3px] border-border bg-background',
+            ? 'border-2 border-white/40 bg-black/40 backdrop-blur-sm rounded-lg'
+            : 'border border-white/20 bg-black/30 rounded-lg',
         )}
         style={{
           width: isCenter ? 220 : 170,

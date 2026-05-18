@@ -73,7 +73,7 @@ interface PlayerRootProps {
   hideControls?: boolean;
   /** Exposes the underlying `<video>` element ref to the parent. */
   onVideoRef?: (ref: HTMLVideoElement | null) => void;
-  /** Server 2 language dubs pre-populated from the /play response */
+  /** Language dubs pre-populated from the /play response */
   initialAudioTracks?: {
     id: string;
     label: string;
@@ -93,7 +93,7 @@ interface PlayerRootProps {
   /** Allow portrait playback on mobile (disables rotate wall) for inline layouts. */
   allowPortraitPlayback?: boolean;
   /** Pass the explicit provider ID to resolve the appropriate engine (hls vs mp4) if URL has no extension */
-  providerId?: 's1' | 's1';
+  providerId?: string;
   /** Initial playback speed multiplier (e.g. `1.5` for 1.5×). */
   playbackRate?: number;
 }

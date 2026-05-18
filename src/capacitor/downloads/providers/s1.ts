@@ -1,6 +1,5 @@
 /**
- * S1 (Server 1) download provider for mobile.
- * Equivalent of electron/modules/downloads/providers/s1.js
+ * HLS download provider for mobile.
  */
 import { startHlsDownload } from '../processors/hls';
 

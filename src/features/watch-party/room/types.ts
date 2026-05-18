@@ -5,6 +5,7 @@ export interface RoomMember {
   name: string;
   profilePhoto?: string;
   isHost: boolean;
+  disconnected?: boolean;
   permissions?: {
     canDraw?: boolean;
     canPlaySound?: boolean;
@@ -39,9 +40,9 @@ export interface WatchPartyRoom {
     src: string;
   }[];
   spriteVtt?: string;
-  /** Quality options for local playback switching (Server 1 HLS variants / Server 2 MP4 resolutions) */
+  /** Quality options for local playback switching (HLS variants / MP4 resolutions) */
   qualities?: { quality: string; url: string }[];
-  /** S2 audio dub tracks pre-fetched when the room was created */
+  /** Audio dub tracks pre-fetched when the room was created */
   audioTracks?: {
     id: string;
     label: string;
@@ -81,7 +82,7 @@ export interface PartyCreatePayload {
   season?: number;
   episode?: number;
   captionUrl?: string;
-  /** Server used when the room was created — drives S2 audio track discovery */
+  /** Server used when the room was created — drives audio track discovery */
   providerId?: 's1';
   subtitleTracks?: {
     id: string;

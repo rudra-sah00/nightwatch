@@ -23,7 +23,7 @@ export async function pushSegment(
 }
 
 /**
- * Upload raw TS segment bytes (Server 1 — Electron fetches locally and uploads).
+ * Upload raw TS segment bytes (Electron fetches locally and uploads).
  */
 export async function pushSegmentData(
   clipId: string,

@@ -496,7 +496,7 @@ export function DownloadMenu({
                 <div className="flex flex-col gap-6">
                   {show.dubs && show.dubs.length > 1 ? (
                     show.dubs.map((dub) => {
-                      const dubId = `s2:${dub.detailPath}::${dub.subjectId}`;
+                      const dubId = `s1:${dub.detailPath}::${dub.subjectId}`;
                       const isSelected = selectedDubId === dubId;
                       return (
                         <button
@@ -598,7 +598,7 @@ export function DownloadMenu({
               <div className="flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-4">
                 {show.dubs && show.dubs.length > 1 ? (
                   show.dubs.map((dub) => {
-                    const dubId = `s2:${dub.detailPath}::${dub.subjectId}`;
+                    const dubId = `s1:${dub.detailPath}::${dub.subjectId}`;
                     const isSelected = selectedDubId === dubId;
 
                     return (

@@ -50,7 +50,7 @@ export function prepareProgressPayload(
 
   const roundedCurrentTime = Math.floor(currentTime);
 
-  // S2 duration fallback
+  // Duration fallback
   const apiDuration = (metadata as { apiDurationSeconds?: number })
     .apiDurationSeconds;
   const effectiveDuration = Number.isFinite(duration)

@@ -13,7 +13,7 @@ interface UsePlayerEngineOptions {
   dispatch: React.Dispatch<PlayerAction>;
   onStreamExpired?: () => void;
   qualities?: { quality: string; url: string }[];
-  providerId?: 's1' | 's1';
+  providerId?: string;
   isLive?: boolean;
 }
 

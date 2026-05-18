@@ -289,26 +289,26 @@ export function ActiveWatchParty({
       {/* Leave Confirmation Dialog */}
       {showLeaveDialog ? (
         <AlertDialog open={showLeaveDialog} onOpenChange={onShowLeaveDialog}>
-          <AlertDialogContent className="bg-background border-[4px] border-border rounded-none  sm:max-w-[425px] p-6">
+          <AlertDialogContent className="bg-black/80 backdrop-blur-xl rounded-lg sm:max-w-[425px] p-6 border border-white/10">
             <AlertDialogHeader className="space-y-3">
-              <AlertDialogTitle className="font-black font-headline uppercase tracking-widest text-xl text-foreground">
+              <AlertDialogTitle className="font-black font-headline uppercase tracking-widest text-xl text-white">
                 {isHost ? t('dialog.endTitle') : t('dialog.leaveTitle')}
               </AlertDialogTitle>
-              <AlertDialogDescription className="font-bold font-headline tracking-wide text-foreground/70 text-base">
+              <AlertDialogDescription className="font-bold font-headline tracking-wide text-white/60 text-base">
                 {isHost ? t('dialog.endDesc') : t('dialog.leaveDesc')}
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="mt-6 sm:space-x-4">
+            <AlertDialogFooter className="mt-6 flex gap-4">
               <AlertDialogCancel
                 onClick={() => onShowLeaveDialog(false)}
-                className="bg-background text-foreground border-[3px] border-border hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest rounded-none transition-colors py-3 text-sm"
+                className="bg-transparent text-white/60 border-none hover:text-white font-bold uppercase tracking-widest transition-colors py-2 text-sm shadow-none"
               >
                 {t('dialog.cancel')}
               </AlertDialogCancel>
               <button
                 type="button"
                 onClick={onConfirmLeave}
-                className="bg-neo-red text-primary-foreground border-[3px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors sm:mt-0 py-3 text-sm px-6"
+                className="text-red-400 hover:text-red-300 font-bold uppercase tracking-widest transition-colors py-2 text-sm"
               >
                 {isHost ? t('dialog.endParty') : t('dialog.leave')}
               </button>

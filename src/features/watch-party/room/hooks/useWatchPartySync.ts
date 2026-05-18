@@ -86,7 +86,7 @@ export function useWatchPartySync({
 
       if (event.action === 'LEAVE') {
         setHostDisconnected(true);
-        const graceSeconds = 30;
+        const graceSeconds = 60;
         toast.warning(tp('hostDisconnected', { seconds: graceSeconds }), {
           id: 'host-disconnected',
           duration: graceSeconds * 1000,
@@ -350,9 +350,7 @@ export function useWatchPartySync({
       isHost,
       rtmSendMessage,
       room,
-      videoRef?.current?.paused,
-      videoRef?.current?.currentTime,
-      videoRef?.current,
+      videoRef,
       tp,
     ],
   );

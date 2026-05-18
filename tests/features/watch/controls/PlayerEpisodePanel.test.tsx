@@ -286,9 +286,7 @@ describe('PlayerEpisodePanelTrigger', () => {
     );
 
     const button = screen.getByLabelText('showEpisodes');
-    expect(button).toHaveClass('bg-background');
-    expect(button).toHaveClass('shadow-none');
-    expect(button).toHaveClass('shadow-none');
+    expect(button).toHaveClass('text-white');
   });
 
   it('should have inactive styling when panel is closed', () => {
@@ -301,8 +299,7 @@ describe('PlayerEpisodePanelTrigger', () => {
     );
 
     const button = screen.getByLabelText('showEpisodes');
-    expect(button).toHaveClass('bg-background');
-    expect(button).toHaveClass('border-border');
+    expect(button).toHaveClass('text-white/80');
   });
 
   it('should have the correct title', () => {

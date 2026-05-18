@@ -98,7 +98,7 @@ export function normalizeRawUrls(
 }
 
 /**
- * Generic HLS response processor (S1, S3).
+ * Generic HLS response processor.
  */
 function processHlsResponse(
   response: PlayResponse,
@@ -137,18 +137,18 @@ function processHlsResponse(
 }
 
 /**
- * Processes a Server 1 (VidSrc / HLS) PlayResponse.
+ * Processes an HLS PlayResponse (token-based proxy URLs).
  */
-function processS1Response(response: PlayResponse): NormalizedUrls {
-  return processHlsResponse(response, 'S1');
+function processHlsPlayResponse(response: PlayResponse): NormalizedUrls {
+  return processHlsResponse(response, 'HLS');
 }
 
 /**
- * Processes a Server 2 (SuperEmbed / MP4) PlayResponse.
+ * Processes a direct MP4/stream PlayResponse (no proxy wrapping needed).
  */
-function processS2Response(response: PlayResponse): NormalizedUrls {
+function processDirectResponse(response: PlayResponse): NormalizedUrls {
   if (!response.success || !response.masterPlaylistUrl) {
-    throw new Error('Invalid S2 response');
+    throw new Error('Invalid play response');
   }
 
   return {
@@ -170,21 +170,21 @@ function processS2Response(response: PlayResponse): NormalizedUrls {
  * Unified processor for any server response.
  */
 export function processResponse(
-  server: 's1' | 's1',
+  server: string,
   response: PlayResponse,
 ): NormalizedUrls {
   switch (server) {
     case 's1':
-      return processS2Response(response);
+      return processDirectResponse(response);
     default:
-      return processS1Response(response);
+      return processHlsPlayResponse(response);
   }
 }
 
 /**
- * Processes only subtitles from an S2 PlayResponse.
+ * Processes only subtitles from a PlayResponse.
  */
-export function processS2Subtitles(
+export function processSubtitles(
   response: PlayResponse,
 ): Partial<NormalizedUrls> {
   if (!response.success) return {};

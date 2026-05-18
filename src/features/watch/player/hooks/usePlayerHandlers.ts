@@ -30,7 +30,7 @@ interface UsePlayerHandlersProps {
   setAudioTrack: (trackId: string) => void;
   /** Available HLS quality levels for label-to-index resolution. */
   qualities: { label: string; height: number }[];
-  /** For server 2: called after local state update so the parent can swap the MP4 URL */
+  /** Called after local state update so the parent can swap the MP4 URL for language dubs */
   onExternalAudioChange?: (trackId: string) => void;
 }
 
@@ -55,7 +55,7 @@ interface UsePlayerHandlersProps {
  *   (`"auto"` → `-1`) and dispatches `SET_CURRENT_QUALITY`.
  * - **`handlePlaybackRateChange(rate)`** — Sets `videoRef.playbackRate` and dispatches state.
  * - **`handleAudioChange(trackId)`** — Switches audio track and optionally notifies the parent
- *   via `onExternalAudioChange` for server-2 MP4 URL swaps.
+ *   via `onExternalAudioChange` for language dub URL swaps.
  * - **`handleSubtitleChange(trackId)`** — Dispatches `SET_CURRENT_SUBTITLE_TRACK`.
  * - **`handleRetry`** — Clears the error state and re-triggers loading.
  *
@@ -256,7 +256,7 @@ export function usePlayerHandlers({
     (trackId: string) => {
       setAudioTrack(trackId);
       dispatch({ type: 'SET_CURRENT_AUDIO_TRACK', trackId });
-      // For server 2 language dubs the parent swaps the top-level streamUrl
+      // For language dubs the parent swaps the top-level streamUrl
       // so useMp4 reloads video.src with the correct CDN MP4 for that language.
       onExternalAudioChange?.(trackId);
       showControls();

@@ -30,11 +30,9 @@ export function Fullscreen({
       aria-label={ariaLabel}
       className={cn(
         compact
-          ? 'p-1.5 transition-[background-color,color,border-color,opacity,transform] duration-200'
-          : 'p-1.5 md:p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
-        'bg-background border-[2px] md:border-[3px] border-border text-foreground ',
-        'hover:bg-neo-yellow/80',
-        'active:bg-neo-yellow',
+          ? 'p-1 transition-colors duration-200'
+          : 'p-1 md:p-1.5 transition-colors duration-200',
+        'text-white/80 hover:text-white active:scale-125 transition-transform duration-200',
       )}
     >
       {isFullscreen ? (

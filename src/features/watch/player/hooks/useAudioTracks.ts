@@ -1,34 +1,17 @@
 /**
- * useAudioTracks
- *
- * S1 Provider (MovieBox) — Audio dub discovery hook.
+ * useAudioTracks — Audio dub discovery hook.
  *
  * Why a separate hook?
  * -------------------
- * MovieBox stores every language dub as an independent content entry that shares
- * the same display title. When the watch page first loads with a stream URL,
- * we need to fetch the full play response (which carries the `audioTracks` list)
- * WITHOUT touching `streamUrl` — changing streamUrl would restart the video and
- * wipe the resume position that useWatchProgress already loaded.
+ * The provider stores every language dub as an independent content entry that
+ * shares the same display title. When the watch page first loads with a stream
+ * URL, we need to fetch the full play response (which carries the `audioTracks`
+ * list) WITHOUT touching `streamUrl` — changing streamUrl would restart the
+ * video and wipe the resume position that useWatchProgress already loaded.
  *
  * This hook fires once on mount and calls playVideo() directly so it can read
  * `response.audioTracks` and expose them to the player WITHOUT side effects on
  * the stream state managed by the parent page.
- *
- * Usage
- * -----
- * ```tsx
- * const { audioTracks, handleAudioTrackChange } = useAudioTracks({
- *   server,
- *   type,
- *   title,
- *   movieId,
- *   seriesId,
- *   season,
- *   episode,
- *   onStreamChange: (url) => setStreamUrl(url),
- * });
- * ```
  */
 
 'use client';
@@ -41,7 +24,7 @@ export interface AudioTrack {
   id: string;
   label: string;
   language: string;
-  /** Raw value from the API — either a direct MP4 URL or a `s1:…` content ID */
+  /** Raw value from the API — either a direct MP4 URL or a prefixed content ID */
   streamUrl: string;
 }
 
@@ -62,7 +45,7 @@ interface UseAudioTracksProps {
   onStreamChange: (url: string) => void;
   /**
    * Called when the user selects a language dub that is a full content entry
-   * (carries a `s1:…` ID), requiring a fresh play session.
+   * (carries a prefixed content ID), requiring a fresh play session.
    */
   onRefetch: (overrideMovieId: string) => void;
   /**

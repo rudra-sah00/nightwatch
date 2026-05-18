@@ -34,7 +34,7 @@ export function useWatchContent() {
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
   const server = (searchParams.get('server') ||
     movieId.split(':')[0] ||
-    's1') as 's1' | 's1';
+    's1') as 's1';
   const { setActiveServer } = useServer();
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export function useWatchContent() {
           const rawId = overrideMovieId || movieId || '';
           const baseIdFromRaw = rawId.replace(/(_S\d+E\d+|-ep\d+)$/, '');
           const currentSeriesId = overrideMovieId || seriesId || baseIdFromRaw;
-          const cleanSeriesId = currentSeriesId.replace(/^(s1|s2):/, '');
+          const cleanSeriesId = currentSeriesId.replace(/^s1:/, '');
 
           let offlineContentId1 = rawId;
           let offlineContentId2 = rawId;
@@ -135,20 +135,15 @@ export function useWatchContent() {
             offlineContentId2 = `${currentSeriesId}-ep${episode || 1}`;
           }
 
-          // 2. Build a comprehensive search set. We check:
-          // - The raw ID from the URL
-          // - The reconstructed standard IDs (with and without server prefixes)
-          // - The base series ID (in case the download was stored at the series level)
+          // Build a comprehensive search set covering possible stored ID formats.
           const searchIds = new Set([
             rawId,
             offlineContentId1,
             offlineContentId2,
             `${cleanSeriesId}_S${season || 1}E${episode || 1}`,
             `${cleanSeriesId}-ep${episode || 1}`,
-            `s1:${offlineContentId1.replace(/^(s1|s2):/, '')}`,
-            `s1:${offlineContentId2.replace(/^(s1|s2):/, '')}`,
-            `s2:${offlineContentId1.replace(/^(s1|s2):/, '')}`,
-            `s2:${offlineContentId2.replace(/^(s1|s2):/, '')}`,
+            `s1:${offlineContentId1.replace(/^s1:/, '')}`,
+            `s1:${offlineContentId2.replace(/^s1:/, '')}`,
           ]);
 
           const downloadedItem = fetchedDownloads.find(
@@ -204,7 +199,7 @@ export function useWatchContent() {
             server,
           });
         } else {
-          console.log('[NW-Play] VOD: fetching movie stream', {
+          console.log('[NW-Play] VOD: fetching stream', {
             movieId: overrideMovieId || movieId,
             server,
           });
@@ -224,9 +219,13 @@ export function useWatchContent() {
           // Unified response handling via StreamUrlService (called within useStreamUrls)
           applyResponse(server, response);
 
-          // Server 2 specific audio track handling
+          // Audio track handling
           if (server === 's1') {
             if (response.audioTracks && response.audioTracks.length > 0) {
+              console.log(
+                '[NW-Audio] tracks from API:',
+                JSON.stringify(response.audioTracks),
+              );
               setInitialAudioTracks(
                 response.audioTracks.map((t) => ({
                   id: t.streamUrl,
@@ -245,11 +244,7 @@ export function useWatchContent() {
           setRefetchError('Failed to load stream');
         }
       } catch (err) {
-        console.error('[NW-Play] VOD: stream error', {
-          status: (err as { status?: number })?.status,
-          msg: (err as Error)?.message,
-          server,
-        });
+        console.error('[NW-Play] VOD: stream error', err);
         const httpStatus = (err as { status?: number })?.status;
         if (
           server === 's1' &&

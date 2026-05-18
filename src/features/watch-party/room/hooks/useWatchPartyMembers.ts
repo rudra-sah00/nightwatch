@@ -142,8 +142,7 @@ export function useWatchPartyMembers({
       rtmSendMessageToPeer,
       rtmSendMessage,
       setRoom,
-      videoRef?.current?.paused,
-      videoRef?.current,
+      videoRef,
       room?.pendingMembers,
       t,
       tp,
@@ -203,40 +202,59 @@ export function useWatchPartyMembers({
 
   const handlePresenceEvent = useCallback(
     (event: { action: 'JOIN' | 'LEAVE'; userId: string }) => {
-      // Auto-kick logic is ONLY performed by the Host to prevent race conditions
-      if (!isHost || !room?.id) return;
-
       // Ignore host drops (handled by useWatchPartySync for Guests)
-      if (event.userId === room.hostId) return;
+      if (event.userId === room?.hostId) return;
 
       if (event.action === 'LEAVE') {
-        // Start a 2-minute grace period before auto-kicking the dropped guest
-        if (disconnectTimersRef.current[event.userId]) {
-          clearTimeout(disconnectTimersRef.current[event.userId]);
-        }
-        disconnectTimersRef.current[event.userId] = setTimeout(() => {
-          // Verify they are still in the room using ref to avoid React strict-mode double-firing side effects
-          const currentRoom = roomRef.current;
-          if (!currentRoom) return;
+        // Mark user as disconnected in the members list for all clients
+        setRoom((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            members: prev.members.map((m) =>
+              m?.id === event.userId ? { ...m, disconnected: true } : m,
+            ),
+          };
+        });
 
-          const isStillMember = currentRoom.members.some(
-            (m) => m?.id === event.userId,
-          );
-          if (isStillMember) {
-            toast.info(tp('autoRemoving'));
-            kickUser(event.userId).catch(() => {});
+        // Host: start 2-minute grace period before auto-kicking
+        if (isHost && room?.id) {
+          if (disconnectTimersRef.current[event.userId]) {
+            clearTimeout(disconnectTimersRef.current[event.userId]);
           }
-          delete disconnectTimersRef.current[event.userId];
-        }, 120000); // 2 minutes
+          disconnectTimersRef.current[event.userId] = setTimeout(() => {
+            const currentRoom = roomRef.current;
+            if (!currentRoom) return;
+            const isStillMember = currentRoom.members.some(
+              (m) => m?.id === event.userId,
+            );
+            if (isStillMember) {
+              toast.info(tp('autoRemoving'));
+              kickUser(event.userId).catch(() => {});
+            }
+            delete disconnectTimersRef.current[event.userId];
+          }, 120000);
+        }
       } else if (event.action === 'JOIN') {
-        // Guest reconnected, cancel the auto-kick
-        if (disconnectTimersRef.current[event.userId]) {
+        // Guest reconnected — restore their status
+        setRoom((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            members: prev.members.map((m) =>
+              m?.id === event.userId ? { ...m, disconnected: false } : m,
+            ),
+          };
+        });
+
+        // Host: cancel the auto-kick
+        if (isHost && disconnectTimersRef.current[event.userId]) {
           clearTimeout(disconnectTimersRef.current[event.userId]);
           delete disconnectTimersRef.current[event.userId];
         }
       }
     },
-    [isHost, room?.id, room?.hostId, kickUser, tp],
+    [isHost, room?.id, room?.hostId, kickUser, tp, setRoom],
   );
 
   // Listen for optimistic local updates from WatchPartySettings via CustomEvent
@@ -307,6 +325,11 @@ export function useWatchPartyMembers({
       if (!active) return;
       socket.emit('watch-party:join_room', room.id);
 
+      // Re-join room on reconnect (socket rooms are lost on disconnect)
+      socket.on('connect', () => {
+        socket.emit('watch-party:join_room', room.id);
+      });
+
       socket.on(
         'PENDING_MEMBERS_UPDATED',
         (payload: { pendingMembers?: RoomMember[] }) => {
@@ -351,6 +374,13 @@ export function useWatchPartyMembers({
       const members = response.pendingMembers;
       if (!members) return;
 
+      if (members.length > 0) {
+        new Audio('/room-join.mp3').play().catch(() => {});
+        toast.success(tp('newJoinRequests', { count: members.length }), {
+          id: 'new-join-request',
+        });
+      }
+
       setRoom((prev) => {
         if (!prev) return null;
         return {
@@ -367,6 +397,7 @@ export function useWatchPartyMembers({
 
     return () => {
       active = false;
+      socket.off('connect');
       socket.off('PENDING_MEMBERS_UPDATED');
       socket.emit('watch-party:leave_room', room.id);
     };

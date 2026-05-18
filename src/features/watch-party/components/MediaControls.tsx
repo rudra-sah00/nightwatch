@@ -104,7 +104,7 @@ export function MediaControls({
   return (
     <div className="border-t-[4px] border-border bg-background relative z-[60] flex flex-col">
       {/* Party Actions - Copy Link & Leave/End Party */}
-      <div className="px-3 py-2 flex gap-2 border-b-[4px] border-border bg-background">
+      <div className="px-3 py-2 flex gap-2 border-b border-white/10">
         {/* Settings */}
         <WatchPartySettings
           room={room}
@@ -122,7 +122,7 @@ export function MediaControls({
             variant="none"
             size="none"
             onClick={onCopyLink}
-            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] md:text-xs bg-background text-foreground border-[2px] border-border hover:bg-neo-yellow/80 font-black font-headline uppercase tracking-widest rounded-none transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] md:text-xs text-white/80 hover:text-white font-black font-headline uppercase tracking-widest rounded-lg transition-colors hover:bg-white/10"
           >
             {linkCopied ? (
               <Check aria-hidden="true" className="w-3.5 h-3.5 stroke-[3px]" />
@@ -141,7 +141,7 @@ export function MediaControls({
           size="none"
           onClick={onLeave}
           className={cn(
-            'flex items-center justify-center gap-1.5 py-1.5 text-[10px] md:text-xs bg-neo-red text-primary-foreground border-[2px] border-border hover:bg-primary hover:text-neo-red font-black font-headline uppercase tracking-widest rounded-none transition-colors',
+            'flex items-center justify-center gap-1.5 py-1.5 text-[10px] md:text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 font-black font-headline uppercase tracking-widest rounded-lg transition-colors',
             isHost ? 'flex-1' : 'w-full',
           )}
         >

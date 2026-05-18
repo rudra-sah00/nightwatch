@@ -4,7 +4,6 @@ import { Theme } from 'emoji-picker-react';
 import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
@@ -50,35 +49,33 @@ export function EmojiReactions({
       window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   return (
-    <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 rounded-full bg-background/5 backdrop-blur-md border border-white/5 shadow-lg pointer-events-auto shrink-0">
+    <div className="relative flex items-center gap-0.5 md:gap-1 px-1 md:px-2 py-1 pointer-events-auto shrink-0">
       {QUICK_EMOJIS.map((emoji, index) => (
-        <Button
+        <button
           type="button"
           key={emoji}
           onClick={() => handleTriggerEmoji(emoji)}
           className={cn(
-            'text-base md:text-lg lg:text-xl hover:scale-125 transition-transform active:scale-95 duration-200 p-1 md:p-1.5',
-            index > 2 && 'hidden md:block', // Show only 3 emojis on small screens
+            'text-base md:text-lg lg:text-xl hover:scale-110 transition-transform active:scale-90 duration-150 w-8 h-8 md:w-9 md:h-9 flex items-center justify-center',
+            index > 2 && 'hidden md:block',
             index > 4 && 'hidden lg:block',
           )}
           aria-label={tAria('sendReaction', { emoji })}
         >
           {emoji}
-        </Button>
+        </button>
       ))}
 
-      <div className="w-px h-3 bg-background/20 mx-0.5 md:mx-1" />
+      <div className="w-px h-3 bg-white/20 mx-0.5 md:mx-1" />
 
-      <Button
+      <button
         type="button"
         onClick={() => setShowPicker(!showPicker)}
         onMouseEnter={() => void import('emoji-picker-react')}
         onFocus={() => void import('emoji-picker-react')}
         className={cn(
-          'p-1 md:p-1.5 rounded-full transition-[colors,transform] duration-200',
-          showPicker
-            ? 'bg-background/20 text-primary-foreground'
-            : 'text-primary-foreground/40 hover:text-primary-foreground/10',
+          'p-1 md:p-1.5 rounded-full transition-colors duration-200',
+          showPicker ? 'text-white' : 'text-white/40 hover:text-white',
         )}
         title={t('emoji.fullLibrary')}
         aria-label={t('emoji.openPicker')}
@@ -86,7 +83,7 @@ export function EmojiReactions({
         aria-haspopup="dialog"
       >
         <Plus className="w-3.5 h-3.5 md:w-4 h-4 lg:w-5 h-5" />
-      </Button>
+      </button>
 
       {/* Popover */}
       {showPicker ? (

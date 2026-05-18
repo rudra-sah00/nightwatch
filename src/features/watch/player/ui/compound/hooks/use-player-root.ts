@@ -64,7 +64,7 @@ interface PlayerRootHookProps {
   initialAudioTrackId?: string;
   onBack?: () => void;
   isLive?: boolean;
-  providerId?: 's1' | 's1';
+  providerId?: string;
   playbackRate?: number;
   skipProgressHistory?: boolean;
 }
@@ -146,7 +146,7 @@ export function usePlayerRoot({
     if (!audioTracksKey) return; // no tracks to process
     const tracks = audioTracksRef.current;
     if (!tracks || tracks.length === 0) return;
-    // Always re-seed when the key changes (e.g. after a language switch on S2).
+    // Always re-seed when the key changes (e.g. after a language switch).
     // The audioTracksKey dep already guards against spurious re-runs — we only
     // reach here when the actual track IDs have changed.
     dispatch({

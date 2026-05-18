@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { sendPartyMessage } from '../../room/services/watch-party.api';
@@ -42,6 +42,16 @@ export function useWatchPartyChat({
   const [typingUsers, setTypingUsers] = useState<
     Array<{ userId: string; userName: string }>
   >([]);
+  const typingTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
+
+  // Cleanup typing timeouts on unmount
+  useEffect(() => {
+    return () => {
+      for (const t of typingTimeoutsRef.current.values()) clearTimeout(t);
+    };
+  }, []);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -151,12 +161,18 @@ export function useWatchPartyChat({
             if (prev.some((u) => u.userId === msg.userId)) return prev;
             return [...prev, { userId: msg.userId, userName: msg.userName }];
           });
-          // Auto-expire after 5s in case TYPING_STOP is never received
-          setTimeout(() => {
-            setTypingUsers((prev) =>
-              prev.filter((u) => u.userId !== msg.userId),
-            );
-          }, 5000);
+          // Clear existing timeout for this user and set a new one
+          const existing = typingTimeoutsRef.current.get(msg.userId);
+          if (existing) clearTimeout(existing);
+          typingTimeoutsRef.current.set(
+            msg.userId,
+            setTimeout(() => {
+              setTypingUsers((prev) =>
+                prev.filter((u) => u.userId !== msg.userId),
+              );
+              typingTimeoutsRef.current.delete(msg.userId);
+            }, 5000),
+          );
           break;
         }
 

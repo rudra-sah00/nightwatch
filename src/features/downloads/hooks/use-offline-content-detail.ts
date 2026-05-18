@@ -15,7 +15,7 @@ import { useDownloads } from './use-downloads';
 
 /** Options for the {@link useOfflineContentDetail} hook. */
 interface UseOfflineContentDetailOptions {
-  /** Unique content identifier (may include provider prefix like `s1:`, `s2:`). */
+  /** Unique content identifier (may include provider prefix like `s1:`). */
   contentId: string;
   /** Optional initial context for deep-linking to a specific season/episode. */
   initialContext?: { season?: number; episode?: number; episodeId?: string };
@@ -82,9 +82,9 @@ export function useOfflineContentDetail({
 
     // Find the relevant download for the given base contentId
     // We check with and without prefixes to be as robust as possible.
-    const searchTarget = contentId.replace(/^(s1|s2|s3):/, '');
+    const searchTarget = contentId.replace(/^s\d+:/, '');
     const relevantDownloads = downloads.filter((d) => {
-      const dbId = d.contentId.replace(/^(s1|s2|s3):/, '');
+      const dbId = d.contentId.replace(/^s\d+:/, '');
       return (
         d.contentId === contentId ||
         dbId === searchTarget ||

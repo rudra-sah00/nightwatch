@@ -48,10 +48,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       // For all other content, propagate the room's server so useWatchProgress
       // records progress with the correct providerId and useNextEpisode fetches
       // from the right API.
-      providerId:
-        room.type === 'livestream'
-          ? ('s1' as const)
-          : room.providerId || (room.contentId.startsWith('s2:') ? 's1' : 's1'),
+      providerId: room.type === 'livestream' ? 's1' : room.providerId || 's1',
     }),
     [
       room.title,
@@ -68,7 +65,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
     setStreamUrlOverride(url);
   }, []);
 
-  // onRefetch (s2: content ID dubs) — not yet supported in watch party.
+  // onRefetch (content ID dubs) — not yet supported in watch party.
   // The host's stream won't change for this case. A future backend event
   // (party:update_stream) would propagate the new URL to all members.
   const handleRefetch = useCallback((_overrideId: string) => {}, []);
@@ -83,13 +80,13 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
   );
 
   // The active track is the current content ID — one of the audio track IDs
-  // will equal room.contentId when it's an S2 dub room.
+  // will equal room.contentId when it's a dub room.
   const initialAudioTrackId =
     room.providerId === 's1' && initialAudioTracks.length > 1
       ? room.contentId
       : undefined;
 
-  // For direct-URL (non-s2:) dub tracks, allow local stream swaps.
+  // For direct-URL dub tracks, allow local stream swaps.
   const handleAudioTrackChange = useCallback(
     (trackId: string) => {
       const track = initialAudioTracks.find((t) => t.id === trackId);

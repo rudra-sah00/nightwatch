@@ -119,7 +119,7 @@ describe('useWatchPartySync', () => {
     act(() => {
       result.current.handleIncomingRtmMessage({
         type: 'HOST_DISCONNECTED',
-        graceSeconds: 30,
+        graceSeconds: 60,
         message: 'Host left',
       } as RTMMessage);
     });
@@ -144,7 +144,7 @@ describe('useWatchPartySync', () => {
     expect(mockWindow.location.href).toBe('');
 
     await act(async () => {
-      vi.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(60000);
     });
 
     expect(mockWindow.location.href).toBe('/home');

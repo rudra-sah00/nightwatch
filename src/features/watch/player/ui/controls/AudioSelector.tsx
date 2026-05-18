@@ -44,12 +44,10 @@ export function AudioSelector({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'p-2.5 md:p-3 transition-colors duration-200',
-          'bg-background border-[3px] border-border text-foreground ',
-          'hover:bg-muted',
-          'active:bg-muted',
+          'p-1 md:p-1.5 transition-colors duration-200',
+          'text-white/80 hover:text-white',
           'flex items-center justify-center',
-          isOpen && 'bg-background shadow-none',
+          isOpen && 'text-white',
         )}
         title={t('audioLanguage')}
       >
@@ -67,29 +65,29 @@ export function AudioSelector({
           className={cn(
             'absolute bottom-full right-0 mb-3',
             'w-64 max-h-80 overflow-hidden',
-            'bg-background border-[4px] border-border',
+            'bg-black/80 backdrop-blur-xl rounded-lg',
             '',
             'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none',
             'flex flex-col z-[100]',
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-4 border-b-[3px] border-border bg-background">
-            <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm flex items-center gap-2">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <span className="text-white font-black font-headline uppercase tracking-widest text-sm flex items-center gap-2">
               <Languages className="w-5 h-5 stroke-[3px]" />
               {t('title')}
             </span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors "
+              className="p-1.5 text-white/60 hover:text-white transition-colors"
             >
               <X className="w-4 h-4 stroke-[3.5px]" />
             </button>
           </div>
 
           {/* Scrollable Track List */}
-          <div className="overflow-y-auto max-h-56 overscroll-contain no-scrollbar bg-background">
+          <div className="overflow-y-auto max-h-56 overscroll-contain no-scrollbar">
             {tracks.map((track, index) => (
               <button
                 type="button"
@@ -102,23 +100,23 @@ export function AudioSelector({
                   'w-full flex items-center justify-between px-4 py-4',
                   'transition-colors duration-150',
                   currentTrack === track.id
-                    ? 'bg-neo-yellow'
-                    : 'bg-background hover:bg-neo-yellow/80',
-                  index !== tracks.length - 1 && 'border-b-[3px] border-border',
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                  index !== tracks.length - 1 && 'border-b border-white/10',
                 )}
               >
                 <div className="flex flex-col items-start">
-                  <span className="text-sm font-black font-headline uppercase tracking-tighter text-foreground">
+                  <span className="text-sm font-black font-headline uppercase tracking-tighter">
                     {track.label}
                   </span>
                   {track.language && track.language !== track.label ? (
-                    <span className="text-[10px] font-bold font-headline uppercase text-foreground/70 tracking-widest mt-0.5">
+                    <span className="text-[10px] font-bold font-headline uppercase text-white/50 tracking-widest mt-0.5">
                       {track.language}
                     </span>
                   ) : null}
                 </div>
                 {currentTrack === track.id ? (
-                  <Check className="w-5 h-5 text-foreground stroke-[3.5px]" />
+                  <Check className="w-5 h-5 text-white stroke-[3.5px]" />
                 ) : null}
               </button>
             ))}

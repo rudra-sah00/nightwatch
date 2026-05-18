@@ -80,10 +80,16 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+    const cfWorkerUrl =
+      process.env.NEXT_PUBLIC_CF_WORKER_URL || 'http://localhost:8787';
     return [
       {
         source: '/api/:path*',
         destination: `${backendUrl.replace(/\/$/, '')}/api/:path*`,
+      },
+      {
+        source: '/mp4/:path*',
+        destination: `${cfWorkerUrl.replace(/\/$/, '')}/mp4/:path*`,
       },
     ];
   },

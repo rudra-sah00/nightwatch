@@ -7,9 +7,9 @@ import { useMobileDetection } from '../../hooks/useMobileDetection';
 
 // Static size configurations to avoid recreation
 const SIZE_CLASSES = {
-  sm: 'w-8 h-8 md:w-10 md:h-10',
-  md: 'w-9 h-9 md:w-12 md:h-12',
-  lg: 'w-10 h-10 md:w-14 md:h-14',
+  sm: 'p-1',
+  md: 'p-1',
+  lg: 'p-1',
 } as const;
 
 const ICON_SIZES = {
@@ -51,20 +51,16 @@ export function PlayPause({
       onClick={onToggle}
       aria-label={isPlaying ? t('pause') : t('play')}
       className={cn(
-        'flex items-center justify-center transition-[background-color,color,border-color,opacity,transform] duration-200',
-        'border-none md:border-[3px] md:border-border bg-neo-yellow text-foreground ',
-        'hover:bg-neo-yellow/80',
-        'active:bg-neo-yellow/80',
+        'flex items-center justify-center transition-transform duration-150',
+        'text-white active:scale-75',
         SIZE_CLASSES[size],
       )}
     >
       {isPlaying ? (
-        <Pause
-          className={cn('text-foreground fill-current', ICON_SIZES[size])}
-        />
+        <Pause className={cn('text-white fill-current', ICON_SIZES[size])} />
       ) : (
         <Play
-          className={cn('text-foreground fill-current ml-1', ICON_SIZES[size])}
+          className={cn('text-white fill-current ml-1', ICON_SIZES[size])}
         />
       )}
     </button>

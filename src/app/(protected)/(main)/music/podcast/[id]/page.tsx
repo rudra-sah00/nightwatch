@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import {
-  getEpisodeStreamUrl,
   getPodcastEpisodes,
   getPodcastShow,
   type PodcastEpisode,
@@ -89,31 +88,29 @@ export default function PodcastPage() {
     [id],
   );
 
+  const episodeToTrack = useCallback(
+    (ep: PodcastEpisode) => ({
+      id: `podcast:${ep.encryptedMediaUrl}`,
+      title: ep.title,
+      artist: show?.title || '',
+      album: show?.title || '',
+      albumId: '',
+      duration: ep.duration,
+      image: ep.image,
+      language: '',
+      year: 0,
+      hasLyrics: false,
+    }),
+    [show],
+  );
+
   const playEpisode = useCallback(
-    async (episode: PodcastEpisode) => {
-      try {
-        const url = await getEpisodeStreamUrl(episode.encryptedMediaUrl);
-        if (url) {
-          const track = {
-            id: episode.id,
-            title: episode.title,
-            artist: show?.title || '',
-            album: show?.title || '',
-            albumId: '',
-            duration: episode.duration,
-            image: episode.image,
-            language: '',
-            year: 0,
-            hasLyrics: false,
-            streamUrl: url,
-          };
-          player.play(track, [track]);
-        }
-      } catch {
-        /* handled */
-      }
+    (episode: PodcastEpisode) => {
+      const queue = episodes.map(episodeToTrack);
+      const track = episodeToTrack(episode);
+      player.play(track, queue);
     },
-    [show, player],
+    [episodes, episodeToTrack, player],
   );
 
   return (
@@ -207,7 +204,8 @@ export default function PodcastPage() {
                   alt={ep.title}
                   className="w-full h-full object-cover"
                 />
-                {player.currentTrack?.id === ep.id && (
+                {player.currentTrack?.id ===
+                  `podcast:${ep.encryptedMediaUrl}` && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     {player.isPlaying ? (
                       <Pause className="w-3.5 h-3.5 text-neo-yellow fill-current" />
@@ -219,7 +217,7 @@ export default function PodcastPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p
-                  className={`font-headline font-bold text-sm uppercase tracking-wider truncate ${player.currentTrack?.id === ep.id ? 'text-neo-yellow' : ''}`}
+                  className={`font-headline font-bold text-sm uppercase tracking-wider truncate ${player.currentTrack?.id === `podcast:${ep.encryptedMediaUrl}` ? 'text-neo-yellow' : ''}`}
                 >
                   {ep.title}
                 </p>

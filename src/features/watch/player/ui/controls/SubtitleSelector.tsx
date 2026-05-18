@@ -78,15 +78,15 @@ export function SubtitleSelector({
   const renderTracksScreen = () => (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-background">
-        <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm flex items-center gap-2">
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <span className="text-white font-black font-headline uppercase tracking-widest text-sm flex items-center gap-2">
           <Subtitles className="w-5 h-5 stroke-[3px]" />
           {t('title')}
         </span>
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors "
+          className="p-1.5 text-white/60 hover:text-white transition-colors"
         >
           <X className="w-4 h-4 stroke-[3px]" />
         </button>
@@ -102,20 +102,20 @@ export function SubtitleSelector({
           className={cn(
             'w-full flex items-center justify-between p-4',
             'transition-colors duration-150',
-            'border-b-[3px] border-border',
-            isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-neo-yellow/80',
-            !currentTrack ? 'bg-neo-yellow' : 'bg-background',
+            'border-b border-white/10',
+            isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-white/10',
+            !currentTrack ? 'bg-white/20 text-white' : 'text-white/80',
           )}
         >
           <span
             className={cn(
-              'text-sm font-bold font-headline uppercase tracking-widest text-foreground',
+              'text-sm font-bold font-headline uppercase tracking-widest',
             )}
           >
             {t('off')}
           </span>
           {!currentTrack && !isLoading ? (
-            <Check className="w-5 h-5 stroke-[3px] text-foreground" />
+            <Check className="w-5 h-5 stroke-[3px] text-white" />
           ) : null}
         </button>
 
@@ -128,27 +128,29 @@ export function SubtitleSelector({
             className={cn(
               'w-full flex items-center justify-between p-4',
               'transition-colors duration-150',
-              isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-neo-yellow/80',
-              currentTrack === track.id ? 'bg-neo-yellow' : 'bg-background',
-              index !== tracks.length - 1 && 'border-b-[3px] border-border',
+              isLoading ? 'opacity-50 cursor-wait' : 'hover:bg-white/10',
+              currentTrack === track.id
+                ? 'bg-white/20 text-white'
+                : 'text-white/80',
+              index !== tracks.length - 1 && 'border-b border-white/10',
             )}
           >
             <div className="flex flex-col items-start">
               <span
                 className={cn(
-                  'text-sm font-bold font-headline uppercase tracking-widest text-foreground',
+                  'text-sm font-bold font-headline uppercase tracking-widest',
                 )}
               >
                 {track.label}
               </span>
               {track.language && track.language !== track.label ? (
-                <span className="text-xs text-foreground/70 font-bold font-headline uppercase">
+                <span className="text-xs text-white/50 font-bold font-headline uppercase">
                   {track.language}
                 </span>
               ) : null}
             </div>
             {currentTrack === track.id && !isLoading ? (
-              <Check className="w-5 h-5 stroke-[3px] text-foreground" />
+              <Check className="w-5 h-5 stroke-[3px] text-white" />
             ) : null}
           </button>
         ))}
@@ -161,15 +163,15 @@ export function SubtitleSelector({
           loadSubtitleFonts();
           setCurrentScreen('style');
         }}
-        className="w-full flex items-center justify-between p-4 border-t-[3px] border-border bg-background hover:bg-neo-yellow/80 transition-colors"
+        className="w-full flex items-center justify-between p-4 border-t border-white/10 hover:bg-white/10 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Type className="w-5 h-5 stroke-[3px] text-foreground" />
-          <span className="text-sm font-black font-headline uppercase tracking-widest text-foreground">
+          <Type className="w-5 h-5 stroke-[3px] text-white" />
+          <span className="text-sm font-black font-headline uppercase tracking-widest text-white">
             {t('subtitleStyle')}
           </span>
         </div>
-        <ChevronRight className="w-5 h-5 stroke-[3px] text-foreground" />
+        <ChevronRight className="w-5 h-5 stroke-[3px] text-white" />
       </button>
     </>
   );
@@ -177,30 +179,30 @@ export function SubtitleSelector({
   const renderStyleScreen = () => (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-background">
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
         <button
           type="button"
           onClick={() => setCurrentScreen('tracks')}
-          className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-yellow transition-colors "
+          className="p-1.5 text-white/60 hover:text-white transition-colors"
         >
           <ChevronRight className="w-4 h-4 stroke-[3px] rotate-180" />
         </button>
-        <span className="text-foreground font-black font-headline uppercase tracking-widest text-sm">
+        <span className="text-white font-black font-headline uppercase tracking-widest text-sm">
           {t('subtitleStyle')}
         </span>
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="p-1.5 border-[3px] border-border bg-background text-foreground hover:bg-neo-red hover:text-primary-foreground transition-colors "
+          className="p-1.5 text-white/60 hover:text-white transition-colors"
         >
           <X className="w-4 h-4 stroke-[3px]" />
         </button>
       </div>
 
-      <div className="overflow-y-auto max-h-[300px] overscroll-contain no-scrollbar bg-background">
+      <div className="overflow-y-auto max-h-[300px] overscroll-contain no-scrollbar">
         {/* Font Size Section */}
-        <div className="px-4 py-2 bg-background border-b-[3px] border-border">
-          <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
+        <div className="px-4 py-2 border-b border-white/10">
+          <span className="text-white/50 text-[10px] font-black font-headline uppercase tracking-widest">
             {t('size')}
           </span>
         </div>
@@ -210,13 +212,11 @@ export function SubtitleSelector({
             key={size.value}
             onClick={() => handleFontSizeChange(size.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
-              subtitleSettings.fontSize === size.value
-                ? 'bg-neo-yellow/30'
-                : 'bg-background',
+              'w-full flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/10 transition-colors',
+              subtitleSettings.fontSize === size.value ? 'bg-white/20' : '',
             )}
           >
-            <span className="text-foreground text-xs font-bold font-headline uppercase tracking-widest">
+            <span className="text-white text-xs font-bold font-headline uppercase tracking-widest">
               {t(
                 size.label.replace('subtitles.', '') as
                   | 'sizeSmall'
@@ -226,14 +226,14 @@ export function SubtitleSelector({
               )}
             </span>
             {subtitleSettings.fontSize === size.value ? (
-              <Check className="w-4 h-4 text-foreground stroke-[3px]" />
+              <Check className="w-4 h-4 text-white stroke-[3px]" />
             ) : null}
           </button>
         ))}
 
         {/* Font Family Section */}
-        <div className="px-4 py-2 bg-background border-y-[3px] border-border">
-          <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
+        <div className="px-4 py-2 border-t border-white/10">
+          <span className="text-white/50 text-[10px] font-black font-headline uppercase tracking-widest">
             {t('font')}
           </span>
         </div>
@@ -243,27 +243,25 @@ export function SubtitleSelector({
             key={font.value}
             onClick={() => handleFontFamilyChange(font.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
-              subtitleSettings.fontFamily === font.value
-                ? 'bg-neo-yellow/30'
-                : 'bg-background',
+              'w-full flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/10 transition-colors',
+              subtitleSettings.fontFamily === font.value ? 'bg-white/20' : '',
             )}
           >
             <span
-              className="text-foreground text-xs font-bold uppercase tracking-widest"
+              className="text-white text-xs font-bold uppercase tracking-widest"
               style={{ fontFamily: font.value }}
             >
               {font.label}
             </span>
             {subtitleSettings.fontFamily === font.value ? (
-              <Check className="w-4 h-4 text-foreground stroke-[3px]" />
+              <Check className="w-4 h-4 text-white stroke-[3px]" />
             ) : null}
           </button>
         ))}
 
         {/* Background Color Section */}
-        <div className="px-4 py-2 bg-background border-y-[3px] border-border">
-          <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
+        <div className="px-4 py-2 border-t border-white/10">
+          <span className="text-white/50 text-[10px] font-black font-headline uppercase tracking-widest">
             {t('background')}
           </span>
         </div>
@@ -273,33 +271,33 @@ export function SubtitleSelector({
             key={bg.value}
             onClick={() => handleBackgroundColorChange(bg.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
+              'w-full flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/10 transition-colors',
               subtitleSettings.backgroundColor === bg.value
-                ? 'bg-neo-yellow/30'
-                : 'bg-background',
+                ? 'bg-white/20'
+                : '',
             )}
           >
             <div className="flex items-center gap-3">
               <div
-                className="w-5 h-5 border-[2px] border-border "
+                className="w-5 h-5 border border-white/20 rounded-sm"
                 style={{
                   backgroundColor:
                     bg.value === 'transparent' ? 'transparent' : bg.value,
                 }}
               />
-              <span className="text-foreground text-xs font-bold font-headline uppercase tracking-widest">
-                {bg.label}
+              <span className="text-white text-xs font-bold font-headline uppercase tracking-widest">
+                {t(bg.label.replace('subtitles.', ''))}
               </span>
             </div>
             {subtitleSettings.backgroundColor === bg.value ? (
-              <Check className="w-4 h-4 text-foreground stroke-[3px]" />
+              <Check className="w-4 h-4 text-white stroke-[3px]" />
             ) : null}
           </button>
         ))}
 
         {/* Text Color Section */}
-        <div className="px-4 py-2 bg-background border-y-[3px] border-border">
-          <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
+        <div className="px-4 py-2 border-t border-white/10">
+          <span className="text-white/50 text-[10px] font-black font-headline uppercase tracking-widest">
             {t('textColor')}
           </span>
         </div>
@@ -309,30 +307,28 @@ export function SubtitleSelector({
             key={color.value}
             onClick={() => handleTextColorChange(color.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
-              subtitleSettings.textColor === color.value
-                ? 'bg-neo-yellow/30'
-                : 'bg-background',
+              'w-full flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/10 transition-colors',
+              subtitleSettings.textColor === color.value ? 'bg-white/20' : '',
             )}
           >
             <div className="flex items-center gap-3">
               <div
-                className="w-5 h-5 border-[2px] border-border "
+                className="w-5 h-5 border border-white/20 rounded-sm"
                 style={{ backgroundColor: color.value }}
               />
-              <span className="text-foreground text-xs font-bold font-headline uppercase tracking-widest">
-                {color.label}
+              <span className="text-white text-xs font-bold font-headline uppercase tracking-widest">
+                {t(color.label.replace('subtitles.', ''))}
               </span>
             </div>
             {subtitleSettings.textColor === color.value ? (
-              <Check className="w-4 h-4 text-foreground stroke-[3px]" />
+              <Check className="w-4 h-4 text-white stroke-[3px]" />
             ) : null}
           </button>
         ))}
 
         {/* Text Shadow Section */}
-        <div className="px-4 py-2 bg-background border-y-[3px] border-border">
-          <span className="text-foreground/50 text-[10px] font-black font-headline uppercase tracking-widest">
+        <div className="px-4 py-2 border-t border-white/10">
+          <span className="text-white/50 text-[10px] font-black font-headline uppercase tracking-widest">
             {t('textEffect')}
           </span>
         </div>
@@ -342,22 +338,20 @@ export function SubtitleSelector({
             key={shadow.value}
             onClick={() => handleTextShadowChange(shadow.value)}
             className={cn(
-              'w-full flex items-center justify-between px-4 py-3 border-b-[2px] border-border/10 hover:bg-neo-yellow/80 transition-colors',
-              subtitleSettings.textShadow === shadow.value
-                ? 'bg-neo-yellow/30'
-                : 'bg-background',
+              'w-full flex items-center justify-between px-4 py-3 border-b border-white/5 hover:bg-white/10 transition-colors',
+              subtitleSettings.textShadow === shadow.value ? 'bg-white/20' : '',
             )}
           >
             <span
-              className="text-foreground text-xs font-bold font-headline uppercase tracking-widest"
+              className="text-white text-xs font-bold font-headline uppercase tracking-widest"
               style={{
                 textShadow: shadow.value !== 'none' ? shadow.value : undefined,
               }}
             >
-              {shadow.label}
+              {t(shadow.label.replace('subtitles.', ''))}
             </span>
             {subtitleSettings.textShadow === shadow.value ? (
-              <Check className="w-4 h-4 text-foreground stroke-[3px]" />
+              <Check className="w-4 h-4 text-white stroke-[3px]" />
             ) : null}
           </button>
         ))}
@@ -372,12 +366,9 @@ export function SubtitleSelector({
         type="button"
         onClick={toggleMenu}
         className={cn(
-          'p-2.5 md:p-3 transition-colors duration-200',
-          'bg-background border-[3px] border-border text-foreground ',
-          'hover:bg-muted',
-          'active:bg-muted',
-          isOpen && 'bg-background shadow-none',
-          isActive && !isOpen && 'bg-neo-yellow',
+          'p-1 md:p-1.5 transition-colors duration-200',
+          'text-white/80 hover:text-white',
+          isActive && 'text-neo-yellow',
         )}
         title={currentLabel ? `Subtitles: ${currentLabel}` : 'Subtitles Off'}
       >
@@ -395,8 +386,8 @@ export function SubtitleSelector({
           className={cn(
             'absolute bottom-full right-0 mb-3',
             'w-64 overflow-hidden',
-            'bg-background border-[4px] border-border flex flex-col',
-            ' z-[100]',
+            'bg-black/80 backdrop-blur-xl rounded-lg flex flex-col',
+            'z-[100]',
             'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-200 motion-reduce:animate-none',
           )}
         >

@@ -59,7 +59,7 @@ interface WatchPlayerProps {
   onNavigate?: (url: string) => void;
   /** Fired when the stream token expires so the parent can refresh it. */
   onStreamExpired?: () => void;
-  /** Server 2 language dubs: seeded into the player so AudioSelector shows them */
+  /** Language dubs: seeded into the player so AudioSelector shows them */
   initialAudioTracks?: {
     id: string;
     label: string;
@@ -68,7 +68,7 @@ interface WatchPlayerProps {
   }[];
   /** Pre-selected track ID — highlights the currently-playing dub in AudioSelector on load */
   initialAudioTrackId?: string;
-  /** Called when the user selects a language dub on server 2 */
+  /** Called when the user selects a language dub */
   onAudioTrackChange?: (trackId: string) => void;
   /** Hide the back button in the player header (e.g. public clip page) */
   hideBackButton?: boolean;

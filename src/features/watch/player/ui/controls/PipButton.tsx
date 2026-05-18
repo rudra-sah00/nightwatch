@@ -40,9 +40,8 @@ export function PlayerPipButton({ onPip, compact }: PlayerPipButtonProps) {
       aria-label={t('pip')}
       className={cn(
         'transition-colors duration-200',
-        'bg-background border-[3px] border-border text-foreground',
-        'hover:bg-neo-yellow/80 active:bg-neo-yellow',
-        resolvedCompact ? 'p-1.5' : 'p-2.5',
+        'text-white/80 hover:text-white',
+        resolvedCompact ? 'p-1' : 'p-1 md:p-1.5',
       )}
     >
       <ChevronDown

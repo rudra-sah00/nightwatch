@@ -91,6 +91,16 @@ export function SketchOverlay({
       }>;
     }>
   >([]);
+  const reactionTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(
+    new Set(),
+  );
+
+  // Cleanup reaction timeouts on unmount
+  useEffect(() => {
+    return () => {
+      for (const t of reactionTimeoutsRef.current) clearTimeout(t);
+    };
+  }, []);
 
   const { color, strokeWidth, currentTool, cursors, stageRef, videoRef } =
     useSketch();
@@ -279,9 +289,11 @@ export function SketchOverlay({
       ]);
 
       // Simple cleanup
-      setTimeout(() => {
+      const tid = setTimeout(() => {
         setActiveReactions((prev) => prev.filter((r) => r.id !== id));
+        reactionTimeoutsRef.current.delete(tid);
       }, 1500);
+      reactionTimeoutsRef.current.add(tid);
     });
   }, []);
 

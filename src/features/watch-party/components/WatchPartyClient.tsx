@@ -2,7 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { WatchPartyLoading } from '@/features/watch-party/components/WatchPartyLoading';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
@@ -127,6 +128,20 @@ export function WatchPartyClient({
   const t = useTranslations('party');
   const isMobile = useIsMobile();
 
+  // Multi-tab detection — prevent duplicate RTM/RTC connections
+  const [isBlockedByOtherTab, setIsBlockedByOtherTab] = useState(false);
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const bc = new BroadcastChannel(`watch-party:${roomId}`);
+    bc.postMessage('TAB_ACTIVE');
+    bc.onmessage = () => setIsBlockedByOtherTab(true);
+    return () => bc.close();
+  }, [roomId]);
+
+  if (isBlockedByOtherTab) {
+    return <WatchPartyLoading message={t('loading.otherTab')} />;
+  }
+
   if (!isGuestSocketReady) {
     return <WatchPartyLoading message={t('loading.connecting')} />;
   }
@@ -160,33 +175,35 @@ export function WatchPartyClient({
 
   if (isConnected && room) {
     return (
-      <SketchProvider>
-        <ActiveWatchParty
-          room={room}
-          currentUserId={currentUserId}
-          currentUserName={currentUserName}
-          isHost={isHost}
-          copied={copied}
-          onKick={kickUser}
-          onApprove={approveMember}
-          onReject={rejectMember}
-          onCopyLink={handleCopyLink}
-          onLeave={handleLeave}
-          onConfirmLeave={confirmLeave}
-          showLeaveDialog={showLeaveDialog}
-          onShowLeaveDialog={setShowLeaveDialog}
-          onPartyEvent={emitEvent}
-          videoRef={videoRef}
-          messages={messages}
-          onSendMessage={sendMessage}
-          onUpdateContent={updateContent}
-          typingUsers={typingUsers}
-          onTypingStart={handleTypingStart}
-          onTypingStop={handleTypingStop}
-          rtmSendMessage={rtmSendMessage}
-          rtmSendMessageToPeer={rtmSendMessageToPeer}
-        />
-      </SketchProvider>
+      <FeatureErrorBoundary feature="watch-party">
+        <SketchProvider>
+          <ActiveWatchParty
+            room={room}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
+            isHost={isHost}
+            copied={copied}
+            onKick={kickUser}
+            onApprove={approveMember}
+            onReject={rejectMember}
+            onCopyLink={handleCopyLink}
+            onLeave={handleLeave}
+            onConfirmLeave={confirmLeave}
+            showLeaveDialog={showLeaveDialog}
+            onShowLeaveDialog={setShowLeaveDialog}
+            onPartyEvent={emitEvent}
+            videoRef={videoRef}
+            messages={messages}
+            onSendMessage={sendMessage}
+            onUpdateContent={updateContent}
+            typingUsers={typingUsers}
+            onTypingStart={handleTypingStart}
+            onTypingStop={handleTypingStop}
+            rtmSendMessage={rtmSendMessage}
+            rtmSendMessageToPeer={rtmSendMessageToPeer}
+          />
+        </SketchProvider>
+      </FeatureErrorBoundary>
     );
   }
 

@@ -38,7 +38,7 @@ export function sortQualities(qualities: DownloadQuality[]): DownloadQuality[] {
 /**
  * Builds a deterministic offline-storage key for a downloadable item.
  *
- * For Server 2 direct URLs the key is `{contentId}-ep{episode}` (series)
+ * For direct URL downloads the key is `{contentId}-ep{episode}` (series)
  * or just `contentId` (movie). For HLS-based downloads it appends
  * `_S{season}E{episode}` when applicable.
  *

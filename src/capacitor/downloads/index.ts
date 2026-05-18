@@ -2,7 +2,7 @@
  * Mobile Download Manager — main entry point.
  * Equivalent of electron/modules/download-manager.js
  *
- * Routes downloads to the correct server provider (s1/s2)
+ * Routes downloads to the correct provider
  * and exposes a unified API for the React hooks.
  */
 import { Directory, Filesystem } from '@capacitor/filesystem';

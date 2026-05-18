@@ -53,10 +53,8 @@ export function Volume({
         onMouseDown={(e) => e.preventDefault()}
         aria-label={isMuted || volume === 0 ? t('unmute') : t('mute')}
         className={cn(
-          'p-1.5 md:p-2.5 transition-[background-color,color,border-color,opacity,transform] duration-200',
-          'bg-background border-[2px] md:border-[3px] border-border text-foreground ',
-          'hover:bg-neo-yellow/80',
-          'active:bg-neo-yellow',
+          'p-1 md:p-1.5 transition-colors duration-200',
+          'text-white/80 hover:text-white',
         )}
       >
         <VolumeIcon className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]" />
@@ -71,7 +69,7 @@ export function Volume({
         <div
           ref={sliderRef}
           className={cn(
-            'relative h-3 w-24 bg-background border-[2px] border-border cursor-pointer',
+            'relative h-1.5 w-24 bg-white/20 rounded-full cursor-pointer',
           )}
           onMouseDown={handleMouseDown}
           role="slider"
@@ -92,7 +90,7 @@ export function Volume({
         >
           {/* Volume fill */}
           <div
-            className="absolute top-0 bottom-0 left-0 bg-neo-blue border-r-[2px] border-border"
+            className="absolute top-0 bottom-0 left-0 bg-white rounded-full"
             style={{
               width: `${displayVolume * 100}%`,
               transition: isDragging ? 'none' : 'width 50ms ease-out',

@@ -109,6 +109,11 @@ export async function getStreamUrl(
   songId: string,
   bitrate = 320,
 ): Promise<string> {
+  // Podcast episodes store encrypted URL in id prefixed with "podcast:"
+  if (songId.startsWith('podcast:')) {
+    const encUrl = songId.slice('podcast:'.length);
+    return getEpisodeStreamUrl(encUrl);
+  }
   const data = await apiFetch<{ url: string }>(
     `/api/music/stream/${songId}?bitrate=${bitrate}`,
   );

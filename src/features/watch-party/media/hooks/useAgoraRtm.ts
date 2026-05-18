@@ -222,6 +222,27 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
         client.addEventListener('status', handleStatus);
         client.addEventListener('presence', handlePresence);
 
+        // Token renewal — refresh before expiry to avoid disconnection
+        const handleTokenExpiring = async () => {
+          if (cleaned) return;
+          try {
+            const { getAgoraRtmToken } = await import('../services/agora.api');
+            const data = await getAgoraRtmToken({
+              channelName: channel,
+              guestId: userId,
+              guestName: userId,
+            });
+            await client?.renewToken(data.token);
+          } catch {
+            // Token renewal failed — connection will drop and reconnect
+          }
+        };
+        (
+          client as unknown as {
+            addEventListener: (e: string, h: () => void) => void;
+          }
+        ).addEventListener('tokenPrivilegeWillExpire', handleTokenExpiring);
+
         fallbackCleanup = () => {
           if (!client) return;
           client.removeEventListener('message', handleMessage);

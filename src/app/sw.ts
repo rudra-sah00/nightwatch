@@ -13,7 +13,7 @@ declare const self: WorkerGlobalScope;
 
 // Runtime caching rules that must run BEFORE defaultCache.
 // defaultCache has a CacheFirst rule for *.mp4 and *.webm which would try to
-// cache entire streaming video files — causing blank screens on S2 (MP4) streams.
+// cache entire streaming video files — causing blank screens on MP4 streams.
 // We intercept all video/HLS streaming requests and pass them straight to the network.
 const streamingPassthrough = [
   // Local Electron proxy — must bypass SW entirely
@@ -38,7 +38,7 @@ const streamingPassthrough = [
     },
     handler: new NetworkOnly(),
   },
-  // S2 MP4 streams served via the backend proxy
+  // MP4 streams served via the backend proxy
   {
     matcher: /\/api\/stream\//i,
     handler: new NetworkOnly(),
@@ -53,7 +53,7 @@ const streamingPassthrough = [
     matcher: /\.(m3u8|ts)(\?.*)?$/i,
     handler: new NetworkOnly(),
   },
-  // MP4/WebM video files fetched directly (e.g. S2 direct CDN links)
+  // MP4/WebM video files fetched directly (e.g. direct CDN links)
   {
     matcher: /\.(mp4|webm)(\?.*)?$/i,
     handler: new NetworkOnly(),
