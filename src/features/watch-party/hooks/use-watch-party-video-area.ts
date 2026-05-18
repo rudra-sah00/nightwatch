@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
-import type { S2AudioTrack } from '@/features/watch/player/hooks/useS2AudioTracks';
+import type { AudioTrack } from '@/features/watch/player/hooks/useAudioTracks';
 import type { WatchPartyRoom } from '../room/types';
 
 /**
@@ -77,7 +77,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
   // host created/updated the room). We never call playVideo() here — doing so
   // would trigger createSessionWithToken → GETSET → replace the party sentinel
   // → emit stream:revoked → kill the party stream for everyone.
-  const initialAudioTracks: S2AudioTrack[] = useMemo(
+  const initialAudioTracks: AudioTrack[] = useMemo(
     () => room.audioTracks ?? [],
     [room.audioTracks],
   );
@@ -94,7 +94,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
     (trackId: string) => {
       const track = initialAudioTracks.find((t) => t.id === trackId);
       if (!track) return;
-      if (track.streamUrl.startsWith('s2:')) {
+      if (track.streamUrl.startsWith('s1:')) {
         handleRefetch(track.streamUrl);
       } else {
         handleStreamChange(track.streamUrl);

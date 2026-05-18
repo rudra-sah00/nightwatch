@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useS2AudioTracks } from '@/features/watch/player/hooks/useS2AudioTracks';
+import { useAudioTracks } from '@/features/watch/player/hooks/useAudioTracks';
 import type { PlayResponse } from '@/types/content';
 
 // ── Mock playVideo ──────────────────────────────────────────────────────────
@@ -16,7 +16,7 @@ const BASE_PROPS = {
   server: 's1' as const,
   type: 'movie' as const,
   title: 'Test Movie',
-  movieId: 's2:movie::123',
+  movieId: 's1:movie::123',
   onStreamChange: vi.fn(),
   onRefetch: vi.fn(),
 };
@@ -26,11 +26,11 @@ function makePlayResponse(overrides: Partial<PlayResponse> = {}): PlayResponse {
     success: true,
     type: 'movie',
     title: 'Test Movie',
-    movieId: 's2:movie::123',
+    movieId: 's1:movie::123',
     masterPlaylistUrl: 'https://cdn.example.com/movie.mp4',
     audioTracks: [
-      { language: 'en', label: 'English', streamUrl: 's2:en::123' },
-      { language: 'ru', label: 'Russian', streamUrl: 's2:ru::456' },
+      { language: 'en', label: 'English', streamUrl: 's1:en::123' },
+      { language: 'ru', label: 'Russian', streamUrl: 's1:ru::456' },
     ],
     ...overrides,
   };
@@ -38,35 +38,35 @@ function makePlayResponse(overrides: Partial<PlayResponse> = {}): PlayResponse {
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
-describe('useS2AudioTracks', () => {
+describe('useAudioTracks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('returns empty tracks for s1', () => {
     const { result } = renderHook(() =>
-      useS2AudioTracks({ ...BASE_PROPS, server: 's1' }),
+      useAudioTracks({ ...BASE_PROPS, server: 's1' }),
     );
     expect(result.current.audioTracks).toHaveLength(0);
   });
 
   it('calls playVideo once and populates audioTracks', async () => {
     mockPlayVideo.mockResolvedValue(makePlayResponse());
-    const { result } = renderHook(() => useS2AudioTracks({ ...BASE_PROPS }));
+    const { result } = renderHook(() => useAudioTracks({ ...BASE_PROPS }));
     await waitFor(() => expect(result.current.audioTracks).toHaveLength(2));
     expect(mockPlayVideo).toHaveBeenCalledOnce();
   });
 
   it('handles playVideo rejection', async () => {
     mockPlayVideo.mockRejectedValue(new Error('error'));
-    const { result } = renderHook(() => useS2AudioTracks({ ...BASE_PROPS }));
+    const { result } = renderHook(() => useAudioTracks({ ...BASE_PROPS }));
     await waitFor(() => expect(mockPlayVideo).toHaveBeenCalled());
     expect(result.current.audioTracks).toHaveLength(0);
   });
 
   it('handles success: false in playVideo', async () => {
     mockPlayVideo.mockResolvedValue({ success: false });
-    const { result } = renderHook(() => useS2AudioTracks({ ...BASE_PROPS }));
+    const { result } = renderHook(() => useAudioTracks({ ...BASE_PROPS }));
     await waitFor(() => expect(mockPlayVideo).toHaveBeenCalled());
     expect(result.current.audioTracks).toHaveLength(0);
   });
@@ -74,7 +74,7 @@ describe('useS2AudioTracks', () => {
   it('seeds state from initialTracks', () => {
     const tracks = [{ id: '1', label: 'T1', language: 'en', streamUrl: 'u1' }];
     const { result } = renderHook(() =>
-      useS2AudioTracks({
+      useAudioTracks({
         ...BASE_PROPS,
         skipDiscovery: true,
         initialTracks: tracks,
@@ -85,7 +85,7 @@ describe('useS2AudioTracks', () => {
 
   it('handles empty initialTracks', () => {
     const { result } = renderHook(() =>
-      useS2AudioTracks({
+      useAudioTracks({
         ...BASE_PROPS,
         skipDiscovery: true,
         initialTracks: [],
@@ -98,11 +98,11 @@ describe('useS2AudioTracks', () => {
     const onRefetch = vi.fn();
     mockPlayVideo.mockResolvedValue(makePlayResponse());
     const { result } = renderHook(() =>
-      useS2AudioTracks({ ...BASE_PROPS, onRefetch }),
+      useAudioTracks({ ...BASE_PROPS, onRefetch }),
     );
     await waitFor(() => expect(result.current.audioTracks).toHaveLength(2));
-    act(() => result.current.handleAudioTrackChange('s2:ru::456'));
-    expect(onRefetch).toHaveBeenCalledWith('s2:ru::456');
+    act(() => result.current.handleAudioTrackChange('s1:ru::456'));
+    expect(onRefetch).toHaveBeenCalledWith('s1:ru::456');
   });
 
   it('responds to track change for direct url', async () => {
@@ -115,7 +115,7 @@ describe('useS2AudioTracks', () => {
       }),
     );
     const { result } = renderHook(() =>
-      useS2AudioTracks({ ...BASE_PROPS, onStreamChange }),
+      useAudioTracks({ ...BASE_PROPS, onStreamChange }),
     );
     await waitFor(() => expect(result.current.audioTracks).toHaveLength(1));
     act(() => result.current.handleAudioTrackChange('http://cdn.mp4'));

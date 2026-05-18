@@ -1,12 +1,12 @@
 /**
- * useS2AudioTracks
+ * useAudioTracks
  *
- * S2 Provider (MovieBox) — Audio dub discovery hook.
+ * S1 Provider (MovieBox) — Audio dub discovery hook.
  *
  * Why a separate hook?
  * -------------------
  * MovieBox stores every language dub as an independent content entry that shares
- * the same display title. When the watch page first loads with an S2 stream URL,
+ * the same display title. When the watch page first loads with a stream URL,
  * we need to fetch the full play response (which carries the `audioTracks` list)
  * WITHOUT touching `streamUrl` — changing streamUrl would restart the video and
  * wipe the resume position that useWatchProgress already loaded.
@@ -18,7 +18,7 @@
  * Usage
  * -----
  * ```tsx
- * const { audioTracks, handleAudioTrackChange } = useS2AudioTracks({
+ * const { audioTracks, handleAudioTrackChange } = useAudioTracks({
  *   server,
  *   type,
  *   title,
@@ -37,15 +37,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { playVideo } from '@/features/watch/api';
 import type { PlayResponse } from '@/types/content';
 
-export interface S2AudioTrack {
+export interface AudioTrack {
   id: string;
   label: string;
   language: string;
-  /** Raw value from the API — either a direct MP4 URL or a `s2:…` content ID */
+  /** Raw value from the API — either a direct MP4 URL or a `s1:…` content ID */
   streamUrl: string;
 }
 
-interface UseS2AudioTracksProps {
+interface UseAudioTracksProps {
   /** Current server. Hook is a no-op when this is not 's1'. */
   server: string;
   type: 'movie' | 'series';
@@ -57,19 +57,18 @@ interface UseS2AudioTracksProps {
   episode?: string | null;
   /**
    * Called when the user selects a language dub that requires swapping the
-   * stream URL (direct MP4 legacy path).  For `s2:…` content IDs the caller
-   * should trigger a full refetch instead.
+   * stream URL (direct MP4 path).
    */
   onStreamChange: (url: string) => void;
   /**
    * Called when the user selects a language dub that is a full content entry
-   * (carries a `s2:…` ID), requiring a fresh play session.
+   * (carries a `s1:…` ID), requiring a fresh play session.
    */
   onRefetch: (overrideMovieId: string) => void;
   /**
    * Called once after the discovery play request completes, with the full
    * PlayResponse.  Use this to apply subtitle tracks and caption URLs that
-   * are not passed as URL params (S2 always serves them via the /play API).
+   * are not passed as URL params (always served via the /play API).
    */
   onDiscovered?: (response: PlayResponse) => void;
   /**
@@ -84,7 +83,7 @@ interface UseS2AudioTracksProps {
    * When provided, the internal discovery playVideo() call is skipped entirely —
    * preventing a second session creation that would revoke the active stream.
    */
-  initialTracks?: S2AudioTrack[];
+  initialTracks?: AudioTrack[];
   /**
    * When true, the internal discovery playVideo() call is skipped entirely.
    * Set this when the parent is already calling playVideo() on mount (i.e.
@@ -95,9 +94,9 @@ interface UseS2AudioTracksProps {
   skipDiscovery?: boolean;
 }
 
-interface UseS2AudioTracksResult {
-  /** Available language dubs for this S2 content.  Empty for S1 or before discovery. */
-  audioTracks: S2AudioTrack[];
+interface UseAudioTracksResult {
+  /** Available language dubs. Empty before discovery completes. */
+  audioTracks: AudioTrack[];
   /**
    * Call when the user picks a language in the player's audio selector.
    * Internally decides whether to swap the URL directly or trigger a full refetch.
@@ -105,7 +104,7 @@ interface UseS2AudioTracksResult {
   handleAudioTrackChange: (trackId: string) => void;
 }
 
-export function useS2AudioTracks({
+export function useAudioTracks({
   server,
   type,
   title,
@@ -119,26 +118,19 @@ export function useS2AudioTracks({
   onBeforeDiscovery,
   initialTracks,
   skipDiscovery,
-}: UseS2AudioTracksProps): UseS2AudioTracksResult {
-  const [audioTracks, setAudioTracks] = useState<S2AudioTrack[]>(
+}: UseAudioTracksProps): UseAudioTracksResult {
+  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>(
     () => initialTracks ?? [],
   );
 
   // Sync initialTracks into state when they arrive after an async refetchStream.
-  // initialTracks starts as [] on mount; this effect fires once they're populated.
   useEffect(() => {
     if (initialTracks && initialTracks.length > 0) {
       setAudioTracks(initialTracks);
     }
   }, [initialTracks]);
 
-  // ── Discover audio dubs on mount (S2 only) ───────────────────────────────
-  // We call playVideo() directly — NOT the parent's refetchStream() — so we
-  // can read audioTracks without touching streamUrl and restarting the video.
-  // SKIP when skipDiscovery=true: the parent is already calling playVideo() on
-  // mount (refetchStream), so a second call would create a new session and
-  // immediately trigger invalidateUserStream → stream:revoked on the active one.
-  // Tracks will be fed back via initialTracks once refetchStream completes.
+  // ── Discover audio dubs on mount ─────────────────────────────────────────
   useEffect(() => {
     if (server !== 's1') return;
     if (skipDiscovery) return;
@@ -173,8 +165,6 @@ export function useS2AudioTracks({
           if (response.audioTracks && response.audioTracks.length > 0) {
             setAudioTracks(
               response.audioTracks.map((t) => ({
-                // Use streamUrl as id — language codes are not unique when the
-                // same language has multiple dubs (e.g. two "ru" entries).
                 id: t.streamUrl,
                 label: t.label,
                 language: t.language,
@@ -182,9 +172,6 @@ export function useS2AudioTracks({
               })),
             );
           }
-          // Propagate subtitle tracks / caption URL back to the parent page so
-          // they are displayed even when the page loaded with a stream URL param
-          // (in which case refetchStream does not fire on mount).
           onDiscovered?.(response);
         }
       } catch {
@@ -199,9 +186,7 @@ export function useS2AudioTracks({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     episode,
-    movieId, // Propagate subtitle tracks / caption URL back to the parent page so
-    // they are displayed even when the page loaded with a stream URL param
-    // (in which case refetchStream does not fire on mount).
+    movieId,
     onBeforeDiscovery,
     onDiscovered,
     season,
@@ -210,7 +195,7 @@ export function useS2AudioTracks({
     title,
     type,
     skipDiscovery,
-  ]); // Once on mount — server/params don't change mid-session.
+  ]);
 
   // ── Track selection ──────────────────────────────────────────────────────
   const handleAudioTrackChange = useCallback(
@@ -218,11 +203,11 @@ export function useS2AudioTracks({
       const track = audioTracks.find((t) => t.id === trackId);
       if (!track) return;
 
-      if (track.streamUrl.startsWith('s2:')) {
-        // Dub stored as a separate S2 content entry → full refetch needed.
+      if (track.streamUrl.startsWith('s1:')) {
+        // Dub stored as a separate content entry → full refetch needed.
         onRefetch(track.streamUrl);
       } else {
-        // Legacy direct MP4 URL → swap in place.
+        // Direct MP4 URL → swap in place.
         onStreamChange(track.streamUrl);
       }
     },

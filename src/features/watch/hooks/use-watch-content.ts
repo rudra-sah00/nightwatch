@@ -6,9 +6,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { playVideo, stopVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import {
-  type S2AudioTrack,
-  useS2AudioTracks,
-} from '@/features/watch/player/hooks/useS2AudioTracks';
+  type AudioTrack,
+  useAudioTracks,
+} from '@/features/watch/player/hooks/useAudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { WS_EVENTS } from '@/lib/constants';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
@@ -21,7 +21,7 @@ import type { PlayResponse } from '@/types/content';
  * Handles metadata derivation and stream fetching.
  */
 const MAX_STREAM_RETRIES = 2;
-const S2_COLD_START_RETRY_DELAY_MS = 3000;
+const COLD_START_RETRY_DELAY_MS = 3000;
 
 export function useWatchContent() {
   const params = useParams();
@@ -78,7 +78,7 @@ export function useWatchContent() {
     subtitleTracks,
     apiDurationSeconds,
     applyResponse,
-    applyS2Subtitles,
+    applySubtitles,
   } = useStreamUrls({
     initialStreamUrlRaw: streamParam ? decodeURIComponent(streamParam) : null,
     initialCaptionUrlRaw: captionParam
@@ -92,16 +92,16 @@ export function useWatchContent() {
 
   const [isRefetching, setIsRefetching] = useState(() => !streamParam);
   const [refetchError, setRefetchError] = useState<string | null>(null);
-  const s2ColdStartRetried = useRef(false);
+  const coldStartRetried = useRef(false);
   const [_isReplacingSession, setIsReplacingSession] = useState(false);
   const replacingSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
 
-  const [s2InitialAudioTracks, setS2InitialAudioTracks] = useState<
-    S2AudioTrack[]
-  >([]);
-  const [s2ActiveTrackId, setS2ActiveTrackId] = useState<string | null>(() =>
+  const [initialAudioTracks, setInitialAudioTracks] = useState<AudioTrack[]>(
+    [],
+  );
+  const [activeTrackId, setActiveTrackId] = useState<string | null>(() =>
     server === 's1' ? movieId : null,
   );
 
@@ -227,7 +227,7 @@ export function useWatchContent() {
           // Server 2 specific audio track handling
           if (server === 's1') {
             if (response.audioTracks && response.audioTracks.length > 0) {
-              setS2InitialAudioTracks(
+              setInitialAudioTracks(
                 response.audioTracks.map((t) => ({
                   id: t.streamUrl,
                   label: t.label,
@@ -236,7 +236,7 @@ export function useWatchContent() {
                 })),
               );
             }
-            setS2ActiveTrackId(overrideMovieId || movieId || null);
+            setActiveTrackId(overrideMovieId || movieId || null);
           }
         } else {
           console.warn('[NW-Play] VOD: no stream URL', {
@@ -254,12 +254,12 @@ export function useWatchContent() {
         if (
           server === 's1' &&
           (httpStatus === 500 || httpStatus === 503) &&
-          !s2ColdStartRetried.current
+          !coldStartRetried.current
         ) {
-          s2ColdStartRetried.current = true;
+          coldStartRetried.current = true;
           setTimeout(
             () => refetchStream(overrideMovieId),
-            S2_COLD_START_RETRY_DELAY_MS,
+            COLD_START_RETRY_DELAY_MS,
           );
         } else {
           setRefetchError(
@@ -277,7 +277,7 @@ export function useWatchContent() {
     [title, type, season, episode, movieId, seriesId, server, applyResponse],
   );
 
-  const handleBeforeS2Discovery = useCallback(() => {
+  const handleBeforeDiscovery = useCallback(() => {
     if (replacingSessionTimerRef.current)
       clearTimeout(replacingSessionTimerRef.current);
     setIsReplacingSession(true);
@@ -287,9 +287,9 @@ export function useWatchContent() {
     }, 90_000);
   }, []);
 
-  const handleS2Discovered = useCallback(
+  const handleDiscovered = useCallback(
     (response: PlayResponse) => {
-      applyS2Subtitles(response);
+      applySubtitles(response);
       if (replacingSessionTimerRef.current)
         clearTimeout(replacingSessionTimerRef.current);
       replacingSessionTimerRef.current = setTimeout(() => {
@@ -297,13 +297,10 @@ export function useWatchContent() {
         replacingSessionTimerRef.current = null;
       }, 2000);
     },
-    [applyS2Subtitles],
+    [applySubtitles],
   );
 
-  const {
-    audioTracks: s2AudioTracks,
-    handleAudioTrackChange: handleS2AudioTrackChange,
-  } = useS2AudioTracks({
+  const { audioTracks, handleAudioTrackChange } = useAudioTracks({
     server,
     type,
     title,
@@ -313,9 +310,9 @@ export function useWatchContent() {
     episode,
     onStreamChange: setStreamUrl,
     onRefetch: (overrideMovieId) => refetchStream(overrideMovieId),
-    onDiscovered: handleS2Discovered,
-    onBeforeDiscovery: handleBeforeS2Discovery,
-    initialTracks: s2InitialAudioTracks,
+    onDiscovered: handleDiscovered,
+    onBeforeDiscovery: handleBeforeDiscovery,
+    initialTracks: initialAudioTracks,
     skipDiscovery: !streamParam,
   });
 
@@ -365,7 +362,7 @@ export function useWatchContent() {
   useEffect(() => {
     if (streamUrl) {
       streamRetryCount.current = 0;
-      s2ColdStartRetried.current = false;
+      coldStartRetried.current = false;
     }
   }, [streamUrl]);
 
@@ -440,9 +437,9 @@ export function useWatchContent() {
     subtitleTracks,
     spriteVtt,
     qualities,
-    s2AudioTracks,
-    handleS2AudioTrackChange,
-    s2ActiveTrackId,
+    audioTracks,
+    handleAudioTrackChange,
+    activeTrackId,
     handleStreamExpired,
     refetchStream,
   };

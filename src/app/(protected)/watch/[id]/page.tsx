@@ -22,9 +22,9 @@ function WatchContent() {
     subtitleTracks,
     spriteVtt,
     qualities,
-    s2AudioTracks,
-    handleS2AudioTrackChange,
-    s2ActiveTrackId,
+    audioTracks,
+    handleAudioTrackChange,
+    activeTrackId,
     handleStreamExpired,
     refetchStream,
   } = useWatchContent();
@@ -142,12 +142,10 @@ function WatchContent() {
         qualities={qualities}
         description={description ? decodeURIComponent(description) : undefined}
         onStreamExpired={handleStreamExpired}
-        initialAudioTracks={
-          s2AudioTracks.length > 0 ? s2AudioTracks : undefined
-        }
-        initialAudioTrackId={s2ActiveTrackId || undefined}
+        initialAudioTracks={audioTracks.length > 0 ? audioTracks : undefined}
+        initialAudioTrackId={activeTrackId || undefined}
         onAudioTrackChange={
-          s2AudioTracks.length > 0 ? handleS2AudioTrackChange : undefined
+          audioTracks.length > 0 ? handleAudioTrackChange : undefined
         }
       />
       <section className="md:hidden px-4 py-4 space-y-3 bg-background text-foreground border-t border-border/60 min-h-[60vh]">

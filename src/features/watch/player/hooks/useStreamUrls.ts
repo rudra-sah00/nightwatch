@@ -41,7 +41,7 @@ interface StreamUrlsReturn {
   subtitleTracks: SubtitleTrack[] | undefined;
   apiDurationSeconds: number | undefined;
   applyResponse: (server: 's1' | 's1', response: PlayResponse) => void;
-  applyS2Subtitles: (response: PlayResponse) => void;
+  applySubtitles: (response: PlayResponse) => void;
 }
 
 export function useStreamUrls({
@@ -137,7 +137,7 @@ export function useStreamUrls({
     [],
   );
 
-  const applyS2Subtitles = useCallback((response: PlayResponse) => {
+  const applySubtitles = useCallback((response: PlayResponse) => {
     const normalized = processS2Subtitles(response);
     if (normalized.captionUrl !== undefined)
       setCaptionUrl(normalized.captionUrl);
@@ -153,6 +153,6 @@ export function useStreamUrls({
     subtitleTracks,
     apiDurationSeconds,
     applyResponse,
-    applyS2Subtitles,
+    applySubtitles,
   };
 }
