@@ -61,7 +61,7 @@ export function useWatchPartyClient({
     }
   }, [router]);
 
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const {
     socket,
     isConnected: isSocketConnected,
@@ -92,17 +92,17 @@ export function useWatchPartyClient({
   const movieEndTimerRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (isAuthLoading) return; // Wait for auth to resolve before deciding guest vs user
-    if (!user && !hasConnectedGuest.current) {
-      hasConnectedGuest.current = true;
-      connectGuest();
-    }
+    if (user || isAuthenticated) return; // Authenticated user — don't connect as guest
+    if (hasConnectedGuest.current) return;
+    hasConnectedGuest.current = true;
+    connectGuest();
     return () => {
-      if (!user && hasConnectedGuest.current) {
+      if (hasConnectedGuest.current) {
         disconnect();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectGuest, disconnect, user, isAuthLoading]);
+  }, [connectGuest, disconnect, user, isAuthLoading, isAuthenticated]);
 
   const isGuestSocketReady = !!user || isSocketConnected;
 
