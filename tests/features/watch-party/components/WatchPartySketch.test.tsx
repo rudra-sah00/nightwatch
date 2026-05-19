@@ -154,9 +154,9 @@ describe('WatchPartySketch', () => {
 
   it('should change color when clicked', () => {
     render(<WatchPartySketch />);
-    const colorBtn = screen.getAllByLabelText(/sketch\.selectColor/)[0];
-    fireEvent.click(colorBtn);
-    expect(mockContext.setColor).toHaveBeenCalledWith('#ef4444');
+    const colorInput = screen.getByDisplayValue(mockContext.color);
+    fireEvent.change(colorInput, { target: { value: '#3b82f6' } });
+    expect(mockContext.setColor).toHaveBeenCalledWith('#3b82f6');
   });
 
   it('should toggle fill when clicked', () => {

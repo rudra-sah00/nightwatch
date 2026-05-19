@@ -20,7 +20,6 @@ import {
   MoveUp,
   Pencil,
   PenTool,
-  Pipette,
   Sparkles,
   Square,
   Star,
@@ -37,28 +36,6 @@ import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
 import { type ToolType, useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
-
-const COLORS = [
-  '#ef4444', // Red
-  '#f97316', // Orange
-  '#eab308', // Yellow
-  '#84cc16', // Lime
-  '#22c55e', // Green
-  '#10b981', // Emerald
-  '#14b8a6', // Teal
-  '#06b6d4', // Cyan
-  '#0ea5e9', // Sky
-  '#3b82f6', // Blue
-  '#6366f1', // Indigo
-  '#8b5cf6', // Violet
-  '#a855f7', // Purple
-  '#d946ef', // Fuchsia
-  '#ec4899', // Pink
-  '#f43f5e', // Rose
-  '#ffffff', // White
-  '#a1a1aa', // Gray
-  '#000000', // Black
-];
 
 const TOOLS: { id: ToolType; labelKey: string; icon: React.ElementType }[] = [
   { id: 'select', labelKey: 'sketch.toolSelect', icon: MousePointer2 },
@@ -210,25 +187,23 @@ export function WatchPartySketch() {
           <h4 className="text-xs font-bold text-foreground/40 dark:text-white/40 uppercase tracking-widest">
             {t('sketch.toolsLabel')}
           </h4>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-7 gap-1">
             {TOOLS.map((tool) => {
               const Icon = tool.icon;
               const isActive = currentTool === tool.id;
               return (
-                <Button
+                <button
                   key={tool.id}
                   type="button"
                   title={t(tool.labelKey)}
                   onClick={() => handleToolClick(tool.id)}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-1.5 p-2.5 transition-colors rounded-lg',
-                    isActive
-                      ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white'
-                      : 'text-foreground/60 hover:text-foreground hover:bg-foreground/10 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10',
+                    'flex items-center justify-center p-2',
+                    isActive ? 'text-white' : 'text-white/40 hover:text-white',
                   )}
                 >
                   <Icon className="w-5 h-5 stroke-[3px]" />
-                </Button>
+                </button>
               );
             })}
           </div>
@@ -283,42 +258,29 @@ export function WatchPartySketch() {
             <h4 className="text-xs font-bold text-foreground/40 dark:text-white/40 uppercase tracking-widest">
               {t('sketch.color')}
             </h4>
-            <div className="grid grid-cols-7 gap-2">
-              {COLORS.map((c) => (
-                <Button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className={cn(
-                    'w-7 h-7 rounded-full transition-transform',
-                    color === c
-                      ? 'scale-125 ring-2 ring-white'
-                      : 'hover:scale-110',
-                  )}
-                  style={{ backgroundColor: c }}
-                  aria-label={t('sketch.selectColor', { color: c })}
-                />
-              ))}
-              <Button
+            <div className="flex items-center justify-center">
+              <button
                 type="button"
                 onClick={() => customColorInputRef.current?.click()}
-                className={cn(
-                  'w-7 h-7 rounded-full transition-transform flex items-center justify-center bg-gradient-to-br from-red-500 via-green-500 to-blue-500',
-                  !COLORS.includes(color) && color !== 'eraser'
-                    ? 'scale-125 '
-                    : 'hover:scale-110',
-                )}
+                className="relative w-32 h-32 rounded-full cursor-pointer"
+                style={{
+                  background:
+                    'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
+                }}
                 title={t('sketch.customColor')}
               >
-                <Pipette className="w-4 h-4 text-primary-foreground drop-shadow-md stroke-[3px]" />
+                <div
+                  className="absolute inset-4 rounded-full border-2 border-white/30"
+                  style={{ backgroundColor: color }}
+                />
                 <input
                   ref={customColorInputRef}
                   type="color"
                   className="sr-only"
-                  value={COLORS.includes(color) ? '#ffffff' : color}
+                  value={color}
                   onChange={(e) => setColor(e.target.value)}
                 />
-              </Button>
+              </button>
             </div>
           </div>
         )}

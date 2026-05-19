@@ -254,9 +254,6 @@ export function WatchPartyLobby({
                 {/* Captcha for guest users */}
                 {onCaptchaVerify ? (
                   <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-300 motion-reduce:animate-none">
-                    <p className="text-[10px] font-black font-headline uppercase text-foreground/60 mb-2 text-center">
-                      {t('securityCheck')}
-                    </p>
                     <div className="mt-2">
                       <Captcha onVerify={onCaptchaVerify} onError={() => {}} />
                     </div>
