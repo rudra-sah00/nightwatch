@@ -164,6 +164,10 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Called after hydration completes — isLoading can now safely be false
+        state?.setIsLoading(false);
+      },
     },
   ),
 );

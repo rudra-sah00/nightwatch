@@ -78,7 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!userId || !sessionId) {
-      setIsLoading(false);
       return;
     }
 
@@ -98,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         offForceLogout(forceLogoutHandlerRef.current);
       disconnect();
     };
-  }, [userId, sessionId, connect, disconnect, handleForceLogout, setIsLoading]);
+  }, [userId, sessionId, connect, disconnect, handleForceLogout]);
 
   // Effect 2: Profile sync — runs once on mount (or when identity changes) to
   // fetch fresh profile data. Does NOT disconnect the socket on re-run.
