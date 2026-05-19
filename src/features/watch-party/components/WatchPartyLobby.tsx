@@ -60,22 +60,20 @@ export function WatchPartyLobby({
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
-        <div className="max-w-md w-full bg-background border-4 border-border p-8  text-center space-y-6">
-          <Monitor className="w-16 h-16 text-foreground mx-auto" />
-          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            {t('desktopOnly')}
-          </h1>
-          <p className="text-foreground font-medium leading-relaxed uppercase text-sm">
-            {t('desktopOnlyDesc')}
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push('/home')}
-            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
-          >
-            {t('goHome')}
-          </button>
-        </div>
+        <Monitor className="w-16 h-16 text-foreground/40 mb-6" />
+        <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground mb-2">
+          {t('desktopOnly')}
+        </h1>
+        <p className="text-foreground/60 font-medium leading-relaxed uppercase text-sm mb-8 text-center max-w-sm">
+          {t('desktopOnlyDesc')}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push('/home')}
+          className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+        >
+          {t('goHome')}
+        </button>
       </div>
     );
   }
@@ -86,110 +84,100 @@ export function WatchPartyLobby({
 
   if (roomNotFound) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-background border-4 border-border p-8  text-center space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
-          <div className="w-20 h-20 bg-neo-red border-4 border-border flex items-center justify-center mx-auto ">
-            <Users className="w-10 h-10 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            {t('roomNotFound')}
-          </h1>
-          <p className="text-foreground font-medium uppercase text-sm leading-relaxed">
-            {t('roomNotFoundDesc')}
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push('/home')}
-            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
-          >
-            {t('backToHome')}
-          </button>
-        </div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
+        <Users className="w-16 h-16 text-foreground/40 mb-6" />
+        <h1 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground mb-2">
+          {t('roomNotFound')}
+        </h1>
+        <p className="text-foreground/60 font-medium uppercase text-sm leading-relaxed mb-8 text-center max-w-sm">
+          {t('roomNotFoundDesc')}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push('/home')}
+          className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+        >
+          {t('backToHome')}
+        </button>
       </div>
     );
   }
 
   if (requestStatus === 'pending') {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-background border-4 border-border p-8  motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none">
-          {/* 3-step indicator - Neobrutalist style */}
-          <div className="flex items-center justify-center gap-2 mb-10">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 bg-emerald-500 border-2 border-border flex items-center justify-center ">
-                <Check className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-[10px] text-foreground font-black font-headline uppercase">
-                {t('sent')}
-              </span>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-500 motion-reduce:animate-none">
+        {/* 3-step indicator */}
+        <div className="flex items-center justify-center gap-2 mb-10">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-10 h-10 bg-emerald-500 border-2 border-border flex items-center justify-center">
+              <Check className="w-5 h-5 text-primary-foreground" />
             </div>
-            <div className="w-12 h-1 bg-primary mb-6" />
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 bg-neo-yellow border-4 border-border flex items-center justify-center animate-pulse motion-reduce:animate-none ">
-                <Loader2 className="w-6 h-6 animate-spin motion-reduce:animate-none text-foreground" />
-              </div>
-              <span className="text-[10px] text-foreground font-black font-headline uppercase">
-                {t('waiting')}
-              </span>
-            </div>
-            <div className="w-12 h-1 bg-primary/20 mb-6" />
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 bg-background border-2 border-border flex items-center justify-center">
-                <Users className="w-5 h-5 text-foreground/40" />
-              </div>
-              <span className="text-[10px] text-foreground/40 font-black font-headline uppercase">
-                {t('joining')}
-              </span>
-            </div>
+            <span className="text-[10px] text-foreground font-black font-headline uppercase">
+              {t('sent')}
+            </span>
           </div>
-
-          <h2 className="text-2xl font-black font-headline uppercase tracking-tighter text-center mb-2">
-            {t('waitingForApproval')}
-          </h2>
-          <p className="text-foreground font-medium uppercase text-xs text-center leading-relaxed mb-8">
-            {t('waitingForApprovalDesc')}
-          </p>
-          <button
-            type="button"
-            onClick={onCancelRequest || onLeave}
-            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
-          >
-            {t('cancelRequest')}
-          </button>
+          <div className="w-12 h-1 bg-primary mb-6" />
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-12 h-12 bg-neo-yellow border-4 border-border flex items-center justify-center animate-pulse motion-reduce:animate-none">
+              <Loader2 className="w-6 h-6 animate-spin motion-reduce:animate-none text-foreground" />
+            </div>
+            <span className="text-[10px] text-foreground font-black font-headline uppercase">
+              {t('waiting')}
+            </span>
+          </div>
+          <div className="w-12 h-1 bg-primary/20 mb-6" />
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-10 h-10 bg-background border-2 border-border flex items-center justify-center">
+              <Users className="w-5 h-5 text-foreground/40" />
+            </div>
+            <span className="text-[10px] text-foreground/40 font-black font-headline uppercase">
+              {t('joining')}
+            </span>
+          </div>
         </div>
+
+        <h2 className="text-2xl font-black font-headline uppercase tracking-tighter text-center mb-2">
+          {t('waitingForApproval')}
+        </h2>
+        <p className="text-foreground/60 font-medium uppercase text-xs text-center leading-relaxed mb-8 max-w-sm">
+          {t('waitingForApprovalDesc')}
+        </p>
+        <button
+          type="button"
+          onClick={onCancelRequest || onLeave}
+          className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+        >
+          {t('cancelRequest')}
+        </button>
       </div>
     );
   }
 
   if (requestStatus === 'rejected') {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-background border-4 border-border p-8  text-center motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
-          <div className="w-20 h-20 bg-neo-red border-4 border-border flex items-center justify-center mx-auto mb-6 ">
-            <UserMinus className="w-10 h-10 text-primary-foreground" />
-          </div>
-          <h2 className="text-2xl font-black font-headline uppercase tracking-tighter mb-2">
-            {t('requestDeclined')}
-          </h2>
-          <p className="text-foreground font-medium uppercase text-sm leading-relaxed mb-8">
-            {t('requestDeclinedDesc')}
-          </p>
-          <div className="flex gap-6 justify-center">
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
-            >
-              {t('tryAgain')}
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push('/home')}
-              className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
-            >
-              {t('goHome')}
-            </button>
-          </div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-300 motion-reduce:animate-none">
+        <UserMinus className="w-16 h-16 text-foreground/40 mb-6" />
+        <h2 className="text-2xl font-black font-headline uppercase tracking-tighter mb-2">
+          {t('requestDeclined')}
+        </h2>
+        <p className="text-foreground/60 font-medium uppercase text-sm leading-relaxed mb-8 text-center max-w-sm">
+          {t('requestDeclinedDesc')}
+        </p>
+        <div className="flex gap-6 justify-center">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+          >
+            {t('tryAgain')}
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/home')}
+            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+          >
+            {t('goHome')}
+          </button>
         </div>
       </div>
     );
