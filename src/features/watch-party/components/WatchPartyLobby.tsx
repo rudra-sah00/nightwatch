@@ -260,11 +260,6 @@ export function WatchPartyLobby({
                     <div className="mt-2">
                       <Captcha onVerify={onCaptchaVerify} onError={() => {}} />
                     </div>
-                    {captchaToken ? (
-                      <p className="text-xs text-emerald-600 font-black font-headline uppercase text-center mt-2 flex items-center justify-center gap-1">
-                        <Check className="w-4 h-4" /> {t('verified')}
-                      </p>
-                    ) : null}
                   </div>
                 ) : null}
               </div>
