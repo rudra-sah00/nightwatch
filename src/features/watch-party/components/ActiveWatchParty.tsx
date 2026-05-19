@@ -1,15 +1,6 @@
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
@@ -288,33 +279,45 @@ export function ActiveWatchParty({
 
       {/* Leave Confirmation Dialog */}
       {showLeaveDialog ? (
-        <AlertDialog open={showLeaveDialog} onOpenChange={onShowLeaveDialog}>
-          <AlertDialogContent className="bg-black/80 backdrop-blur-xl rounded-lg sm:max-w-[425px] p-6 border border-white/10">
-            <AlertDialogHeader className="space-y-3">
-              <AlertDialogTitle className="font-black font-headline uppercase tracking-widest text-xl text-white">
-                {isHost ? t('dialog.endTitle') : t('dialog.leaveTitle')}
-              </AlertDialogTitle>
-              <AlertDialogDescription className="font-bold font-headline tracking-wide text-white/60 text-base">
-                {isHost ? t('dialog.endDesc') : t('dialog.leaveDesc')}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="mt-6 flex gap-4">
-              <AlertDialogCancel
+        <div
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/40"
+          onClick={() => onShowLeaveDialog(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') onShowLeaveDialog(false);
+          }}
+          role="dialog"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={() => {}}
+            role="alertdialog"
+            className="flex flex-col items-center gap-4 text-center"
+          >
+            <span className="text-6xl mb-2">{isHost ? '🫠' : '👋'}</span>
+            <h2 className="font-black font-headline uppercase tracking-tight text-xl text-white">
+              {isHost ? t('dialog.endTitle') : t('dialog.leaveTitle')}
+            </h2>
+            <p className="text-white/40 text-xs font-headline font-bold uppercase tracking-wider max-w-xs">
+              {isHost ? t('dialog.endDesc') : t('dialog.leaveDesc')}
+            </p>
+            <div className="flex items-center gap-6 mt-4">
+              <button
+                type="button"
                 onClick={() => onShowLeaveDialog(false)}
-                className="bg-transparent text-white/60 border-none hover:text-white font-bold uppercase tracking-widest transition-colors py-2 text-sm shadow-none"
+                className="text-white/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white"
               >
                 {t('dialog.cancel')}
-              </AlertDialogCancel>
+              </button>
               <button
                 type="button"
                 onClick={onConfirmLeave}
-                className="text-red-400 hover:text-red-300 font-bold uppercase tracking-widest transition-colors py-2 text-sm"
+                className="text-red-400 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-red-300"
               >
                 {isHost ? t('dialog.endParty') : t('dialog.leave')}
               </button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );
