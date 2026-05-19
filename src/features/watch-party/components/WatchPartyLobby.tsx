@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
+
 import { Captcha } from '@/components/ui/captcha';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
 import type { User } from '@/types';
@@ -68,14 +68,13 @@ export function WatchPartyLobby({
           <p className="text-foreground font-medium leading-relaxed uppercase text-sm">
             {t('desktopOnlyDesc')}
           </p>
-          <Button
+          <button
             type="button"
-            variant="neo-outline"
             onClick={() => router.push('/home')}
-            className="w-full py-4 tracking-widest uppercase font-black border-4"
+            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
           >
             {t('goHome')}
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -98,14 +97,13 @@ export function WatchPartyLobby({
           <p className="text-foreground font-medium uppercase text-sm leading-relaxed">
             {t('roomNotFoundDesc')}
           </p>
-          <Button
+          <button
             type="button"
-            variant="neo-outline"
             onClick={() => router.push('/home')}
-            className="w-full py-4 tracking-widest uppercase font-black border-4"
+            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
           >
             {t('backToHome')}
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -151,14 +149,13 @@ export function WatchPartyLobby({
           <p className="text-foreground font-medium uppercase text-xs text-center leading-relaxed mb-8">
             {t('waitingForApprovalDesc')}
           </p>
-          <Button
+          <button
             type="button"
-            variant="neo-outline"
             onClick={onCancelRequest || onLeave}
-            className="w-full py-3 tracking-widest uppercase font-black border-4"
+            className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
           >
             {t('cancelRequest')}
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -177,22 +174,21 @@ export function WatchPartyLobby({
           <p className="text-foreground font-medium uppercase text-sm leading-relaxed mb-8">
             {t('requestDeclinedDesc')}
           </p>
-          <div className="flex flex-col gap-3">
-            <Button
+          <div className="flex gap-6 justify-center">
+            <button
               type="button"
-              variant="neo-outline"
               onClick={() => window.location.reload()}
-              className="w-full py-4 tracking-widest uppercase font-black border-4"
+              className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
             >
               {t('tryAgain')}
-            </Button>
-            <Button
-              variant="neo-ghost"
+            </button>
+            <button
+              type="button"
               onClick={() => router.push('/home')}
-              className="w-full text-foreground/60 hover:text-foreground text-[10px] tracking-widest underline underline-offset-4"
+              className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
             >
               {t('goHome')}
-            </Button>
+            </button>
           </div>
         </div>
       </div>
@@ -286,41 +282,37 @@ export function WatchPartyLobby({
               </div>
             ) : null}
 
-            <div className="space-y-3">
-              <Button
+            <div className="flex flex-wrap gap-6 justify-center">
+              <button
                 type="button"
-                variant="neo-outline"
                 onClick={onJoin}
                 disabled={
                   isLoading ||
                   (!user && !guestName.trim()) ||
                   (!user && !captchaToken)
                 }
-                className="w-full py-4 tracking-widest uppercase font-black border-4"
+                className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors disabled:text-foreground/20 disabled:cursor-not-allowed"
               >
                 {isLoading ? t('requesting') : t('requestToJoin')}
-              </Button>
+              </button>
 
               {isBrowser ? (
-                <Button
+                <button
                   type="button"
-                  variant="neo-outline"
                   onClick={() => openInDesktopApp()}
-                  className="w-full py-4 tracking-widest uppercase font-black bg-neo-yellow text-primary-foreground border-4 hover:bg-neo-yellow/80"
+                  className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
                 >
-                  <Monitor className="w-5 h-5 mr-2" />
                   {t('openInDesktopApp')}
-                </Button>
+                </button>
               ) : null}
 
-              <Button
+              <button
                 type="button"
-                variant="neo-ghost"
                 onClick={() => router.push('/home')}
-                className="w-full text-foreground/60 hover:text-foreground text-[10px] tracking-widest underline underline-offset-4"
+                className="text-foreground/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
               >
                 {t('cancel')}
-              </Button>
+              </button>
             </div>
 
             {error ? (
