@@ -158,9 +158,9 @@ export function WatchPartySketch() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-white/10 shrink-0 flex items-center justify-between">
-        <h3 className="text-sm font-black font-headline uppercase tracking-widest text-white flex items-center gap-2">
-          <PenTool className="w-4 h-4 text-white/60 stroke-[3px]" />
+      <div className="p-4 border-b border-border/20 dark:border-white/10 shrink-0 flex items-center justify-between">
+        <h3 className="text-sm font-black font-headline uppercase tracking-widest text-foreground dark:text-white flex items-center gap-2">
+          <PenTool className="w-4 h-4 text-foreground/60 dark:text-white/60 stroke-[3px]" />
           {t('sketch.tools')}
         </h3>
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -169,7 +169,7 @@ export function WatchPartySketch() {
             variant="neo-base"
             size="none"
             onClick={triggerUndo}
-            className="text-[10px] flex items-center gap-1.5 px-2 py-1 text-white/70 hover:text-white hover:bg-white/10 font-bold rounded-md transition-colors"
+            className="text-[10px] flex items-center gap-1.5 px-2 py-1 text-foreground/70 hover:text-foreground hover:bg-foreground/10 dark:text-white/70 dark:hover:text-white dark:hover:bg-white/10 font-bold rounded-md transition-colors"
             title={t('sketch.undoTitle')}
           >
             <Undo2 className="w-3.5 h-3.5 stroke-[3px]" />
@@ -181,7 +181,7 @@ export function WatchPartySketch() {
             variant="neo-base"
             size="none"
             onClick={triggerClearSelf}
-            className="text-[10px] flex items-center gap-1.5 px-2 py-1 text-blue-400 hover:text-blue-300 hover:bg-white/10 font-bold rounded-md transition-colors"
+            className="text-[10px] flex items-center gap-1.5 px-2 py-1 text-blue-400 hover:text-blue-300 hover:bg-foreground/10 dark:hover:bg-white/10 font-bold rounded-md transition-colors"
             title={t('sketch.clearMineTitle')}
           >
             <Eraser className="w-3.5 h-3.5 stroke-[3px]" />
@@ -194,7 +194,7 @@ export function WatchPartySketch() {
               variant="neo-base"
               size="none"
               onClick={triggerClear}
-              className="text-[10px] flex items-center gap-1.5 px-2 py-1 text-red-400 hover:text-red-300 hover:bg-white/10 font-bold rounded-md transition-colors"
+              className="text-[10px] flex items-center gap-1.5 px-2 py-1 text-red-400 hover:text-red-300 hover:bg-foreground/10 dark:hover:bg-white/10 font-bold rounded-md transition-colors"
               title={t('sketch.clearAllTitle')}
             >
               <Trash2 className="w-3.5 h-3.5 stroke-[3px]" />
@@ -207,7 +207,7 @@ export function WatchPartySketch() {
       <div className="flex-1 overflow-y-auto p-4 space-y-8 custom-scrollbar">
         {/* Tool Selection */}
         <div className="space-y-3">
-          <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest">
+          <h4 className="text-xs font-bold text-foreground/40 dark:text-white/40 uppercase tracking-widest">
             {t('sketch.toolsLabel')}
           </h4>
           <div className="grid grid-cols-4 gap-2">
@@ -223,8 +223,8 @@ export function WatchPartySketch() {
                   className={cn(
                     'flex flex-col items-center justify-center gap-1.5 p-2.5 transition-colors rounded-lg',
                     isActive
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/60 hover:text-white hover:bg-white/10',
+                      ? 'bg-white/20 text-white dark:bg-white/20 dark:text-white'
+                      : 'text-foreground/60 hover:text-foreground hover:bg-foreground/10 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10',
                   )}
                 >
                   <Icon className="w-5 h-5 stroke-[3px]" />
@@ -237,7 +237,7 @@ export function WatchPartySketch() {
         {/* Fill Toggle & Visual Options */}
         {showFillToggle && (
           <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
-            <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest flex items-center justify-between">
+            <h4 className="text-xs font-bold text-foreground/40 dark:text-white/40 uppercase tracking-widest flex items-center justify-between">
               {t('sketch.options')}
               {selectedId && (
                 <div className="flex gap-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-reduce:animate-none">
@@ -245,7 +245,7 @@ export function WatchPartySketch() {
                     type="button"
                     onClick={() => handleMoveZ(selectedId, 'front')}
                     title={t('sketch.bringToFront')}
-                    className="p-1 text-white/60 hover:text-white transition-colors"
+                    className="p-1 text-foreground/60 hover:text-foreground dark:text-white/60 dark:hover:text-white transition-colors"
                   >
                     <MoveUp className="w-3 h-3 stroke-[3px]" />
                   </Button>
@@ -253,7 +253,7 @@ export function WatchPartySketch() {
                     type="button"
                     onClick={() => handleMoveZ(selectedId, 'back')}
                     title={t('sketch.sendToBack')}
-                    className="p-1 text-white/60 hover:text-white transition-colors"
+                    className="p-1 text-foreground/60 hover:text-foreground dark:text-white/60 dark:hover:text-white transition-colors"
                   >
                     <MoveDown className="w-3 h-3 stroke-[3px]" />
                   </Button>
@@ -267,8 +267,8 @@ export function WatchPartySketch() {
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 px-4 py-2 font-bold text-xs transition-colors rounded-lg',
                   isFilled
-                    ? 'bg-white/20 text-white'
-                    : 'text-white/60 hover:bg-white/10',
+                    ? 'bg-white/20 text-foreground dark:text-white'
+                    : 'text-foreground/60 hover:bg-foreground/10 dark:text-white/60 dark:hover:bg-white/10',
                 )}
               >
                 {isFilled ? t('sketch.filledShape') : t('sketch.outlineOnly')}
@@ -280,10 +280,10 @@ export function WatchPartySketch() {
         {/* Color Selection */}
         {showColorPicker && (
           <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
-            <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest">
+            <h4 className="text-xs font-bold text-foreground/40 dark:text-white/40 uppercase tracking-widest">
               {t('sketch.color')}
             </h4>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-7 gap-2">
               {COLORS.map((c) => (
                 <Button
                   key={c}
@@ -326,12 +326,12 @@ export function WatchPartySketch() {
         {/* Stroke Width / Font Size Slider */}
         <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest">
+            <h4 className="text-xs font-bold text-foreground/40 dark:text-white/40 uppercase tracking-widest">
               {currentTool === 'text'
                 ? t('sketch.fontSize')
                 : t('sketch.thickness')}
             </h4>
-            <span className="text-xs font-bold text-white/50">
+            <span className="text-xs font-bold text-foreground/50 dark:text-white/50">
               {currentTool === 'text'
                 ? `${strokeWidth * 4}px`
                 : `${strokeWidth}px`}
@@ -344,7 +344,7 @@ export function WatchPartySketch() {
             step="1"
             value={strokeWidth}
             onChange={(e) => setStrokeWidth(Number(e.target.value))}
-            className="w-full h-1.5 bg-white/20 rounded-full accent-white appearance-none cursor-pointer"
+            className="w-full h-1.5 bg-foreground/20 dark:bg-white/20 rounded-full accent-foreground dark:accent-white appearance-none cursor-pointer"
             aria-label={
               currentTool === 'text'
                 ? t('sketch.fontSize')
@@ -356,10 +356,10 @@ export function WatchPartySketch() {
         {/* Opacity Slider */}
         <div className="space-y-3 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest">
+            <h4 className="text-xs font-bold text-foreground/40 dark:text-white/40 uppercase tracking-widest">
               {t('sketch.opacity')}
             </h4>
-            <span className="text-xs font-bold text-white/50">
+            <span className="text-xs font-bold text-foreground/50 dark:text-white/50">
               {Math.round(opacity * 100)}%
             </span>
           </div>
@@ -370,14 +370,14 @@ export function WatchPartySketch() {
             step="0.1"
             value={opacity}
             onChange={(e) => setOpacity(Number(e.target.value))}
-            className="w-full h-1.5 bg-white/20 rounded-full accent-white appearance-none cursor-pointer"
+            className="w-full h-1.5 bg-foreground/20 dark:bg-white/20 rounded-full accent-foreground dark:accent-white appearance-none cursor-pointer"
             aria-label={t('sketch.opacity')}
           />
         </div>
       </div>
 
       {/* Footer Actions */}
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 border-t border-border/20 dark:border-white/10">
         <Button
           type="button"
           variant="neo"
@@ -405,7 +405,7 @@ export function WatchPartySketch() {
               }
             }, 50);
           }}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 text-sm bg-foreground/10 hover:bg-foreground/20 text-foreground dark:bg-white/10 dark:hover:bg-white/20 dark:text-white rounded-lg transition-colors"
         >
           <Camera className="w-5 h-5 stroke-[3px]" />
           {t('sketch.captureScene')}

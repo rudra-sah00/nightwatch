@@ -85,7 +85,7 @@ export function Soundboard({
       </div>
 
       <div className="flex-1 overflow-y-auto pr-1 min-h-0 scrollbar-thin scrollbar-thumb-white/20">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-1.5 pb-4">
+        <div className="flex flex-col gap-1 pb-4">
           {sounds.map((sound) => (
             <button
               key={sound.slug}
@@ -110,14 +110,14 @@ export function Soundboard({
           ))}
 
           {loading ? (
-            <div className="col-span-2 py-4 flex justify-center">
+            <div className="py-4 flex justify-center">
               <Loader2 className="w-5 h-5 animate-spin text-white/50 stroke-[3px]" />
             </div>
           ) : null}
 
           <div
             ref={loadMoreRef}
-            className="col-span-2 h-10 w-full flex items-center justify-center"
+            className="h-10 w-full flex items-center justify-center"
           >
             {!loading && hasMore ? (
               <button
@@ -136,7 +136,7 @@ export function Soundboard({
           </div>
 
           {!loading && sounds.length === 0 ? (
-            <div className="col-span-2 py-10 text-center text-xs font-bold text-white/40">
+            <div className="py-10 text-center text-xs font-bold text-white/40">
               {t('soundboard.noSoundsFound')}
             </div>
           ) : null}
