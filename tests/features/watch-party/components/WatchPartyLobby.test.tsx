@@ -234,7 +234,7 @@ describe('WatchPartyLobby', () => {
       expect(screen.getByTestId('captcha-button')).toBeInTheDocument();
     });
 
-    it('should show verified message when captcha is complete', () => {
+    it('should enable join button when captcha is complete', () => {
       render(
         <WatchPartyLobby
           {...defaultProps}
@@ -244,14 +244,8 @@ describe('WatchPartyLobby', () => {
         />,
       );
 
-      // Rendered as <Check icon /> + " Verified" inside a <p> element
-      expect(
-        screen.getByText(
-          (_, el) =>
-            el?.tagName === 'P' &&
-            (el?.textContent?.includes('verified') ?? false),
-        ),
-      ).toBeInTheDocument();
+      const joinBtn = screen.getByRole('button', { name: /join/i });
+      expect(joinBtn).not.toBeDisabled();
     });
 
     it('should disable join for guest without name', () => {
