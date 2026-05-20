@@ -44,15 +44,14 @@ function Switch({ checked, onCheckedChange, disabled, label }: SwitchProps) {
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'peer inline-flex h-6 w-12 shrink-0 cursor-pointer items-center border border-white/10 transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ring-0 p-0 m-0',
-        checked ? 'bg-neo-yellow' : '',
+        'relative inline-flex h-8 w-16 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+        checked ? 'bg-neo-blue' : 'bg-secondary',
       )}
     >
       <span
-        data-state={checked ? 'checked' : 'unchecked'}
         className={cn(
-          'pointer-events-none block h-4 w-4 bg-primary transition-transform',
-          checked ? 'translate-x-[22px]' : 'translate-x-[2px]',
+          'inline-flex h-6 w-6 transform rounded-full bg-background shadow transition-transform',
+          checked ? 'translate-x-9' : 'translate-x-1',
         )}
       />
     </button>
