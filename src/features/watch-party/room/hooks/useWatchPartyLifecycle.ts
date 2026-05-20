@@ -84,8 +84,10 @@ export function useWatchPartyLifecycle({
     if (requestStatus !== 'pending' || !activeUserId) return;
 
     let tempSocket: ReturnType<typeof io> | null = null;
+    let socketCleaned = false;
 
     const connectSocket = () => {
+      if (socketCleaned) return;
       const socketUrl =
         env.WS_URL ||
         (env as Record<string, string | undefined>).BACKEND_URL ||
@@ -99,6 +101,10 @@ export function useWatchPartyLifecycle({
       });
 
       tempSocket.on('connect', () => {
+        if (socketCleaned) {
+          tempSocket?.disconnect();
+          return;
+        }
         tempSocket?.emit(
           'watch-party:join_room',
           roomId || room?.id || 'PENDING',
@@ -158,10 +164,10 @@ export function useWatchPartyLifecycle({
       tempSocket.on('JOIN_RESULT', handleJoinResult);
 
       tempSocket.on('connect_error', () => {
-        // Simple retry logic if unstable
+        // Simple retry logic if unstable — guarded by cleanup flag
         setTimeout(() => {
-          if (!tempSocket?.active) {
-            tempSocket?.connect();
+          if (!socketCleaned && tempSocket && !tempSocket.active) {
+            tempSocket.connect();
           }
         }, 3000);
       });
@@ -170,6 +176,7 @@ export function useWatchPartyLifecycle({
     connectSocket();
 
     return () => {
+      socketCleaned = true;
       tempSocket?.disconnect();
     };
   }, [

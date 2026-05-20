@@ -65,6 +65,8 @@ export function useAgoraRtmToken(
       return;
     }
 
+    let cancelled = false;
+
     const fetchToken = async () => {
       // Guard: both roomId and a settled userId are required
       if (
@@ -85,20 +87,25 @@ export function useAgoraRtmToken(
           guestId: userId,
           guestName: userName || 'Guest',
         });
+        if (cancelled) return;
         setToken(data.token);
         setAppId(data.appId);
         setChannel(roomId.toUpperCase());
         setUid(data.uid);
       } catch (err) {
+        if (cancelled) return;
         const errorMessage =
           err instanceof Error ? err.message : 'Unknown error';
         setError(errorMessage);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchToken();
+    return () => {
+      cancelled = true;
+    };
   }, [roomId, userId, userName, options.initialTokenData]);
 
   return { token, appId, channel, uid, isLoading, error };

@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { WatchPartyLoading } from '@/features/watch-party/components/WatchPartyLoading';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
@@ -126,6 +126,39 @@ export function WatchPartyClient({
 
   const t = useTranslations('party');
   const isMobile = useIsMobile();
+
+  // Multi-tab detection — prevent duplicate RTM/RTC connections
+  const [isBlockedByOtherTab, setIsBlockedByOtherTab] = useState(false);
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const bc = new BroadcastChannel(`watch-party:${roomId}`);
+    const myTimestamp = Date.now();
+
+    bc.onmessage = (e) => {
+      if (e.data?.type === 'CLAIM') {
+        // Another tab is claiming — if they're newer than us, tell them to back off
+        if (e.data.ts > myTimestamp) {
+          bc.postMessage({ type: 'ALREADY_ACTIVE' });
+        } else if (e.data.ts < myTimestamp) {
+          // They're older — we yield
+          setIsBlockedByOtherTab(true);
+        }
+        // Equal timestamps: both keep running (extremely rare, harmless)
+      } else if (e.data?.type === 'ALREADY_ACTIVE') {
+        // An older tab responded — we are the duplicate
+        setIsBlockedByOtherTab(true);
+      }
+    };
+
+    // Announce with our timestamp. Older tab wins.
+    bc.postMessage({ type: 'CLAIM', ts: myTimestamp });
+
+    return () => bc.close();
+  }, [roomId]);
+
+  if (isBlockedByOtherTab) {
+    return <WatchPartyLoading message={t('loading.otherTab')} />;
+  }
 
   if (!isGuestSocketReady) {
     return <WatchPartyLoading message={t('loading.connecting')} />;

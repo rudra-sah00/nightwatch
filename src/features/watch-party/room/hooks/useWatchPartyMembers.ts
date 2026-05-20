@@ -156,12 +156,12 @@ export function useWatchPartyMembers({
       const response = await rejectJoinRequest(room.id, memberId);
       if (response.success) {
         toast.success(t('memberRejected'));
+        rtmSendMessageToPeer?.(memberId, {
+          type: 'JOIN_REJECTED',
+          reason: tp('requestDeclined'),
+        });
         setRoom((prev) => {
           if (!prev) return null;
-          rtmSendMessageToPeer?.(memberId, {
-            type: 'JOIN_REJECTED',
-            reason: tp('requestDeclined'),
-          });
           return {
             ...prev,
             pendingMembers: prev.pendingMembers.filter(
@@ -182,13 +182,13 @@ export function useWatchPartyMembers({
       const response = await kickMember(room.id, memberId);
       if (response.success) {
         toast.success(t('memberRemoved'));
+        rtmSendMessage?.({
+          type: 'KICK',
+          targetUserId: memberId,
+          reason: tp('kickedByHost'),
+        });
         setRoom((prev) => {
           if (!prev) return null;
-          rtmSendMessage?.({
-            type: 'KICK',
-            targetUserId: memberId,
-            reason: tp('kickedByHost'),
-          });
           return {
             ...prev,
             members: prev.members.filter((m) => m?.id !== memberId),
@@ -307,6 +307,12 @@ export function useWatchPartyMembers({
       if (!active) return;
       socket.emit('watch-party:join_room', room.id);
 
+      // Use named function so we only remove OUR handler, not others
+      const handleReconnect = () => {
+        socket.emit('watch-party:join_room', room.id);
+      };
+      socket.on('connect', handleReconnect);
+
       socket.on(
         'PENDING_MEMBERS_UPDATED',
         (payload: { pendingMembers?: RoomMember[] }) => {
@@ -367,6 +373,7 @@ export function useWatchPartyMembers({
 
     return () => {
       active = false;
+      // Remove only our specific handlers (not all 'connect' listeners app-wide)
       socket.off('PENDING_MEMBERS_UPDATED');
       socket.emit('watch-party:leave_room', room.id);
     };

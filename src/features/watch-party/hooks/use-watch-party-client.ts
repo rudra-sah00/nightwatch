@@ -163,15 +163,16 @@ export function useWatchPartyClient({
     videoRef,
   });
 
+  const isHost = user?.id === room?.hostId;
+  isHostRef.current = isHost;
+
   const { applyState } = usePredictiveSync(
     videoRef,
     clockOffset,
     isCalibrated,
     room?.type === 'livestream',
+    isHost,
   );
-
-  const isHost = user?.id === room?.hostId;
-  isHostRef.current = isHost;
 
   const prevMemberCount = useRef(0);
 
@@ -249,8 +250,20 @@ export function useWatchPartyClient({
     ) {
       hasAttemptedAutoJoin.current = true;
       requestJoin(roomId);
+      if (isNewParty) {
+        toast.success(tp('partyCreated'), { duration: 5000 });
+      }
     }
-  }, [user, room, requestStatus, requestJoin, roomId, roomNotFound]);
+  }, [
+    user,
+    room,
+    requestStatus,
+    requestJoin,
+    roomId,
+    roomNotFound,
+    isNewParty,
+    tp,
+  ]);
 
   const syncTimersRef = useRef<NodeJS.Timeout[]>([]);
 
@@ -259,20 +272,17 @@ export function useWatchPartyClient({
     if (room.members.length > prevMemberCount.current) {
       if (isHost && videoRef.current) {
         const currentRef = videoRef.current;
-        const sendSync = () => {
-          if (currentRef) {
-            emitEvent({
-              eventType: currentRef.paused ? 'pause' : 'play',
-              videoTime: currentRef.currentTime,
-              playbackRate: currentRef.playbackRate,
-            });
-          }
-        };
         syncTimersRef.current.forEach(clearTimeout);
         syncTimersRef.current = [
-          setTimeout(sendSync, 500),
-          setTimeout(sendSync, 1000),
-          setTimeout(sendSync, 2000),
+          setTimeout(() => {
+            if (currentRef) {
+              emitEvent({
+                eventType: currentRef.paused ? 'pause' : 'play',
+                videoTime: currentRef.currentTime,
+                playbackRate: currentRef.playbackRate,
+              });
+            }
+          }, 1000),
         ];
       }
     }
@@ -281,37 +291,7 @@ export function useWatchPartyClient({
       syncTimersRef.current.forEach(clearTimeout);
       syncTimersRef.current = [];
     };
-  }, [room?.members, isHost, room, emitEvent]);
-
-  useEffect(() => {
-    if (
-      user &&
-      (isNewParty || isCreator) &&
-      roomId &&
-      !room &&
-      !isLoading &&
-      requestStatus === 'idle' &&
-      !hasAttemptedAutoJoin.current
-    ) {
-      hasAttemptedAutoJoin.current = true;
-      requestJoin(roomId);
-      if (isNewParty) {
-        toast.success(tp('partyCreated'), {
-          duration: 5000,
-        });
-      }
-    }
-  }, [
-    isNewParty,
-    isCreator,
-    roomId,
-    room,
-    isLoading,
-    requestStatus,
-    requestJoin,
-    user,
-    tp,
-  ]);
+  }, [room?.members?.length, isHost, room, emitEvent]);
 
   useEffect(() => {
     if (isNewParty && requestStatus === 'joined') {

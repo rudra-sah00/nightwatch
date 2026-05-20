@@ -63,6 +63,8 @@ export function useFloatingEmojis() {
     [t],
   );
 
+  const recentEmojiIds = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     const cleanup = onPartyInteraction(
       (msg: {
@@ -70,8 +72,16 @@ export function useFloatingEmojis() {
         kind?: string;
         emoji?: string;
         userName?: string;
+        messageId?: string;
       }) => {
         if (msg.type === 'INTERACTION' && msg.kind === 'emoji' && msg.emoji) {
+          // Deduplicate RTM retries using messageId if present
+          const dedupKey =
+            msg.messageId ||
+            `${msg.emoji}-${msg.userName}-${Math.floor(Date.now() / 500)}`;
+          if (recentEmojiIds.current.has(dedupKey)) return;
+          recentEmojiIds.current.add(dedupKey);
+          setTimeout(() => recentEmojiIds.current.delete(dedupKey), 2000);
           spawnEmoji(msg.emoji, msg.userName || t('someone'));
         }
       },

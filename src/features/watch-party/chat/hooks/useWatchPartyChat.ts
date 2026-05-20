@@ -38,7 +38,19 @@ export function useWatchPartyChat({
   currentUserName,
 }: UseWatchPartyChatOptions = {}) {
   const t = useTranslations('common.toasts');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const MAX_CHAT_MESSAGES = 200;
+  const [messages, _setMessages] = useState<ChatMessage[]>([]);
+  const setMessages = useCallback(
+    (update: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+      _setMessages((prev) => {
+        const next = typeof update === 'function' ? update(prev) : update;
+        return next.length > MAX_CHAT_MESSAGES
+          ? next.slice(next.length - MAX_CHAT_MESSAGES)
+          : next;
+      });
+    },
+    [],
+  );
   const [typingUsers, setTypingUsers] = useState<
     Array<{ userId: string; userName: string }>
   >([]);
@@ -88,7 +100,7 @@ export function useWatchPartyChat({
         );
       }
     },
-    [room?.id, userId, currentUserName, rtmSendMessage, t],
+    [room?.id, userId, currentUserName, rtmSendMessage, t, setMessages],
   );
 
   const handleTypingStart = useCallback(() => {
@@ -166,7 +178,7 @@ export function useWatchPartyChat({
         }
       }
     },
-    [room?.id, userId],
+    [room?.id, userId, setMessages],
   );
 
   return {

@@ -54,7 +54,10 @@ const { mockClient, mockAudioTrack, mockVideoTrack, mockCamera } = vi.hoisted(
       on: vi.fn(),
       off: vi.fn(),
       removeAllListeners: vi.fn(),
-      join: vi.fn().mockResolvedValue(1),
+      join: vi.fn().mockImplementation(async () => {
+        mockClient.connectionState = 'CONNECTED';
+        return 1;
+      }),
       leave: vi.fn().mockResolvedValue(undefined),
       subscribe: vi.fn().mockResolvedValue(undefined),
       publish: vi.fn().mockResolvedValue(undefined),
@@ -407,6 +410,11 @@ describe('useAgora', () => {
 
     it('should handle toggle error when not connected', async () => {
       mockClient.connectionState = 'DISCONNECTED';
+      mockClient.join.mockImplementationOnce(async () => {
+        // Keep disconnected for this test
+        mockClient.connectionState = 'DISCONNECTED';
+        return 1;
+      });
       const { result } = renderHook(() => useAgora(defaultOptions));
 
       await act(async () => {

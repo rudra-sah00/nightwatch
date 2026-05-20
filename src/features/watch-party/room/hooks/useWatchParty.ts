@@ -126,34 +126,45 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         case 'JOIN_APPROVED': {
           const { room: approvedRoom, initialState } = msg;
 
-          getPartyStreamToken(approvedRoom.id).then((response) => {
-            const token = response.token || msg.streamToken || '';
-            const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
-              injectStream: true,
-            });
-
-            setRoom(normalizedRoom);
-            setIsConnected(true);
-            setRequestStatus('joined');
-
-            if (initialState) {
-              // Perform initial clock calibration
-              if (initialState.serverTime) {
-                calibrate(initialState.serverTime);
-              }
-
-              optionsRef.current.onStateUpdate?.({
-                currentTime: initialState.currentTime ?? 0,
-                videoTime:
-                  initialState.videoTime ?? initialState.currentTime ?? 0,
-                isPlaying: initialState.isPlaying,
-                playbackRate: initialState.playbackRate ?? 1,
-                timestamp: initialState.timestamp ?? Date.now(),
-                serverTime: initialState.serverTime || Date.now(),
-                eventType: 'init',
+          getPartyStreamToken(approvedRoom.id)
+            .then((response) => {
+              const token = response.token || msg.streamToken || '';
+              const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+                injectStream: true,
               });
-            }
-          });
+
+              setRoom(normalizedRoom);
+              setIsConnected(true);
+              setRequestStatus('joined');
+
+              if (initialState) {
+                // Perform initial clock calibration
+                if (initialState.serverTime) {
+                  calibrate(initialState.serverTime);
+                }
+
+                optionsRef.current.onStateUpdate?.({
+                  currentTime: initialState.currentTime ?? 0,
+                  videoTime:
+                    initialState.videoTime ?? initialState.currentTime ?? 0,
+                  isPlaying: initialState.isPlaying,
+                  playbackRate: initialState.playbackRate ?? 1,
+                  timestamp: initialState.timestamp ?? Date.now(),
+                  serverTime: initialState.serverTime || Date.now(),
+                  eventType: 'init',
+                });
+              }
+            })
+            .catch(() => {
+              // Fallback: use stream token from the approval message
+              const token = msg.streamToken || '';
+              const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+                injectStream: true,
+              });
+              setRoom(normalizedRoom);
+              setIsConnected(true);
+              setRequestStatus('joined');
+            });
           break;
         }
 
@@ -253,13 +264,6 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
 
   // Clock Synchronization
   const { clockOffset, isCalibrated, calibrate } = useClockSync();
-
-  // Note: Calibration now happens dynamically via initial state and RTM messages
-  useEffect(() => {
-    if (isConnected && requestStatus === 'joined' && !isCalibrated) {
-      // Initial calibration if needed - though JOIN_APPROVED should have handled it
-    }
-  }, [isConnected, requestStatus, isCalibrated]);
 
   // Handle Guest Initial Sync Request
   useEffect(() => {

@@ -249,10 +249,15 @@ export function useAgora({
   const [selectedAudioDevice, setSelectedAudioDevice] = useState('');
   const [selectedVideoDevice, setSelectedVideoDevice] = useState('');
 
-  // Track speaker state separately so it isn't lost when participants list re-clones
-  const [speakerState, setSpeakerState] = useState<
+  // Track speaker state in a ref to avoid re-renders on every volume-indicator tick (~200ms).
+  // The participant list is rebuilt on a throttled schedule instead.
+  const speakerStateRef = useRef<
     Record<string, { isSpeaking: boolean; audioLevel: number }>
   >({});
+  const speakerUpdateScheduled = useRef(false);
+
+  // Force participant rebuild (called at most every 500ms via volume indicator)
+  const [speakerTick, setSpeakerTick] = useState(0);
 
   // Keep refs in sync for use in callbacks without stale closures
   useEffect(() => {
@@ -352,6 +357,7 @@ export function useAgora({
    * Uses room members as the authoritative list to ensure immediate visibility.
    */
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: speakerTick is an intentional trigger to rebuild participants when speaking state changes
   useEffect(() => {
     // Build participant list from room members.
     // We use 'members' as the primary source of truth so everyone appears
@@ -387,7 +393,9 @@ export function useAgora({
         mappedMemberIds.add(numericUid);
 
         // Fetch persistent speaker state for this user (keyed by Agora numeric UID)
-        const speaker = speakerState[isLocal ? String(uid) : numericUid] || {
+        const speaker = speakerStateRef.current[
+          isLocal ? String(uid) : numericUid
+        ] || {
           isSpeaking: false,
           audioLevel: 0,
         };
@@ -440,7 +448,7 @@ export function useAgora({
     )
       .filter(([uidStr]) => !mappedMemberIds.has(uidStr))
       .map(([uidStr, remoteUser]) => {
-        const speaker = speakerState[uidStr] || {
+        const speaker = speakerStateRef.current[uidStr] || {
           isSpeaking: false,
           audioLevel: 0,
         };
@@ -468,13 +476,13 @@ export function useAgora({
     audioEnabled,
     videoEnabled,
     members,
-    speakerState,
+    speakerTick,
     connectionState,
   ]);
 
   /**
    * Monitors audio volume indicators from Agora to drive the 'speaking' status
-   * in the participant list.
+   * in the participant list. Writes to a ref and schedules a throttled state update.
    */
 
   useEffect(() => {
@@ -486,28 +494,28 @@ export function useAgora({
     const handleVolumeIndicator = (
       volumes: { uid: number; level: number }[],
     ) => {
-      setSpeakerState((prev) => {
-        let changed = false;
-        const next = { ...prev };
-
-        for (const v of volumes) {
-          // If local participant, SDK uses UID 0. Map it back to our uid string.
-          const uidStr = v.uid === 0 ? String(uid) : String(v.uid);
-          const isSpeaking = v.level > 5;
-          const audioLevel = v.level / 100;
-
-          if (
-            !next[uidStr] ||
-            next[uidStr].isSpeaking !== isSpeaking ||
-            next[uidStr].audioLevel !== audioLevel
-          ) {
-            next[uidStr] = { isSpeaking, audioLevel };
-            changed = true;
-          }
+      let changed = false;
+      for (const v of volumes) {
+        const uidStr = v.uid === 0 ? String(uid) : String(v.uid);
+        const isSpeaking = v.level > 5;
+        const audioLevel = v.level / 100;
+        const prev = speakerStateRef.current[uidStr];
+        if (!prev || prev.isSpeaking !== isSpeaking) {
+          speakerStateRef.current[uidStr] = { isSpeaking, audioLevel };
+          changed = true;
+        } else if (Math.abs(prev.audioLevel - audioLevel) > 0.05) {
+          speakerStateRef.current[uidStr] = { isSpeaking, audioLevel };
         }
+      }
 
-        return changed ? next : prev;
-      });
+      // Only schedule a React update when speaking status actually changed
+      if (changed && !speakerUpdateScheduled.current) {
+        speakerUpdateScheduled.current = true;
+        setTimeout(() => {
+          speakerUpdateScheduled.current = false;
+          setSpeakerTick((t) => t + 1);
+        }, 500);
+      }
     };
 
     client.on('volume-indicator', handleVolumeIndicator);
@@ -619,16 +627,20 @@ export function useAgora({
         mediaType: 'audio' | 'video',
       ) => {
         if (cleaned) return;
-        await client.subscribe(user, mediaType);
+        try {
+          await client.subscribe(user, mediaType);
 
-        if (mediaType === 'audio' && user.audioTrack) {
-          user.audioTrack.play();
-          if (isDeafenedRef.current) {
-            user.audioTrack.setVolume(0);
+          if (mediaType === 'audio' && user.audioTrack) {
+            user.audioTrack.play();
+            if (isDeafenedRef.current) {
+              user.audioTrack.setVolume(0);
+            }
           }
-        }
 
-        setRemoteUsers([...client.remoteUsers]);
+          setRemoteUsers([...client.remoteUsers]);
+        } catch {
+          // User may have left before subscribe completed — safe to ignore
+        }
       };
 
       const handleUserUnpublished = () => {
@@ -671,7 +683,7 @@ export function useAgora({
 
       const client = clientRef.current;
       if (client) {
-        // Detach core listeners
+        // Remove all listeners — safe for Agora SDK as we're about to leave/destroy
         client.removeAllListeners();
 
         // Cleanup local tracks
@@ -706,12 +718,17 @@ export function useAgora({
    * Optimized for voice chat in a watch party context.
    */
 
+  const isTogglingAudio = useRef(false);
+  const isTogglingVideo = useRef(false);
+
   const toggleAudio = useCallback(async () => {
+    if (isTogglingAudio.current) return;
     const client = clientRef.current;
-    if (!client || connectionState !== 'CONNECTED') {
+    if (!client || client.connectionState !== 'CONNECTED') {
       toast.error(tp('notConnectedVoice'));
       return;
     }
+    isTogglingAudio.current = true;
     // Snapshot whether audio was enabled AT CALL TIME (ref value is live).
     // Used in the catch block to distinguish enable-failure from disable-failure.
     const wasEnabled = !!localAudioTrackRef.current;
@@ -762,8 +779,10 @@ export function useAgora({
         localAudioTrackRef.current = null;
       }
       handleDeviceError(error, 'Microphone', tp);
+    } finally {
+      isTogglingAudio.current = false;
     }
-  }, [refreshDevices, connectionState, tp]);
+  }, [refreshDevices, tp]);
   const toggleDeafen = useCallback(() => {
     const next = !isDeafenedRef.current;
     isDeafenedRef.current = next;
@@ -788,11 +807,13 @@ export function useAgora({
   }, [toggleAudio]);
 
   const toggleVideo = useCallback(async () => {
+    if (isTogglingVideo.current) return;
     const client = clientRef.current;
-    if (!client || connectionState !== 'CONNECTED') {
+    if (!client || client.connectionState !== 'CONNECTED') {
       toast.error(tp('notConnectedVideo'));
       return;
     }
+    isTogglingVideo.current = true;
     // Snapshot whether video was enabled AT CALL TIME (ref value is live).
     const wasEnabled = !!localVideoTrackRef.current;
     try {
@@ -832,8 +853,10 @@ export function useAgora({
         localVideoTrackRef.current = null;
       }
       handleDeviceError(error, 'Camera', tp);
+    } finally {
+      isTogglingVideo.current = false;
     }
-  }, [refreshDevices, connectionState, tp]);
+  }, [refreshDevices, tp]);
 
   /**
    * Low-level device switching without track reinitialization where possible.

@@ -423,3 +423,97 @@ All calls go through `apiFetch` (cookie-authenticated). Defined in `room/service
 4. Guest's `useAgoraRtm.onMessage` receives the message → routes to `sync.handleIncomingRtmMessage`
 5. `useWatchPartySync` constructs `PartyStateUpdate` → calls `onStateUpdate`
 6. `usePredictiveSync.applyState` calculates expected position, applies drift correction, and calls `video.play()`
+
+## Performance & Reliability Guarantees
+
+### Memory Management
+
+| Resource | Cap/Strategy | Location |
+|----------|--------------|----------|
+| Sketch actions | Max 200, FIFO eviction | `SketchContext.tsx` |
+| Chat messages | Max 200, FIFO eviction | `useWatchPartyChat.ts` |
+| Remote cursors | Pruned every 5s (stale > 5s removed) | `use-sketch-overlay.ts` |
+| Floating emojis | Auto-remove after 4.5s animation | `use-floating-emojis.ts` |
+| Soundboard audio | Dedicated ref per source (local + remote) | `use-soundboard.ts` |
+| Gesture detection | Disabled by default (opt-in via `enabled` prop) | `useGestureDetection.ts` |
+| Particle reactions | Self-terminating rAF loop, single instance | `SketchOverlay.tsx` |
+
+### Render Optimization
+
+| Optimization | Description |
+|--------------|-------------|
+| Speaker state via ref | Volume indicator writes to `speakerStateRef`, triggers React update at most every 500ms |
+| Stable `onPartyEvent` | Uses ref pattern in `useWatchPartyHostSync` — video listeners attached once, never re-attached |
+| Stable `getExpectedTime` | Uses `clockOffsetRef` — callback identity never changes |
+| Cursor broadcast throttle | 10fps (100ms) instead of 30fps for RTM bandwidth savings |
+| Member count dep | Sync effect tracks `room.members.length` not the full array reference |
+| Toggle guards | `isTogglingAudio`/`isTogglingVideo` refs prevent double-click race conditions |
+
+### Multi-Tab Safety
+
+`WatchPartyClient` uses `BroadcastChannel` with a timestamp-based claim protocol to prevent duplicate RTM/RTC connections:
+1. New tab sends `{ type: 'CLAIM', ts: Date.now() }`
+2. Existing tab responds `{ type: 'ALREADY_ACTIVE' }` if it has an older timestamp
+3. Newer tab yields (blocks itself) upon receiving `ALREADY_ACTIVE`
+4. Oldest tab always wins ownership
+
+### Token Fetch Safety
+
+Both `useAgoraToken` and `useAgoraRtmToken` use a `cancelled` flag pattern to prevent stale fetch results from overwriting fresh state when room/user changes rapidly.
+
+## Backend Architecture
+
+### Atomic Room Mutations
+
+All room state mutations use Redis `WATCH`/`MULTI`/`EXEC` optimistic locking with up to 3 retries on contention:
+
+```
+1. WATCH key
+2. GET key → parse room JSON
+3. Apply mutation (mutator function)
+4. TTL = existing TTL (preserved, NOT reset)
+5. MULTI → SETEX key ttl json → EXEC
+6. If EXEC returns null (contention) → retry
+```
+
+This prevents lost updates when concurrent operations hit the same room (e.g., two members joining simultaneously, host approving while someone leaves).
+
+### Host Transfer
+
+When the host leaves a room with remaining members:
+1. Room is NOT deleted
+2. Host role transfers to the longest-tenured member (`min(joinedAt)`)
+3. `HOST_TRANSFERRED` event emitted via Socket.IO
+4. Room continues operating normally
+
+### Security Measures
+
+| Measure | Description |
+|---------|-------------|
+| No raw `guestId` | Agora token endpoints require signed JWT (via `optionalAuthMiddleware`). Raw query param `guestId` is no longer accepted. |
+| Strict DM channel validation | Regex `^dm-([a-z0-9]+)-([a-z0-9]+)$` with participant ID verification |
+| Room ID normalization | All room IDs uppercased before Socket.IO `join()` — prevents case-mismatch room splitting |
+| Self-kick prevention | Host cannot kick themselves (`memberId === hostId` guard) |
+| Chat TTL alignment | Chat keys use same 6h TTL as room keys — no orphaned data |
+| Room code collision check | `createRoom` verifies generated code doesn't collide with existing rooms |
+
+### Socket.IO Reliability
+
+| Feature | Implementation |
+|---------|----------------|
+| Redis error handlers | All pub/sub/clipSub clients have `.on('error')` handlers |
+| Connection try/catch | Entire async connection handler wrapped — uncaught errors disconnect the socket cleanly |
+| Named handler cleanup | Socket listeners use specific function references for targeted removal |
+
+### RTM Message Types (Extended)
+
+| Category | Types |
+|----------|-------|
+| Playback | `PLAY_EVENT`, `PAUSE_EVENT`, `SEEK_EVENT`, `RATE_EVENT`, `SYNC`, `SYNC_REQUEST` |
+| Members | `JOIN_APPROVED`, `JOIN_REJECTED`, `MEMBER_JOINED`, `MEMBER_LEFT`, `PARTY_CLOSED`, `KICK` |
+| Host | `HOST_DISCONNECTED`, `HOST_RECONNECTED`, `HOST_TRANSFERRED` |
+| Chat | `CHAT`, `TYPING_START`, `TYPING_STOP` |
+| Interactions | `INTERACTION` (emoji/sound/animation) |
+| Sketch | `SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_REQUEST_SYNC`, `SKETCH_SYNC_STATE`, `SKETCH_MOVE_Z`, `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION` |
+| Permissions | `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`, `CONTENT_UPDATED` |
+| Stream | `STREAM_TOKEN` |

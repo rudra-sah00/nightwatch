@@ -128,7 +128,19 @@ export function SketchProvider({ children }: { children: ReactNode }) {
   const [isHost, setIsHost] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
   const [opacity, setOpacity] = useState(1);
-  const [actions, setActions] = useState<SketchAction[]>([]);
+  const MAX_SKETCH_ACTIONS = 200;
+  const [actions, _setActions] = useState<SketchAction[]>([]);
+  const setActions = useCallback(
+    (update: SketchAction[] | ((prev: SketchAction[]) => SketchAction[])) => {
+      _setActions((prev) => {
+        const next = typeof update === 'function' ? update(prev) : update;
+        return next.length > MAX_SKETCH_ACTIONS
+          ? next.slice(next.length - MAX_SKETCH_ACTIONS)
+          : next;
+      });
+    },
+    [],
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [cursors, setCursors] = useState<
     Record<
@@ -212,6 +224,7 @@ export function SketchProvider({ children }: { children: ReactNode }) {
       selectedId,
       cursors,
       selectedSticker,
+      setActions,
     ],
   );
 

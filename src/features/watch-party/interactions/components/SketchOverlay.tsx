@@ -5,7 +5,6 @@ import {
   Arrow,
   Circle,
   Group,
-  Image,
   Label,
   Layer,
   Line,
@@ -92,13 +91,11 @@ export function SketchOverlay({
     }>
   >([]);
 
-  const { color, strokeWidth, currentTool, cursors, stageRef, videoRef } =
-    useSketch();
+  const { color, strokeWidth, currentTool, cursors, stageRef } = useSketch();
 
   useEffect(() => {
     if (pendingText) {
       setInputValue('');
-      // Defer focus so the element is painted first
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [pendingText]);
@@ -285,42 +282,47 @@ export function SketchOverlay({
     });
   }, []);
 
-  // Particle Animation Loop
+  // Particle Animation Loop — single loop driven by ref, not state dependency
+  const animFrameRef = useRef<number>(0);
+  const isAnimatingRef = useRef(false);
+
   useEffect(() => {
-    if (activeReactions.length === 0) return;
+    if (activeReactions.length > 0 && !isAnimatingRef.current) {
+      isAnimatingRef.current = true;
+      const update = () => {
+        setActiveReactions((prev) => {
+          const next = prev
+            .map((reaction) => ({
+              ...reaction,
+              particles: reaction.particles.map((p) => ({
+                ...p,
+                x: p.x + p.vx,
+                y: p.y + p.vy,
+                vy: p.vy + 0.2,
+                opacity: Math.max(0, p.opacity - 0.02),
+                scale: Math.max(0, p.scale - 0.01),
+              })),
+            }))
+            .filter((r) => r.particles.some((p) => p.opacity > 0));
+          if (next.length === 0) {
+            isAnimatingRef.current = false;
+            return next;
+          }
+          animFrameRef.current = requestAnimationFrame(update);
+          return next;
+        });
+      };
+      animFrameRef.current = requestAnimationFrame(update);
+    }
+  }, [activeReactions.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    let animFrame: number;
-    const update = () => {
-      setActiveReactions((prev) =>
-        prev.map((reaction) => ({
-          ...reaction,
-          particles: reaction.particles.map((p) => ({
-            ...p,
-            x: p.x + p.vx,
-            y: p.y + p.vy,
-            vy: p.vy + 0.2, // gravity
-            opacity: Math.max(0, p.opacity - 0.02),
-            scale: Math.max(0, p.scale - 0.01),
-          })),
-        })),
-      );
-      animFrame = requestAnimationFrame(update);
+  useEffect(() => {
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-
-    animFrame = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(animFrame);
-  }, [activeReactions.length]);
+  }, []);
 
   const isDraggable = isSketchMode && currentTool === 'select';
-
-  const [bgImage, setBgImage] = useState<HTMLVideoElement | null>(null);
-
-  // Poll video for background capture
-  useEffect(() => {
-    if (stageRef?.current && videoRef?.current) {
-      setBgImage(videoRef.current);
-    }
-  }, [stageRef, videoRef]);
 
   return (
     <div
@@ -340,18 +342,6 @@ export function SketchOverlay({
         onTouchMove={handleMouseMove}
         onTouchEnd={handleMouseUp}
       >
-        <Layer>
-          {bgImage && (
-            <Image
-              image={bgImage}
-              width={stageSize.width}
-              height={stageSize.height}
-              listening={false}
-              opacity={0} // Hidden normally, Konva will still capture it if we force draw or handle capture correctly
-              id="video-snapshot-layer"
-            />
-          )}
-        </Layer>
         <Layer>
           {actions.map((action) => {
             const { id, type, data, color, strokeWidth, fill } = action;

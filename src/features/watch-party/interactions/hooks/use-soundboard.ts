@@ -96,15 +96,23 @@ export function useSoundboard({
     };
   }, [searchQuery, fetchSoundsData]);
 
+  // Stable load-more callback ref to avoid recreating observer on state changes
+  const loadMoreCallbackRef = useRef<(() => void) | undefined>(undefined);
+  loadMoreCallbackRef.current = () => {
+    if (hasMore && !loadingRef.current) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchSoundsData(searchQuery, nextPage, true);
+    }
+  };
+
   useEffect(() => {
-    if (!hasMore || loading || !loadMoreRef.current) return;
+    if (!loadMoreRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          fetchSoundsData(searchQuery, nextPage, true);
+        if (entries[0].isIntersecting) {
+          loadMoreCallbackRef.current?.();
         }
       },
       { threshold: 0.1 },
@@ -112,7 +120,7 @@ export function useSoundboard({
 
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [hasMore, loading, page, searchQuery, fetchSoundsData]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const playSoundEffect = useCallback((soundUrl: string) => {
     if (currentAudioRef.current) {
@@ -126,6 +134,12 @@ export function useSoundboard({
     audio.play().catch(() => {
       /* ignore play errors */
     });
+    // Auto-cleanup when sound finishes playing
+    audio.onended = () => {
+      if (currentAudioRef.current === audio) {
+        currentAudioRef.current = null;
+      }
+    };
   }, []);
 
   // Cleanup audio on unmount
@@ -160,16 +174,40 @@ export function useSoundboard({
     [rtmSendMessage, userId, userName, playSoundEffect, t],
   );
 
+  // Track remote audio separately so we can cap concurrent playback
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     const cleanup = onPartyInteraction(
       (msg: { type?: string; kind?: string; sound?: string }) => {
         if (msg.type === 'INTERACTION' && msg.kind === 'sound' && msg.sound) {
-          playSoundEffect(msg.sound);
+          // Stop previous remote sound to prevent audio buildup
+          if (remoteAudioRef.current) {
+            remoteAudioRef.current.pause();
+            remoteAudioRef.current = null;
+          }
+          const audio = new Audio(msg.sound);
+          remoteAudioRef.current = audio;
+          audio.volume = 0.5;
+          audio.play().catch(() => {});
+          audio.onended = () => {
+            if (remoteAudioRef.current === audio) {
+              remoteAudioRef.current = null;
+            }
+          };
         }
       },
     );
     return cleanup;
-  }, [playSoundEffect]);
+  }, []);
+
+  // Cleanup remote audio on unmount
+  useEffect(() => {
+    return () => {
+      remoteAudioRef.current?.pause();
+      remoteAudioRef.current = null;
+    };
+  }, []);
 
   return {
     sounds,

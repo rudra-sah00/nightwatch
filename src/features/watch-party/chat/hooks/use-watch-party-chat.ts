@@ -69,17 +69,18 @@ export function useWatchPartyChat({
     };
   }, [showEmoji]);
 
-  // Cleanup typing timeout on unmount
+  // Cleanup typing timeout on unmount only (not on callback reference changes)
+  const onTypingStopRef = useRef(onTypingStop);
+  onTypingStopRef.current = onTypingStop;
+
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      if (onTypingStop) {
-        onTypingStop();
-      }
+      onTypingStopRef.current?.();
     };
-  }, [onTypingStop]);
+  }, []);
 
   const handleSend = (e?: React.FormEvent) => {
     e?.preventDefault();

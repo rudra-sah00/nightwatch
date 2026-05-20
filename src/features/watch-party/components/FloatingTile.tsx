@@ -49,6 +49,12 @@ export const FloatingTile = memo(function FloatingTile({
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const tileRef = useRef<HTMLDivElement>(null);
 
+  // Cleanup any active drag/resize pointer listeners on unmount
+  const activeListenerCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    return () => activeListenerCleanup.current?.();
+  }, []);
+
   // Attach Agora video track — do NOT stop the track on cleanup since
   // it's shared with the sidebar VideoGrid and owned by Agora.
   useEffect(() => {
@@ -125,6 +131,10 @@ export const FloatingTile = memo(function FloatingTile({
 
       document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', onUp);
+      activeListenerCleanup.current = () => {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+      };
     },
     [
       containerRef,
@@ -168,6 +178,10 @@ export const FloatingTile = memo(function FloatingTile({
 
       document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', onUp);
+      activeListenerCleanup.current = () => {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+      };
     },
     [minW, minH, onFocus, onResizeEnd, participant.identity],
   );

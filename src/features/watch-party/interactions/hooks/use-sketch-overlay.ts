@@ -92,6 +92,22 @@ export function useSketchOverlay({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  // Prune stale cursors every 5s (removes cursors not updated in 5s)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setCursors((prev) => {
+        const entries = Object.entries(prev);
+        const stale = entries.filter(([, c]) => now - c.lastUpdate > 5000);
+        if (stale.length === 0) return prev;
+        const next = { ...prev };
+        for (const [id] of stale) delete next[id];
+        return next;
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [setCursors]);
+
   // Sync with host on mount
   useEffect(() => {
     if (!isHost && userId) {
@@ -101,6 +117,10 @@ export function useSketchOverlay({
       });
     }
   }, [isHost, userId, rtmSendMessage]);
+
+  // Ref to access latest actions inside event callbacks without re-subscribing
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
 
   // Listen for RTM events via the bridged on* API
   useEffect(() => {
@@ -120,14 +140,14 @@ export function useSketchOverlay({
 
     const cleanupUndo = onSketchUndo(({ actionId }) => {
       setActions((prev) => prev.filter((a) => a.id !== actionId));
-      if (selectedId === actionId) setSelectedId(null);
+      setSelectedId(null);
     });
 
     const cleanupProvideSync = onSketchProvideSync(({ requesterId }) => {
       if (isHost && requesterId) {
         rtmSendMessageToPeer?.(requesterId, {
           type: 'SKETCH_SYNC_STATE',
-          elements: actions,
+          elements: actionsRef.current,
           targetId: requesterId,
         });
       }
@@ -179,9 +199,7 @@ export function useSketchOverlay({
     };
   }, [
     isHost,
-    actions,
     rtmSendMessageToPeer,
-    selectedId,
     setSelectedId,
     userId,
     setCursors,
@@ -384,9 +402,9 @@ export function useSketchOverlay({
       const point = stage?.getPointerPosition();
       if (!point || !isSketchMode) return;
 
-      // Broadcast cursor position (Throttled to ~30fps / 33ms)
+      // Broadcast cursor position (Throttled to ~10fps / 100ms to reduce RTM load)
       const now = Date.now();
-      if (now - lastCursorBroadcast.current > 33) {
+      if (now - lastCursorBroadcast.current > 100) {
         rtmSendMessage?.({
           type: 'SKETCH_CURSOR_MOVE',
           x: point.x,

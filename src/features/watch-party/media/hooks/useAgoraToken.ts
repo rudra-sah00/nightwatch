@@ -43,6 +43,8 @@ export function useAgoraToken(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchToken = async () => {
       const guestToken =
         typeof window !== 'undefined'
@@ -74,20 +76,25 @@ export function useAgoraToken(
           guestName,
         });
 
+        if (cancelled) return;
         setToken(data.token);
         setAppId(data.appId);
         setChannel(data.channel);
         setUid(data.uid);
       } catch (err) {
+        if (cancelled) return;
         const errorMessage =
           err instanceof Error ? err.message : 'Unknown error';
         setError(errorMessage);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchToken();
+    return () => {
+      cancelled = true;
+    };
   }, [roomId, userId, userName]);
 
   return {
