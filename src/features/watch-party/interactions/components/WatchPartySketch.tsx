@@ -370,7 +370,7 @@ export function WatchPartySketch() {
             });
             ctx.drawImage(sketchImg, 0, 0, canvas.width, canvas.height);
 
-            const finalDataUrl = canvas.toDataURL('image/png');
+            const finalDataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
             // Save to library via API
             try {
