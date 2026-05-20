@@ -1,5 +1,47 @@
 # Changelog
 
+## [2.13.0](https://github.com/rudra-sah00/nightwatch/compare/v2.12.0...v2.13.0) (2026-05-20)
+
+
+### Features
+
+* add staging environment (Docker standalone + deploy workflow) ([5fa4316](https://github.com/rudra-sah00/nightwatch/commit/5fa43166d61feb37dc6c379f89bed6426b6d76da))
+* **music:** add podcasts listing page with infinite scroll, View All link ([3e54b5e](https://github.com/rudra-sah00/nightwatch/commit/3e54b5ea72f5a0d2bc1c88a8ce95d9679f61d852))
+* **music:** detachable floating mini player, transparent UI, overlay modals for queue & device picker ([a8a03d9](https://github.com/rudra-sah00/nightwatch/commit/a8a03d95de8a795b693f2cec796faae7ee5b7960))
+* **music:** refactor components, add podcast support, faceted search tabs ([d33b4ca](https://github.com/rudra-sah00/nightwatch/commit/d33b4ca525f88aaa689432e580ce4031fe8d80ec))
+
+
+### Bug Fixes
+
+* also check isAuthenticated to prevent guest socket for logged-in users ([af72af6](https://github.com/rudra-sah00/nightwatch/commit/af72af69139257e865bc6162b85d07bbe670f32e))
+* audio track language switching stuck on loading ([9480f39](https://github.com/rudra-sah00/nightwatch/commit/9480f3944f5d53404763239bf27bfaf538e1e690))
+* **ci:** trigger builds on release:published instead of release_created output ([80f1340](https://github.com/rudra-sah00/nightwatch/commit/80f1340d92912cbdbc31c57d1ea43ce7488f63a8))
+* close button in IPTV channel detail modal not working ([e7b6fbb](https://github.com/rudra-sah00/nightwatch/commit/e7b6fbbd185567506c7100756535a0b97b885692))
+* close button in live match modal not working ([9c7e0f7](https://github.com/rudra-sah00/nightwatch/commit/9c7e0f7ddd7daf59ce6f43d46a21e0df9fe2eb77))
+* disable service worker on staging (CF Access blocks sw.js) ([71d1ff5](https://github.com/rudra-sah00/nightwatch/commit/71d1ff5469fc0ccb1072733682323617cdd76581))
+* **docker:** add TURNSTILE_SITE_KEY env var for build ([d7a69d6](https://github.com/rudra-sah00/nightwatch/commit/d7a69d640750168727edfe0bfd83de586647e697))
+* **docker:** copy patches/ dir for pnpm install in staging build ([ef4d118](https://github.com/rudra-sah00/nightwatch/commit/ef4d11894eb8d81a4fcd5563e333724668f05a09))
+* IPTV channel modal close button not working in Electron ([a0b3b39](https://github.com/rudra-sah00/nightwatch/commit/a0b3b3928f7c7118e499c143d755096081ad8416))
+* IPTV modal close button - use onPointerDown + stopPropagation ([1b8f86f](https://github.com/rudra-sah00/nightwatch/commit/1b8f86fa82d51895a6c9ce2a050587fe97f3c29d))
+* language switching, player UI redesign, watch party stability ([d9ead0f](https://github.com/rudra-sah00/nightwatch/commit/d9ead0fe96760ea8d6037cda87ceb931de0aeec3))
+* modal close button in Electron + disable sidebars when modal open ([21d8321](https://github.com/rudra-sah00/nightwatch/commit/21d83219444c8e8ee0c291683da87a4ec7dbd328))
+* only show clip button in livestream watch parties ([5c98638](https://github.com/rudra-sah00/nightwatch/commit/5c986380398f075903bbd1674b53d76a148566ba))
+* prevent guest socket connection when host reloads watch party ([e311a50](https://github.com/rudra-sah00/nightwatch/commit/e311a501a7973b60ebdc4079122bd9bb0bd8939c))
+* prevent video refetch when entering/exiting PiP on desktop ([de151da](https://github.com/rudra-sah00/nightwatch/commit/de151da9ff5e9b5e056915b36645681b8d2a3c20))
+* properly handle auth hydration timing with onRehydrateStorage ([e872bd8](https://github.com/rudra-sah00/nightwatch/commit/e872bd81175f160a502150a04bf1800a39c4401c))
+* remove -webkit-app-region:drag from LiveMatchModal header ([3f934b6](https://github.com/rudra-sah00/nightwatch/commit/3f934b6f605f7f723955b149aa66afa2bb2f0b27))
+* remove nginx-staging from deploy (not in compose) ([c9e769b](https://github.com/rudra-sah00/nightwatch/commit/c9e769b37ac825ac50ccb57a3199c07ebe6a6394))
+* resolve i18n interpolation bugs in playlist track count and subtitle size labels ([8b44929](https://github.com/rudra-sah00/nightwatch/commit/8b44929cb025c9e0a537d247771c846c7119dd07))
+* **sw:** prevent false update toast on first SW install ([3056422](https://github.com/rudra-sah00/nightwatch/commit/3056422ae705d679d90f1a60f7365d0d1e99a697))
+* update stale captcha verification test to match current UI ([982b813](https://github.com/rudra-sah00/nightwatch/commit/982b8138373d75876fd31bdf6a807e806dd65ed9))
+* use staging turnstile secret and update dev-api URL ([471e771](https://github.com/rudra-sah00/nightwatch/commit/471e771bbef1911a2fd6adf5c216bdd6df312ec9))
+* watch party critical improvements - RTC token renewal, clock sync, stream token auto-refresh, chat pagination, cursor batching, pending fallback, content race fix, friend request sidebar refresh ([5be8a8e](https://github.com/rudra-sah00/nightwatch/commit/5be8a8ee58325dabe920e32a513f66ae125d6e1f))
+* **watch-party:** remove captcha text, replace color grid with color wheel, icons-only tools ([0191de3](https://github.com/rudra-sah00/nightwatch/commit/0191de3cd8a436cc09f3da19f0353dec10622f2f))
+* **watch-party:** remove card wrappers from edge case states, use icon-only design ([f01c0b0](https://github.com/rudra-sah00/nightwatch/commit/f01c0b014b549c5b223269d84cda9ea207c316c2))
+* **watch-party:** replace leave dialog with minimal overlay matching music design ([b76fcab](https://github.com/rudra-sah00/nightwatch/commit/b76fcab8078664fcce70e159e5fd5cd0e7cf29d8))
+* **watch-party:** resolve memory leaks, race conditions, and performance issues ([d508e0d](https://github.com/rudra-sah00/nightwatch/commit/d508e0dd8ce3e2cfb7afb312d7abb62868774083))
+* **watch-party:** soundboard single-column layout, sketch theme-aware icons & color picker grid ([95cf8bb](https://github.com/rudra-sah00/nightwatch/commit/95cf8bbd67fe086f56ba0d321043139e98b369b3))
+
 ## [2.12.0](https://github.com/rudra-sah00/nightwatch/compare/v2.11.0...v2.12.0) (2026-05-15)
 
 
