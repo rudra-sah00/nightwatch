@@ -166,7 +166,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
 
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-foreground text-sm space-y-3">
-            <div className="w-16 h-16 bg-background border-[4px] border-border flex items-center justify-center ">
+            <div className="w-16 h-16 flex items-center justify-center">
               <Smile className="w-8 h-8 stroke-[3px]" />
             </div>
             <div className="text-center">
