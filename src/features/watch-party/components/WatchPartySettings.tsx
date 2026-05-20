@@ -1,22 +1,6 @@
-import {
-  MessageSquare,
-  PenTool,
-  Settings,
-  Users,
-  Volume2,
-  X,
-} from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
@@ -44,15 +28,14 @@ function Switch({ checked, onCheckedChange, disabled, label }: SwitchProps) {
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'peer inline-flex h-6 w-12 shrink-0 cursor-pointer items-center border border-white/10 transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ring-0 p-0 m-0',
-        checked ? 'bg-neo-yellow' : '',
+        'relative inline-flex h-8 w-16 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+        checked ? 'bg-neo-blue' : 'bg-secondary',
       )}
     >
       <span
-        data-state={checked ? 'checked' : 'unchecked'}
         className={cn(
-          'pointer-events-none block h-4 w-4 bg-primary transition-transform',
-          checked ? 'translate-x-[22px]' : 'translate-x-[2px]',
+          'inline-flex h-6 w-6 transform rounded-full bg-background shadow transition-transform',
+          checked ? 'translate-x-9' : 'translate-x-1',
         )}
       />
     </button>
@@ -160,59 +143,50 @@ export function WatchPartySettings({
   const guests = room.members.filter((m) => m.id !== room.hostId);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger
+    <>
+      <button
         type="button"
         className="p-1.5 text-white/80 hover:text-white transition-colors"
         title={t('settings.roomAccessPermissions')}
         onClick={() => setIsOpen(true)}
       >
         <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
-      </DialogTrigger>
+      </button>
 
-      <DialogContent
-        aria-describedby={undefined}
-        showCloseButton={false}
-        className="max-w-md bg-black/80 backdrop-blur-xl text-white p-0 rounded-lg overflow-hidden m-4 w-[calc(100%-2rem)] border border-white/10"
-      >
-        <DialogHeader className="p-4 md:p-6 border-b border-white/10 m-0 flex flex-row items-center justify-between">
-          <DialogTitle className="flex items-center gap-3 font-black font-headline uppercase tracking-tighter text-xl text-white">
-            <Settings aria-hidden="true" className="w-6 h-6 stroke-[3px]" />
-            {t('settings.title')}
-          </DialogTitle>
-          <DialogClose asChild>
-            <Button
-              type="button"
-              variant="none"
-              size="none"
-              className="p-1.5 text-white/60 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5 stroke-[3.5px]" />
-            </Button>
-          </DialogClose>
-        </DialogHeader>
+      {isOpen ? (
+        <div
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/40"
+          onClick={() => setIsOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setIsOpen(false);
+          }}
+          role="dialog"
+          tabIndex={-1}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={() => {}}
+            role="document"
+            className="flex flex-col items-center gap-6 w-full max-w-sm px-4 max-h-[80vh] overflow-y-auto no-scrollbar"
+          >
+            <div className="flex flex-col items-center gap-2">
+              <Settings className="w-8 h-8 text-white stroke-[3px]" />
+              <h2 className="font-black font-headline uppercase tracking-tight text-xl text-white">
+                {t('settings.title')}
+              </h2>
+            </div>
 
-        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-8">
-          {/* Personal Preferences — visible to all users */}
-          {onToggleFloatingChat !== undefined ? (
-            <div className="space-y-4">
-              <h3 className="text-sm font-black font-headline uppercase tracking-widest text-white flex items-center gap-2 border-b border-white/10 pb-2">
-                <MessageSquare className="w-5 h-5 stroke-[3px]" />
-                {t('settings.personal')}
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <MessageSquare className="w-5 h-5 text-white stroke-[3px]" />
-                    <div className="flex flex-col">
-                      <p className="text-sm font-black font-headline uppercase tracking-widest text-white leading-none">
-                        {t('settings.floatingChat')}
-                      </p>
-                      <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50 mt-1">
-                        {t('settings.floatingChatDesc')}
-                      </p>
-                    </div>
-                  </div>
+            {/* Personal Preferences */}
+            {onToggleFloatingChat !== undefined ? (
+              <div className="w-full space-y-4">
+                <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
+                  {t('settings.personal')}
+                </p>
+
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                    {t('settings.floatingChat')}
+                  </span>
                   <Switch
                     checked={floatingChatEnabled}
                     onCheckedChange={() => onToggleFloatingChat?.()}
@@ -221,18 +195,10 @@ export function WatchPartySettings({
                 </div>
 
                 {onToggleFloatingTiles !== undefined ? (
-                  <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                    <div className="flex items-center gap-3">
-                      <Users className="w-5 h-5 text-white stroke-[3px]" />
-                      <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-white leading-none">
-                          {t('settings.floatingTiles')}
-                        </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50 mt-1">
-                          {t('settings.floatingTilesDesc')}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                      {t('settings.floatingTiles')}
+                    </span>
                     <Switch
                       checked={floatingTilesEnabled}
                       onCheckedChange={() => onToggleFloatingTiles?.()}
@@ -241,30 +207,20 @@ export function WatchPartySettings({
                   </div>
                 ) : null}
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          {isHost ? (
-            <div className="space-y-8">
-              {/* Global Permissions */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-black font-headline uppercase tracking-widest text-white border-b border-white/10 pb-2">
-                  {t('settings.globalPermissions')}
-                </h3>
+            {isHost ? (
+              <>
+                {/* Global Permissions */}
+                <div className="w-full space-y-4">
+                  <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
+                    {t('settings.globalPermissions')}
+                  </p>
 
-                <div className="space-y-3 p-4 bg-white/5 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <PenTool className="w-5 h-5 text-white stroke-[3px]" />
-                      <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-white leading-none">
-                          {t('settings.sketchBoard')}
-                        </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50 mt-1">
-                          {t('settings.allowDraw')}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                      {t('settings.sketchBoard')}
+                    </span>
                     <Switch
                       checked={room.permissions.canGuestsDraw}
                       onCheckedChange={(v) =>
@@ -274,18 +230,10 @@ export function WatchPartySettings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-white/10 pt-3">
-                    <div className="flex items-center gap-3">
-                      <Volume2 className="w-5 h-5 text-white stroke-[3px]" />
-                      <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-white leading-none">
-                          {t('settings.soundboardLabel')}
-                        </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50 mt-1">
-                          {t('settings.allowSounds')}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                      {t('settings.soundboardLabel')}
+                    </span>
                     <Switch
                       checked={room.permissions.canGuestsPlaySounds}
                       onCheckedChange={(v) =>
@@ -295,18 +243,10 @@ export function WatchPartySettings({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-white/10 pt-3">
-                    <div className="flex items-center gap-3">
-                      <MessageSquare className="w-5 h-5 text-white stroke-[3px]" />
-                      <div className="flex flex-col">
-                        <p className="text-sm font-black font-headline uppercase tracking-widest text-white leading-none">
-                          {t('settings.liveChat')}
-                        </p>
-                        <p className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50 mt-1">
-                          {t('settings.allowChat')}
-                        </p>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                      {t('settings.liveChat')}
+                    </span>
                     <Switch
                       checked={room.permissions.canGuestsChat}
                       onCheckedChange={(v) =>
@@ -316,35 +256,22 @@ export function WatchPartySettings({
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* Individual Overrides */}
-              {guests.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-black font-headline uppercase tracking-widest text-white border-b border-white/10 pb-2">
-                    {t('settings.individualOverrides')}
-                  </h3>
+                {/* Individual Overrides */}
+                {guests.length > 0 ? (
+                  <div className="w-full space-y-4">
+                    <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
+                      {t('settings.individualOverrides')}
+                    </p>
 
-                  <div className="space-y-3">
                     {guests.map((guest) => (
-                      <div
-                        key={guest.id}
-                        className="p-4 bg-white/5 rounded-lg flex flex-col gap-4 "
-                      >
-                        <div className="flex items-center gap-3 border-b border-white/10 pb-3">
-                          <div className="w-8 h-8 bg-neo-blue border-[2px] border-border flex items-center justify-center shrink-0">
-                            <span className="text-xs font-black font-headline uppercase tracking-widest text-primary-foreground">
-                              {guest.name.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                          <span className="text-sm font-black font-headline uppercase tracking-widest pr-2 truncate text-white">
-                            {guest.name}
-                          </span>
-                        </div>
-
+                      <div key={guest.id} className="w-full space-y-3">
+                        <p className="text-xs font-black font-headline uppercase tracking-widest text-white text-center">
+                          {guest.name}
+                        </p>
                         <div className="grid grid-cols-3 gap-2">
-                          <div className="flex flex-col items-center gap-3">
-                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50">
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
                               {t('tabs.sketch')}
                             </span>
                             <Switch
@@ -364,8 +291,8 @@ export function WatchPartySettings({
                               })}
                             />
                           </div>
-                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
-                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50">
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
                               {t('settings.sounds')}
                             </span>
                             <Switch
@@ -385,8 +312,8 @@ export function WatchPartySettings({
                               })}
                             />
                           </div>
-                          <div className="flex flex-col items-center gap-3 border-l-[2px] border-border/10">
-                            <span className="text-[10px] md:text-xs font-bold font-headline uppercase tracking-widest text-white/50">
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
                               {t('tabs.chat')}
                             </span>
                             <Switch
@@ -410,12 +337,20 @@ export function WatchPartySettings({
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
-          ) : null}
+                ) : null}
+              </>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="text-white/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white mt-2"
+            >
+              {t('dialog.cancel')}
+            </button>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      ) : null}
+    </>
   );
 }

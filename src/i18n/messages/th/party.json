@@ -88,7 +88,9 @@
     "thickness": "ความหนา",
     "opacity": "ความทึบ",
     "close": "ปิด",
-    "anonymous": "ไม่ระบุชื่อ"
+    "anonymous": "ไม่ระบุชื่อ",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "ผู้คน",

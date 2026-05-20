@@ -2,7 +2,6 @@
 
 import type HlsType from 'hls.js';
 import { type RefObject, useCallback, useMemo, useRef } from 'react';
-import { useServer } from '@/providers/server-provider';
 import type { PlayerAction } from '../context/types';
 import { useHls } from './useHls';
 import { useMp4 } from './useMp4';
@@ -13,7 +12,6 @@ interface UsePlayerEngineOptions {
   dispatch: React.Dispatch<PlayerAction>;
   onStreamExpired?: () => void;
   qualities?: { quality: string; url: string }[];
-  providerId?: string;
   isLive?: boolean;
 }
 
@@ -34,35 +32,25 @@ export function usePlayerEngine({
   dispatch,
   onStreamExpired,
   qualities,
-  providerId: providerIdProp,
   isLive = false,
 }: UsePlayerEngineOptions): UsePlayerEngineReturn {
-  const { activeServer } = useServer();
   const nullHlsRef = useRef<HlsType | null>(null);
 
-  // Determine engine type based on provider (prop or context) OR stream URL fallback
+  // Determine engine type based on stream URL
   const engineType = useMemo(() => {
     if (!streamUrl) return 'none';
 
-    // URL extension takes priority — .m3u8 is always HLS regardless of the active
-    // server preference. This prevents the 's1' (MP4) default from breaking
-    // livestream watch parties where the stream is an HLS playlist.
     const lowerUrl = streamUrl.toLowerCase();
     if (lowerUrl.includes('.m3u8')) return 'hls';
 
     // Live streams are overwhelmingly HLS, even if the URL doesn't end in .m3u8
-    // Using the MP4 engine for live streams breaks playback and causes false-positive errors on mobile Safari.
     if (isLive) return 'hls';
 
     if (lowerUrl.includes('.mp4')) return 'mp4';
 
-    // Fall back to provider preference for streams without a clear extension
-    const effectiveProvider = providerIdProp || activeServer;
-    if (effectiveProvider === 's1') return 'mp4';
-    if (effectiveProvider === 's1') return 'hls';
-
-    return 'hls';
-  }, [streamUrl, providerIdProp, activeServer, isLive]);
+    // Default to mp4 for streams without a clear extension
+    return 'mp4';
+  }, [streamUrl, isLive]);
 
   // Initialize HLS engine
   const hlsResult = useHls({

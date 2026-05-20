@@ -107,7 +107,6 @@ describe('LoginPage', () => {
         username: 'test',
         email: 'test@test.com',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 's1',
         createdAt: '2025-01-01',
       },

@@ -88,7 +88,9 @@
     "thickness": "Espessura",
     "opacity": "Opacidade",
     "close": "Fechar",
-    "anonymous": "Anônimo"
+    "anonymous": "Anônimo",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "Pessoas",

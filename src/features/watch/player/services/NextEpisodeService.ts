@@ -138,20 +138,17 @@ export async function fetchNextEpisodeInfo(
 export async function prepareNextEpisodeCommand(
   nextEpisodeInfo: NextEpisodeInfo,
   metadata: VideoMetadata,
-  serverOverride?: string,
 ): Promise<string | null> {
   const seriesId = metadata.seriesId;
   if (!seriesId) return null;
 
   stopVideo();
-  const server = serverOverride || metadata.providerId || 's1';
 
   const response = await playVideo({
     type: 'series',
     title: metadata.title,
     season: nextEpisodeInfo.seasonNumber,
     episode: nextEpisodeInfo.episodeNumber,
-    server,
   });
 
   const effectiveStreamUrl =
@@ -175,7 +172,7 @@ export async function prepareNextEpisodeCommand(
       ? encodeURIComponent(nextEpisodeInfo.title)
       : '';
 
-    let url = `/watch/${encodeURIComponent(response.movieId)}?type=series&title=${encodeURIComponent(metadata.title)}&season=${nextEpisodeInfo.seasonNumber}&episode=${nextEpisodeInfo.episodeNumber}&seriesId=${encodeURIComponent(seriesId)}&server=${server}&stream=${streamUrl}`;
+    let url = `/watch/${encodeURIComponent(response.movieId)}?type=series&title=${encodeURIComponent(metadata.title)}&season=${nextEpisodeInfo.seasonNumber}&episode=${nextEpisodeInfo.episodeNumber}&seriesId=${encodeURIComponent(seriesId)}&stream=${streamUrl}`;
     if (captionUrl) url += `&caption=${captionUrl}`;
     if (response.spriteVtt)
       url += `&sprite=${encodeURIComponent(response.spriteVtt)}`;

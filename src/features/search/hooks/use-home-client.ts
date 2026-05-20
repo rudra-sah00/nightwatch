@@ -8,7 +8,6 @@ import { searchContent } from '@/features/search/api';
 import { searchQuerySchema } from '@/features/search/schema';
 import type { SearchResult } from '@/features/search/types';
 import { useAuth } from '@/providers/auth-provider';
-import { useServer } from '@/providers/server-provider';
 
 /** Options for the {@link useHomeClient} hook. */
 interface UseHomeClientOptions {
@@ -44,8 +43,10 @@ export function useHomeClient({
 
   // When server provides fresh results (page navigation), use them immediately
   useEffect(() => {
-    setResults(initialResults);
-    setIsLoading(false);
+    if (initialResults.length > 0) {
+      setResults(initialResults);
+      setIsLoading(false);
+    }
   }, [initialResults]);
   const [selectedContent, setSelectedContent] = useState<SearchResult | null>(
     null,
@@ -59,7 +60,6 @@ export function useHomeClient({
     useState(true);
 
   const { user } = useAuth();
-  const { activeServer } = useServer();
 
   useEffect(() => {
     if (!query.trim()) {
@@ -75,17 +75,21 @@ export function useHomeClient({
       startTransition(() => setResults([]));
       return;
     }
+
+    // Skip fetch only if query matches AND we have results
     if (query === initialQuery && initialResults.length > 0) {
       return;
     }
 
+    // Clear stale results immediately before fetching
+    setResults([]);
     setIsLoading(true);
 
     const controller = new AbortController();
     const fetchResults = async () => {
       setHasSearched(true);
       try {
-        const data = await searchContent(query, activeServer, {
+        const data = await searchContent(query, {
           signal: controller.signal,
         });
         if (!controller.signal.aborted) {
@@ -103,7 +107,8 @@ export function useHomeClient({
 
     fetchResults();
     return () => controller.abort();
-  }, [query, initialQuery, initialResults, activeServer, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, initialQuery, t, initialResults.length]);
 
   useEffect(() => {
     setIsContinueWatchingLoading(true);

@@ -188,7 +188,6 @@ export function useWatchProgress({
           metadata.type === 'series' && metadata.season && metadata.episode
             ? `${metadata.season}-${metadata.episode}`
             : undefined,
-        providerId: metadata.providerId,
       },
       (response: SocketResponse) => {
         if (response?.success && response.progress) {

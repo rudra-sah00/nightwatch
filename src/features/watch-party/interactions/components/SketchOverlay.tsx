@@ -372,12 +372,6 @@ export function SketchOverlay({
               scaleY: action.scaleY || 1,
               rotation: action.rotation || 0,
               hitStrokeWidth: Math.max(strokeWidth, 20),
-              // Neo-Brutalist Hard Shadow
-              shadowColor: 'rgba(0,0,0,1)',
-              shadowBlur: 0,
-              shadowOffsetX: 4,
-              shadowOffsetY: 4,
-              shadowOpacity: 1,
             };
 
             if (type === 'freehand' || type === 'pencil') {

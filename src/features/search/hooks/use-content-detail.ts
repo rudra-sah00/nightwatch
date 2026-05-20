@@ -91,13 +91,10 @@ export function useContentDetail({
   useEffect(() => {
     let isMounted = true;
 
-    const providerId = (contentId.split(':')[0] || 's1') as 's1';
-
-    // Start fetching watchlist status immediately, don't wait for 'show'
     const checkStatus = async () => {
       try {
         setIsWatchlistLoading(true);
-        const inList = await checkInWatchlist(contentId, providerId);
+        const inList = await checkInWatchlist(contentId);
         if (isMounted) setInWatchlist(inList);
       } catch {
         // ignore
@@ -116,8 +113,6 @@ export function useContentDetail({
   const toggleWatchlist = async () => {
     if (!show) return;
 
-    const providerId = (show.id.split(':')[0] || 's1') as 's1';
-
     // Use transition for optimistic update
     React.startTransition(async () => {
       const nextState = !inWatchlist;
@@ -125,7 +120,7 @@ export function useContentDetail({
 
       try {
         if (inWatchlist) {
-          await removeFromWatchlist(show.id, providerId);
+          await removeFromWatchlist(show.id);
           setInWatchlist(false);
           toast.success(t('removedFromWatchlist'));
         } else {
@@ -135,7 +130,6 @@ export function useContentDetail({
               show.contentType === ContentType.Movie ? 'Movie' : 'Series',
             title: show.title,
             posterUrl: show.posterUrl,
-            providerId,
           });
           setInWatchlist(true);
           toast.success(t('addedToWatchlist'));

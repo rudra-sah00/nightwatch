@@ -88,7 +88,9 @@
     "thickness": "두께",
     "opacity": "불투명도",
     "close": "닫기",
-    "anonymous": "익명"
+    "anonymous": "익명",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "참여자",

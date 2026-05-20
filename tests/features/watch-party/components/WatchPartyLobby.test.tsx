@@ -43,7 +43,6 @@ describe('WatchPartyLobby', () => {
     name: 'Test User',
     username: 'testuser',
     profilePhoto: null,
-    preferredServer: 's1' as 's1' | 's1',
     sessionId: 'session-123',
     createdAt: new Date().toISOString(),
   };

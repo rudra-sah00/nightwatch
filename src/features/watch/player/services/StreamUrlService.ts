@@ -2,10 +2,7 @@
  * StreamUrlService — Handles HLS token injection, URL normalization, and response processing.
  */
 
-import {
-  extractTokenFromUrl,
-  normalizeWatchUrls,
-} from '@/features/watch/utils';
+import { normalizeWatchUrls } from '@/features/watch/utils';
 import { env } from '@/lib/env';
 import type { PlayResponse } from '@/types/content';
 
@@ -15,7 +12,7 @@ import type { PlayResponse } from '@/types/content';
  * the backend returns absolute URLs with its own origin (e.g. localhost:4000)
  * which isn't reachable from mobile devices.
  */
-function toRelativeApiUrl(url: string): string {
+function _toRelativeApiUrl(url: string): string {
   const backendUrl =
     (typeof window === 'undefined'
       ? process.env.NEXT_PUBLIC_BACKEND_URL
@@ -98,52 +95,6 @@ export function normalizeRawUrls(
 }
 
 /**
- * Generic HLS response processor.
- */
-function processHlsResponse(
-  response: PlayResponse,
-  serverId: string,
-): NormalizedUrls {
-  if (!response.success || !response.masterPlaylistUrl) {
-    throw new Error(`Invalid ${serverId} response`);
-  }
-
-  const streamUrl = toRelativeApiUrl(response.masterPlaylistUrl);
-  const token = extractTokenFromUrl(streamUrl) || '';
-
-  const normalized = normalizeWatchUrls(
-    {
-      streamUrl,
-      captionUrl: response.captionSrt,
-      spriteVtt: response.spriteVtt,
-      subtitleTracks: response.subtitleTracks?.map((t, i) => ({
-        id: t.language ? `${t.language}-${i}` : `track-${i}`,
-        label: t.label,
-        language: t.language,
-        src: t.url,
-      })),
-      qualities: response.qualities,
-    },
-    token,
-  );
-
-  return {
-    streamUrl: normalized.streamUrl,
-    captionUrl: normalized.captionUrl ?? null,
-    spriteVtt: normalized.spriteVtt,
-    subtitleTracks: normalized.subtitleTracks,
-    qualities: normalized.qualities,
-  };
-}
-
-/**
- * Processes an HLS PlayResponse (token-based proxy URLs).
- */
-function processHlsPlayResponse(response: PlayResponse): NormalizedUrls {
-  return processHlsResponse(response, 'HLS');
-}
-
-/**
  * Processes a direct MP4/stream PlayResponse (no proxy wrapping needed).
  */
 function processDirectResponse(response: PlayResponse): NormalizedUrls {
@@ -169,16 +120,8 @@ function processDirectResponse(response: PlayResponse): NormalizedUrls {
 /**
  * Unified processor for any server response.
  */
-export function processResponse(
-  server: string,
-  response: PlayResponse,
-): NormalizedUrls {
-  switch (server) {
-    case 's1':
-      return processDirectResponse(response);
-    default:
-      return processHlsPlayResponse(response);
-  }
+export function processResponse(response: PlayResponse): NormalizedUrls {
+  return processDirectResponse(response);
 }
 
 /**

@@ -29,8 +29,6 @@ export interface AudioTrack {
 }
 
 interface UseAudioTracksProps {
-  /** Current server. Hook is a no-op when this is not 's1'. */
-  server: string;
   type: 'movie' | 'series';
   /** Encoded title from URL params (raw — will be decoded internally). */
   title: string;
@@ -88,7 +86,6 @@ interface UseAudioTracksResult {
 }
 
 export function useAudioTracks({
-  server,
   type,
   title,
   movieId,
@@ -115,7 +112,6 @@ export function useAudioTracks({
 
   // ── Discover audio dubs on mount ─────────────────────────────────────────
   useEffect(() => {
-    if (server !== 's1') return;
     if (skipDiscovery) return;
 
     let cancelled = false;
@@ -133,14 +129,12 @@ export function useAudioTracks({
             seriesId: seriesId || movieId || undefined,
             season: parseInt(season, 10),
             episode: parseInt(episode, 10),
-            server: 's1',
           });
         } else {
           response = await playVideo({
             type: 'movie',
             title: decodedTitle,
             movieId: movieId || undefined,
-            server: 's1',
           });
         }
 
@@ -174,7 +168,6 @@ export function useAudioTracks({
     onDiscovered,
     season,
     seriesId,
-    server,
     title,
     type,
     skipDiscovery,

@@ -78,7 +78,6 @@ export function prepareProgressPayload(
       : Math.floor(effectiveDuration),
     playbackRate: video.playbackRate,
     progressDelta,
-    providerId: metadata.providerId,
     hasMoreEpisodes: metadata.type === 'series' ? hasMoreEpisodes : undefined,
   };
 }

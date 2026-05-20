@@ -43,12 +43,6 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       movieId: room.contentId,
       seriesId: room.type === 'series' ? room.contentId : undefined,
       posterUrl: room.posterUrl || '',
-      // Livestreams are always HLS — force 's1' so the player never falls back to
-      // the user's activeServer preference ('s1'/MP4) and shows a blank screen.
-      // For all other content, propagate the room's server so useWatchProgress
-      // records progress with the correct providerId and useNextEpisode fetches
-      // from the right API.
-      providerId: room.type === 'livestream' ? 's1' : room.providerId || 's1',
     }),
     [
       room.title,
@@ -57,7 +51,6 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
       room.episode,
       room.contentId,
       room.posterUrl,
-      room.providerId,
     ],
   );
 
@@ -82,9 +75,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
   // The active track is the current content ID — one of the audio track IDs
   // will equal room.contentId when it's a dub room.
   const initialAudioTrackId =
-    room.providerId === 's1' && initialAudioTracks.length > 1
-      ? room.contentId
-      : undefined;
+    initialAudioTracks.length > 1 ? room.contentId : undefined;
 
   // For direct-URL dub tracks, allow local stream swaps.
   const handleAudioTrackChange = useCallback(

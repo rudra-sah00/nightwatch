@@ -44,7 +44,6 @@ describe('Auth Utils', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -78,7 +77,6 @@ describe('Auth Utils', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -96,7 +94,6 @@ describe('Auth Utils', () => {
         name: 'Old User',
         username: 'olduser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -107,7 +104,6 @@ describe('Auth Utils', () => {
         name: 'New User',
         username: 'newuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 'test-session',
         createdAt: '2024-01-02',
       };
@@ -126,7 +122,6 @@ describe('Auth Utils', () => {
         name: "O'Brien",
         username: 'user_123',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -146,7 +141,6 @@ describe('Auth Utils', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };
@@ -196,7 +190,6 @@ describe('Auth Utils', () => {
         name: 'Test User',
         username: 'testuser',
         profilePhoto: null,
-        preferredServer: 's1' as 's1' | 's1',
         sessionId: 'test-session',
         createdAt: '2024-01-01',
       };

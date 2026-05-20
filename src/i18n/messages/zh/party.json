@@ -88,7 +88,9 @@
     "thickness": "粗细",
     "opacity": "不透明度",
     "close": "关闭",
-    "anonymous": "匿名"
+    "anonymous": "匿名",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "成员",

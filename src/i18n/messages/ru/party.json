@@ -88,7 +88,9 @@
     "thickness": "Толщина",
     "opacity": "Непрозрачность",
     "close": "Закрыть",
-    "anonymous": "Аноним"
+    "anonymous": "Аноним",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "Участники",

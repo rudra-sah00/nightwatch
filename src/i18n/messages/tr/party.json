@@ -88,7 +88,9 @@
     "thickness": "Kalınlık",
     "opacity": "Saydamlık",
     "close": "Kapat",
-    "anonymous": "Anonim"
+    "anonymous": "Anonim",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "Kişiler",

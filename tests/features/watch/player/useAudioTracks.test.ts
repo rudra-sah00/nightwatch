@@ -13,7 +13,6 @@ vi.mock('@/features/watch/api', () => ({
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 const BASE_PROPS = {
-  server: 's1' as const,
   type: 'movie' as const,
   title: 'Test Movie',
   movieId: 's1:movie::123',
@@ -44,9 +43,7 @@ describe('useAudioTracks', () => {
   });
 
   it('returns empty tracks for s1', () => {
-    const { result } = renderHook(() =>
-      useAudioTracks({ ...BASE_PROPS, server: 's1' }),
-    );
+    const { result } = renderHook(() => useAudioTracks({ ...BASE_PROPS }));
     expect(result.current.audioTracks).toHaveLength(0);
   });
 

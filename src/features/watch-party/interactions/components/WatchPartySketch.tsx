@@ -100,6 +100,7 @@ export function WatchPartySketch() {
     setOpacity,
     selectedId,
     stageRef,
+    videoRef,
   } = useSketch();
 
   const { handleMoveZ } = useSketchOverlay();
@@ -343,29 +344,50 @@ export function WatchPartySketch() {
         <Button
           type="button"
           variant="neo"
-          onClick={() => {
+          onClick={async () => {
             const stage = stageRef.current;
+            const video = videoRef.current;
             if (!stage) return;
-            // Briefly reveal the video snapshot layer (hidden by default)
-            const bgNode = stage.findOne('#video-snapshot-layer');
-            if (bgNode) {
-              bgNode.opacity(1);
-              stage.batchDraw();
+
+            // Capture video frame onto an offscreen canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = stage.width() * 2;
+            canvas.height = stage.height() * 2;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            // Draw video frame as background
+            if (video) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             }
 
-            // Small timeout to allow Konva to paint the frame if needed
-            setTimeout(() => {
-              const dataUrl = stage.toDataURL({ pixelRatio: 2 });
-              const link = document.createElement('a');
-              link.download = `watch-party-sketch-${Date.now()}.png`;
-              link.href = dataUrl;
-              link.click();
+            // Draw sketch overlay on top
+            const sketchDataUrl = stage.toDataURL({ pixelRatio: 2 });
+            const sketchImg = new Image();
+            sketchImg.src = sketchDataUrl;
+            await new Promise((r) => {
+              sketchImg.onload = r;
+            });
+            ctx.drawImage(sketchImg, 0, 0, canvas.width, canvas.height);
 
-              if (bgNode) {
-                bgNode.opacity(0);
-                stage.batchDraw();
-              }
-            }, 50);
+            const finalDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+            // Save to library via API
+            try {
+              const { apiFetch } = await import('@/lib/fetch');
+              await apiFetch('/api/clips/screenshot', {
+                method: 'POST',
+                body: JSON.stringify({
+                  image: finalDataUrl,
+                  title: `Scene Capture`,
+                }),
+              });
+              const { toast } = await import('sonner');
+              toast.success(t('sketch.captureSuccess'));
+            } catch {
+              const { toast } = await import('sonner');
+              toast.error(t('sketch.captureFailed'));
+            }
           }}
           className="w-full flex items-center justify-center gap-2 py-2.5 text-sm bg-foreground/10 hover:bg-foreground/20 text-foreground dark:bg-white/10 dark:hover:bg-white/20 dark:text-white rounded-lg transition-colors"
         >

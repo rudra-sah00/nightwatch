@@ -25,8 +25,6 @@ const GlobalTour = dynamic(
 import { useFriendNotifications } from '@/features/friends/hooks/use-friend-notifications';
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { checkIsMobile } from '@/lib/electron-bridge';
-import { useAuth } from '@/providers/auth-provider';
-import { ServerProvider } from '@/providers/server-provider';
 
 type SidebarContextType = {
   leftOpen: boolean;
@@ -54,7 +52,6 @@ const RIGHT_OPEN_ZONE = 50;
 const RIGHT_CLOSE_ZONE = 340;
 
 function MainLayoutInner({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
   useFriendNotifications();
   const pathname = usePathname() || '';
   const { isOffline, mounted } = useNetworkStatus();
@@ -214,31 +211,29 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
         setSidebarsDisabled,
       }}
     >
-      <ServerProvider defaultServer={user?.preferredServer}>
-        <div className="h-full w-full bg-background text-foreground font-body flex flex-col overflow-hidden">
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-neo-yellow focus:text-foreground focus:px-4 focus:py-2 focus:border-[3px] focus:border-border focus:font-headline focus:font-black focus:uppercase focus:text-sm focus:tracking-widest"
-          >
-            {t('skipToContent')}
-          </a>
-          <Suspense fallback={null}>
-            <GlobalTour />
-          </Suspense>
-          <Navbar />
-          <div
-            ref={containerRef}
-            id="main-content"
-            className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative"
-          >
-            <LeftSidebar />
-            <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative">
-              {showOfflineBlocker ? <OfflineState /> : children}
-            </div>
-            <RightSidebar />
+      <div className="h-full w-full bg-background text-foreground font-body flex flex-col overflow-hidden">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-neo-yellow focus:text-foreground focus:px-4 focus:py-2 focus:border-[3px] focus:border-border focus:font-headline focus:font-black focus:uppercase focus:text-sm focus:tracking-widest"
+        >
+          {t('skipToContent')}
+        </a>
+        <Suspense fallback={null}>
+          <GlobalTour />
+        </Suspense>
+        <Navbar />
+        <div
+          ref={containerRef}
+          id="main-content"
+          className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative"
+        >
+          <LeftSidebar />
+          <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative">
+            {showOfflineBlocker ? <OfflineState /> : children}
           </div>
+          <RightSidebar />
         </div>
-      </ServerProvider>
+      </div>
     </SidebarContext.Provider>
   );
 }
