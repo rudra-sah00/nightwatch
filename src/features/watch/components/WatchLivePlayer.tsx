@@ -298,6 +298,7 @@ function LivePlayerState({
     matchId: metadata.movieId,
     title: `${metadata.title} - Clip`,
     streamToken: extractTokenFromUrl(streamUrl),
+    streamUrl,
   });
 
   const tc = useTranslations('common');

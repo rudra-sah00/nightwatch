@@ -12,8 +12,10 @@ interface UseClipRecorderOptions {
   matchId: string;
   /** Default title for the new clip. */
   title: string;
-  /** Stream session token from the active stream. */
+  /** Stream session token from the active stream (for token-based streams). */
   streamToken: string | null;
+  /** Raw stream URL fallback (for IPTV/direct streams without a session token). */
+  streamUrl?: string | null;
 }
 
 /**
@@ -26,6 +28,7 @@ export function useClipRecorder({
   matchId,
   title,
   streamToken,
+  streamUrl,
 }: UseClipRecorderOptions) {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -67,7 +70,7 @@ export function useClipRecorder({
   }, [cleanup]);
 
   const start = useCallback(async () => {
-    if (!streamToken) return;
+    if (!(streamToken || streamUrl)) return;
 
     setIsStarting(true);
     try {
@@ -75,6 +78,7 @@ export function useClipRecorder({
       startTimeRef.current = Date.now();
       const { clipId: id } = await startServerClip(
         streamToken,
+        streamUrl || null,
         matchId,
         title,
         startTime,
@@ -93,7 +97,7 @@ export function useClipRecorder({
     } catch {
       cleanup();
     }
-  }, [matchId, title, streamToken, stop, cleanup]);
+  }, [matchId, title, streamToken, streamUrl, stop, cleanup]);
 
   useEffect(() => {
     return () => {

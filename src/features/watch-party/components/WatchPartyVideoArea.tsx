@@ -164,6 +164,7 @@ export function WatchPartyVideoArea({
     streamToken: extractTokenFromUrl(
       streamUrlOverride || room.streamUrl || null,
     ),
+    streamUrl: streamUrlOverride || room.streamUrl || null,
   });
 
   const t = useTranslations('common');
