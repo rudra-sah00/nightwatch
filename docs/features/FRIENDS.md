@@ -32,7 +32,7 @@ src/features/friends/
 3. Results show status badges: "Friends" / "Sent" / "Incoming" / "Add Friend" button
 4. Backend resolves username → userId, creates pending friendship
 5. Receiver gets real-time `friend:request_received` socket event
-6. Receiver accepts/rejects from the sidebar "Requests" section
+6. Receiver sees the request instantly in the sidebar (no manual refresh needed) and accepts/rejects from the "Requests" section
 7. Sender can cancel from the "Sent" section
 
 ### States in Sidebar

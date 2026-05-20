@@ -32,7 +32,7 @@ src-electron/
     ├── main.js              # App entry point, plugin registration, window setup, global shortcuts
     └── commands/
         ├── mod.js           # Module declarations
-        ├── window.js        # PiP, badge, keep-awake, theme, autostart, clipboard, notifications
+        ├── window.js        # Badge, keep-awake, theme, autostart, clipboard, notifications
         ├── tray.js          # System tray menu (Show, Play/Pause, Toggle Mic, About, Updates, Quit)
         ├── discord.js       # Discord Rich Presence via local IPC socket
         ├── downloads.js     # Secure offline download manager (HLS/MP4, pause/resume, crash recovery)
@@ -65,6 +65,8 @@ The desktop app supports full offline startup via a PWA Service Worker powered b
 1. On the first online launch, the Service Worker (`/sw.js`) installs and precaches all JS chunks, CSS, and statically prerendered pages.
 2. On subsequent offline launches, the webview attempts to load the production URL. The Service Worker intercepts the navigation and returns the cached app shell.
 3. If the cache is empty (first-ever launch without internet), the page displays an offline error state.
+
+> **Note:** The service worker is disabled on the staging environment to avoid caching issues during QA testing.
 
 **Vercel Firewall Configuration (production):**
 
@@ -125,7 +127,6 @@ pnpm electron:build
 
 | Feature | Implementation |
 |---------|---------------|
-| **Picture-in-Picture** | Resizes window to 480×270, pins always-on-top, restores original bounds on exit |
 | **System Tray** | Show/Play-Pause/Toggle Mic/About/Check Updates/Quit menu items |
 | **Discord Rich Presence** | Local IPC socket connection to Discord client, broadcasts playback state |
 | **Media Keys** | Global shortcuts for MediaPlayPause, MediaNextTrack, MediaPreviousTrack, MediaStop |
@@ -153,7 +154,7 @@ The bridge detects the Electron environment via `window.electronAPI` or `window.
 Key exports:
 - `isDesktop` / `isElectron` — Boolean detection flags
 - `checkIsDesktop()` — Function for use in useState initializers (hydration-safe)
-- `desktopBridge` — Object with all native methods (Discord, clipboard, store, PiP, badge, downloads, etc.)
+- `desktopBridge` — Object with all native methods (Discord, clipboard, store, badge, downloads, etc.)
 
 ### `src/hooks/use-desktop-app.ts`
 

@@ -73,11 +73,5 @@ Triggers on every PR to `main`:
 2. Builds and deploys a Vercel preview
 3. Comments the preview URL on the PR
 
-### Nightly E2E Pipeline (`e2e-nightly.yml`)
-Runs at 2 AM UTC daily (also manual trigger):
-1. Installs Playwright Chromium
-2. Runs full E2E test suite with test credentials from GitHub Secrets
-3. Uploads test results as artifacts (7-day retention)
-
 ### Local Validation
 The `pnpm validate` command sequences type-checking, formatting, linting, and Vitest runs before allowing a merge.

@@ -22,7 +22,6 @@ The Profile system allows users to customize their identity across the platform,
 
 ### Customization Options
 - **Display Name and Avatar:** Users can upload custom avatars (handled via Cloudinary on the backend) and set a unique username.
-- **Server Preferences:** Users can select their preferred video streaming server quality (e.g., Balanced, High Quality) based on their network capabilities.
 - **Security Management:** Authenticated users can override or set their account passwords and manage active sessions from the security panel.
 
 ## Watch Parties (Flagship Feature)
@@ -57,7 +56,7 @@ Hosts have granular control over what Guests are allowed to do.
 For users on our native Electron client, the platform supports securely pulling full HD movies and multi-season episodic content directly to the device for offline viewing without requiring aggressive persistent network connectivity.
 
 ### 1. Robust Download Pipelines
-The system adapts intelligently to `s1`, `s2`, and `s3` master source providers. It calculates master playlist configurations and iteratively streams AES / raw HLS segments natively within Rust backend pipelines mapping directly down to local directories.
+The system calculates master playlist configurations and iteratively streams AES / raw HLS segments natively within Rust backend pipelines mapping directly down to local directories.
 
 ### 2. DRM and File Vaulting
 Nightwatch strictly protects raw media content boundaries from casual file browsing.

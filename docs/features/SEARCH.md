@@ -274,3 +274,9 @@ Minimal hook tracking image error state for a single episode card.
 4. User clicks result → `ContentDetailModal` opens
 5. `useContentDetail` fetches show details + episodes + watch progress in parallel
 6. User clicks Play → `usePlaybackActions.handlePlay` constructs URL → `router.push('/watch/...')`
+
+## Known Issues (Resolved)
+
+- **Stale results on rapid navigation**: Fixed race condition where `AbortController` cleanup was not cancelling in-flight requests when the query changed rapidly, causing old results to overwrite newer ones.
+- **Escape key not closing modal**: Fixed event propagation issue where the content detail modal's Escape handler was being swallowed by the emoji picker when it was previously open in the same render cycle.
+- **Cache key mismatch**: Fixed TTL cache returning results for a different query when the cache key included stale URL params from a previous navigation.

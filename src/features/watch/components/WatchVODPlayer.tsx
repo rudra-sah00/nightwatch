@@ -244,7 +244,6 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
             <VODPlayerState
               hideBackButton={props.hideBackButton}
               isPip={isPip}
-              onPip={handleBack}
             />
           </Player.Root>
         </div>
@@ -281,16 +280,13 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
  *
  * @param props.hideBackButton - Hides the header back arrow (e.g. on public clip pages).
  * @param props.isPip - Whether the player is currently in the inline mobile PiP state.
- * @param props.onPip - Callback invoked when the user taps the PiP exit button.
  */
 function VODPlayerState({
   hideBackButton,
   isPip,
-  onPip,
 }: {
   hideBackButton?: boolean;
   isPip?: boolean;
-  onPip?: () => void;
 }) {
   const { state, metadata, playerHandlers, nextEpisode, pauseOverlayMetadata } =
     useVODPlayerState();

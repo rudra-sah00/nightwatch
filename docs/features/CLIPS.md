@@ -22,6 +22,7 @@ src/features/clips/
 
 - **Live Player** (`WatchLivePlayer.tsx`): RecordButton in `PlayerHeader` right slot.
 - **Player Context** (`PlayerContext.tsx`): Exposes `hlsRef` for fragment capture.
+- **Watch Party Sketch** (`SketchOverlay.tsx`): "Capture Scene" saves the current sketch + video frame as a clip to the user's library.
 - **Library Page** (`/library`): ClipsGrid with search, sort, infinite scroll.
 - **Clip Player** (`/clip/[id]`): Plays clips in the core VOD player.
 - **Socket.IO**: `clip:ready` event via Redis pub/sub for real-time status updates.
