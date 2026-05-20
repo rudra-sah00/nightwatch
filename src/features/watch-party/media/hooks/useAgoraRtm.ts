@@ -248,6 +248,14 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
           client.removeEventListener('message', handleMessage);
           client.removeEventListener('status', handleStatus);
           client.removeEventListener('presence', handlePresence);
+          (
+            client as unknown as {
+              removeEventListener: (e: string, h: () => void) => void;
+            }
+          ).removeEventListener(
+            'tokenPrivilegeWillExpire',
+            handleTokenExpiring,
+          );
 
           client.unsubscribe(channel).catch(() => {});
           client.unsubscribe(userChannel).catch(() => {});

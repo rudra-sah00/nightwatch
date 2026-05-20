@@ -27,11 +27,14 @@ export function usePredictiveSync(
   clockOffset: number,
   isCalibrated: boolean,
   isLive = false,
+  isHost = false,
 ) {
   const stateRef = useRef<PartyPlaybackState | null>(null);
   // Stores the last state update received before the video element was mounted.
   // A polling interval applies it once the video becomes available.
   const pendingUpdateRef = useRef<PartyStateUpdate | null>(null);
+  const clockOffsetRef = useRef(clockOffset);
+  clockOffsetRef.current = clockOffset;
 
   // Calculate expected video position based on server time
   const getExpectedTime = useCallback(() => {
@@ -40,10 +43,10 @@ export function usePredictiveSync(
     if (!state.isPlaying) return state.videoTime;
 
     // serverNow = localNow + offset
-    const serverNow = Date.now() + clockOffset;
+    const serverNow = Date.now() + clockOffsetRef.current;
     const elapsed = (serverNow - state.serverTime) / 1000;
     return state.videoTime + elapsed * state.playbackRate;
-  }, [clockOffset]);
+  }, []);
 
   // Apply state update from server
   const applyState = useCallback(
@@ -148,6 +151,7 @@ export function usePredictiveSync(
   // This covers the gap between join_approved (video not yet rendered) and
   // the first state_update that arrives after the video mounts.
   useEffect(() => {
+    if (isHost) return; // Host doesn't receive state updates
     const interval = setInterval(() => {
       const video = videoRef.current;
       if (pendingUpdateRef.current && video && video.readyState >= 1) {
@@ -161,10 +165,11 @@ export function usePredictiveSync(
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [applyState, videoRef]);
+  }, [applyState, videoRef, isHost]);
 
   // Periodic state enforcement & drift check (every 2s)
   useEffect(() => {
+    if (isHost) return; // Host is the source of truth, no drift correction needed
     const interval = setInterval(() => {
       const video = videoRef.current;
       const state = stateRef.current;
@@ -211,7 +216,7 @@ export function usePredictiveSync(
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [videoRef, getExpectedTime, isCalibrated, isLive]);
+  }, [videoRef, getExpectedTime, isCalibrated, isLive, isHost]);
 
   return { applyState, getExpectedTime };
 }

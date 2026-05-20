@@ -155,12 +155,12 @@ export function useWatchPartyMembers({
       const response = await rejectJoinRequest(room.id, memberId);
       if (response.success) {
         toast.success(t('memberRejected'));
+        rtmSendMessageToPeer?.(memberId, {
+          type: 'JOIN_REJECTED',
+          reason: tp('requestDeclined'),
+        });
         setRoom((prev) => {
           if (!prev) return null;
-          rtmSendMessageToPeer?.(memberId, {
-            type: 'JOIN_REJECTED',
-            reason: tp('requestDeclined'),
-          });
           return {
             ...prev,
             pendingMembers: prev.pendingMembers.filter(
@@ -181,13 +181,13 @@ export function useWatchPartyMembers({
       const response = await kickMember(room.id, memberId);
       if (response.success) {
         toast.success(t('memberRemoved'));
+        rtmSendMessage?.({
+          type: 'KICK',
+          targetUserId: memberId,
+          reason: tp('kickedByHost'),
+        });
         setRoom((prev) => {
           if (!prev) return null;
-          rtmSendMessage?.({
-            type: 'KICK',
-            targetUserId: memberId,
-            reason: tp('kickedByHost'),
-          });
           return {
             ...prev,
             members: prev.members.filter((m) => m?.id !== memberId),

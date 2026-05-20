@@ -133,7 +133,7 @@ export function useActiveWatchParty({
       const diff = Math.abs(video.volume - userVolume);
       if (diff > 0.01 && !isDuckingRef.current) {
         const now = Date.now();
-        if (now - lastUserChange > 500) {
+        if (now - lastUserChange > 200) {
           setUserVolume(video.volume);
           originalVolumeRef.current = video.volume;
           lastUserChange = now;

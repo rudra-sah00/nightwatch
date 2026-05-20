@@ -92,13 +92,15 @@ interface UseGestureDetectionOptions {
   rtmSendMessage?: (msg: RTMMessage) => void;
   userId?: string;
   userName?: string;
+  /** Gesture detection is disabled by default due to high resource usage (~1.5GB WASM models). Opt-in only. */
+  enabled?: boolean;
 }
 
 export function useGestureDetection(
   videoTrack: ICameraVideoTrack | null,
   options: UseGestureDetectionOptions = {},
 ) {
-  const { rtmSendMessage, userId, userName } = options;
+  const { rtmSendMessage, userId, userName, enabled = false } = options;
   const gestureRecognizerRef = useRef<GestureRecognizerType | null>(null);
   const faceLandmarkerRef = useRef<FaceLandmarkerType | null>(null);
   const requestRef = useRef<number>(0);
@@ -310,6 +312,8 @@ export function useGestureDetection(
   }, [videoTrack, triggerReaction]);
 
   useEffect(() => {
+    if (!enabled) return;
+
     let cleaned = false;
 
     if (videoTrack) {
@@ -338,7 +342,7 @@ export function useGestureDetection(
         videoElementRef.current = null;
       }
     };
-  }, [videoTrack, initMediaPipe, predict, safeClose]);
+  }, [enabled, videoTrack, initMediaPipe, predict, safeClose]);
 
   return { isSupported: true };
 }

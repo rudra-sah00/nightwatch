@@ -52,6 +52,7 @@ export function useWatchPartySync({
   const tp = useTranslations('party.toasts');
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const contentUpdateIdRef = useRef(0);
   const isLiveRoom = room?.type === 'livestream';
 
   const handlePresenceEvent = useCallback(
@@ -60,19 +61,13 @@ export function useWatchPartySync({
       if (isHost) {
         if (event.action === 'JOIN' && event.userId !== room?.hostId) {
           if (room?.id) {
+            const video = videoRef?.current;
             rtmSendMessage?.({
               type: 'SYNC',
-              currentTime: isLiveRoom
-                ? 0
-                : (videoRef?.current?.currentTime ?? room.state.currentTime),
-              videoTime: isLiveRoom
-                ? 0
-                : (videoRef?.current?.currentTime ?? room.state.currentTime),
-              isPlaying: videoRef?.current
-                ? !videoRef.current.paused
-                : room.state.isPlaying,
-              playbackRate:
-                videoRef?.current?.playbackRate ?? room.state.playbackRate,
+              currentTime: isLiveRoom ? 0 : (video?.currentTime ?? 0),
+              videoTime: isLiveRoom ? 0 : (video?.currentTime ?? 0),
+              isPlaying: video ? !video.paused : false,
+              playbackRate: video?.playbackRate ?? 1,
               serverTime: Date.now(),
               fromHost: true,
             });
@@ -112,11 +107,8 @@ export function useWatchPartySync({
       isLiveRoom,
       room?.hostId,
       room?.id,
-      room?.state.isPlaying,
-      room?.state.playbackRate,
       rtmSendMessage,
       videoRef,
-      room?.state.currentTime,
       t,
       tp,
     ],
@@ -278,14 +270,21 @@ export function useWatchPartySync({
 
         case 'CONTENT_UPDATED': {
           const { room: newRoom } = msg;
+          const updateId = ++contentUpdateIdRef.current;
           toast.info(tp('contentChanged', { title: newRoom.title }));
-          getPartyStreamToken(newRoom.id).then((response) => {
-            const token = response.token || '';
-            const normalizedRoom = normalizeRoomUrls(newRoom, token, {
-              injectStream: true,
+          getPartyStreamToken(newRoom.id)
+            .then((response) => {
+              if (contentUpdateIdRef.current !== updateId) return; // stale
+              const token = response.token || '';
+              const normalizedRoom = normalizeRoomUrls(newRoom, token, {
+                injectStream: true,
+              });
+              setRoom(normalizedRoom);
+            })
+            .catch(() => {
+              if (contentUpdateIdRef.current !== updateId) return;
+              setRoom(normalizeRoomUrls(newRoom, '', { injectStream: false }));
             });
-            setRoom(normalizedRoom);
-          });
           break;
         }
 

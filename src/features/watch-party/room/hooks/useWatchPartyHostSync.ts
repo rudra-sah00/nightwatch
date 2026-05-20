@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { PartyEvent } from '../types';
 
 interface UseWatchPartyHostSyncProps {
@@ -20,6 +20,10 @@ export function useWatchPartyHostSync({
   isLive = false,
   onPartyEvent,
 }: UseWatchPartyHostSyncProps) {
+  // Stabilize callback via ref to prevent video listener teardown/reattach on every room state change
+  const onPartyEventRef = useRef(onPartyEvent);
+  onPartyEventRef.current = onPartyEvent;
+
   useEffect(() => {
     if (!videoElement || !isHost) return;
 
@@ -30,7 +34,7 @@ export function useWatchPartyHostSync({
     const handlePlay = () => {
       if (playPauseDebounce) clearTimeout(playPauseDebounce);
       playPauseDebounce = setTimeout(() => {
-        onPartyEvent({
+        onPartyEventRef.current({
           eventType: 'play',
           videoTime: videoElement.currentTime,
           playbackRate: videoElement.playbackRate,
@@ -41,7 +45,7 @@ export function useWatchPartyHostSync({
     const handlePause = () => {
       if (playPauseDebounce) clearTimeout(playPauseDebounce);
       playPauseDebounce = setTimeout(() => {
-        onPartyEvent({
+        onPartyEventRef.current({
           eventType: 'pause',
           videoTime: videoElement.currentTime,
         });
@@ -56,7 +60,7 @@ export function useWatchPartyHostSync({
 
       if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
       syncDebounceTimer = setTimeout(() => {
-        onPartyEvent({
+        onPartyEventRef.current({
           eventType: 'seek',
           videoTime: videoElement.currentTime,
           playbackRate: videoElement.playbackRate,
@@ -67,7 +71,7 @@ export function useWatchPartyHostSync({
 
     const handleRateChange = () => {
       if (isLive) return;
-      onPartyEvent({
+      onPartyEventRef.current({
         eventType: 'rate',
         videoTime: videoElement.currentTime,
         playbackRate: videoElement.playbackRate,
@@ -90,5 +94,5 @@ export function useWatchPartyHostSync({
       if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
       if (playPauseDebounce) clearTimeout(playPauseDebounce);
     };
-  }, [videoElement, isHost, isLive, onPartyEvent]);
+  }, [videoElement, isHost, isLive]);
 }

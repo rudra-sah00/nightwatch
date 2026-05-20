@@ -19,8 +19,13 @@ export function SerwistProvider({
       navigator.userAgent,
     );
 
+  // Disable SW on staging — CF Access intercepts /sw.js with a redirect
+  const isStaging =
+    typeof window !== 'undefined' &&
+    window.location.hostname === 'dev.nightwatch.in';
+
   return (
-    <BaseSerwistProvider swUrl={swUrl} disable={isBot}>
+    <BaseSerwistProvider swUrl={swUrl} disable={isBot || isStaging}>
       {children}
     </BaseSerwistProvider>
   );

@@ -70,6 +70,7 @@ export function useSketchOverlay({
 
   const t = useTranslations('party');
   const lastCursorBroadcast = useRef(0);
+  const cursorBatchRef = useRef<{ x: number; y: number }[]>([]);
   const [pendingText, setPendingText] = useState<PendingTextInput | null>(null);
   const isDrawing = useRef(false);
   const currentActionRef = useRef<SketchAction | null>(null);
@@ -92,6 +93,22 @@ export function useSketchOverlay({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  // Prune stale cursors every 5s (removes cursors not updated in 5s)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      setCursors((prev) => {
+        const entries = Object.entries(prev);
+        const stale = entries.filter(([, c]) => now - c.lastUpdate > 5000);
+        if (stale.length === 0) return prev;
+        const next = { ...prev };
+        for (const [id] of stale) delete next[id];
+        return next;
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [setCursors]);
+
   // Sync with host on mount
   useEffect(() => {
     if (!isHost && userId) {
@@ -101,6 +118,10 @@ export function useSketchOverlay({
       });
     }
   }, [isHost, userId, rtmSendMessage]);
+
+  // Ref to access latest actions inside event callbacks without re-subscribing
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
 
   // Listen for RTM events via the bridged on* API
   useEffect(() => {
@@ -120,14 +141,14 @@ export function useSketchOverlay({
 
     const cleanupUndo = onSketchUndo(({ actionId }) => {
       setActions((prev) => prev.filter((a) => a.id !== actionId));
-      if (selectedId === actionId) setSelectedId(null);
+      setSelectedId(null);
     });
 
     const cleanupProvideSync = onSketchProvideSync(({ requesterId }) => {
       if (isHost && requesterId) {
         rtmSendMessageToPeer?.(requesterId, {
           type: 'SKETCH_SYNC_STATE',
-          elements: actions,
+          elements: actionsRef.current,
           targetId: requesterId,
         });
       }
@@ -179,9 +200,7 @@ export function useSketchOverlay({
     };
   }, [
     isHost,
-    actions,
     rtmSendMessageToPeer,
-    selectedId,
     setSelectedId,
     userId,
     setCursors,
@@ -384,17 +403,21 @@ export function useSketchOverlay({
       const point = stage?.getPointerPosition();
       if (!point || !isSketchMode) return;
 
-      // Broadcast cursor position (Throttled to ~30fps / 33ms)
+      // Batch cursor positions and broadcast every 100ms
+      cursorBatchRef.current.push({ x: point.x, y: point.y });
       const now = Date.now();
-      if (now - lastCursorBroadcast.current > 33) {
+      if (now - lastCursorBroadcast.current > 100) {
+        const batch = cursorBatchRef.current;
+        const last = batch[batch.length - 1];
         rtmSendMessage?.({
           type: 'SKETCH_CURSOR_MOVE',
-          x: point.x,
-          y: point.y,
+          x: last.x,
+          y: last.y,
           userName: userName || t('sketch.anonymous'),
           color,
           userId: userId || '',
         });
+        cursorBatchRef.current = [];
         lastCursorBroadcast.current = now;
       }
 

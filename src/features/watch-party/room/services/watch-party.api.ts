@@ -406,11 +406,12 @@ export async function sendPartyMessage(
 
 export async function getPartyMessages(
   roomId: string,
+  options?: { limit?: number; before?: number },
 ): Promise<{ messages?: ChatMessage[]; error?: string }> {
   try {
-    const data = await apiFetch<{ messages: ChatMessage[] }>(
-      `/api/rooms/${roomId}/messages`,
-    );
+    let url = `/api/rooms/${roomId}/messages?limit=${options?.limit ?? 40}`;
+    if (options?.before !== undefined) url += `&before=${options.before}`;
+    const data = await apiFetch<{ messages: ChatMessage[] }>(url);
     return { messages: data.messages };
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Unknown error' };

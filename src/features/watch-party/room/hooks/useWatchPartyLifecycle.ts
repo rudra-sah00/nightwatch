@@ -84,8 +84,10 @@ export function useWatchPartyLifecycle({
     if (requestStatus !== 'pending' || !activeUserId) return;
 
     let tempSocket: ReturnType<typeof io> | null = null;
+    let socketCleaned = false;
 
     const connectSocket = () => {
+      if (socketCleaned) return;
       const socketUrl =
         env.WS_URL ||
         (env as Record<string, string | undefined>).BACKEND_URL ||
@@ -99,6 +101,10 @@ export function useWatchPartyLifecycle({
       });
 
       tempSocket.on('connect', () => {
+        if (socketCleaned) {
+          tempSocket?.disconnect();
+          return;
+        }
         tempSocket?.emit(
           'watch-party:join_room',
           roomId || room?.id || 'PENDING',
@@ -158,10 +164,10 @@ export function useWatchPartyLifecycle({
       tempSocket.on('JOIN_RESULT', handleJoinResult);
 
       tempSocket.on('connect_error', () => {
-        // Simple retry logic if unstable
+        // Simple retry logic if unstable — guarded by cleanup flag
         setTimeout(() => {
-          if (!tempSocket?.active) {
-            tempSocket?.connect();
+          if (!socketCleaned && tempSocket && !tempSocket.active) {
+            tempSocket.connect();
           }
         }, 3000);
       });
@@ -169,7 +175,36 @@ export function useWatchPartyLifecycle({
 
     connectSocket();
 
+    // Polling fallback: if Socket.IO doesn't deliver JOIN_RESULT within 10s,
+    // poll the REST endpoint to check if we were approved
+    const pollTimer = setInterval(async () => {
+      if (socketCleaned) return;
+      const targetRoomId = roomId || room?.id;
+      if (!targetRoomId || !activeUserId) return;
+      try {
+        const roomData = await getRoomDetails(targetRoomId);
+        if (roomData?.members.some((m) => m.id === activeUserId)) {
+          // We were approved but missed the Socket.IO event
+          const streamRes = await getPartyStreamToken(targetRoomId);
+          const token = streamRes.token || '';
+          const normalizedRoom = normalizeRoomUrls(roomData, token, {
+            injectStream: true,
+          });
+          setRoom(normalizedRoom);
+          setIsConnected(true);
+          setRequestStatus('joined');
+          toast.success(t('requestApproved'));
+          socketCleaned = true;
+          tempSocket?.disconnect();
+        }
+      } catch {
+        // Network error — keep polling
+      }
+    }, 10_000);
+
     return () => {
+      socketCleaned = true;
+      clearInterval(pollTimer);
       tempSocket?.disconnect();
     };
   }, [

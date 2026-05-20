@@ -126,34 +126,45 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         case 'JOIN_APPROVED': {
           const { room: approvedRoom, initialState } = msg;
 
-          getPartyStreamToken(approvedRoom.id).then((response) => {
-            const token = response.token || msg.streamToken || '';
-            const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
-              injectStream: true,
-            });
-
-            setRoom(normalizedRoom);
-            setIsConnected(true);
-            setRequestStatus('joined');
-
-            if (initialState) {
-              // Perform initial clock calibration
-              if (initialState.serverTime) {
-                calibrate(initialState.serverTime);
-              }
-
-              optionsRef.current.onStateUpdate?.({
-                currentTime: initialState.currentTime ?? 0,
-                videoTime:
-                  initialState.videoTime ?? initialState.currentTime ?? 0,
-                isPlaying: initialState.isPlaying,
-                playbackRate: initialState.playbackRate ?? 1,
-                timestamp: initialState.timestamp ?? Date.now(),
-                serverTime: initialState.serverTime || Date.now(),
-                eventType: 'init',
+          getPartyStreamToken(approvedRoom.id)
+            .then((response) => {
+              const token = response.token || msg.streamToken || '';
+              const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+                injectStream: true,
               });
-            }
-          });
+
+              setRoom(normalizedRoom);
+              setIsConnected(true);
+              setRequestStatus('joined');
+
+              if (initialState) {
+                // Perform initial clock calibration
+                if (initialState.serverTime) {
+                  calibrate(initialState.serverTime);
+                }
+
+                optionsRef.current.onStateUpdate?.({
+                  currentTime: initialState.currentTime ?? 0,
+                  videoTime:
+                    initialState.videoTime ?? initialState.currentTime ?? 0,
+                  isPlaying: initialState.isPlaying,
+                  playbackRate: initialState.playbackRate ?? 1,
+                  timestamp: initialState.timestamp ?? Date.now(),
+                  serverTime: initialState.serverTime || Date.now(),
+                  eventType: 'init',
+                });
+              }
+            })
+            .catch(() => {
+              // Fallback: use stream token from the approval message
+              const token = msg.streamToken || '';
+              const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+                injectStream: true,
+              });
+              setRoom(normalizedRoom);
+              setIsConnected(true);
+              setRequestStatus('joined');
+            });
           break;
         }
 
@@ -254,12 +265,24 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   // Clock Synchronization
   const { clockOffset, isCalibrated, calibrate } = useClockSync();
 
-  // Note: Calibration now happens dynamically via initial state and RTM messages
+  // Stream token auto-renewal: refresh at 3.5h to prevent 4h expiry
   useEffect(() => {
-    if (isConnected && requestStatus === 'joined' && !isCalibrated) {
-      // Initial calibration if needed - though JOIN_APPROVED should have handled it
-    }
-  }, [isConnected, requestStatus, isCalibrated]);
+    const isHost = userId === room?.hostId;
+    if (!isHost || !room?.id || room.type === 'livestream') return;
+
+    const RENEWAL_MS = 3.5 * 60 * 60 * 1000; // 3.5 hours
+    const timer = setTimeout(async () => {
+      const response = await getPartyStreamToken(room.id);
+      if (response.token) {
+        rtmSendMessage?.({
+          type: 'STREAM_TOKEN',
+          token: response.token,
+        } as unknown as import('../types/rtm-messages').RTMMessage);
+      }
+    }, RENEWAL_MS);
+
+    return () => clearTimeout(timer);
+  }, [room?.id, room?.hostId, room?.type, userId, rtmSendMessage]);
 
   // Handle Guest Initial Sync Request
   useEffect(() => {
@@ -315,6 +338,9 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     sendMessage: chat.sendMessage,
     handleTypingStart: chat.handleTypingStart,
     handleTypingStop: chat.handleTypingStop,
+    loadMoreMessages: chat.loadMoreMessages,
+    hasMoreMessages: chat.hasMoreMessages,
+    isLoadingMoreMessages: chat.isLoadingMore,
     createRoom: lifecycle.createRoom,
     requestJoin: lifecycle.requestJoin,
     cancelRequest: lifecycle.cancelRequest,

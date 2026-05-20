@@ -36,6 +36,7 @@ describe('useGestureDetection', () => {
     rtmSendMessage: mockRtmSendMessage,
     userId: 'user-1',
     userName: 'User 1',
+    enabled: true,
   };
 
   beforeEach(async () => {
