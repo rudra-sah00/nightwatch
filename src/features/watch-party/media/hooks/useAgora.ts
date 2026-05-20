@@ -783,6 +783,9 @@ export function useAgora({
         const audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
           microphoneId: selectedAudioDeviceRef.current || undefined,
           encoderConfig: AUDIO_ENCODER_CONFIG,
+          AEC: true,
+          ANS: true,
+          AGC: true,
         });
         localAudioTrackRef.current = audioTrack;
         await client.publish(audioTrack);
