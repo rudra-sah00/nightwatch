@@ -9,6 +9,7 @@ import { Player } from '@/features/watch/player';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import { CenterPlayButton } from '@/features/watch/player/ui/controls/PlayPause';
 import { NextEpisodeOverlay } from '@/features/watch/player/ui/overlays/NextEpisodeOverlay';
+import { extractTokenFromUrl } from '@/features/watch/utils';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
@@ -160,7 +161,9 @@ export function WatchPartyVideoArea({
   const clip = useClipRecorder({
     matchId: room.contentId || `wp-${room.id}`,
     title: `${metadata.title} - Clip`,
-    streamUrl: streamUrlOverride || room.streamUrl || null,
+    streamToken: extractTokenFromUrl(
+      streamUrlOverride || room.streamUrl || null,
+    ),
   });
 
   const t = useTranslations('common');

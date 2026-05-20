@@ -20,6 +20,7 @@ import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
+import { extractTokenFromUrl } from '../utils';
 
 /**
  * Props for the {@link WatchLivePlayer} component.
@@ -296,7 +297,7 @@ function LivePlayerState({
   const clip = useClipRecorder({
     matchId: metadata.movieId,
     title: `${metadata.title} - Clip`,
-    streamUrl,
+    streamToken: extractTokenFromUrl(streamUrl),
   });
 
   const tc = useTranslations('common');

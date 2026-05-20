@@ -12,6 +12,28 @@ export async function startClip(
   });
 }
 
+export async function startServerClip(
+  streamToken: string,
+  matchId: string,
+  title: string,
+  startTime: number,
+): Promise<{ clipId: string }> {
+  return apiFetch('/api/clips/start-server-clip', {
+    method: 'POST',
+    body: JSON.stringify({ streamToken, matchId, title, startTime }),
+  });
+}
+
+export async function stopServerClip(
+  clipId: string,
+  endTime: number,
+): Promise<{ status: string }> {
+  return apiFetch(`/api/clips/${clipId}/stop-server-clip`, {
+    method: 'POST',
+    body: JSON.stringify({ endTime }),
+  });
+}
+
 export async function pushSegment(
   clipId: string,
   segment: ClipSegment,
