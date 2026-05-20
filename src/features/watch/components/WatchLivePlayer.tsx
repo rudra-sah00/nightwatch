@@ -199,11 +199,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
                 aria-label="Back to player"
               />
             ) : null}
-            <LivePlayerState
-              streamUrl={props.streamUrl}
-              isPip={isPip}
-              onPip={handleBack}
-            />
+            <LivePlayerState streamUrl={props.streamUrl} isPip={isPip} />
           </Player.Root>
         </div>
       ) : (
@@ -241,16 +237,13 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
  *
  * @param props.streamUrl - Current HLS URL (used by the clip recorder).
  * @param props.isPip - Whether the player is in inline mobile PiP mode.
- * @param props.onPip - Callback when the user taps the PiP exit button.
  */
 function LivePlayerState({
   streamUrl,
   isPip,
-  onPip,
 }: {
   streamUrl: string | null;
   isPip?: boolean;
-  onPip?: () => void;
 }) {
   const { state, playerHandlers, metadata } = usePlayerContext();
   const t = useTranslations('watch.player');
