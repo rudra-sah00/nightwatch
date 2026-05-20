@@ -17,7 +17,7 @@ export function duckMediaElements(factor: number): () => void {
   )) {
     const wasPlaying = !el.paused;
     saved.push({ el, vol: el.volume, wasPlaying });
-    // Pause video elements entirely to prevent PiP from activating
+    // Pause video elements entirely during a call
     if (el instanceof HTMLVideoElement && wasPlaying) {
       el.pause();
     } else {

@@ -15,7 +15,6 @@ export * from './ui/compound/PlayerSkipButtons';
 export * from './ui/compound/PlayerTimeDisplay';
 export * from './ui/compound/PlayerVideo';
 export * from './ui/compound/PlayerVolume';
-export * from './ui/controls/PipButton';
 
 import { PlayerAudioSubtitleSelectors } from './ui/compound/PlayerAudioSubtitleSelectors';
 import { PlayerCastButton } from './ui/compound/PlayerCastButton';
@@ -44,8 +43,6 @@ import { PlayerSkipButtons } from './ui/compound/PlayerSkipButtons';
 import { PlayerTimeDisplay } from './ui/compound/PlayerTimeDisplay';
 import { PlayerVideo } from './ui/compound/PlayerVideo';
 import { PlayerVolume } from './ui/compound/PlayerVolume';
-import { PlayerPipButton } from './ui/controls/PipButton';
-
 /**
  * Namespace object that groups all compound player components for clean
  * `<Player.Root>`, `<Player.Controls>`, etc. usage in consuming components.
@@ -59,7 +56,6 @@ export const Player = {
   MobileCenterControls: PlayerMobileCenterControls,
   MobileBottomRight: PlayerMobileBottomRight,
   Spacer: PlayerSpacer,
-  PipButton: PlayerPipButton,
   PlayPause: PlayerPlayPause,
   SeekBar: PlayerSeekBar,
   MobileSeekBar: PlayerMobileSeekBar,

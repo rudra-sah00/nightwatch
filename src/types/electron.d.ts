@@ -61,17 +61,11 @@ export interface ElectronAPI {
   /** Sets the native electron window frame theme to avoid white flashes and keep context menus aligned */
   setNativeTheme: (theme: 'light' | 'dark' | 'system') => void;
 
-  /** Toggles Picture-in-Picture mode. OpacityLevel 1.0 = Solid. 0.7 = 30% See-Through (Ghost mode) */
-  setPictureInPicture: (isEnabled: boolean, opacityLevel?: number) => void;
-
   /** Sets a red unread badge icon on the Mac Dock/Windows Taskbar when a user gets invited to a party */
   setUnreadBadge: (badgeCount: number) => void;
 
   /** Prevents the OS from going to sleep or locking the screen while a video is playing */
   setKeepAwake: (shouldKeepAwake: boolean) => void;
-
-  /** Tells React when Native PiP forces the window to shrink, allowing us to hide CSS menus. */
-  onPipModeChanged: (callback: (isPipMode: boolean) => void) => () => void;
 
   /** Triggers a native system notification popup (e.g. for Party Invites or Chat messages) */
   showNotification: (payload: {
@@ -111,15 +105,13 @@ export interface ElectronAPI {
     callback: (isFullScreen: boolean) => void,
   ) => () => void;
 
-  /** Tells React when the window has lost focus (good for Auto-PiP) */
+  /** Tells React when the window has lost focus */
   onWindowBlur: (callback: () => void) => () => void;
 
   /** Tells React when the window has regained focus */
   onWindowFocus: (callback: () => void) => () => void;
 
-  /** Fired when the OS native fullscreen state changes on the Electron window.
-   *  Use this to guard blur→PiP so a fullscreen animation never accidentally
-   *  triggers the mini-player. */
+  /** Fired when the OS native fullscreen state changes on the Electron window. */
   onWindowFullscreenChanged: (
     callback: (isFullscreen: boolean) => void,
   ) => () => void;

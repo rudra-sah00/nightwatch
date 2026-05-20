@@ -324,8 +324,7 @@ class AppWindow {
 
     // --- NATIVE FULLSCREEN STATE TRACKING ---
     // macOS fires 'blur' on the BrowserWindow during the OS fullscreen animation.
-    // Without this guard, that spurious blur triggers Auto-PiP mid-transition,
-    // causing a visible snap to the 480×270 PiP size before snapping back.
+    // Track fullscreen state so blur/focus handlers can guard against spurious events.
     let isNativeFullscreen = false;
     // A small grace period after leaving fullscreen to absorb any trailing blur.
     let fullscreenExitGraceTimer = null;
@@ -349,33 +348,15 @@ class AppWindow {
       this.mainWindow.webContents.send('window-fullscreen-changed', false);
     });
 
-    // --- AUTO-PICTURE-IN-PICTURE (PiP) EMITTERS ---
-    // Let Next.js know when the user clicks away, so it can enter a mini-player.
-    // Guard: never fire while the native fullscreen transition is in progress.
-    // Debounce: suppress rapid blur/focus pairs caused by PiP setBounds() animation.
-    let pipDebounceTimer = null;
-
+    // --- AUTO-FOCUS/BLUR EMITTERS ---
+    // Let Next.js know when the user clicks away or returns.
     this.mainWindow.on('blur', () => {
-      if (isNativeFullscreen) return;
       if (this.callActive) return;
-      if (pipDebounceTimer) clearTimeout(pipDebounceTimer);
-      pipDebounceTimer = setTimeout(() => {
-        this.mainWindow.webContents.send('window-blur');
-      }, 150);
+      this.mainWindow.webContents.send('window-blur');
     });
 
     this.mainWindow.on('focus', () => {
-      if (pipDebounceTimer) {
-        clearTimeout(pipDebounceTimer);
-        pipDebounceTimer = null;
-      }
-      // Delay focus event slightly so the PiP→fullsize resize animation
-      // completes before the renderer repaints — prevents macOS traffic
-      // light blinking caused by layout thrash during the animation.
-      pipDebounceTimer = setTimeout(() => {
-        this.mainWindow.webContents.send('window-focus');
-        pipDebounceTimer = null;
-      }, 100);
+      this.mainWindow.webContents.send('window-focus');
     });
 
     // Minimize to tray on close for all platforms (standard behavior)

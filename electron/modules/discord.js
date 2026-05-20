@@ -77,7 +77,7 @@ class DiscordIntegration {
 
     const merged = {
       largeImageKey: 'nightwatch_logo',
-      largeImageText: 'Nightwatch App',
+      largeImageText: 'Nightwatch',
       startTimestamp: this.startTimestamp,
       instance: false,
       ...presence,
