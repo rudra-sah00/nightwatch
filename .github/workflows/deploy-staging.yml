@@ -56,7 +56,7 @@ jobs:
           docker pull ghcr.io/${{ github.repository }}-staging:latest
           docker tag ghcr.io/${{ github.repository }}-staging:latest nightwatch-frontend-staging:latest
 
-          docker compose -f docker-compose.staging.yml -p nightwatch-staging up -d frontend-staging nginx-staging --force-recreate
+          docker compose -f docker-compose.staging.yml -p nightwatch-staging up -d frontend-staging --force-recreate
 
           echo "✅ Frontend staging deployed at https://dev.nightwatch.in"
           DEPLOY
