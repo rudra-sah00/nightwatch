@@ -138,16 +138,12 @@ function createBridge() {
       storeDelete: noop as (k: string) => void,
       getAppVersion: async () => '',
       setNativeTheme: noop as (t: string) => void,
-      setPictureInPicture: noop as (e: boolean, o?: number) => void,
       setUnreadBadge: noop as (c: number) => void,
       setKeepAwake: noop as (k: boolean) => void,
       setCallActive: noop as (active: boolean) => void,
       windowMinimize: noop,
       windowMaximize: noop,
       windowClose: noop,
-      onPipModeChanged: noopListen as (
-        cb: (isPip: boolean) => void,
-      ) => UnlistenFn,
       showNotification: noop as (p: {
         title: string;
         body: string;
@@ -198,16 +194,12 @@ function createBridge() {
     storeDelete: (k: string) => e.storeDelete(k),
     getAppVersion: () => e.getAppVersion() as Promise<string>,
     setNativeTheme: (t: string) => e.setNativeTheme(t),
-    setPictureInPicture: (enabled: boolean, opacity = 1.0) =>
-      e.setPictureInPicture(enabled, opacity),
     setUnreadBadge: (c: number) => e.setUnreadBadge(c),
     setKeepAwake: (k: boolean) => e.setKeepAwake(k),
     setCallActive: (active: boolean) => e.setCallActive(active),
     windowMinimize: () => e.windowMinimize(),
     windowMaximize: () => e.windowMaximize(),
     windowClose: () => e.windowClose(),
-    onPipModeChanged: (cb: (isPip: boolean) => void) =>
-      e.onPipModeChanged(cb) as UnlistenFn,
     showNotification: (p: {
       title: string;
       body: string;
@@ -252,7 +244,7 @@ function createBridge() {
  * bridge methods unconditionally without platform guards.
  *
  * Methods cover: Discord Rich Presence, clipboard, persistent key-value store,
- * native theme, Picture-in-Picture, window controls, notifications, media keys,
+ * native theme, window controls, notifications, media keys,
  * fullscreen, offline downloads, and more.
  */
 export const desktopBridge = createBridge();

@@ -15,8 +15,6 @@ import { MusicDiscordPresence } from '@/features/music/components/MusicDiscordPr
 import { MusicMediaSession } from '@/features/music/components/MusicMediaSession';
 import { MusicPlayerProvider } from '@/features/music/context/MusicPlayerContext';
 import { RemoteDisc } from '@/features/remote-control/components/RemoteDisc';
-import { PipOverlay } from '@/features/watch/player/ui/overlays/PipOverlay';
-import { PipProvider } from '@/providers/pip-provider';
 
 export default function ProtectedLayout({
   children,
@@ -28,25 +26,22 @@ export default function ProtectedLayout({
       <CallProvider>
         <FeatureErrorBoundary feature="Music" silent>
           <MusicPlayerProvider>
-            <PipProvider>
-              <FeatureErrorBoundary feature="Call Overlay" silent>
-                <CallOverlay />
-              </FeatureErrorBoundary>
-              <PipOverlay />
-              <FeatureErrorBoundary feature="Music Player" silent>
-                <FullPlayer />
-                <FloatingDisc />
-                <MusicAutoStop />
-                <MusicDeviceSync />
-                <MusicDiscordPresence />
-                <MusicMediaSession />
-              </FeatureErrorBoundary>
-              <RemoteDisc />
-              <MobileAppLifecycle />
-              <div className="h-full bg-background flex flex-col overflow-hidden">
-                <main className="flex-1 w-full min-h-0">{children}</main>
-              </div>
-            </PipProvider>
+            <FeatureErrorBoundary feature="Call Overlay" silent>
+              <CallOverlay />
+            </FeatureErrorBoundary>
+            <FeatureErrorBoundary feature="Music Player" silent>
+              <FullPlayer />
+              <FloatingDisc />
+              <MusicAutoStop />
+              <MusicDeviceSync />
+              <MusicDiscordPresence />
+              <MusicMediaSession />
+            </FeatureErrorBoundary>
+            <RemoteDisc />
+            <MobileAppLifecycle />
+            <div className="h-full bg-background flex flex-col overflow-hidden">
+              <main className="flex-1 w-full min-h-0">{children}</main>
+            </div>
           </MusicPlayerProvider>
         </FeatureErrorBoundary>
       </CallProvider>

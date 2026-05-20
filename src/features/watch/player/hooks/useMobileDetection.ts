@@ -35,8 +35,8 @@ export function useMobileDetection() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Electron desktop is never mobile. Skip resize listener entirely so PiP
-    // window shrink (480×270) doesn't flip the layout and remount the player.
+    // Electron desktop is never mobile. Skip resize listener entirely so
+    // window shrink doesn't flip the layout and remount the player.
     if (checkIsDesktop()) {
       setIsMobile(false);
       return;

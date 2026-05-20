@@ -1,10 +1,9 @@
 import { SkipBack, SkipForward } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useRemoteControlListener } from '@/features/remote-control/hooks/use-remote-control-listener';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
-import { usePipContext } from '@/providers/pip-provider';
 import { useSocket } from '@/providers/socket-provider';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
 import { Player, usePlayerContext } from '../player';
@@ -93,7 +92,6 @@ interface WatchPlayerProps {
  * - Updates Discord Rich Presence on Electron via `desktopBridge`.
  * - Broadcasts a `watch:set_activity` socket event so friends can see what
  *   the user is watching, cleared on unmount.
- * - Registers with the global {@link PipProvider} so cross-route PiP works.
  *
  * @param props - {@link WatchPlayerProps}
  * @returns The memoised VOD player element.
@@ -243,10 +241,6 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
                 aria-label="Back to player"
               />
             ) : null}
-            <PipRegistrar
-              streamUrl={props.streamUrl}
-              metadata={props.metadata}
-            />
             <VODPlayerState
               hideBackButton={props.hideBackButton}
               isPip={isPip}
@@ -269,7 +263,6 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
           onBack={handleBack}
           onNavigate={props.onNavigate || ((url) => router.replace(url))}
         >
-          <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
           <VODPlayerState hideBackButton={props.hideBackButton} isPip={false} />
         </Player.Root>
       )}
@@ -405,11 +398,6 @@ function VODPlayerState({
             <Player.Header hideBackButton={hideBackButton} />
             {/* Mobile top-right: settings + fullscreen (YouTube-style) */}
             <Player.MobileTopBar>
-              <Player.PipButton
-                onPip={() => {
-                  if (onPip) onPip();
-                }}
-              />
               <Player.SettingsMenu />
             </Player.MobileTopBar>
             {/* Mobile center: skip back / play / skip forward (YouTube-style) */}
@@ -495,31 +483,6 @@ function MobileSkipForward() {
       <SkipForward className="w-7 h-7 text-white fill-white" />
     </button>
   );
-}
-
-/** Registers the current video element with the global PiP provider so it can
- *  be captured when the user navigates away from the watch route. */
-function PipRegistrar({
-  streamUrl,
-  metadata,
-}: {
-  streamUrl: string | null;
-  metadata: VideoMetadata;
-}) {
-  const { videoRef } = usePlayerContext();
-  const pip = usePipContext();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (!pip || !streamUrl) return;
-    pip.register(
-      { streamUrl, watchUrl: pathname, title: metadata.title },
-      videoRef.current!,
-    );
-    return () => pip.unregister();
-  }, [pip, streamUrl, pathname, metadata.title, videoRef]);
-
-  return null;
 }
 
 /**

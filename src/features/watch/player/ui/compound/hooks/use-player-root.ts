@@ -370,36 +370,6 @@ export function usePlayerRoot({
     onToggleFullscreen: toggleFullscreen,
   });
 
-  const [_isDesktopPip, setIsDesktopPip] = useState(false);
-  const isPipRef = useRef(false);
-
-  useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-    if (checkIsDesktop() && desktopBridge.onPipModeChanged) {
-      unsubscribe = desktopBridge.onPipModeChanged((isPip) => {
-        setIsDesktopPip(isPip);
-        isPipRef.current = isPip;
-        dispatch({ type: isPip ? 'HIDE_CONTROLS' : 'SHOW_CONTROLS' });
-
-        // Let the CSS know we are in native PiP so we can strip borders
-        if (isPip) {
-          document.body.classList.add('is-desktop-pip');
-        } else {
-          document.body.classList.remove('is-desktop-pip');
-        }
-      });
-    }
-    return () => unsubscribe?.();
-  }, []);
-
-  // --- AUTO-PiP ON BLUR IMPL ---
-  const isPlayingRef = useRef(state.isPlaying);
-  const isPausedRef = useRef(state.isPaused);
-  useEffect(() => {
-    isPlayingRef.current = state.isPlaying;
-    isPausedRef.current = state.isPaused;
-  }, [state.isPlaying, state.isPaused]);
-
   // --- NATIVE OS: KEEP AWAKE DURING PLAYBACK ---
   useEffect(() => {
     const playing = state.isPlaying && !state.isPaused;
@@ -419,16 +389,8 @@ export function usePlayerRoot({
     };
   }, [state.isPlaying, state.isPaused]);
 
-  // --- REACT-SIDE NATIVE FULLSCREEN GUARD ---
-  // Tracks whether the Electron window is currently in (or transitioning out of)
-  // OS native fullscreen. The main process sends 'window-fullscreen-changed'
-  // on enter-full-screen and leave-full-screen events, and also suppresses
-  // blur IPC during the transition. This ref is the React-side backstop.
-  const isNativeFullscreenRef = useRef(false);
-  const fullscreenExitGraceRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-
+  // --- NATIVE FULLSCREEN STATE SYNC ---
+  // Syncs the Electron native fullscreen state with the player's React state.
   useEffect(() => {
     if (
       typeof window === 'undefined' ||
@@ -439,66 +401,9 @@ export function usePlayerRoot({
     }
     const unsubscribe = desktopBridge.onWindowFullscreenChanged((isFs) => {
       dispatch({ type: 'SET_FULLSCREEN', isFullscreen: isFs });
-      if (isFs) {
-        // Entering fullscreen — clear any pending grace timer and mark as fullscreen.
-        if (fullscreenExitGraceRef.current) {
-          clearTimeout(fullscreenExitGraceRef.current);
-          fullscreenExitGraceRef.current = null;
-        }
-        isNativeFullscreenRef.current = true;
-      } else {
-        // Leaving fullscreen — hold the flag for a short grace period to absorb
-        // any trailing blur event from the OS animation (~300 ms on macOS).
-        fullscreenExitGraceRef.current = setTimeout(() => {
-          isNativeFullscreenRef.current = false;
-          fullscreenExitGraceRef.current = null;
-        }, 350);
-      }
     });
     return () => {
       unsubscribe();
-      if (fullscreenExitGraceRef.current)
-        clearTimeout(fullscreenExitGraceRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    let unsubscribeBlur: (() => void) | undefined;
-    let unsubscribeFocus: (() => void) | undefined;
-
-    if (checkIsDesktop()) {
-      if (desktopBridge.onWindowBlur) {
-        unsubscribeBlur = desktopBridge.onWindowBlur(() => {
-          // Guard 0: Don't re-trigger if already in PiP mode
-          if (isPipRef.current) return;
-
-          // Guard 1: Never auto-PiP during a native OS fullscreen transition.
-          // The main process already suppresses blur IPC in this case, but this
-          // ref acts as a belt-and-suspenders backstop for the React side.
-          if (isNativeFullscreenRef.current) return;
-
-          // Guard 2: Never auto-PiP during active navigation to another page.
-          // This prevents the infinite zoom-in/out loop when clicking 'Back'.
-          if (isNavigatingRef.current) return;
-
-          // Guard 3: Only Auto-PiP if we are actively playing media.
-          if (isPlayingRef.current && !isPausedRef.current) {
-            desktopBridge.setPictureInPicture(true, 1.0);
-          }
-        });
-      }
-
-      if (desktopBridge.onWindowFocus) {
-        unsubscribeFocus = desktopBridge.onWindowFocus(() => {
-          // Restore window normally when user comes back
-          desktopBridge.setPictureInPicture(false);
-        });
-      }
-    }
-
-    return () => {
-      unsubscribeBlur?.();
-      unsubscribeFocus?.();
     };
   }, []);
 

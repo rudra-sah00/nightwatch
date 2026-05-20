@@ -57,11 +57,11 @@ export function PlayerControlRow({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * YouTube-style mobile top bar: PiP minimize button top-left, settings gear top-right.
+ * YouTube-style mobile top bar: settings gear top-right.
  *
  * Only visible on mobile (`md:hidden`). Receives pointer events so buttons remain tappable.
  *
- * @param props.children - Typically {@link PlayerPipButton} and {@link SettingsMenu}.
+ * @param props.children - Typically settings and other mobile controls.
  */
 export function PlayerMobileTopBar({
   children,

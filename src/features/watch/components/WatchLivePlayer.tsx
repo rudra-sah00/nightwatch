@@ -1,6 +1,6 @@
 'use client';
 import { SkipBack, SkipForward } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -12,7 +12,6 @@ import {
   checkIsMobile,
   desktopBridge,
 } from '@/lib/electron-bridge';
-import { usePipContext } from '@/providers/pip-provider';
 import { useSocket } from '@/providers/socket-provider';
 import { Player, usePlayerContext } from '../player';
 import type { VideoMetadata } from '../player/context/types';
@@ -200,10 +199,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
                 aria-label="Back to player"
               />
             ) : null}
-            <PipRegistrar
-              streamUrl={props.streamUrl}
-              metadata={props.metadata}
-            />
             <LivePlayerState
               streamUrl={props.streamUrl}
               isPip={isPip}
@@ -227,7 +222,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
           onBack={handleBack}
           onNavigate={(url) => router.push(url)}
         >
-          <PipRegistrar streamUrl={props.streamUrl} metadata={props.metadata} />
           <LivePlayerState streamUrl={props.streamUrl} isPip={false} />
         </Player.Root>
       )}
@@ -372,9 +366,8 @@ function LivePlayerState({
       {isPip ? null : (
         <Player.Controls>
           <Player.Header rightContent={recordButton} />
-          {/* Mobile top: PiP left, settings right */}
+          {/* Mobile top: settings right */}
           <Player.MobileTopBar>
-            <Player.PipButton onPip={() => onPip?.()} />
             <Player.SettingsMenu />
           </Player.MobileTopBar>
           {/* Mobile center: skip back / play / skip forward */}
@@ -439,36 +432,6 @@ function MobileSkipForward() {
       <SkipForward className="w-7 h-7 text-white fill-white" />
     </button>
   );
-}
-
-/**
- * Registers the current live video element with the global {@link PipProvider}
- * so cross-route PiP can activate when the user navigates away.
- *
- * @param props.streamUrl - Current HLS live manifest URL.
- * @param props.metadata - Video metadata (title used in the PiP overlay).
- */
-function PipRegistrar({
-  streamUrl,
-  metadata,
-}: {
-  streamUrl: string | null;
-  metadata: VideoMetadata;
-}) {
-  const { videoRef } = usePlayerContext();
-  const pip = usePipContext();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (!pip || !streamUrl) return;
-    pip.register(
-      { streamUrl, watchUrl: pathname, title: metadata.title },
-      videoRef.current!,
-    );
-    return () => pip.unregister();
-  }, [pip, streamUrl, pathname, metadata.title, videoRef]);
-
-  return null;
 }
 
 /**

@@ -25,10 +25,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Sync React Native Theme with Electron Window Frame
   setNativeTheme: (theme) => ipcRenderer.send('set-native-theme', theme),
 
-  // Toggle Picture-in-Picture mode (Always on Top) with optional opacity (0.7 = 70% safe transparent!)
-  setPictureInPicture: (isEnabled, opacityLevel = 1.0) =>
-    ipcRenderer.send('set-pip', isEnabled, opacityLevel),
-
   // Set an unread chat count overlay badge on the Windows Taskbar / Mac Dock (and bounce the icon)
   setUnreadBadge: (badgeCount) => ipcRenderer.send('set-badge', badgeCount),
 
@@ -39,14 +35,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   windowMinimize: () => ipcRenderer.send('window-minimize'),
   windowMaximize: () => ipcRenderer.send('window-maximize'),
   windowClose: () => ipcRenderer.send('window-close'),
-
-  // Listener to hide CSS when the Native Window shrinks down to a PiP block
-  onPipModeChanged: (callback) => {
-    ipcRenderer.removeAllListeners('pip-mode-changed');
-    const subscription = (_event, isPip) => callback(isPip);
-    ipcRenderer.on('pip-mode-changed', subscription);
-    return () => ipcRenderer.removeListener('pip-mode-changed', subscription);
-  },
 
   // Native Desktop Notifications (e.g., Party Invites)
   showNotification: (payload) => ipcRenderer.send('show-notification', payload),
@@ -77,7 +65,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('media-command', subscription);
   },
 
-  // Listen for Window Auto-PiP Triggers (Blur/Focus)
+  // Listen for Window Blur/Focus events
   onWindowBlur: (callback) => {
     ipcRenderer.removeAllListeners('window-blur');
     const subscription = () => callback();
@@ -96,8 +84,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   toggleFullscreen: () => ipcRenderer.invoke('toggle-fullscreen'),
 
   // Fired when the native OS fullscreen state changes (enter or leave).
-  // React uses this to guard blur→PiP so a fullscreen transition never
-  // accidentally triggers the mini-player.
   onWindowFullscreenChanged: (callback) => {
     ipcRenderer.removeAllListeners('window-fullscreen-changed');
     const subscription = (_event, isFullscreen) => callback(isFullscreen);

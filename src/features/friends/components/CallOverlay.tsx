@@ -234,7 +234,7 @@ export function CallOverlay() {
                   </p>
                 </div>
               )}
-              {/* PiP small video (local by default, remote when swapped) */}
+              {/* Small video (local by default, remote when swapped) */}
               {callState === 'active' && (
                 <button
                   type="button"

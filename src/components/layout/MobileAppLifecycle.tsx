@@ -8,7 +8,6 @@ import { mobileBridge } from '@/lib/mobile-bridge';
 /**
  * Handles app background/foreground lifecycle on mobile.
  * - Revalidates auth token on resume (JS timers freeze in background).
- * - Video PiP is handled by PipProvider (requestPictureInPicture on background).
  * - Music (HTMLAudioElement): keeps playing in background (unchanged).
  */
 export function MobileAppLifecycle() {
