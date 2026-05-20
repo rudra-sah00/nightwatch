@@ -88,7 +88,9 @@
     "thickness": "मोटाई",
     "opacity": "अपारदर्शिता",
     "close": "बंद करें",
-    "anonymous": "अनाम"
+    "anonymous": "अनाम",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "लोग",

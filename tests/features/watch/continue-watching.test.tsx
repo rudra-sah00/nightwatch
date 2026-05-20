@@ -16,11 +16,6 @@ vi.mock(
   () => import('./__mocks__/socket-provider'),
 );
 
-// Mock ServerProvider
-vi.mock('@/providers/server-provider', () => ({
-  useServer: () => ({ activeServer: 's1', setActiveServer: () => {} }),
-}));
-
 describe('ContinueWatching', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -351,10 +346,7 @@ describe('ContinueWatching', () => {
     const removeButton = screen.getByTitle('continueWatching.removeAriaLabel');
     await user.click(removeButton);
 
-    expect(deleteWatchProgress).toHaveBeenCalledWith(
-      'progress-1',
-      expect.any(String),
-    );
+    expect(deleteWatchProgress).toHaveBeenCalledWith('progress-1');
   });
 
   it('shows error toast when remove fails', async () => {

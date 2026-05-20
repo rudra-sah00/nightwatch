@@ -88,7 +88,9 @@
     "thickness": "السُمك",
     "opacity": "الشفافية",
     "close": "إغلاق",
-    "anonymous": "مجهول"
+    "anonymous": "مجهول",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "tabs": {
     "people": "الأشخاص",
