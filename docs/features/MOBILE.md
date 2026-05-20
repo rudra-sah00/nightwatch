@@ -57,7 +57,6 @@ Key decisions:
 | 13 | Filesystem | `@capacitor/filesystem` | Read/write files for offline downloads |
 | 14 | Phone Call Notification | `@anuradev/capacitor-phone-call-notification` | Android "call in progress" notification |
 | 15 | CallKit | `@capgo/capacitor-incoming-call-kit` | iOS incoming call UI (green pill, lock screen) |
-| 16 | Picture-in-Picture | Native WebKit API | Background video via `requestPictureInPicture()` |
 
 ## Mobile Bridge API
 
@@ -222,16 +221,6 @@ Capacitor's keyboard resize is set to `None` — the app handles insets manually
 
 See [DOWNLOADS.md](./DOWNLOADS.md) for the full offline download system. The mobile-specific implementation lives in `src/capacitor/downloads/` and uses the Capacitor Filesystem plugin to store content in an `OfflineVault` directory.
 
-## Picture-in-Picture
-
-The global `PipProvider` (`src/providers/pip-provider.tsx`) handles cross-route video continuity on mobile:
-
-- When navigating away from a video route (`/watch/`, `/live/`, `/clip/`) with a playing video, a floating mini-player appears
-- When the app goes to background, native PiP is activated via `requestPictureInPicture()`
-- PiP auto-closes when music starts playing (conflict resolution)
-
-See [ARCHITECTURE.md](../ARCHITECTURE.md) for the full PiP system design.
-
 ## Development Workflow
 
 ### Prerequisites
@@ -303,6 +292,4 @@ src/
 │       └── providers/
 │           ├── s1.ts                  # Server 1 (HLS)
 │           └── s2.ts                  # Server 1 (MP4 or HLS)
-└── providers/
-    └── pip-provider.tsx               # Cross-route PiP + native background PiP
 ```

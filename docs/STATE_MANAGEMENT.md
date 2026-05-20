@@ -14,7 +14,6 @@ For providing singleton instances and infrequently-changing values down the tree
 *   **`AuthProvider`**: Thin wrapper that syncs the Zustand auth store with WebSocket connections and profile data. Exposes `useAuth()` which reads directly from the Zustand store.
 *   **`SocketProvider`**: Manages the singleton `socket.io-client` connection instance.
 *   **`ThemeProvider`**: Light/dark theme with `useMemo`-stabilized context value to prevent unnecessary re-renders.
-*   **`ServerProvider`**: Active content server selection (`s1`/`s2`/`s3`), synced from user preferences via `useEffect`.
 
 ### Decision Tree
 | Need | Use |
@@ -66,7 +65,7 @@ We do not use Apollo or React Query. Instead, we lean directly into Next.js App 
 All client-side API caching uses a unified `createTTLCache<T>(ttlMs, maxSize)` utility:
 *   **Search API**: 4 caches (results 5min, suggestions 10min, show details 5min, episodes 10min)
 *   **Profile API**: Profile data cache (5min)
-*   **Watch API**: Continue-watching cache (30s), progress cache (2min) — uses custom per-server keying
+*   **Watch API**: Continue-watching cache (30s), progress cache (2min)
 
 All caches auto-register in a global registry. `clearAllCaches()` is called on logout to prevent stale data across sessions.
 

@@ -41,8 +41,6 @@ Manages the watchlist page state:
 
 ```typescript
 function useWatchlist(): {
-  activeServer: string;       // From ServerProvider
-  serverLabel: string;        // Human-readable server name
   watchlist: WatchlistItem[]; // Current items
   loading: boolean;
   selectedId: string | null;  // Content ID for detail modal

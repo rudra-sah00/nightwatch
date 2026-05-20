@@ -20,7 +20,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 
 ### Core Architecture
 - [Setup & Local Development](./docs/SETUP.md): Instructions for environment variables, dependencies, and local start.
-- [High-Level Architecture](./docs/ARCHITECTURE.md): The Next.js framework, real-time topologies, React state strategies, platform layers, PiP system, and player compound components.
+- [High-Level Architecture](./docs/ARCHITECTURE.md): The Next.js framework, real-time topologies, React state strategies, platform layers, and player compound components.
 - [API Layer & Communication](./docs/API_LAYER.md): Integration with Node.js backend, Agora RTM/RTC, and WebRTC protocols.
 - [State Management Strategy](./docs/STATE_MANAGEMENT.md): Multi-tiered state management using Provider Contexts, Server Actions, and React hooks.
 - [Testing Methodology](./docs/TESTING.md): Unit, integration, and E2E testing strategies using Vitest and Playwright.
@@ -91,7 +91,7 @@ pnpm validate
 
 ## Desktop Application (macOS, Windows, Linux)
 
-This repository also contains a native OS desktop wrapper using Electron (Node.js). It adds Picture-in-Picture mode, system tray icons, Discord Rich Presence, media key controls, offline downloads, and macOS Dock unread badging.
+This repository also contains a native OS desktop wrapper using Electron (Node.js). It adds system tray icons, Discord Rich Presence, media key controls, offline downloads, and macOS Dock unread badging.
 
 To develop the desktop app locally:
 ```bash

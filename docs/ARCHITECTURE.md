@@ -78,7 +78,7 @@ The desktop app wraps the Next.js frontend in an Electron shell with a preload s
 import { desktopBridge, checkIsDesktop } from '@/lib/electron-bridge';
 
 if (checkIsDesktop()) {
-  desktopBridge.setPictureInPicture(true);
+  desktopBridge.updateDiscordPresence(activity);
 }
 ```
 
@@ -87,7 +87,6 @@ if (checkIsDesktop()) {
 | Feature | Bridge Method | Description |
 |---------|--------------|-------------|
 | Discord Rich Presence | `updateDiscordPresence()` / `clearDiscordPresence()` | Shows current activity in Discord |
-| Picture-in-Picture | `setPictureInPicture(enabled, opacity)` | OS-level always-on-top mini player |
 | System Tray | (main process) | Background presence with unread badge |
 | Media Keys | `onMediaCommand(cb)` | Play/pause/next/prev from keyboard |
 | Window Controls | `windowMinimize()` / `windowMaximize()` / `windowClose()` | Frameless window management |
@@ -161,85 +160,7 @@ const isMobile = useIsMobile(); // true if <768px OR Capacitor native
 
 ---
 
-## 8. Picture-in-Picture System
-
-Nightwatch implements a multi-layer PiP system that works across routes and platforms.
-
-### Global PipProvider (`src/providers/pip-provider.tsx`)
-
-The `PipProvider` wraps the entire protected layout and manages cross-route video continuity on mobile:
-
-```
-PlayerRoot (watch page)
-  → register(streamUrl, title, watchUrl, videoEl)
-  → user navigates away from /watch/, /live/, /clip/
-  → PipProvider captures currentTime + streamUrl
-  → renders floating PipPlayer mini-player (bottom-right, 45vw)
-  → user taps mini-player → navigates back to watchUrl
-  → user navigates to another video route → PiP closes
-```
-
-### Route-Change Detection
-
-The provider watches `pathname` via `usePathname()`:
-
-- **Navigating AWAY from a video route** with a registered, playing video → activate PiP
-- **Navigating TO a video route** → close any existing PiP (avoid conflicts)
-
-Video routes: `/watch/`, `/live/`, `/clip/`
-
-### Music Conflict Resolution
-
-If music starts playing while PiP is active, PiP is automatically closed so audio streams don't overlap:
-
-```ts
-const { isPlaying: musicPlaying } = useMusicPlayerContext();
-useEffect(() => {
-  if (musicPlaying && pip) close();
-}, [musicPlaying, pip, close]);
-```
-
-### Native Background PiP (Capacitor)
-
-When the app goes to background on mobile, the provider uses the native `requestPictureInPicture()` API:
-
-```ts
-mobileBridge.onAppStateChange(({ isActive }) => {
-  if (!isActive) {
-    videoEl.requestPictureInPicture?.();  // Enter native PiP
-  } else {
-    document.exitPictureInPicture();      // Return to app
-  }
-});
-```
-
-### Desktop PiP (Electron)
-
-On desktop, PiP uses the Electron main process for an always-on-top mini window:
-
-```ts
-desktopBridge.setPictureInPicture(enabled, opacity);
-desktopBridge.onPipModeChanged((isPip) => { ... });
-```
-
-### PipPlayer Component
-
-The floating mini-player renders when PiP is active on mobile:
-
-- Fixed position: `bottom: calc(1rem + env(safe-area-inset-bottom))`, `right: 0.75rem`
-- Size: `45vw` with `16:9` aspect ratio
-- Seeks to saved `currentTime` on `loadedmetadata`
-- Tap overlay → navigate back to original watch route
-- Close button (X) → dismiss PiP
-- Title bar with gradient overlay
-
-### Local IntersectionObserver PiP
-
-Individual player components (e.g., `PipOverlay`) use `IntersectionObserver` to detect when the video element scrolls out of view within a page, triggering an in-page mini-player overlay without the global PiP system.
-
----
-
-## 9. Player Compound Component Pattern
+## 8. Player Compound Component Pattern
 
 The video player uses a **compound component** architecture where a root provider exposes shared state to composable child components via React Context.
 
@@ -319,7 +240,7 @@ src/features/watch/player/ui/compound/
 
 Each child component consumes `PlayerContext` and renders a single concern:
 
-- `PlayerVideo` — renders `<video>` with event bindings, registers with PipProvider
+- `PlayerVideo` — renders `<video>` with event bindings
 - `PlayerControls` — auto-hiding control bar with idle detection
 - `PlayerSeekBar` — draggable seek with sprite thumbnail preview on hover
 - `PlayerMobileSeekBar` — swipe-based seek optimized for touch

@@ -107,7 +107,6 @@ Mini-player features:
 Also:
 - Updates Discord Rich Presence via `desktopBridge`
 - Broadcasts `watch:set_activity` socket event for friend activity feeds (cleared on unmount)
-- Registers with global `PipProvider` for cross-route PiP
 
 Internal `VODPlayerState` renders: loading poster overlay, buffering spinner, error overlay, center play button, mobile-specific controls layout, episode panel, and next-episode auto-play overlay.
 

@@ -161,6 +161,12 @@ Footer: `MediaControls` with Agora voice/video controls.
 
 Horizontal icon tab bar (People, Chat, Soundboard, Sketch) using Lucide icons. Active tab gets `neo-yellow` variant styling.
 
+### WatchPartySettings
+
+`components/WatchPartySettings.tsx`
+
+Full-screen overlay panel for room configuration. Replaces the previous dialog-based settings with an immersive overlay that covers the entire watch party interface. Hosts can manage global permissions (chat, draw, soundboard), update member-specific overrides, and configure room settings without losing context of the active session.
+
 ### MediaControls
 
 `components/MediaControls.tsx`
@@ -214,7 +220,7 @@ Transparent overlay (no background) rendered over the video when the sidebar is 
 
 | Hook | File | Purpose |
 |------|------|---------|
-| `useWatchPartyChat` | `chat/hooks/useWatchPartyChat.ts` | Full RTM chat lifecycle: optimistic send → backend persist → RTM broadcast. Handles incoming `CHAT`, `TYPING_START`, `TYPING_STOP` messages. Plays notification sound when chat is hidden. |
+| `useWatchPartyChat` | `chat/hooks/useWatchPartyChat.ts` | Full RTM chat lifecycle: optimistic send → backend persist → RTM broadcast. Handles incoming `CHAT`, `TYPING_START`, `TYPING_STOP` messages. Plays notification sound when chat is hidden. Supports paginated message loading for long sessions. |
 | `useWatchPartyChat` (UI) | `chat/hooks/use-watch-party-chat.ts` | Local UI state: input value, emoji picker visibility, auto-scroll on new messages, typing indicator signaling with 3s debounce, Enter-to-send. |
 | `useChatScroll` | `chat/hooks/use-chat-scroll.ts` | Scrolls to bottom on initial render. |
 
@@ -238,8 +244,8 @@ Handles top-level RTM messages: `JOIN_APPROVED`, `JOIN_REJECTED`, `KICK`, `PARTY
 
 `room/hooks/useWatchPartyLifecycle.ts`
 
-Manages room creation, join requests, approval polling (Socket.IO for pending state), and leaving. Key flows:
-- **Pending state polling**: Opens a temporary Socket.IO connection that listens for `JOIN_RESULT` events while the request is pending.
+Manages room creation, join requests, approval polling (Socket.IO for pending state with HTTP polling fallback), and leaving. Key flows:
+- **Pending state polling**: Opens a temporary Socket.IO connection that listens for `JOIN_RESULT` events while the request is pending. Falls back to periodic HTTP polling if the socket connection fails, ensuring guests are never stuck in a pending state.
 - **`requestJoin`**: POST to `/api/rooms/:id/join`, handles `pending` (stores guest token) and `joined` (normalizes URLs, sets room state).
 - **`leaveRoom`**: Broadcasts `PARTY_CLOSED` via RTM if host, then calls REST leave endpoint.
 
@@ -260,7 +266,8 @@ Manages membership: approve/reject/kick via REST + RTM broadcast. Features:
 Host↔guest playback synchronization:
 - **Host**: `emitEvent` broadcasts `PLAY_EVENT`/`PAUSE_EVENT`/`SEEK_EVENT`/`RATE_EVENT` via RTM and persists to backend via `syncPartyState`.
 - **Guest**: Processes incoming events, applies state updates via `onStateUpdate` callback, handles host disconnect/reconnect with configurable grace period (30s default).
-- **Content updates**: `updateContent` calls REST endpoint and broadcasts `CONTENT_UPDATED` via RTM.
+- **Content updates**: `updateContent` calls REST endpoint and broadcasts `CONTENT_UPDATED` via RTM. Includes a race condition guard to prevent stale content from overwriting newer updates when rapid switches occur.
+- **Stream token auto-renewal**: Automatically refreshes the stream token before expiry via the `/api/rooms/:id/stream-token` endpoint, preventing playback interruptions during long sessions.
 - **Livestream normalization**: Seek and rate events are converted to play/pause for live streams (no time-based seeking).
 
 ### usePredictiveSync
@@ -293,7 +300,7 @@ Attaches `play`, `pause`, `seeked`, and `ratechange` event listeners to the host
 
 `room/hooks/useClockSync.ts`
 
-One-way clock offset calibration: `offset = serverTime - localReceiveTime`. Calibrated dynamically from RTM messages containing `serverTime`.
+Multi-sample clock offset calibration: collects multiple RTM message timestamps and computes a stable offset using median filtering to reduce jitter. Formula: `offset = median(serverTime - localReceiveTime)` across recent samples.
 
 ### useWatchPartyFullscreen
 
@@ -314,7 +321,7 @@ Container-level fullscreen with Safari/WebKit vendor-prefix fallbacks. In Electr
 | `useParticipantView` | `hooks/use-participant-view.ts` | Attaches Agora video track to container div, non-mirrored style. |
 | `useMediaControls` | `hooks/use-media-controls.ts` | Audio/video device dropdown visibility state. |
 | `useDesktopNotifications` | `hooks/use-desktop-notifications.ts` | Discord Rich Presence, taskbar unread badge, native OS toast notifications for messages when window is blurred. |
-| `useWatchPartySettings` | `hooks/use-watch-party-settings.ts` | Settings dialog open/close state. |
+| `useWatchPartySettings` | `hooks/use-watch-party-settings.ts` | Settings overlay open/close state. |
 
 ## Media Hooks
 
@@ -322,7 +329,7 @@ Container-level fullscreen with Safari/WebKit vendor-prefix fallbacks. In Electr
 
 `media/hooks/useAgoraToken.ts`
 
-Fetches an Agora RTC token for the given room and user. Handles both authenticated users and approved guests (via session-stored guest token). Returns `token`, `appId`, `channel`, `uid`, `isLoading`, `error`.
+Fetches an Agora RTC token for the given room and user. Handles both authenticated users and approved guests (via session-stored guest token). Automatically renews the token before expiry to prevent mid-session disconnects. Returns `token`, `appId`, `channel`, `uid`, `isLoading`, `error`.
 
 ### useAgora
 
@@ -368,7 +375,7 @@ Searchable sound panel with:
 
 14 drawing tools: select, freehand, pencil, arrow, line, rectangle, circle, triangle, star, bubble, text, sticker, laser, eraser, reaction.
 
-Features: 19-color palette + custom color picker, stroke width slider, opacity slider, fill toggle, undo, clear (self/all), z-order controls, "Capture Scene" PNG export, remote cursor rendering, real-time sync via RTM (`SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_MOVE_Z`, `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION`).
+Features: 19-color palette + custom color picker, stroke width slider, opacity slider, fill toggle, undo, clear (self/all), z-order controls, "Capture Scene" saves to clip library, remote cursor rendering (batched updates), real-time sync via RTM (`SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_MOVE_Z`, `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION`). Lines are rendered without shadow for cleaner visuals.
 
 ### SketchContext
 
@@ -445,7 +452,7 @@ All calls go through `apiFetch` (cookie-authenticated). Defined in `room/service
 | Speaker state via ref | Volume indicator writes to `speakerStateRef`, triggers React update at most every 500ms |
 | Stable `onPartyEvent` | Uses ref pattern in `useWatchPartyHostSync` — video listeners attached once, never re-attached |
 | Stable `getExpectedTime` | Uses `clockOffsetRef` — callback identity never changes |
-| Cursor broadcast throttle | 10fps (100ms) instead of 30fps for RTM bandwidth savings |
+| Cursor broadcast throttle | Batched at 10fps (100ms) instead of per-move for RTM bandwidth savings |
 | Member count dep | Sync effect tracks `room.members.length` not the full array reference |
 | Toggle guards | `isTogglingAudio`/`isTogglingVideo` refs prevent double-click race conditions |
 
