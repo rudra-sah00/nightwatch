@@ -13,13 +13,14 @@ export async function searchContent(
   server?: string,
   options?: RequestInit,
 ): Promise<SearchResult[]> {
-  const cacheKey = `${query.toLowerCase().trim()}:${server || 'default'}`;
+  const normalizedQuery = query.toLowerCase().trim();
+  const cacheKey = `${normalizedQuery}:${server || 'default'}`;
   const cached = searchResultsCache.get(cacheKey);
   if (cached) return cached;
 
   const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
   const { results } = await apiFetch<{ results: SearchResult[] }>(
-    `/api/video/search?q=${encodeURIComponent(query)}${serverParam}`,
+    `/api/video/search?q=${encodeURIComponent(normalizedQuery)}${serverParam}`,
     options,
   );
 

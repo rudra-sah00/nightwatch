@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { cacheSeriesData } from '@/features/watch/player/hooks/useNextEpisode';
 import type { ContentProgress } from '@/types/content';
@@ -49,6 +49,14 @@ export function usePlaybackActions({
   const [playingEpisodeId, setPlayingEpisodeId] = useState<
     string | number | null
   >(null);
+  const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (playbackTimeoutRef.current) clearTimeout(playbackTimeoutRef.current);
+    };
+  }, []);
 
   // Reset loading state on mount (important for when returning from video player)
   useEffect(() => {
@@ -89,7 +97,7 @@ export function usePlaybackActions({
           const navigationPromise = router.push(url);
 
           // Set 8-second timeout to reset loading state if navigation fails
-          const timeoutId = setTimeout(() => {
+          playbackTimeoutRef.current = setTimeout(() => {
             toast.error(t('playbackFailed'));
             setIsPlaying(false);
             setPlayingEpisodeId(null);
@@ -97,7 +105,8 @@ export function usePlaybackActions({
 
           // Clear timeout when navigation completes
           Promise.resolve(navigationPromise).finally(() => {
-            clearTimeout(timeoutId);
+            if (playbackTimeoutRef.current)
+              clearTimeout(playbackTimeoutRef.current);
           });
         } else {
           // Series playback
@@ -155,7 +164,7 @@ export function usePlaybackActions({
           const navigationPromise = router.push(url);
 
           // Set 8-second timeout to reset loading state if navigation fails
-          const timeoutId = setTimeout(() => {
+          playbackTimeoutRef.current = setTimeout(() => {
             toast.error(t('playbackFailed'));
             setIsPlaying(false);
             setPlayingEpisodeId(null);
@@ -163,7 +172,8 @@ export function usePlaybackActions({
 
           // Clear timeout when navigation completes
           Promise.resolve(navigationPromise).finally(() => {
-            clearTimeout(timeoutId);
+            if (playbackTimeoutRef.current)
+              clearTimeout(playbackTimeoutRef.current);
           });
         }
       } catch {

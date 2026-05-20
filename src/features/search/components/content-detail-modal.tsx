@@ -111,22 +111,7 @@ export function ContentDetailModal({
     }
   }, [isSetupOpen]);
 
-  // Escape key to close modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  // Lock body scroll when modal is open (prevents iOS scroll-through)
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
+  // Body scroll lock handled by useContentDetailModal hook
 
   // Loading state
   if (isLoading) {
