@@ -1,37 +1,54 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+
+const SAMPLE_COUNT = 5;
 
 /**
- * Hook to synchronize local clock with server time.
+ * Hook to synchronize local clock with server time using multi-sample median filtering.
  *
- * Simplified for Agora RTM:
- * - We can calibrate using the `serverTime` provided in RTM messages.
- * - Offset = serverTime - (localTransmitTime + estimatedLatency)
- * - Or more simply for one-way: Offset = serverTime - localReceiveTime
+ * Collects up to 5 offset samples from incoming RTM messages containing `serverTime`,
+ * then uses the median to eliminate jitter outliers.
  */
 export function useClockSync() {
   const [clockOffset, setClockOffset] = useState<number>(0);
   const [isCalibrated, setIsCalibrated] = useState(false);
-  const [isCalibrating, _setIsCalibrating] = useState(false);
+  const [isCalibrating, setIsCalibrating] = useState(false);
+  const samplesRef = useRef<number[]>([]);
 
   /**
-   * Calibrate using a server time sample (e.g. from an RTM message)
-   * @param serverTime The timestamp from the server/sender
-   * @param localTime The local timestamp when the message was received (optional, defaults to now)
+   * Calibrate using a server time sample (e.g. from an RTM message).
+   * Collects multiple samples and computes the median offset.
    */
   const calibrate = useCallback(
     (serverTime: number, localTime: number = Date.now()) => {
-      // Basic one-way sync: serverTime = localTime + offset
       const offset = serverTime - localTime;
+      const samples = samplesRef.current;
 
-      // We update the offset using a moving average or just replace it for now
-      // In a premium implementation, we might filter outliers or use multiple samples
-      setClockOffset(offset);
-      setIsCalibrated(true);
+      if (samples.length < SAMPLE_COUNT) {
+        samples.push(offset);
+        if (!isCalibrated) setIsCalibrating(true);
+      } else {
+        // Sliding window: drop oldest, add newest
+        samples.shift();
+        samples.push(offset);
+      }
+
+      if (samples.length >= SAMPLE_COUNT) {
+        // Median of sorted samples — robust against outliers
+        const sorted = [...samples].sort((a, b) => a - b);
+        const median = sorted[Math.floor(sorted.length / 2)];
+        setClockOffset(median);
+        setIsCalibrated(true);
+        setIsCalibrating(false);
+      } else if (samples.length === 1) {
+        // Use first sample immediately as initial estimate
+        setClockOffset(offset);
+        setIsCalibrated(true);
+        setIsCalibrating(false);
+      }
     },
-    [],
+    [isCalibrated],
   );
 
-  // Get current server time based on local clock and calculated offset
   const getServerTime = useCallback(() => {
     return Date.now() + clockOffset;
   }, [clockOffset]);

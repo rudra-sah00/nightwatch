@@ -70,6 +70,7 @@ export function useSketchOverlay({
 
   const t = useTranslations('party');
   const lastCursorBroadcast = useRef(0);
+  const cursorBatchRef = useRef<{ x: number; y: number }[]>([]);
   const [pendingText, setPendingText] = useState<PendingTextInput | null>(null);
   const isDrawing = useRef(false);
   const currentActionRef = useRef<SketchAction | null>(null);
@@ -402,17 +403,21 @@ export function useSketchOverlay({
       const point = stage?.getPointerPosition();
       if (!point || !isSketchMode) return;
 
-      // Broadcast cursor position (Throttled to ~10fps / 100ms to reduce RTM load)
+      // Batch cursor positions and broadcast every 100ms
+      cursorBatchRef.current.push({ x: point.x, y: point.y });
       const now = Date.now();
       if (now - lastCursorBroadcast.current > 100) {
+        const batch = cursorBatchRef.current;
+        const last = batch[batch.length - 1];
         rtmSendMessage?.({
           type: 'SKETCH_CURSOR_MOVE',
-          x: point.x,
-          y: point.y,
+          x: last.x,
+          y: last.y,
           userName: userName || t('sketch.anonymous'),
           color,
           userId: userId || '',
         });
+        cursorBatchRef.current = [];
         lastCursorBroadcast.current = now;
       }
 

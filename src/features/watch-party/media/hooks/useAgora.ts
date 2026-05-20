@@ -663,6 +663,24 @@ export function useAgora({
       client.on('user-joined', handleUserJoined);
       client.on('user-left', handleUserLeft);
 
+      // Token renewal — refresh before expiry to avoid voice/video drop
+      client.on('token-privilege-will-expire', async () => {
+        if (cleaned) return;
+        try {
+          const { getAgoraToken } = await import('../services/agora.api');
+          const data = await getAgoraToken({
+            channelName: channel,
+            guestId: String(uid),
+            guestName: String(uid),
+          });
+          if (!cleaned && clientRef.current === client) {
+            await client.renewToken(data.token);
+          }
+        } catch {
+          // Token renewal failed — connection will drop and reconnect
+        }
+      });
+
       try {
         await client.join(appId, channel, token, uid);
         if (cleaned) return;

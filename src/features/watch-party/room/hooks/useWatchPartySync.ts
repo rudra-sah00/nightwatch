@@ -52,6 +52,7 @@ export function useWatchPartySync({
   const tp = useTranslations('party.toasts');
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const hostDisconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const contentUpdateIdRef = useRef(0);
   const isLiveRoom = room?.type === 'livestream';
 
   const handlePresenceEvent = useCallback(
@@ -269,9 +270,11 @@ export function useWatchPartySync({
 
         case 'CONTENT_UPDATED': {
           const { room: newRoom } = msg;
+          const updateId = ++contentUpdateIdRef.current;
           toast.info(tp('contentChanged', { title: newRoom.title }));
           getPartyStreamToken(newRoom.id)
             .then((response) => {
+              if (contentUpdateIdRef.current !== updateId) return; // stale
               const token = response.token || '';
               const normalizedRoom = normalizeRoomUrls(newRoom, token, {
                 injectStream: true,
@@ -279,6 +282,7 @@ export function useWatchPartySync({
               setRoom(normalizedRoom);
             })
             .catch(() => {
+              if (contentUpdateIdRef.current !== updateId) return;
               setRoom(normalizeRoomUrls(newRoom, '', { injectStream: false }));
             });
           break;

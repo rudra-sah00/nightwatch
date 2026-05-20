@@ -265,6 +265,25 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   // Clock Synchronization
   const { clockOffset, isCalibrated, calibrate } = useClockSync();
 
+  // Stream token auto-renewal: refresh at 3.5h to prevent 4h expiry
+  useEffect(() => {
+    const isHost = userId === room?.hostId;
+    if (!isHost || !room?.id || room.type === 'livestream') return;
+
+    const RENEWAL_MS = 3.5 * 60 * 60 * 1000; // 3.5 hours
+    const timer = setTimeout(async () => {
+      const response = await getPartyStreamToken(room.id);
+      if (response.token) {
+        rtmSendMessage?.({
+          type: 'STREAM_TOKEN',
+          token: response.token,
+        } as unknown as import('../types/rtm-messages').RTMMessage);
+      }
+    }, RENEWAL_MS);
+
+    return () => clearTimeout(timer);
+  }, [room?.id, room?.hostId, room?.type, userId, rtmSendMessage]);
+
   // Handle Guest Initial Sync Request
   useEffect(() => {
     const isHost = userId === room?.hostId;
@@ -314,21 +333,13 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     sendMessage: chat.sendMessage,
     handleTypingStart: chat.handleTypingStart,
     handleTypingStop: chat.handleTypingStop,
+    loadMoreMessages: chat.loadMoreMessages,
+    hasMoreMessages: chat.hasMoreMessages,
+    isLoadingMoreMessages: chat.isLoadingMore,
     createRoom: lifecycle.createRoom,
     requestJoin: lifecycle.requestJoin,
     cancelRequest: lifecycle.cancelRequest,
-    leaveRoom: async () => {
-      if (room?.hostId === userId) {
-        // Broadcast to all members that the party is closed
-        await rtmSendMessage?.({
-          type: 'PARTY_CLOSED',
-          reason: tp('hostLeftRoom'),
-        });
-        // Give RTM a small window to ensure the broadcast is sent before we disconnect
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      }
-      return lifecycle.leaveRoom();
-    },
+    leaveRoom: lifecycle.leaveRoom,
     approveMember: members.approveMember,
     rejectMember: members.rejectMember,
     kickUser: members.kickUser,

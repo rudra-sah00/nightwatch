@@ -52,6 +52,7 @@ export function RightSidebar() {
     reject,
     cancel,
     unblock,
+    refetch,
   } = useFriends();
   const t = useTranslations('common.friends');
   const [filterQuery, setFilterQuery] = useState('');
@@ -265,7 +266,12 @@ export function RightSidebar() {
   return (
     <>
       {showSpotlight && (
-        <FriendSearchSpotlight onClose={() => setShowSpotlight(false)} />
+        <FriendSearchSpotlight
+          onClose={() => {
+            setShowSpotlight(false);
+            refetch();
+          }}
+        />
       )}
 
       {mobile ? (

@@ -70,6 +70,12 @@ interface WatchPartySidebarProps {
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
   currentUserName?: string;
   isFullscreen?: boolean;
+  /** Load older chat messages on scroll */
+  onLoadMoreMessages?: () => void;
+  /** Whether there are more messages to load */
+  hasMoreMessages?: boolean;
+  /** Whether older messages are currently being fetched */
+  isLoadingMoreMessages?: boolean;
 }
 
 /**
@@ -107,6 +113,9 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   rtmSendMessage,
   currentUserName: currentUserNameProp,
   isFullscreen = false,
+  onLoadMoreMessages,
+  hasMoreMessages,
+  isLoadingMoreMessages,
 }: WatchPartySidebarProps) {
   const { getDesktopTopPaddingClass, noDragStyle } = useDesktopApp();
 
@@ -210,6 +219,9 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
               typingUsers={typingUsers}
               onTypingStart={onTypingStart}
               onTypingStop={onTypingStop}
+              onLoadMore={onLoadMoreMessages}
+              hasMore={hasMoreMessages}
+              isLoadingMore={isLoadingMoreMessages}
             />
           ) : (
             <WatchPartyChatDisabled

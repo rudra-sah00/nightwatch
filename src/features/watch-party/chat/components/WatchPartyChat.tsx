@@ -2,7 +2,7 @@ import { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useFormatter, useTranslations } from 'next-intl';
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { useTheme } from '@/providers/theme-provider';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
@@ -39,6 +39,9 @@ interface WatchPartyChatProps {
   typingUsers?: TypingUser[];
   onTypingStart?: () => void;
   onTypingStop?: () => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
 }
 
 /**
@@ -99,6 +102,9 @@ export const WatchPartyChat = memo(function WatchPartyChat({
   typingUsers = EMPTY_TYPING_USERS,
   onTypingStart,
   onTypingStop,
+  onLoadMore,
+  hasMore,
+  isLoadingMore,
 }: WatchPartyChatProps) {
   const {
     input,
@@ -119,6 +125,14 @@ export const WatchPartyChat = memo(function WatchPartyChat({
 
   const { theme: appTheme } = useTheme();
   const t = useTranslations('party.chat');
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = useCallback(() => {
+    if (!onLoadMore || !hasMore || !scrollRef.current) return;
+    if (scrollRef.current.scrollTop < 50) {
+      onLoadMore();
+    }
+  }, [onLoadMore, hasMore]);
 
   const resolvedDark =
     appTheme === 'dark' ||
@@ -130,9 +144,26 @@ export const WatchPartyChat = memo(function WatchPartyChat({
     <div className="flex flex-col h-full relative">
       {/* Messages Area */}
       <div
+        ref={scrollRef}
+        onScroll={handleScroll}
         className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 no-scrollbar bg-background"
         style={{ contentVisibility: 'auto' }}
       >
+        {/* Loading skeleton when fetching older messages */}
+        {isLoadingMore ? (
+          <div className="space-y-3 pb-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-start gap-2">
+                <div className="w-6 h-6 rounded bg-muted animate-pulse shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+                  <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-foreground text-sm space-y-3">
             <div className="w-16 h-16 bg-background border-[4px] border-border flex items-center justify-center ">

@@ -175,8 +175,36 @@ export function useWatchPartyLifecycle({
 
     connectSocket();
 
+    // Polling fallback: if Socket.IO doesn't deliver JOIN_RESULT within 10s,
+    // poll the REST endpoint to check if we were approved
+    const pollTimer = setInterval(async () => {
+      if (socketCleaned) return;
+      const targetRoomId = roomId || room?.id;
+      if (!targetRoomId || !activeUserId) return;
+      try {
+        const roomData = await getRoomDetails(targetRoomId);
+        if (roomData?.members.some((m) => m.id === activeUserId)) {
+          // We were approved but missed the Socket.IO event
+          const streamRes = await getPartyStreamToken(targetRoomId);
+          const token = streamRes.token || '';
+          const normalizedRoom = normalizeRoomUrls(roomData, token, {
+            injectStream: true,
+          });
+          setRoom(normalizedRoom);
+          setIsConnected(true);
+          setRequestStatus('joined');
+          toast.success(t('requestApproved'));
+          socketCleaned = true;
+          tempSocket?.disconnect();
+        }
+      } catch {
+        // Network error — keep polling
+      }
+    }, 10_000);
+
     return () => {
       socketCleaned = true;
+      clearInterval(pollTimer);
       tempSocket?.disconnect();
     };
   }, [

@@ -1,10 +1,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
-import { sendPartyMessage } from '../../room/services/watch-party.api';
+import {
+  getPartyMessages,
+  sendPartyMessage,
+} from '../../room/services/watch-party.api';
 import type { ChatMessage, WatchPartyRoom } from '../../room/types';
 
 /**
@@ -40,6 +43,9 @@ export function useWatchPartyChat({
   const t = useTranslations('common.toasts');
   const MAX_CHAT_MESSAGES = 200;
   const [messages, _setMessages] = useState<ChatMessage[]>([]);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const isLoadingMoreRef = useRef(false);
   const setMessages = useCallback(
     (update: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
       _setMessages((prev) => {
@@ -54,6 +60,39 @@ export function useWatchPartyChat({
   const [typingUsers, setTypingUsers] = useState<
     Array<{ userId: string; userName: string }>
   >([]);
+
+  const loadMoreMessages = useCallback(async () => {
+    if (!room?.id || isLoadingMoreRef.current || !hasMoreMessages) return;
+    isLoadingMoreRef.current = true;
+    setIsLoadingMore(true);
+    try {
+      let count = 0;
+      _setMessages((prev) => {
+        count = prev.length;
+        return prev;
+      });
+      const response = await getPartyMessages(room.id, {
+        limit: 40,
+        before: count,
+      });
+      if (response.messages) {
+        if (response.messages.length === 0) {
+          setHasMoreMessages(false);
+        } else {
+          _setMessages((prev) => {
+            const existingIds = new Set(prev.map((m) => m.id));
+            const newMsgs = response.messages!.filter(
+              (m) => !existingIds.has(m.id),
+            );
+            return [...newMsgs, ...prev];
+          });
+        }
+      }
+    } finally {
+      isLoadingMoreRef.current = false;
+      setIsLoadingMore(false);
+    }
+  }, [room?.id, hasMoreMessages]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -189,5 +228,8 @@ export function useWatchPartyChat({
     handleTypingStart,
     handleTypingStop,
     handleIncomingRtmMessage,
+    loadMoreMessages,
+    hasMoreMessages,
+    isLoadingMore,
   };
 }
