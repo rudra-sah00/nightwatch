@@ -106,7 +106,9 @@
     "thickness": "Thickness",
     "opacity": "Opacity",
     "close": "Close",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "captureSuccess": "Saved to library",
+    "captureFailed": "Failed to save screenshot"
   },
   "lobby": {
     "desktopOnly": "Desktop Only",
