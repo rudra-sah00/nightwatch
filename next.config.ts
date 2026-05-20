@@ -6,6 +6,8 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Standalone output for Docker deployment (staging/dev)
+  output: 'standalone',
   // Disable React Strict Mode to prevent double-invocation of effects in dev.
   // Strict Mode mounts every component twice, causing duplicate API calls and
   // session conflicts (e.g. stream:revoked on S2 playback).

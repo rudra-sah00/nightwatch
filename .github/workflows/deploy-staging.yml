@@ -1,0 +1,61 @@
+name: Deploy Staging (Frontend)
+
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-staging
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.staging
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            NEXT_PUBLIC_BACKEND_URL=https://dev.api.nightwatch.in
+            NEXT_PUBLIC_WS_URL=https://dev.api.nightwatch.in
+            NEXT_PUBLIC_AGORA_APP_ID=${{ secrets.AGORA_APP_ID }}
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:server
+
+      - name: Deploy to staging
+        run: |
+          ssh -o StrictHostKeyChecking=no rudra@${{ secrets.DEPLOY_HOST }} << 'DEPLOY'
+          set -e
+          cd /opt/nightwatch-staging
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull ghcr.io/${{ github.repository }}-staging:latest
+          docker tag ghcr.io/${{ github.repository }}-staging:latest nightwatch-frontend-staging:latest
+
+          docker compose -f docker-compose.staging.yml -p nightwatch-staging up -d frontend-staging nginx-staging --force-recreate
+
+          echo "✅ Frontend staging deployed at https://dev.nightwatch.in"
+          DEPLOY
