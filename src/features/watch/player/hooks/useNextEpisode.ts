@@ -18,8 +18,6 @@ interface UseNextEpisodeOptions {
   duration: number;
   isPlaying: boolean;
   onNavigate: (url: string) => void;
-  /** Explicit server ID — pass metadata.providerId from PlayerRoot for reliability */
-  server?: string;
 }
 
 interface UseNextEpisodeReturn {
@@ -39,7 +37,6 @@ export function useNextEpisode({
   duration,
   isPlaying,
   onNavigate,
-  server: serverProp,
 }: UseNextEpisodeOptions): UseNextEpisodeReturn {
   const [showNextEpisode, setShowNextEpisode] = useState(false);
   const [nextEpisodeInfo, setNextEpisodeInfo] =
@@ -154,7 +151,7 @@ export function useNextEpisode({
         return;
       }
 
-      const url = await prepareNextEpisodeCommand(info, metadata, serverProp);
+      const url = await prepareNextEpisodeCommand(info, metadata);
       if (url) {
         onNavigate(url);
       } else {
@@ -163,7 +160,7 @@ export function useNextEpisode({
     } catch (_error) {
       setIsLoadingNext(false);
     }
-  }, [nextEpisodeInfo, metadata, isLoadingNext, onNavigate, serverProp]);
+  }, [nextEpisodeInfo, metadata, isLoadingNext, onNavigate]);
 
   // Cancel auto-play
   const cancelNextEpisode = useCallback(() => {

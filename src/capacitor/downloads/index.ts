@@ -9,8 +9,6 @@ import { Directory, Filesystem } from '@capacitor/filesystem';
 import type { DownloadItem } from '@/lib/electron-bridge';
 import { startHlsDownload } from './processors/hls';
 import { startMp4Download } from './processors/mp4';
-import { downloadS1 } from './providers/s1';
-import { downloadS2 } from './providers/s2';
 import {
   activeAbortControllers,
   loadDownloads,
@@ -25,12 +23,7 @@ async function startDownloadTask(
   contentId: string,
   m3u8Url: string,
 ): Promise<void> {
-  const prefix = contentId.split(':')[0];
-
-  if (prefix === 's1') return downloadS1(contentId, m3u8Url);
-  if (prefix === 's1') return downloadS2(contentId, m3u8Url);
-
-  // Fallback: detect by URL
+  // Detect by URL
   const isMp4 = m3u8Url.includes('.mp4') || !m3u8Url.includes('.m3u8');
   if (isMp4) return startMp4Download(contentId, m3u8Url);
   return startHlsDownload(contentId, m3u8Url);

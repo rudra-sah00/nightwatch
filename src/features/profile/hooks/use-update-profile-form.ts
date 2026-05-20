@@ -8,7 +8,7 @@ import { checkUsername, deleteAccount, updateProfile } from '../api';
 import { updateProfileSchema } from '../schema';
 
 /**
- * Hook that manages the update-profile form (name, username, preferred server)
+ * Hook that manages the update-profile form (name, username)
  * and the account-deletion flow.
  *
  * Performs debounced username-availability checks, validates input via
@@ -24,9 +24,6 @@ export function useUpdateProfileForm() {
   const { user, updateUser, logout } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
-  const [preferredServer, setPreferredServer] = useState<string>(
-    user?.preferredServer || 's1',
-  );
   const debouncedUsername = useDebounce(username, 500);
   const [isCheckingUsername, startCheckTransition] = useTransition();
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -41,7 +38,6 @@ export function useUpdateProfileForm() {
     if (user && !isInitialized.current) {
       const nextName = user.name || '';
       const nextUsername = user.username || '';
-      const nextServer = user.preferredServer || 's1';
 
       if (name !== nextName) {
         setName(nextName);
@@ -49,12 +45,9 @@ export function useUpdateProfileForm() {
       if (username !== nextUsername) {
         setUsername(nextUsername);
       }
-      if (preferredServer !== nextServer) {
-        setPreferredServer(nextServer);
-      }
       isInitialized.current = true;
     }
-  }, [name, preferredServer, user, username]);
+  }, [name, user, username]);
 
   useEffect(() => {
     if (!debouncedUsername || debouncedUsername === user?.username) {
@@ -86,12 +79,10 @@ export function useUpdateProfileForm() {
     ) => {
       const nameVal = formData.get('name') as string;
       const usernameVal = formData.get('username') as string;
-      const preferredServerVal = formData.get('preferredServer') as string;
 
       if (
         nameVal.trim() === (user?.name || '') &&
-        usernameVal === (user?.username || '') &&
-        preferredServerVal === (user?.preferredServer || 's1')
+        usernameVal === (user?.username || '')
       ) {
         return { message: t('messages.noChanges'), type: 'info' };
       }
@@ -103,7 +94,6 @@ export function useUpdateProfileForm() {
       const parsed = updateProfileSchema.safeParse({
         name: nameVal,
         username: usernameVal || undefined,
-        preferredServer: preferredServerVal,
       });
       if (!parsed.success) {
         const key = parsed.error.issues[0]?.message;
@@ -149,9 +139,7 @@ export function useUpdateProfileForm() {
   }, [state, isPending]);
 
   const hasChanges =
-    name.trim() !== (user?.name || '') ||
-    username !== (user?.username || '') ||
-    preferredServer !== (user?.preferredServer || 's1');
+    name.trim() !== (user?.name || '') || username !== (user?.username || '');
 
   const handleDeleteAccount = async () => {
     try {
@@ -173,8 +161,6 @@ export function useUpdateProfileForm() {
     setName,
     username,
     setUsername,
-    preferredServer,
-    setPreferredServer,
     isCheckingUsername,
     isAvailable,
     hasChanges,

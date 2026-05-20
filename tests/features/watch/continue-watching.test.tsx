@@ -473,7 +473,7 @@ describe('ContinueWatching', () => {
 
   it('displays empty state when no items to display', async () => {
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, cb) => {
       cb?.([]);
       return [];
     });
@@ -562,7 +562,7 @@ describe('ContinueWatching', () => {
     mockGetCached.mockReturnValue(null);
 
     let callCount = 0;
-    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, cb) => {
       callCount++;
       cb?.(mockItems);
       return mockItems;
@@ -588,7 +588,7 @@ describe('ContinueWatching', () => {
     const mockOnLoadComplete = vi.fn();
 
     const { fetchContinueWatching } = await import('@/features/watch/api');
-    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, _s, cb) => {
+    vi.mocked(fetchContinueWatching).mockImplementation(async (_l, cb) => {
       cb?.(null, 'Network error');
       return null;
     });

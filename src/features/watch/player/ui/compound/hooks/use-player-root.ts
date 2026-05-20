@@ -64,7 +64,6 @@ interface PlayerRootHookProps {
   initialAudioTrackId?: string;
   onBack?: () => void;
   isLive?: boolean;
-  providerId?: string;
   playbackRate?: number;
   skipProgressHistory?: boolean;
 }
@@ -90,7 +89,6 @@ export function usePlayerRoot({
   initialAudioTrackId,
   onBack: onBackProp,
   isLive = false,
-  providerId: _providerId,
   playbackRate: playbackRateProp,
   skipProgressHistory = false,
 }: PlayerRootHookProps) {
@@ -125,7 +123,6 @@ export function usePlayerRoot({
     dispatch,
     onStreamExpired,
     qualities,
-    providerId: metadata.providerId,
     isLive,
   });
 
@@ -288,7 +285,6 @@ export function usePlayerRoot({
     duration: state.duration,
     isPlaying: state.isPlaying && !state.isPaused,
     onNavigate: handleNavigate,
-    server: metadata.providerId,
   });
 
   const handleProgressLoaded = useCallback((seconds: number) => {

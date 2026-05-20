@@ -75,7 +75,6 @@ export function PlayerEpisodePanel({
           poster: encodeURIComponent(metadata.posterUrl),
         }),
         ...(metadata.year && { year: metadata.year }),
-        ...(metadata.providerId && { server: metadata.providerId }),
         seriesId,
         ...(episode.title && { episodeTitle: episode.title }),
       });

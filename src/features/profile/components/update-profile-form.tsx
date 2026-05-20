@@ -355,9 +355,6 @@ export function UpdateProfileForm() {
         </Button>
       </section>
 
-      {/* Server is fixed to s1 - no selection needed */}
-      <input type="hidden" name="preferredServer" value="s1" />
-
       {/* Danger Zone */}
       <section className="bg-card border border-neo-red/30 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-neo-red/10">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">

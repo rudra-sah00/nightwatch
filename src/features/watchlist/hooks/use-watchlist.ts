@@ -9,25 +9,23 @@ import type { WatchlistItem } from '@/features/watchlist/types';
  * Moved from app/ layer to features/ layer for better organization.
  */
 export function useWatchlist() {
-  const activeServer = 's1';
-  const serverLabel = 'Balanced';
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Cancels in-flight watchlist requests when the server changes or the
+  // Cancels in-flight watchlist requests when the
   // component unmounts (navigating away) so stale responses don't arrive
   // after the user has already moved to another page.
   const abortRef = useRef<AbortController | null>(null);
 
-  const fetchWatchlist = useCallback(async (providerId: string) => {
+  const fetchWatchlist = useCallback(async () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
     setLoading(true);
     try {
-      const items = await getWatchlist(providerId, controller.signal);
+      const items = await getWatchlist(undefined, controller.signal);
       if (controller.signal.aborted) return;
       setWatchlist(items);
     } catch {
@@ -42,7 +40,7 @@ export function useWatchlist() {
   }, []);
 
   useEffect(() => {
-    fetchWatchlist(activeServer);
+    fetchWatchlist();
 
     return () => {
       abortRef.current?.abort();
@@ -52,8 +50,6 @@ export function useWatchlist() {
   const isEmpty = !loading && watchlist.length === 0;
 
   return {
-    activeServer,
-    serverLabel,
     watchlist,
     loading,
     selectedId,

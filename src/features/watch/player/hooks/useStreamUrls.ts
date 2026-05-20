@@ -40,7 +40,7 @@ interface StreamUrlsReturn {
   qualities: QualityOption[] | undefined;
   subtitleTracks: SubtitleTrack[] | undefined;
   apiDurationSeconds: number | undefined;
-  applyResponse: (server: string, response: PlayResponse) => void;
+  applyResponse: (response: PlayResponse) => void;
   applySubtitles: (response: PlayResponse) => void;
 }
 
@@ -122,20 +122,17 @@ export function useStreamUrls({
     initialQualitiesRaw,
   ]);
 
-  const applyResponse = useCallback(
-    (server: string, response: PlayResponse) => {
-      try {
-        const normalized = processResponse(server, response);
-        setStreamUrl(normalized.streamUrl);
-        setCaptionUrl(normalized.captionUrl);
-        setSpriteVtt(normalized.spriteVtt);
-        setSubtitleTracks(normalized.subtitleTracks);
-        setQualities(normalized.qualities);
-        setApiDurationSeconds(normalized.apiDurationSeconds);
-      } catch (_e) {}
-    },
-    [],
-  );
+  const applyResponse = useCallback((response: PlayResponse) => {
+    try {
+      const normalized = processResponse(response);
+      setStreamUrl(normalized.streamUrl);
+      setCaptionUrl(normalized.captionUrl);
+      setSpriteVtt(normalized.spriteVtt);
+      setSubtitleTracks(normalized.subtitleTracks);
+      setQualities(normalized.qualities);
+      setApiDurationSeconds(normalized.apiDurationSeconds);
+    } catch (_e) {}
+  }, []);
 
   const applySubtitles = useCallback((response: PlayResponse) => {
     const normalized = processSubtitles(response);

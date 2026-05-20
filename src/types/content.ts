@@ -108,8 +108,6 @@ export interface WatchProgress extends ContentProgress {
   remainingSeconds: number;
   remainingMinutes: number;
   lastWatchedAt: string;
-  /** Which server this progress entry was saved for */
-  providerId?: 's1';
   episodeId?: string;
 }
 
@@ -119,8 +117,6 @@ export interface SearchResult {
   contentType: ContentType;
   poster: string;
   year?: number;
-  /** Which provider returned this result — used for badge display (pv = Prime Video via S1) */
-  provider?: 's1';
 }
 
 export interface PlayMovieParams {
@@ -128,7 +124,6 @@ export interface PlayMovieParams {
   title: string;
   movieId?: string;
   duration?: number; // Duration in seconds for smart caching
-  server?: string;
 }
 
 export interface PlaySeriesParams {
@@ -138,7 +133,6 @@ export interface PlaySeriesParams {
   season: number;
   episode: number;
   duration?: number; // Duration in seconds for smart caching
-  server?: string;
 }
 
 export type PlayParams = PlayMovieParams | PlaySeriesParams;

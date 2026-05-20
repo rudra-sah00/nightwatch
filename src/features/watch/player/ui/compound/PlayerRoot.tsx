@@ -92,8 +92,6 @@ interface PlayerRootProps {
   containerStyle?: React.CSSProperties;
   /** Allow portrait playback on mobile (disables rotate wall) for inline layouts. */
   allowPortraitPlayback?: boolean;
-  /** Pass the explicit provider ID to resolve the appropriate engine (hls vs mp4) if URL has no extension */
-  providerId?: string;
   /** Initial playback speed multiplier (e.g. `1.5` for 1.5×). */
   playbackRate?: number;
 }
@@ -150,7 +148,6 @@ export function PlayerRoot({
   isLive = false,
   containerStyle,
   allowPortraitPlayback = false,
-  providerId,
   playbackRate,
 }: PlayerRootProps) {
   const t = useTranslations('watch.player');
@@ -194,7 +191,6 @@ export function PlayerRoot({
     initialAudioTrackId,
     onBack: onBackProp,
     isLive: resolvedIsLive,
-    providerId,
     playbackRate,
   });
 

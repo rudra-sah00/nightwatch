@@ -170,12 +170,9 @@ export async function startDesktopDownload({
     return;
   }
 
-  const server = contentId.includes(':') ? contentId.split(':')[0] : 's1';
-
   const response = await playVideo({
     type,
     title: showTitle,
-    server,
     movieId: type === 'movie' ? contentId : undefined,
     seriesId: type === 'series' ? contentId : undefined,
     season,

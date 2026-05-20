@@ -32,47 +32,35 @@ const continueWatchingCache: Record<string, ContinueWatchingCache> = {};
 const CONTINUE_WATCHING_STALE_TIME = 30 * 1000;
 
 // Invalidate continue watching cache (for real-time updates)
-export function invalidateContinueWatchingCache(server?: string): void {
-  if (server) {
-    delete continueWatchingCache[server];
-  } else {
-    for (const key of Object.keys(continueWatchingCache)) {
-      delete continueWatchingCache[key];
-    }
+export function invalidateContinueWatchingCache(): void {
+  for (const key of Object.keys(continueWatchingCache)) {
+    delete continueWatchingCache[key];
   }
 }
 
 // Check if cache is fresh
-export function isContinueWatchingCacheFresh(server: string): boolean {
-  const cache = continueWatchingCache[server];
+export function isContinueWatchingCacheFresh(): boolean {
+  const cache = continueWatchingCache.default;
   if (!cache) return false;
   return Date.now() - cache.timestamp < CONTINUE_WATCHING_STALE_TIME;
 }
 
 // Get cached continue watching data
-export function getCachedContinueWatching(
-  server: string,
-): WatchProgress[] | null {
-  if (isContinueWatchingCacheFresh(server)) {
-    return continueWatchingCache[server].data;
+export function getCachedContinueWatching(): WatchProgress[] | null {
+  if (isContinueWatchingCacheFresh()) {
+    return continueWatchingCache.default.data;
   }
   return null;
 }
 
 // Update continue watching cache
-export function setContinueWatchingCache(
-  server: string,
-  data: WatchProgress[],
-): void {
-  continueWatchingCache[server] = { data, timestamp: Date.now() };
+export function setContinueWatchingCache(data: WatchProgress[]): void {
+  continueWatchingCache.default = { data, timestamp: Date.now() };
 }
 
 // Remove item from cache (optimistic update)
-export function removeFromContinueWatchingCache(
-  server: string,
-  itemId: string,
-): void {
-  const cache = continueWatchingCache[server];
+export function removeFromContinueWatchingCache(itemId: string): void {
+  const cache = continueWatchingCache.default;
   if (cache) {
     cache.data = cache.data.filter((i) => i.id !== itemId);
   }
@@ -81,11 +69,10 @@ export function removeFromContinueWatchingCache(
 // Fetch continue watching via HTTP (for SSR or fallback)
 export async function getContinueWatching(
   limit = 10,
-  server = 's1',
   options?: RequestInit,
 ): Promise<WatchProgress[]> {
   const result = await apiFetch<{ items: WatchProgress[] }>(
-    `/api/watch/continue-watching?limit=${limit}&server=${server}`,
+    `/api/watch/continue-watching?limit=${limit}`,
     options,
   );
   return result.items;
@@ -94,12 +81,11 @@ export async function getContinueWatching(
 // Fetch continue watching via HTTP
 export async function fetchContinueWatching(
   limit = 10,
-  server = 's1',
   callback?: (items: WatchProgress[] | null, error?: string) => void,
 ): Promise<WatchProgress[] | null> {
   try {
-    const items = await getContinueWatching(limit, server);
-    setContinueWatchingCache(server, items);
+    const items = await getContinueWatching(limit);
+    setContinueWatchingCache(items);
     callback?.(items);
     return items;
   } catch (err: unknown) {
@@ -112,18 +98,16 @@ export async function fetchContinueWatching(
 // Delete progress via HTTP
 export async function deleteWatchProgress(
   progressId: string,
-  server = 's1',
   callback?: (success: boolean) => void,
 ): Promise<boolean> {
   try {
-    const params = new URLSearchParams({ server });
     const result = await apiFetch<{ success: boolean }>(
-      `/api/watch/progress/${progressId}?${params}`,
+      `/api/watch/progress/${progressId}`,
       { method: 'DELETE' },
     );
 
     if (result.success) {
-      removeFromContinueWatchingCache(server, progressId);
+      removeFromContinueWatchingCache(progressId);
     }
     callback?.(result.success);
     return result.success;
@@ -180,20 +164,14 @@ export function setProgressCache(
   });
 }
 
-/** Infer the provider from a content/series ID prefix (legacy — always returns 's1'). */
-function inferProviderFromId(_id: string): string {
-  return 's1';
-}
-
 // Fetch progress via HTTP (for SSR or fallback)
 export async function getContentProgress(
   contentId: string,
   options?: RequestInit,
 ): Promise<ContentProgress | null> {
-  const server = inferProviderFromId(contentId);
   try {
     const result = await apiFetch<{ progress: ContentProgress | null }>(
-      `/api/watch/progress/${contentId}?server=${server}`,
+      `/api/watch/progress/${contentId}`,
       options,
     );
     const progress = result.progress;

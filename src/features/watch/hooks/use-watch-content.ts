@@ -31,7 +31,6 @@ export function useWatchContent() {
   const movieId = decodeURIComponent(params.id as string);
   const t = useTranslations('watch');
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
-  const server = 's1';
 
   const title = searchParams.get('title') || t('page.unknownTitle');
   const season = searchParams.get('season');
@@ -93,8 +92,8 @@ export function useWatchContent() {
   const [initialAudioTracks, setInitialAudioTracks] = useState<AudioTrack[]>(
     [],
   );
-  const [activeTrackId, setActiveTrackId] = useState<string | null>(() =>
-    server === 's1' ? movieId : null,
+  const [activeTrackId, setActiveTrackId] = useState<string | null>(
+    () => movieId,
   );
 
   const refetchStream = useCallback(
@@ -143,7 +142,7 @@ export function useWatchContent() {
           );
 
           if (downloadedItem?.localPlaylistPath) {
-            applyResponse(server, {
+            applyResponse({
               success: true,
               masterPlaylistUrl: downloadedItem.localPlaylistPath,
               title: decodedTitle,
@@ -180,7 +179,6 @@ export function useWatchContent() {
             seriesId: overrideMovieId || seriesId || movieId,
             season,
             episode,
-            server,
           });
           response = await playVideo({
             type: 'series',
@@ -188,47 +186,41 @@ export function useWatchContent() {
             seriesId: overrideMovieId || seriesId || movieId || undefined,
             season: parseInt(season, 10),
             episode: parseInt(episode, 10),
-            server,
           });
         } else {
           console.log('[NW-Play] VOD: fetching stream', {
             movieId: overrideMovieId || movieId,
-            server,
           });
           response = await playVideo({
             type: 'movie',
             title: decodedTitle,
             movieId: overrideMovieId || movieId || undefined,
-            server,
           });
         }
 
         if (response.success && response.masterPlaylistUrl) {
           console.log('[NW-Play] VOD: got stream URL', {
             url: response.masterPlaylistUrl,
-            server,
           });
           // Unified response handling via StreamUrlService (called within useStreamUrls)
-          applyResponse(server, response);
+          applyResponse(response);
 
           // Audio track handling
-          if (server === 's1') {
-            if (response.audioTracks && response.audioTracks.length > 0) {
-              console.log(
-                '[NW-Audio] tracks from API:',
-                JSON.stringify(response.audioTracks),
-              );
-              setInitialAudioTracks(
-                response.audioTracks.map((t) => ({
-                  id: t.streamUrl,
-                  label: t.label,
-                  language: t.language,
-                  streamUrl: t.streamUrl,
-                })),
-              );
-            }
-            setActiveTrackId(overrideMovieId || movieId || null);
+          if (response.audioTracks && response.audioTracks.length > 0) {
+            console.log(
+              '[NW-Audio] tracks from API:',
+              JSON.stringify(response.audioTracks),
+            );
+            setInitialAudioTracks(
+              response.audioTracks.map((t) => ({
+                id: t.streamUrl,
+                label: t.label,
+                language: t.language,
+                streamUrl: t.streamUrl,
+              })),
+            );
           }
+          setActiveTrackId(overrideMovieId || movieId || null);
         } else {
           console.warn('[NW-Play] VOD: no stream URL', {
             success: response.success,
@@ -239,7 +231,6 @@ export function useWatchContent() {
         console.error('[NW-Play] VOD: stream error', err);
         const httpStatus = (err as { status?: number })?.status;
         if (
-          server === 's1' &&
           (httpStatus === 500 || httpStatus === 503) &&
           !coldStartRetried.current
         ) {
@@ -288,7 +279,6 @@ export function useWatchContent() {
   );
 
   const { audioTracks, handleAudioTrackChange } = useAudioTracks({
-    server,
     type,
     title,
     movieId,
@@ -315,7 +305,6 @@ export function useWatchContent() {
       description: description ? decodeURIComponent(description) : undefined,
       year: year ? decodeURIComponent(year) : undefined,
       posterUrl,
-      providerId: server,
       apiDurationSeconds: apiDurationSeconds ?? undefined,
     }),
     [
@@ -374,7 +363,6 @@ export function useWatchContent() {
     movieId?: string;
     season?: string | null;
     episode?: string | null;
-    server?: string;
   }>(undefined);
 
   useEffect(() => {
@@ -382,7 +370,7 @@ export function useWatchContent() {
     // skip the first fetch to avoid redundant API calls.
     if (initialStreamUrlRaw && !mountFetchedRef.current) {
       mountFetchedRef.current = true;
-      prevParamsRef.current = { movieId, season, episode, server };
+      prevParamsRef.current = { movieId, season, episode };
       return;
     }
 
@@ -390,12 +378,11 @@ export function useWatchContent() {
     const paramsChanged =
       prevParamsRef.current?.movieId !== movieId ||
       prevParamsRef.current?.season !== season ||
-      prevParamsRef.current?.episode !== episode ||
-      prevParamsRef.current?.server !== server;
+      prevParamsRef.current?.episode !== episode;
 
     if ((!mountFetchedRef.current || paramsChanged) && title) {
       mountFetchedRef.current = true;
-      prevParamsRef.current = { movieId, season, episode, server };
+      prevParamsRef.current = { movieId, season, episode };
       refetchStream();
     }
   }, [movieId, season, episode, title, refetchStream, initialStreamUrlRaw]);

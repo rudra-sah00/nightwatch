@@ -19,7 +19,7 @@ interface UseContinueWatchingOptions {
 /**
  * Fetches and manages the user's "continue watching" progress list.
  *
- * Handles server-aware caching, optimistic removal via `useOptimistic`,
+ * Handles caching, optimistic removal via `useOptimistic`,
  * window-focus refetching, and cache invalidation on unmount.
  *
  * @returns Items, optimistic items, loading state, select and remove handlers.
@@ -28,7 +28,6 @@ export function useContinueWatching({
   onSelectContent,
   onLoadComplete,
 }: UseContinueWatchingOptions) {
-  const activeServer = 's1';
   const t = useTranslations('watch.continueWatching');
   const [items, setItems] = useState<WatchProgress[]>([]);
   const [optimisticItems, addOptimisticItem] = React.useOptimistic(
@@ -37,23 +36,20 @@ export function useContinueWatching({
       state.filter((item) => item.id !== idToRemove),
   );
   const [isLoading, setIsLoading] = useState(true);
-  const lastFetchRef = useRef<{ time: number; server: string }>({
+  const lastFetchRef = useRef<{ time: number }>({
     time: 0,
-    server: '',
   });
   // Track current items in a ref so fetchItems can report count without
   // needing items in its dependency array.
   const itemsRef = useRef<WatchProgress[]>([]);
-  const fetchingForServerRef = useRef<string>('');
 
   const fetchItems = useCallback(
     async (force = false) => {
       const now = Date.now();
-      const serverChanged = lastFetchRef.current.server !== activeServer;
 
-      // Cache hit (only valid when not forced and server hasn't changed)
-      if (!force && !serverChanged) {
-        const cached = getCachedContinueWatching(activeServer);
+      // Cache hit (only valid when not forced)
+      if (!force) {
+        const cached = getCachedContinueWatching();
         if (cached) {
           setItems(cached);
           itemsRef.current = cached;
@@ -63,28 +59,16 @@ export function useContinueWatching({
         }
       }
 
-      // Throttle: skip duplicate fetches within 1 second, but always notify parent
-      if (!serverChanged && now - lastFetchRef.current.time < 1000) {
+      // Throttle: skip duplicate fetches within 1 second
+      if (now - lastFetchRef.current.time < 1000) {
         setIsLoading(false);
         onLoadComplete?.(itemsRef.current.length);
         return;
       }
-      lastFetchRef.current = { time: now, server: activeServer };
-
-      // Clear stale items and show skeleton immediately when server changes
-      if (serverChanged) {
-        setItems([]);
-        itemsRef.current = [];
-        setIsLoading(true);
-      }
-
-      const fetchingServer = activeServer;
-      fetchingForServerRef.current = fetchingServer;
+      lastFetchRef.current = { time: now };
 
       try {
-        const fetchedItems = await apiFetchContinueWatching(10, activeServer);
-        // Discard stale response if server changed while request was in flight
-        if (fetchingForServerRef.current !== fetchingServer) return;
+        const fetchedItems = await apiFetchContinueWatching(10);
         setIsLoading(false);
         if (fetchedItems) {
           setItems(fetchedItems);
@@ -94,7 +78,6 @@ export function useContinueWatching({
           onLoadComplete?.(0);
         }
       } catch (_err) {
-        if (fetchingForServerRef.current !== fetchingServer) return;
         setIsLoading(false);
         onLoadComplete?.(0);
       }
@@ -127,7 +110,7 @@ export function useContinueWatching({
       e.stopPropagation();
       React.startTransition(async () => {
         addOptimisticItem(item.id);
-        const success = await deleteWatchProgress(item.id, activeServer);
+        const success = await deleteWatchProgress(item.id);
         if (success) {
           setItems((prev) => prev.filter((i) => i.id !== item.id));
         } else {

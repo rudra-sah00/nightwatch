@@ -10,13 +10,13 @@ const watchlistStatusCache = createTTLCache<boolean>(2 * 60 * 1000, 50);
  * Fetch the user's watchlist.
  */
 export async function getWatchlist(
-  providerId?: string,
+  _providerId?: string,
   signal?: AbortSignal,
 ): Promise<WatchlistItem[]> {
-  const url = providerId
-    ? `/api/user/watchlist?providerId=${providerId}`
-    : '/api/user/watchlist';
-  const data = await apiFetch<{ items: WatchlistItem[] }>(url, { signal });
+  const data = await apiFetch<{ items: WatchlistItem[] }>(
+    '/api/user/watchlist',
+    { signal },
+  );
   return data.items || [];
 }
 
@@ -28,7 +28,6 @@ export async function addToWatchlist(item: {
   contentType: 'Movie' | 'Series';
   title: string;
   posterUrl?: string;
-  providerId?: string;
 }): Promise<void> {
   await apiFetch('/api/user/watchlist', {
     method: 'POST',
@@ -40,12 +39,8 @@ export async function addToWatchlist(item: {
 /**
  * Remove an item from the watchlist.
  */
-export async function removeFromWatchlist(
-  contentId: string,
-  providerId?: string,
-): Promise<void> {
+export async function removeFromWatchlist(contentId: string): Promise<void> {
   const params = new URLSearchParams({ id: contentId });
-  if (providerId) params.set('providerId', providerId);
   await apiFetch(`/api/user/watchlist?${params}`, {
     method: 'DELETE',
   });
@@ -55,15 +50,11 @@ export async function removeFromWatchlist(
 /**
  * Check if an item is in the watchlist.
  */
-export async function checkInWatchlist(
-  contentId: string,
-  providerId?: string,
-): Promise<boolean> {
+export async function checkInWatchlist(contentId: string): Promise<boolean> {
   const cached = watchlistStatusCache.get(contentId);
   if (cached !== undefined) return cached;
 
-  const pId = providerId || contentId.split(':')[0] || 's1';
-  const params = new URLSearchParams({ id: contentId, providerId: pId });
+  const params = new URLSearchParams({ id: contentId });
   const { inWatchlist } = await apiFetch<{ inWatchlist: boolean }>(
     `/api/user/watchlist/status?${params}`,
   );
