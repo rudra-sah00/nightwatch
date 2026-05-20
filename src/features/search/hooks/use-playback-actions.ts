@@ -87,8 +87,7 @@ export function usePlaybackActions({
             ? encodeURIComponent(showData.posterUrl)
             : '';
 
-          const providerId = showData.id.split(':')[0] || 's1';
-          let url = `/watch/${encodeURIComponent(showData.id)}?type=movie&title=${encodeURIComponent(showData.title)}&server=${providerId}`;
+          let url = `/watch/${encodeURIComponent(showData.id)}?type=movie&title=${encodeURIComponent(showData.title)}`;
           if (description) url += `&description=${description}`;
           if (year) url += `&year=${year}`;
           if (posterUrl) url += `&poster=${posterUrl}`;
@@ -153,8 +152,7 @@ export function usePlaybackActions({
             ? encodeURIComponent(episodeToPlay.title)
             : '';
 
-          const providerId = showData.id.split(':')[0] || 's1';
-          let url = `/watch/${encodeURIComponent(showData.id)}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episodeToPlay.episodeNumber}&seriesId=${encodeURIComponent(showData.id)}&server=${providerId}`;
+          let url = `/watch/${encodeURIComponent(showData.id)}?type=series&title=${encodeURIComponent(showData.title)}&season=${seasonNumber}&episode=${episodeToPlay.episodeNumber}&seriesId=${encodeURIComponent(showData.id)}`;
           if (description) url += `&description=${description}`;
           if (year) url += `&year=${year}`;
           if (posterUrl) url += `&poster=${posterUrl}`;

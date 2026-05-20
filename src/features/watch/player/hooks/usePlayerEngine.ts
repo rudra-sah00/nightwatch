@@ -2,7 +2,6 @@
 
 import type HlsType from 'hls.js';
 import { type RefObject, useCallback, useMemo, useRef } from 'react';
-import { useServer } from '@/providers/server-provider';
 import type { PlayerAction } from '../context/types';
 import { useHls } from './useHls';
 import { useMp4 } from './useMp4';
@@ -37,7 +36,7 @@ export function usePlayerEngine({
   providerId: providerIdProp,
   isLive = false,
 }: UsePlayerEngineOptions): UsePlayerEngineReturn {
-  const { activeServer } = useServer();
+  const activeServer = 's1';
   const nullHlsRef = useRef<HlsType | null>(null);
 
   // Determine engine type based on provider (prop or context) OR stream URL fallback
@@ -62,7 +61,7 @@ export function usePlayerEngine({
     if (effectiveProvider === 's1') return 'hls';
 
     return 'hls';
-  }, [streamUrl, providerIdProp, activeServer, isLive]);
+  }, [streamUrl, providerIdProp, isLive]);
 
   // Initialize HLS engine
   const hlsResult = useHls({

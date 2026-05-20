@@ -12,7 +12,6 @@ import {
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { WS_EVENTS } from '@/lib/constants';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
-import { useServer } from '@/providers/server-provider';
 import { useSocket } from '@/providers/socket-provider';
 import type { PlayResponse } from '@/types/content';
 
@@ -32,14 +31,7 @@ export function useWatchContent() {
   const movieId = decodeURIComponent(params.id as string);
   const t = useTranslations('watch');
   const type = (searchParams.get('type') || 'movie') as 'movie' | 'series';
-  const server = (searchParams.get('server') ||
-    movieId.split(':')[0] ||
-    's1') as 's1';
-  const { setActiveServer } = useServer();
-
-  useEffect(() => {
-    setActiveServer(server);
-  }, [server, setActiveServer]);
+  const server = 's1';
 
   const title = searchParams.get('title') || t('page.unknownTitle');
   const season = searchParams.get('season');
@@ -269,7 +261,7 @@ export function useWatchContent() {
         }, 2000);
       }
     },
-    [title, type, season, episode, movieId, seriesId, server, applyResponse],
+    [title, type, season, episode, movieId, seriesId, applyResponse],
   );
 
   const handleBeforeDiscovery = useCallback(() => {
@@ -337,7 +329,6 @@ export function useWatchContent() {
       description,
       year,
       posterUrl,
-      server,
       apiDurationSeconds,
     ],
   );
@@ -407,15 +398,7 @@ export function useWatchContent() {
       prevParamsRef.current = { movieId, season, episode, server };
       refetchStream();
     }
-  }, [
-    movieId,
-    season,
-    episode,
-    server,
-    title,
-    refetchStream,
-    initialStreamUrlRaw,
-  ]);
+  }, [movieId, season, episode, title, refetchStream, initialStreamUrlRaw]);
 
   return {
     router,

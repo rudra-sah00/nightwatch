@@ -8,7 +8,6 @@ import { searchContent } from '@/features/search/api';
 import { searchQuerySchema } from '@/features/search/schema';
 import type { SearchResult } from '@/features/search/types';
 import { useAuth } from '@/providers/auth-provider';
-import { useServer } from '@/providers/server-provider';
 
 /** Options for the {@link useHomeClient} hook. */
 interface UseHomeClientOptions {
@@ -61,7 +60,6 @@ export function useHomeClient({
     useState(true);
 
   const { user } = useAuth();
-  const { activeServer } = useServer();
 
   useEffect(() => {
     if (!query.trim()) {
@@ -78,7 +76,7 @@ export function useHomeClient({
       return;
     }
 
-    // Skip fetch only if query matches AND server hasn't changed AND we have results
+    // Skip fetch only if query matches AND we have results
     if (query === initialQuery && initialResults.length > 0) {
       return;
     }
@@ -91,7 +89,7 @@ export function useHomeClient({
     const fetchResults = async () => {
       setHasSearched(true);
       try {
-        const data = await searchContent(query, activeServer, {
+        const data = await searchContent(query, {
           signal: controller.signal,
         });
         if (!controller.signal.aborted) {
@@ -110,7 +108,7 @@ export function useHomeClient({
     fetchResults();
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, initialQuery, activeServer, t, initialResults.length]);
+  }, [query, initialQuery, t, initialResults.length]);
 
   useEffect(() => {
     setIsContinueWatchingLoading(true);

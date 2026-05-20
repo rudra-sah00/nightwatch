@@ -10,17 +10,15 @@ const searchResultsCache = createTTLCache<SearchResult[]>(5 * 60 * 1000, 100);
 
 export async function searchContent(
   query: string,
-  server?: string,
   options?: RequestInit,
 ): Promise<SearchResult[]> {
   const normalizedQuery = query.toLowerCase().trim();
-  const cacheKey = `${normalizedQuery}:${server || 'default'}`;
+  const cacheKey = normalizedQuery;
   const cached = searchResultsCache.get(cacheKey);
   if (cached) return cached;
 
-  const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
   const { results } = await apiFetch<{ results: SearchResult[] }>(
-    `/api/video/search?q=${encodeURIComponent(normalizedQuery)}${serverParam}`,
+    `/api/video/search?q=${encodeURIComponent(normalizedQuery)}`,
     options,
   );
 
@@ -35,18 +33,16 @@ const searchSuggestionsCache = createTTLCache<string[]>(10 * 60 * 1000, 50);
 
 export async function getSearchSuggestions(
   query: string,
-  server?: string,
   options?: RequestInit,
 ): Promise<string[]> {
   if (!query || query.length < 2) return [];
 
-  const cacheKey = `${query.toLowerCase()}:${server || 'default'}`;
+  const cacheKey = query.toLowerCase();
   const cached = searchSuggestionsCache.get(cacheKey);
   if (cached) return cached;
 
-  const serverParam = server ? `&server=${encodeURIComponent(server)}` : '';
   const { suggestions } = await apiFetch<{ suggestions: string[] }>(
-    `/api/video/search/suggest?q=${encodeURIComponent(query)}${serverParam}`,
+    `/api/video/search/suggest?q=${encodeURIComponent(query)}`,
     options,
   );
 

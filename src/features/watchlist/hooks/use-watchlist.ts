@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getWatchlist } from '@/features/watchlist/api';
 import type { WatchlistItem } from '@/features/watchlist/types';
-import { useServer } from '@/providers/server-provider';
 
 /**
  * Hook for managing the watchlist page state.
  * Moved from app/ layer to features/ layer for better organization.
  */
 export function useWatchlist() {
-  const { activeServer, serverLabel } = useServer();
+  const activeServer = 's1';
+  const serverLabel = 'Balanced';
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function useWatchlist() {
     return () => {
       abortRef.current?.abort();
     };
-  }, [activeServer, fetchWatchlist]);
+  }, [fetchWatchlist]);
 
   const isEmpty = !loading && watchlist.length === 0;
 

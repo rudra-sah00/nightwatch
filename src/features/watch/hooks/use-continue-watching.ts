@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { useServer } from '@/providers/server-provider';
 import {
   fetchContinueWatching as apiFetchContinueWatching,
   deleteWatchProgress,
@@ -29,7 +28,7 @@ export function useContinueWatching({
   onSelectContent,
   onLoadComplete,
 }: UseContinueWatchingOptions) {
-  const { activeServer } = useServer();
+  const activeServer = 's1';
   const t = useTranslations('watch.continueWatching');
   const [items, setItems] = useState<WatchProgress[]>([]);
   const [optimisticItems, addOptimisticItem] = React.useOptimistic(
@@ -100,7 +99,7 @@ export function useContinueWatching({
         onLoadComplete?.(0);
       }
     },
-    [onLoadComplete, activeServer],
+    [onLoadComplete],
   );
 
   // Let the 30s TTL handle cache staleness — no need to invalidate on unmount.
@@ -136,7 +135,7 @@ export function useContinueWatching({
         }
       });
     },
-    [addOptimisticItem, activeServer, t],
+    [addOptimisticItem, t],
   );
 
   return {

@@ -4,7 +4,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type React from 'react';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getSearchSuggestions } from '@/features/search/api';
-import { useServer } from '@/providers/server-provider';
 
 /**
  * Hook that manages the global search input, inline typeahead suggestions,
@@ -27,7 +26,6 @@ export function useSearchInput() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const { activeServer } = useServer();
   const containerRef = useRef<HTMLDivElement>(null);
   const isFocusedRef = useRef(false);
 
@@ -72,7 +70,7 @@ export function useSearchInput() {
   useEffect(() => {
     // We fetch suggestions based on raw query to support trailing space hints
     // but we still want a minimum character count.
-    if (!query || query.length < 2 || activeServer !== 's1' || isSearchPage) {
+    if (!query || query.length < 2 || isSearchPage) {
       setSuggestions([]);
       return;
     }
@@ -80,7 +78,7 @@ export function useSearchInput() {
     const timer = setTimeout(async () => {
       setIsFetchingSuggestions(true);
       try {
-        const results = await getSearchSuggestions(query, activeServer);
+        const results = await getSearchSuggestions(query);
         // Only keep the first suggestion for inline typeahead
         setSuggestions(results.slice(0, 1));
       } catch {
@@ -91,22 +89,17 @@ export function useSearchInput() {
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [query, activeServer, isSearchPage]);
+  }, [query, isSearchPage]);
 
   const fetchSuggestions = async (searchTerm: string) => {
-    if (
-      !searchTerm ||
-      searchTerm.length < 2 ||
-      activeServer !== 's1' ||
-      isSearchPage
-    ) {
+    if (!searchTerm || searchTerm.length < 2 || isSearchPage) {
       setSuggestions([]);
       return;
     }
 
     setIsFetchingSuggestions(true);
     try {
-      const results = await getSearchSuggestions(searchTerm, activeServer);
+      const results = await getSearchSuggestions(searchTerm);
       setSuggestions(results.slice(0, 1));
     } catch {
       setSuggestions([]);
