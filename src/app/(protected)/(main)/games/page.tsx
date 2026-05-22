@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
+import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getCookie } from '@/lib/cookies';
 
 interface Game {
@@ -16,6 +17,7 @@ interface Game {
 export default function GamesPage() {
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const csrf = getCookie('csrfToken');
@@ -24,7 +26,8 @@ export default function GamesPage() {
     })
       .then((r) => r.json())
       .then((data) => setGames(data.games ?? []))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = games.filter(
@@ -65,42 +68,62 @@ export default function GamesPage() {
 
           {/* Games Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filtered.map((game) => (
-              <Link
-                key={game.slug}
-                href={`/games/${game.slug}`}
-                className="group bg-card p-2 border-[3px] border-border"
-              >
-                <div className="aspect-video bg-background flex items-center justify-center border-[3px] border-border overflow-hidden relative">
-                  <img
-                    src={game.thumbnail}
-                    alt={game.title}
-                    className="w-full h-full object-cover group-hover:opacity-0 transition-opacity"
-                  />
-                  <video
-                    src={game.video}
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity"
-                    onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
-                    onMouseLeave={(e) => {
-                      const v = e.target as HTMLVideoElement;
-                      v.pause();
-                      v.currentTime = 0;
-                    }}
-                  />
-                </div>
-                <div className="px-2 pt-3 pb-2">
-                  <p className="font-headline font-black uppercase tracking-wider text-foreground text-sm">
-                    {game.title}
-                  </p>
-                  <p className="text-xs text-foreground/50 mt-1">
-                    {game.description}
-                  </p>
-                </div>
-              </Link>
-            ))}
+            {loading
+              ? [0, 1, 2, 3, 4, 5].map((n) => (
+                  <div
+                    key={`skeleton-${n}`}
+                    className="bg-card p-2 border-[3px] border-border"
+                  >
+                    <AppSkeletonTheme>
+                      <Skeleton
+                        containerClassName="block aspect-video"
+                        height="100%"
+                      />
+                      <div className="px-2 pt-3 pb-2">
+                        <Skeleton height={14} width="60%" />
+                        <Skeleton height={10} width="80%" className="mt-1" />
+                      </div>
+                    </AppSkeletonTheme>
+                  </div>
+                ))
+              : filtered.map((game) => (
+                  <Link
+                    key={game.slug}
+                    href={`/games/${game.slug}`}
+                    className="group bg-card p-2 border-[3px] border-border"
+                  >
+                    <div className="aspect-video bg-background flex items-center justify-center border-[3px] border-border overflow-hidden relative">
+                      <img
+                        src={game.thumbnail}
+                        alt={game.title}
+                        className="w-full h-full object-cover group-hover:opacity-0 transition-opacity"
+                      />
+                      <video
+                        src={game.video}
+                        muted
+                        loop
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity"
+                        onMouseEnter={(e) =>
+                          (e.target as HTMLVideoElement).play()
+                        }
+                        onMouseLeave={(e) => {
+                          const v = e.target as HTMLVideoElement;
+                          v.pause();
+                          v.currentTime = 0;
+                        }}
+                      />
+                    </div>
+                    <div className="px-2 pt-3 pb-2">
+                      <p className="font-headline font-black uppercase tracking-wider text-foreground text-sm">
+                        {game.title}
+                      </p>
+                      <p className="text-xs text-foreground/50 mt-1">
+                        {game.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
           </div>
         </div>
       </div>
