@@ -189,9 +189,9 @@ export function useFullscreen({
   const enterFullscreen = useCallback(async () => {
     try {
       if (isMobile) {
-        // YouTube-style mobile fullscreen: lock orientation to landscape,
-        // fill the viewport, and lock scroll. No native fullscreen API —
-        // this keeps our custom controls visible on both iOS and Android.
+        const isAndroid = /android/i.test(navigator.userAgent);
+
+        // Lock orientation to landscape
         const orientation = screen.orientation as ScreenOrientation & {
           lock?: (orientation: string) => Promise<void>;
         };
@@ -216,6 +216,14 @@ export function useFullscreen({
           } catch {
             /* plugin not available */
           }
+        }
+
+        // Android: also request native fullscreen to hide system bars
+        // (notification bar + navigation bar). iOS doesn't support this
+        // so we rely on CSS-only fullscreen there.
+        if (isAndroid) {
+          const target = containerRef.current || document.documentElement;
+          await requestElementFullscreen(target).catch(() => {});
         }
 
         manualMobileFullscreenRef.current = true;
