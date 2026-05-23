@@ -397,6 +397,26 @@ export function useFullscreen({
     }
   }, [playerIsFullscreen]);
 
+  // Force landscape orientation while in fullscreen on mobile
+  useEffect(() => {
+    if (!isMobile || !playerIsFullscreen) return;
+
+    const enforceOrientation = () => {
+      const orientation = screen.orientation as ScreenOrientation & {
+        lock?: (orientation: string) => Promise<void>;
+      };
+      if (orientation?.lock) {
+        orientation.lock('landscape-primary').catch(() => {});
+      }
+    };
+
+    // Re-lock if orientation somehow changes while in fullscreen
+    screen.orientation?.addEventListener('change', enforceOrientation);
+    return () => {
+      screen.orientation?.removeEventListener('change', enforceOrientation);
+    };
+  }, [isMobile, playerIsFullscreen]);
+
   // Clear orientation timeouts on unmount
   useEffect(() => {
     return () => {
