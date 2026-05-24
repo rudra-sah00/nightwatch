@@ -119,7 +119,6 @@ export default function LiveMatchPlayerPage() {
           streamUrl={resolvedUrl}
           metadata={metadata}
           secondaryPosterUrl={null}
-          mobileLayout="inline"
         />
         <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
           <div className="flex items-start justify-between gap-3">
@@ -344,7 +343,6 @@ export default function LiveMatchPlayerPage() {
         streamUrl={sessionUrl}
         metadata={metadata}
         secondaryPosterUrl={activeMatch.team2.avatar || null}
-        mobileLayout="inline"
       />
 
       <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
