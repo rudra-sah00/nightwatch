@@ -253,8 +253,9 @@ export function PlayerRoot({
       <div
         ref={containerRef}
         role="application"
+        data-mobile={isMobile || undefined}
         className={cn(
-          'video-container relative w-full bg-black overflow-hidden flex flex-col',
+          'group video-container relative w-full bg-black overflow-hidden flex flex-col',
           'cursor-none',
           state.showControls && !resolvedHideControls && 'cursor-auto',
           className,

@@ -229,7 +229,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
           <MobileSkipForward />
         </Player.MobileCenterControls>
         {/* Desktop: DVR seek bar */}
-        <div className="hidden md:contents">
+        <div className="hidden md:contents group-data-[mobile]:!hidden">
           <Player.SeekBar />
         </div>
         <Player.ControlRow>
@@ -237,10 +237,10 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
           <Player.Volume />
           <Player.LiveBadge />
           <Player.Spacer />
-          <div className="hidden min-[380px]:contents md:contents">
+          <div className="hidden min-[380px]:contents md:contents group-data-[mobile]:!hidden">
             <Player.SettingsMenu />
           </div>
-          <div className="hidden md:contents">
+          <div className="hidden md:contents group-data-[mobile]:!hidden">
             <Player.CastButton />
           </div>
           <Player.Fullscreen />
@@ -249,7 +249,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         <Player.MobileBottomRight>
           <Player.Fullscreen />
         </Player.MobileBottomRight>
-        <div className="md:hidden">
+        <div className="md:hidden group-data-[mobile]:block">
           <Player.MobileSeekBar />
         </div>
       </Player.Controls>
