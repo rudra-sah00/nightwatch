@@ -46,7 +46,7 @@ export function PlayerControls({ children }: { children: React.ReactNode }) {
  */
 export function PlayerControlRow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative hidden md:block px-2 py-3 min-[380px]:p-3 md:p-6 lg:p-8 2xl:p-10 space-y-1 min-[380px]:space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto pb-[max(0.75rem,env(safe-area-inset-bottom))] min-[380px]:pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+    <div className="relative hidden group-data-[mobile]:!hidden md:block px-2 py-3 min-[380px]:p-3 md:p-6 lg:p-8 2xl:p-10 space-y-1 min-[380px]:space-y-2 md:space-y-3 lg:space-y-4 pointer-events-auto pb-[max(0.75rem,env(safe-area-inset-bottom))] min-[380px]:pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="flex items-center justify-between">
         <div className="flex w-full items-center gap-0.5 min-[380px]:gap-1 md:gap-2 lg:gap-3 2xl:gap-4">
           {children}
@@ -69,8 +69,8 @@ export function PlayerMobileTopBar({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden flex items-center justify-between gap-2 px-3 pt-2 pointer-events-auto">
-      {children}
+    <div className="md:hidden group-data-[mobile]:block px-3 pt-2 pointer-events-auto">
+      <div className="flex items-center justify-between gap-2">{children}</div>
     </div>
   );
 }
@@ -90,7 +90,7 @@ export function PlayerMobileCenterControls({
   const { state } = usePlayerContext();
   if (state.isLoading || state.isBuffering) return null;
   return (
-    <div className="md:hidden flex flex-1 items-center justify-center gap-8 pointer-events-auto">
+    <div className="md:hidden group-data-[mobile]:flex flex-1 items-center justify-center gap-8 pointer-events-auto">
       {children}
     </div>
   );
@@ -118,7 +118,7 @@ export function PlayerMobileBottomRight({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden absolute bottom-3 right-3 pointer-events-auto">
+    <div className="md:hidden group-data-[mobile]:block absolute bottom-3 right-3 pointer-events-auto">
       {children}
     </div>
   );

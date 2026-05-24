@@ -245,25 +245,25 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
             <MobileSkipForward />
           </Player.MobileCenterControls>
           {/* Desktop layout: seekbar then control row */}
-          <div className="hidden md:contents">
+          <div className="hidden md:contents group-data-[mobile]:!hidden">
             <Player.SeekBar />
           </div>
           <Player.ControlRow>
             <Player.PlayPause />
             <Player.SkipButtons />
             <Player.Volume />
-            <div className="hidden md:contents">
+            <div className="hidden md:contents group-data-[mobile]:!hidden">
               <Player.TimeDisplay />
             </div>
             <Player.Spacer />
-            <div className="hidden md:contents">
+            <div className="hidden md:contents group-data-[mobile]:!hidden">
               <Player.EpisodePanelTrigger />
             </div>
-            <div className="hidden md:contents">
+            <div className="hidden md:contents group-data-[mobile]:!hidden">
               <Player.AudioSubtitleSelectors />
             </div>
             <Player.SettingsMenu />
-            <div className="hidden md:contents">
+            <div className="hidden md:contents group-data-[mobile]:!hidden">
               <Player.CastButton />
             </div>
             <Player.Fullscreen />
@@ -272,7 +272,7 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
           <Player.MobileBottomRight>
             <Player.Fullscreen />
           </Player.MobileBottomRight>
-          <div className="md:hidden">
+          <div className="md:hidden group-data-[mobile]:block">
             <Player.MobileSeekBar />
           </div>
         </Player.Controls>
