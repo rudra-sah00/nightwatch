@@ -52,14 +52,23 @@ export function useMp4({
     const handleError = (e: Event) => {
       const mediaError = (e.target as HTMLVideoElement).error;
 
-      // Ignore MEDIA_ERR_SRC_NOT_SUPPORTED (4) which happens when src is set to empty during unmount
       // Ignore MEDIA_ERR_ABORTED (1) which happens on unmount or browser interruption
-      if (
-        !mediaError ||
-        mediaError.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
-        mediaError.code === MediaError.MEDIA_ERR_ABORTED
-      )
+      if (!mediaError || mediaError.code === MediaError.MEDIA_ERR_ABORTED)
         return;
+
+      // MEDIA_ERR_SRC_NOT_SUPPORTED during cleanup (empty src) — ignore on web.
+      // On native Capacitor, this indicates a real failure (e.g. CF Worker response
+      // not playable by AVPlayer) — trigger stream expired so the player can retry.
+      if (mediaError.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        const isNative =
+          typeof window !== 'undefined' &&
+          window.Capacitor?.isNativePlatform?.();
+        if (isNative && onStreamExpiredRef.current) {
+          dispatch({ type: 'SET_LOADING', isLoading: true });
+          onStreamExpiredRef.current();
+        }
+        return;
+      }
 
       dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
       onStreamExpiredRef.current?.();
@@ -68,7 +77,23 @@ export function useMp4({
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('error', handleError);
 
+    // Timeout: if loadedmetadata doesn't fire within 20s on native platforms,
+    // the stream is likely unplayable — trigger expired to retry or show error.
+    let metadataTimeout: ReturnType<typeof setTimeout> | null = null;
+    const isNative =
+      typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.();
+    if (isNative) {
+      metadataTimeout = setTimeout(() => {
+        if (onStreamExpiredRef.current) {
+          onStreamExpiredRef.current();
+        } else {
+          dispatch({ type: 'SET_ERROR', error: 'Video failed to load' });
+        }
+      }, 20000);
+    }
+
     return () => {
+      if (metadataTimeout) clearTimeout(metadataTimeout);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('error', handleError);
       video.pause();

@@ -1,5 +1,5 @@
 'use client';
-import { SkipBack, SkipForward } from 'lucide-react';
+import { ArrowLeft, SkipBack, SkipForward } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useCallback, useEffect, useState } from 'react';
@@ -217,8 +217,9 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
 
       <Player.Controls>
         <Player.Header rightContent={recordButton} />
-        {/* Mobile top: settings right */}
+        {/* Mobile top: back left, settings right */}
         <Player.MobileTopBar>
+          <MobileLiveBackButton />
           <Player.SettingsMenu />
         </Player.MobileTopBar>
         {/* Mobile center: skip back / play / skip forward */}
@@ -253,6 +254,20 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         </div>
       </Player.Controls>
     </>
+  );
+}
+
+/** Mobile-only back button in the top-left of the player overlay. */
+function MobileLiveBackButton() {
+  const { playerHandlers } = usePlayerContext();
+  return (
+    <button
+      type="button"
+      onClick={playerHandlers.goBack}
+      className="p-2 transition-transform active:scale-90"
+    >
+      <ArrowLeft className="w-6 h-6 text-white stroke-[3px]" />
+    </button>
   );
 }
 

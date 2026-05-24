@@ -1,4 +1,4 @@
-import { SkipBack, SkipForward } from 'lucide-react';
+import { ArrowLeft, SkipBack, SkipForward } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useCallback, useEffect, useState } from 'react';
@@ -233,8 +233,9 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
       <Player.EpisodePanel>
         <Player.Controls>
           <Player.Header hideBackButton={hideBackButton} />
-          {/* Mobile top-right: settings + fullscreen (YouTube-style) */}
+          {/* Mobile top: back left, settings right */}
           <Player.MobileTopBar>
+            <MobileBackButton />
             <Player.SettingsMenu />
           </Player.MobileTopBar>
           {/* Mobile center: skip back / play / skip forward (YouTube-style) */}
@@ -315,6 +316,20 @@ function MobileSkipForward() {
       className="p-3 transition-transform active:scale-90"
     >
       <SkipForward className="w-7 h-7 text-white fill-white" />
+    </button>
+  );
+}
+
+/** Mobile-only back button in the top-left of the player overlay. */
+function MobileBackButton() {
+  const { playerHandlers } = usePlayerContext();
+  return (
+    <button
+      type="button"
+      onClick={playerHandlers.goBack}
+      className="p-2 transition-transform active:scale-90"
+    >
+      <ArrowLeft className="w-6 h-6 text-white stroke-[3px]" />
     </button>
   );
 }
