@@ -4,19 +4,57 @@ import { User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useCallback, useRef } from 'react';
+import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
 import { useAuth } from '@/providers/auth-provider';
+
+function useLongPress(onLongPress: () => void, delay = 500) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPressRef = useRef(false);
+
+  const start = useCallback(() => {
+    didLongPressRef.current = false;
+    timerRef.current = setTimeout(() => {
+      didLongPressRef.current = true;
+      onLongPress();
+    }, delay);
+  }, [onLongPress, delay]);
+
+  const cancel = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = null;
+  }, []);
+
+  const onClick = useCallback((e: React.MouseEvent) => {
+    if (didLongPressRef.current) {
+      e.preventDefault();
+      didLongPressRef.current = false;
+    }
+  }, []);
+
+  return {
+    onTouchStart: start,
+    onTouchEnd: cancel,
+    onTouchMove: cancel,
+    onClick,
+  };
+}
 
 /**
  * Top navigation bar displaying the brand logo and user profile link.
  *
- * Adapts its drag region behavior based on whether the music player is expanded,
- * and applies Electron-safe insets for desktop app compatibility.
+ * On mobile, long-pressing the logo opens the left sidebar and long-pressing
+ * the profile icon opens the right sidebar.
  */
 export function Navbar() {
   const { user } = useAuth();
   const { expanded: musicExpanded } = useMusicPlayerContext();
   const t = useTranslations('common.nav');
+  const { setLeftOpen, setRightOpen } = useSidebar();
+
+  const logoLongPress = useLongPress(() => setLeftOpen(true));
+  const profileLongPress = useLongPress(() => setRightOpen(true));
 
   return (
     <nav
@@ -36,6 +74,7 @@ export function Navbar() {
             href="/home"
             className="flex items-center gap-2 py-4 px-2 [-webkit-app-region:no-drag]"
             title={t('home')}
+            {...logoLongPress}
           >
             <div className="md:hidden w-10 h-10 flex items-center justify-center shrink-0">
               <img
@@ -58,6 +97,7 @@ export function Navbar() {
             href="/profile"
             className="flex flex-col items-center [-webkit-app-region:no-drag] justify-center gap-1 hover:bg-black/5 text-foreground rounded-lg px-3 py-1.5 transition-colors min-w-[72px]"
             title={t('profile')}
+            {...profileLongPress}
           >
             <div className="relative w-6 h-6 shrink-0 flex items-center justify-center overflow-hidden">
               {user?.profilePhoto ? (
