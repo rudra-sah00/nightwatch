@@ -190,8 +190,8 @@ export function PlayerRoot({
 
   // YouTube-style mobile fullscreen: override container to fill viewport
   const mobileFullscreen = isMobile && state.isFullscreen;
-  const effectiveContainerStyle = mobileFullscreen
-    ? ({
+  const effectiveContainerStyle: React.CSSProperties = mobileFullscreen
+    ? {
         position: 'fixed',
         top: 0,
         left: 0,
@@ -200,8 +200,10 @@ export function PlayerRoot({
         width: '100%',
         height: '100dvh',
         zIndex: 9999,
-      } as React.CSSProperties)
-    : (containerStyle ?? CONTAINER_STYLE);
+      }
+    : isMobile
+      ? { position: 'relative', width: '100%', aspectRatio: '16 / 9' }
+      : (containerStyle ?? CONTAINER_STYLE);
   // Mobile: tap to toggle controls (show/hide). Ignore taps on interactive
   // children (buttons, inputs) so controls buttons still work normally.
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
