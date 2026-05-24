@@ -341,7 +341,8 @@ function QrScanner({
     try {
       await qrAuthorize(scannedCode);
       toast.success(t('devices.authorized'));
-      onSuccess();
+      // Wait for desktop to poll and create its session, then refresh
+      setTimeout(() => onSuccess(), 4000);
     } catch {
       toast.error(t('devices.authorizeFailed'));
       onClose();
