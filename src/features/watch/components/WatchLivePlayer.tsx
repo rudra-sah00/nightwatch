@@ -88,7 +88,6 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
         left: 0,
       }}
       streamMode="live"
-      allowPortraitPlayback={false}
       onBack={handleBack}
       onNavigate={(url) => router.push(url)}
     >

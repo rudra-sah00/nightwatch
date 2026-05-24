@@ -1,5 +1,4 @@
 'use client';
-import { RotateCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { useCallback, useRef } from 'react';
@@ -7,7 +6,6 @@ import { cn } from '@/lib/utils';
 import { PlayerContext } from '../../context/PlayerContext';
 import type { VideoMetadata } from '../../context/types';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
-import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 import { usePlayerRoot } from './hooks/use-player-root';
 
 /**
@@ -90,8 +88,6 @@ interface PlayerRootProps {
   isLive?: boolean;
   /** Override the default 100dvh container sizing (e.g. for YouTube-style embedded layout) */
   containerStyle?: React.CSSProperties;
-  /** Allow portrait playback on mobile (disables rotate wall) for inline layouts. */
-  allowPortraitPlayback?: boolean;
   /** Initial playback speed multiplier (e.g. `1.5` for 1.5×). */
   playbackRate?: number;
 }
@@ -109,8 +105,6 @@ const CONTAINER_STYLE = {
  * - Provides {@link PlayerContext} to all descendant player components.
  * - Manages YouTube-style **mobile fullscreen** by switching to a fixed-position
  *   viewport overlay (no native Fullscreen API on iOS Safari).
- * - Renders a **rotate wall** on iOS portrait when playback is active, prompting
- *   the user to physically rotate the device to landscape.
  * - Implements **tap-to-toggle controls** on mobile — tapping the container
  *   shows/hides the control bar (ignores taps on interactive children).
  * - Registers **keyboard shortcuts** on the container (`Space`/`K` play/pause,
@@ -147,10 +141,8 @@ export function PlayerRoot({
   onBack: onBackProp,
   isLive = false,
   containerStyle,
-  allowPortraitPlayback = false,
   playbackRate,
 }: PlayerRootProps) {
-  const t = useTranslations('watch.player');
   const tAria = useTranslations('watch.aria');
   const resolvedReadOnly =
     interactionMode === 'read-only'
@@ -195,7 +187,6 @@ export function PlayerRoot({
   });
 
   const isMobile = useMobileDetection();
-  const isPortrait = useMobileOrientation();
 
   // YouTube-style mobile fullscreen: override container to fill viewport
   const mobileFullscreen = isMobile && state.isFullscreen;
@@ -211,19 +202,6 @@ export function PlayerRoot({
         zIndex: 9999,
       } as React.CSSProperties)
     : (containerStyle ?? CONTAINER_STYLE);
-  // Android: orientation lock + real fullscreen kick in automatically so this
-  // only triggers on iOS Safari where the OS won't rotate programmatically.
-  // Also suppress the wall when the player is already in fullscreen (either
-  // real browser fullscreen on Android, or the manual iOS state) — in that
-  // case the video IS covering the screen and the wall just blocks content.
-  const showRotateWall =
-    isMobile &&
-    isPortrait &&
-    state.isPlaying &&
-    !allowPortraitPlayback &&
-    !isFullscreenOverride &&
-    !state.isFullscreen;
-
   // Mobile: tap to toggle controls (show/hide). Ignore taps on interactive
   // children (buttons, inputs) so controls buttons still work normally.
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
@@ -320,23 +298,6 @@ export function PlayerRoot({
         }}
       >
         {children}
-
-        {/* iOS portrait wall: blocks playback UI until user physically rotates device */}
-        {showRotateWall && (
-          <div className="absolute inset-0 z-50 bg-neo-yellow flex flex-col items-center justify-center gap-8 pointer-events-auto select-none p-6 text-center">
-            <div className="bg-background border-[4px] border-border p-4  rounded-none">
-              <RotateCw className="w-16 h-16 text-foreground animate-spin [animation-duration:2s] stroke-[3px]" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-foreground text-2xl font-black font-headline uppercase tracking-widest">
-                {t('rotateToLandscape')}
-              </p>
-              <p className="text-foreground text-sm font-bold font-headline uppercase tracking-widest max-w-[250px] mx-auto">
-                {t('landscapeOnlyMessage')}
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </PlayerContext>
   );

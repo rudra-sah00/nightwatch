@@ -118,7 +118,6 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
         left: 0,
       }}
       streamMode="vod"
-      allowPortraitPlayback={false}
       onBack={handleBack}
       onNavigate={props.onNavigate || ((url) => router.replace(url))}
     >
