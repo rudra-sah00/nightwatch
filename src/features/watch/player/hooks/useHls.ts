@@ -523,6 +523,13 @@ export function useHls({
               dispatch({ type: 'SET_BUFFERING', isBuffering: true });
             }
             video.play().catch(() => {});
+          } else if (isRecoverable && isNativePlatform) {
+            // Capacitor iOS: AVPlayer fires MEDIA_ERR_NETWORK on pause/play
+            // when the HLS session socket drops. Retry playback first instead
+            // of refetching the entire stream — the CDN URL is still valid.
+            dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+            video.load();
+            video.play().catch(() => {});
           } else if (isRecoverable && onStreamExpiredRef.current) {
             dispatch({ type: 'SET_LOADING', isLoading: true });
             onStreamExpiredRef.current();
