@@ -10,6 +10,7 @@ import { Player, usePlayerContext } from '../player';
 import type { VideoMetadata } from '../player/context/types';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
+import { DebugOverlay } from '../player/ui/overlays/DebugOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 import { NextEpisodeOverlay } from '../player/ui/overlays/NextEpisodeOverlay';
@@ -288,6 +289,8 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
         onCancel={nextEpisode.cancel}
         isLoading={nextEpisode.isLoading}
       />
+
+      <DebugOverlay />
     </>
   );
 }

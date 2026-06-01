@@ -17,6 +17,7 @@ import { Player, usePlayerContext } from '../player';
 import type { VideoMetadata } from '../player/context/types';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
+import { DebugOverlay } from '../player/ui/overlays/DebugOverlay';
 import { ErrorOverlay } from '../player/ui/overlays/ErrorOverlay';
 import { LoadingOverlay } from '../player/ui/overlays/LoadingOverlay';
 import { extractTokenFromUrl } from '../utils';
@@ -253,6 +254,8 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
           <Player.MobileSeekBar />
         </div>
       </Player.Controls>
+
+      <DebugOverlay />
     </>
   );
 }
