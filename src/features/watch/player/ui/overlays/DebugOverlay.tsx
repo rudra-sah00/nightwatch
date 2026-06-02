@@ -40,11 +40,13 @@ export function DebugOverlay() {
   useEffect(() => {
     if (!visible || !isStaging) return;
     if (state.isLoading) addLog('⏳ Loading...');
+    else addLog('✅ Loading complete');
   }, [state.isLoading, visible, addLog]);
 
   useEffect(() => {
     if (!visible || !isStaging) return;
     if (state.isBuffering) addLog('🔄 Buffering...');
+    else addLog('✅ Buffer OK');
   }, [state.isBuffering, visible, addLog]);
 
   useEffect(() => {

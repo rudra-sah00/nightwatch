@@ -543,11 +543,21 @@ export function useHls({
 
         const nativeStalledHandler = () => {
           if (cancelled) return;
-          dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+          // Only mark buffering if the video isn't actually progressing
+          if (video.readyState < 3) {
+            dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+          }
         };
 
         const nativePlayingHandler = () => {
           if (cancelled) return;
+          dispatch({ type: 'SET_BUFFERING', isBuffering: false });
+        };
+
+        const nativeTimeupdateHandler = () => {
+          if (cancelled) return;
+          // Clear stale buffering state — iOS fires 'waiting' spuriously on
+          // live HLS segment boundaries even while video continues playing.
           dispatch({ type: 'SET_BUFFERING', isBuffering: false });
         };
 
@@ -564,6 +574,7 @@ export function useHls({
         video.addEventListener('stalled', nativeStalledHandler);
         video.addEventListener('waiting', nativeStalledHandler);
         video.addEventListener('playing', nativePlayingHandler);
+        video.addEventListener('timeupdate', nativeTimeupdateHandler);
 
         // Store extra handlers on the element for cleanup (avoids closure capture issues)
         (
@@ -573,6 +584,8 @@ export function useHls({
           () => video.removeEventListener('stalled', nativeStalledHandler),
           () => video.removeEventListener('waiting', nativeStalledHandler),
           () => video.removeEventListener('playing', nativePlayingHandler),
+          () =>
+            video.removeEventListener('timeupdate', nativeTimeupdateHandler),
         ];
       }
     };
