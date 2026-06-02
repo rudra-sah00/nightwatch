@@ -71,6 +71,63 @@ export function DebugOverlay() {
     if (streamUrl) addLog(`🔗 Stream loaded: ${streamUrl.slice(0, 60)}...`);
   }, [streamUrl, visible, addLog]);
 
+  // Capacitor-specific: track native video element events directly
+  useEffect(() => {
+    if (!isStaging) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const isCapacitor =
+      typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.();
+
+    const logEvent = (name: string) => () => {
+      addLog(
+        `📱 ${name} | rs:${video.readyState} ns:${video.networkState} src:${(video.currentSrc || video.src || '').slice(0, 50)}`,
+      );
+    };
+
+    const onError = () => {
+      const e = video.error;
+      addLog(
+        `🚨 VIDEO ERROR code:${e?.code} msg:${e?.message || 'none'} src:${(video.currentSrc || '').slice(0, 50)}`,
+      );
+    };
+
+    const onStalled = () => {
+      addLog(
+        `⚠️ STALLED rs:${video.readyState} buffered:${video.buffered.length > 0 ? video.buffered.end(0).toFixed(1) : '0'}s`,
+      );
+    };
+
+    if (isCapacitor) {
+      addLog(
+        `📱 Capacitor native: true | src: ${(video.src || '').slice(0, 60)}`,
+      );
+    }
+
+    video.addEventListener('loadstart', logEvent('loadstart'));
+    video.addEventListener('loadeddata', logEvent('loadeddata'));
+    video.addEventListener('canplay', logEvent('canplay'));
+    video.addEventListener('canplaythrough', logEvent('canplaythrough'));
+    video.addEventListener('error', onError);
+    video.addEventListener('stalled', onStalled);
+    video.addEventListener('suspend', logEvent('suspend'));
+    video.addEventListener('abort', logEvent('abort'));
+    video.addEventListener('emptied', logEvent('emptied'));
+
+    return () => {
+      video.removeEventListener('loadstart', logEvent('loadstart'));
+      video.removeEventListener('loadeddata', logEvent('loadeddata'));
+      video.removeEventListener('canplay', logEvent('canplay'));
+      video.removeEventListener('canplaythrough', logEvent('canplaythrough'));
+      video.removeEventListener('error', onError);
+      video.removeEventListener('stalled', onStalled);
+      video.removeEventListener('suspend', logEvent('suspend'));
+      video.removeEventListener('abort', logEvent('abort'));
+      video.removeEventListener('emptied', logEvent('emptied'));
+    };
+  }, [videoRef, addLog]);
+
   // Triple-tap to toggle
   useEffect(() => {
     if (!isStaging) return;
