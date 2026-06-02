@@ -486,6 +486,45 @@ export function useHls({
             });
           }
 
+          // Parse master playlist for quality levels on native iOS
+          // (AVPlayer handles quality internally but we want to show options in UI)
+          if (manualQualitiesRef.current.length === 0) {
+            fetch(absoluteStreamUrl, { credentials: 'include' })
+              .then((r) => r.text())
+              .then((text) => {
+                if (cancelled) return;
+                const qualities: Quality[] = [];
+                const lines = text.split('\n');
+                for (let i = 0; i < lines.length; i++) {
+                  const line = lines[i];
+                  if (line.startsWith('#EXT-X-STREAM-INF:')) {
+                    const resMatch = line.match(/RESOLUTION=\d+x(\d+)/);
+                    const bwMatch = line.match(/BANDWIDTH=(\d+)/);
+                    if (resMatch) {
+                      const height = parseInt(resMatch[1], 10);
+                      const bandwidth = bwMatch ? parseInt(bwMatch[1], 10) : 0;
+                      qualities.push({
+                        label: `${height}p`,
+                        height,
+                        bandwidth,
+                      });
+                    }
+                  }
+                }
+                // Deduplicate by height
+                const seen = new Set<number>();
+                const unique = qualities.filter((q) => {
+                  if (seen.has(q.height)) return false;
+                  seen.add(q.height);
+                  return true;
+                });
+                if (unique.length > 0) {
+                  dispatch({ type: 'SET_QUALITIES', qualities: unique });
+                }
+              })
+              .catch(() => {});
+          }
+
           dispatch({ type: 'SET_LOADING', isLoading: false });
           video.play().catch(() => {});
         };
