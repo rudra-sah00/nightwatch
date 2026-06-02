@@ -290,7 +290,7 @@ export function SettingsMenu({
                 {currentScreen === 'speed' && renderSpeedMenu()}
               </div>
             </>,
-            document.body,
+            document.querySelector('.video-container') || document.body,
           )
         ) : (
           <div className="absolute bottom-full right-0 mb-3 w-64 max-h-[70vh] overflow-y-auto no-scrollbar bg-black/80 backdrop-blur-xl rounded-lg flex flex-col z-[100] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">

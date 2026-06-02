@@ -69,7 +69,7 @@ export function PlayerMobileTopBar({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden group-data-[mobile]:block px-3 pt-2 pointer-events-auto">
+    <div className="md:hidden group-data-[mobile]:block px-[max(0.75rem,env(safe-area-inset-left))] pt-[max(0.5rem,env(safe-area-inset-top))] pointer-events-auto">
       <div className="flex items-center justify-between gap-2">{children}</div>
     </div>
   );
@@ -118,7 +118,7 @@ export function PlayerMobileBottomRight({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden group-data-[mobile]:block absolute bottom-3 right-3 pointer-events-auto">
+    <div className="md:hidden group-data-[mobile]:block absolute bottom-4 right-[max(1rem,env(safe-area-inset-right))] pointer-events-auto">
       {children}
     </div>
   );
