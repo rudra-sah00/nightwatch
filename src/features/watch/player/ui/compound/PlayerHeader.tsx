@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePlayerContext } from '../../context/PlayerContext';
+import { useMobileDetection } from '../../hooks/useMobileDetection';
 
 /** Props for the {@link PlayerHeader} component. */
 interface PlayerHeaderProps {
@@ -23,14 +24,18 @@ export function PlayerHeader({
   hideBackButton,
   rightContent,
 }: PlayerHeaderProps) {
-  const { metadata, playerHandlers } = usePlayerContext();
+  const { metadata, playerHandlers, state } = usePlayerContext();
   const t = useTranslations('watch.player');
   const tAria = useTranslations('watch.aria');
+  const isMobile = useMobileDetection();
+
+  // Hide desktop header in mobile fullscreen — MobileTopBar handles it
+  if (isMobile && state.isFullscreen) return null;
 
   return (
     <section
       className={cn(
-        'player-header absolute top-0 left-0 right-0 p-4 sm:p-6 lg:p-8 2xl:p-10 hidden sm:flex group-data-[mobile]:!hidden items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300 opacity-100',
+        'player-header absolute top-0 left-0 right-0 p-4 sm:p-6 lg:p-8 2xl:p-10 hidden sm:flex items-center gap-4 lg:gap-6 z-20 pointer-events-auto transition-opacity duration-300 opacity-100',
       )}
       onMouseEnter={() => playerHandlers.handleInteraction(true)}
       onMouseLeave={() => playerHandlers.handleInteraction(false)}
