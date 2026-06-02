@@ -152,11 +152,14 @@ const messageImports: Record<
 };
 
 export default getRequestConfig(async () => {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(COOKIE_NAME)?.value;
-  const locale: Locale = locales.includes(raw as Locale)
-    ? (raw as Locale)
-    : defaultLocale;
+  let locale: Locale = defaultLocale;
+  try {
+    const cookieStore = await cookies();
+    const raw = cookieStore.get(COOKIE_NAME)?.value;
+    if (locales.includes(raw as Locale)) locale = raw as Locale;
+  } catch {
+    // cookies() unavailable during static prerendering — use default
+  }
 
   const loader = messageImports[locale] || messageImports.en;
   const [common, auth, profile, search, watch, live, party, music] =
