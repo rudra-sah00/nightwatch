@@ -84,12 +84,16 @@ export function DebugOverlay() {
       } else {
         tapTimerRef.current = setTimeout(() => {
           tapCountRef.current = 0;
-        }, 400);
+        }, 500);
       }
     };
 
+    container.addEventListener('touchend', handler);
     container.addEventListener('dblclick', handler);
-    return () => container.removeEventListener('dblclick', handler);
+    return () => {
+      container.removeEventListener('touchend', handler);
+      container.removeEventListener('dblclick', handler);
+    };
   }, []);
 
   const handleCopy = useCallback(async () => {
