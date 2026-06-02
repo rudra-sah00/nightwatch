@@ -202,7 +202,11 @@ export function PlayerRoot({
         zIndex: 9999,
       }
     : isMobile
-      ? { position: 'relative', width: '100%', aspectRatio: '16 / 9' }
+      ? (containerStyle ?? {
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '16 / 9',
+        })
       : (containerStyle ?? CONTAINER_STYLE);
   // Mobile: tap to toggle controls (show/hide). Ignore taps on interactive
   // children (buttons, inputs) so controls buttons still work normally.
