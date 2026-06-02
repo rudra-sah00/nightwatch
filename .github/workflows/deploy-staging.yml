@@ -46,6 +46,20 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:server
 
+      - name: Wait for Tailscale DNS
+        run: |
+          for i in 1 2 3 4 5; do
+            if tailscale status --peers | grep -q "${{ secrets.DEPLOY_HOST }}"; then
+              echo "✅ Tailscale peer resolved"
+              exit 0
+            fi
+            echo "Waiting for Tailscale DNS... (attempt $i)"
+            sleep 5
+          done
+          echo "❌ Tailscale DNS failed after 25s"
+          tailscale status
+          exit 1
+
       - name: Deploy to staging
         run: |
           ssh -o StrictHostKeyChecking=no rudra@${{ secrets.DEPLOY_HOST }} << 'DEPLOY'
