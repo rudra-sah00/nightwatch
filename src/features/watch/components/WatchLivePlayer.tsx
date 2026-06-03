@@ -250,7 +250,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         <Player.MobileBottomRight>
           <Player.Fullscreen />
         </Player.MobileBottomRight>
-        <div className="md:hidden group-data-[mobile]:block landscape:pb-10">
+        <div className="md:hidden group-data-[mobile]:block">
           <Player.MobileSeekBar />
         </div>
       </Player.Controls>
