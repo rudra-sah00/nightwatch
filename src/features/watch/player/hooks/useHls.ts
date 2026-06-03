@@ -601,11 +601,15 @@ export function useHls({
         };
 
         // Native AVPlayer doesn't resolve relative URLs against the WKWebView
-        // origin automatically. Resolve against the current origin so the
-        // request goes through the Next.js rewrite proxy correctly.
+        // origin automatically. On Capacitor, resolve against the backend API URL
+        // directly — the frontend domain is behind CF Access which blocks AVPlayer.
         let absoluteStreamUrl = streamUrl;
         if (streamUrl.startsWith('/') && typeof window !== 'undefined') {
-          absoluteStreamUrl = `${window.location.origin}${streamUrl}`;
+          const baseUrl =
+            isNativePlatform && process.env.NEXT_PUBLIC_BACKEND_URL
+              ? process.env.NEXT_PUBLIC_BACKEND_URL
+              : window.location.origin;
+          absoluteStreamUrl = `${baseUrl}${streamUrl}`;
         }
         video.src = absoluteStreamUrl;
         video.addEventListener('loadedmetadata', nativeLoadedMetadataHandler);
