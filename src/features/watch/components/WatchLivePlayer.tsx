@@ -221,9 +221,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         {/* Mobile top: back left, settings right */}
         <Player.MobileTopBar>
           <MobileLiveBackButton />
-          <div className="pr-1">
-            <Player.SettingsMenu />
-          </div>
+          <Player.SettingsMenu />
         </Player.MobileTopBar>
         {/* Mobile center: skip back / play / skip forward */}
         <Player.MobileCenterControls>
@@ -252,7 +250,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         <Player.MobileBottomRight>
           <Player.Fullscreen />
         </Player.MobileBottomRight>
-        <div className="md:hidden group-data-[mobile]:block landscape:pb-3">
+        <div className="md:hidden group-data-[mobile]:block landscape:pb-10">
           <Player.MobileSeekBar />
         </div>
       </Player.Controls>
