@@ -221,7 +221,9 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         {/* Mobile top: back left, settings right */}
         <Player.MobileTopBar>
           <MobileLiveBackButton />
-          <Player.SettingsMenu />
+          <div className="pr-1">
+            <Player.SettingsMenu />
+          </div>
         </Player.MobileTopBar>
         {/* Mobile center: skip back / play / skip forward */}
         <Player.MobileCenterControls>
