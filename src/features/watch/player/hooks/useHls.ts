@@ -109,11 +109,14 @@ export function useHls({
       if (
         Hls.isSupported() &&
         // WKWebView (Capacitor iOS) reports MediaSource support since iOS 17.1
-        // but its implementation is unreliable — buffer stalls, silent failures.
-        // Force native HLS on Capacitor iOS which handles .m3u8 natively.
+        // but its implementation is unreliable for VOD — buffer stalls, silent failures.
+        // Force native HLS on Capacitor iOS for VOD which handles .m3u8 natively.
+        // However, for LIVE streams use HLS.js even on Capacitor because native AVPlayer
+        // can't handle the proxied playlist URLs (relative paths, recursive rewrites).
         !(
           typeof window !== 'undefined' &&
-          window.Capacitor?.isNativePlatform?.()
+          window.Capacitor?.isNativePlatform?.() &&
+          !isLive
         ) &&
         (streamUrl.includes('.m3u8') || !streamUrl.includes('.mp4'))
       ) {
