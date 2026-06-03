@@ -283,7 +283,7 @@ export function SettingsMenu({
               {/* Bottom sheet */}
               <div
                 data-settings-portal
-                className="fixed bottom-0 left-0 right-0 z-[10001] bg-background border-t-[4px] border-border max-h-[60vh] overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom motion-safe:duration-200 motion-reduce:animate-none"
+                className="fixed bottom-0 left-0 right-0 z-[10001] bg-background border-t-[4px] border-border max-h-[60vh] overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] landscape:left-auto landscape:right-auto landscape:w-[min(24rem,80vw)] landscape:inset-x-0 landscape:mx-auto motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom motion-safe:duration-200 motion-reduce:animate-none"
               >
                 {currentScreen === 'main' && renderMainMenu()}
                 {currentScreen === 'quality' && renderQualityMenu()}
