@@ -38,11 +38,22 @@ export function MusicHeader({
   const t = useTranslations('music');
 
   return (
-    <div className="flex items-center justify-between px-6 pt-6 pb-2">
-      <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter">
+    <div className="flex items-center justify-between px-6 pt-6 pb-2 gap-3">
+      <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter shrink-0">
         {t('title')}
       </h1>
-      <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={onOpenSearch}
+        className="flex-1 max-w-md h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors cursor-pointer"
+        aria-label={t('searchMusic')}
+      >
+        <Search className="w-4 h-4 text-foreground/40 shrink-0" />
+        <span className="text-sm text-foreground/40 font-body truncate">
+          {t('searchPlaceholder')}
+        </span>
+      </button>
+      <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
           onClick={onOpenLangPicker}
@@ -64,14 +75,6 @@ export function MusicHeader({
           aria-label={t('createPlaylist')}
         >
           <Plus className="w-4 h-4 text-foreground/50" />
-        </button>
-        <button
-          type="button"
-          onClick={onOpenSearch}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors"
-          aria-label={t('searchMusic')}
-        >
-          <Search className="w-4 h-4 text-foreground/50" />
         </button>
       </div>
     </div>
