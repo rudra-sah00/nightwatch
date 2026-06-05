@@ -75,6 +75,11 @@ export function getTokenExpiresAt(): number | null {
  * If the token has expired while JS timers were frozen, refresh immediately.
  */
 export async function revalidateTokenOnResume(): Promise<boolean> {
+  // Don't attempt refresh while offline — it will fail and the session
+  // may still be valid once connectivity returns.
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return true;
+  }
   if (!tokenExpiresAt) return true;
   if (Date.now() < tokenExpiresAt - 60000) {
     // Token still valid with >1 min margin — just reschedule the timer
@@ -245,7 +250,13 @@ export async function apiFetch<T>(
       // Refresh failed — only logout if session is truly invalid
       // (tokenExpiresAt cleared by 401/403 from refresh endpoint).
       // Transient errors (5xx, network) keep tokenExpiresAt set.
-      if (!tokenExpiresAt && typeof window !== 'undefined') {
+      // Also skip logout if the device is offline — the session may still be
+      // valid once connectivity returns.
+      if (
+        !tokenExpiresAt &&
+        typeof window !== 'undefined' &&
+        navigator.onLine !== false
+      ) {
         window.dispatchEvent(new CustomEvent('auth:expired'));
       }
 
