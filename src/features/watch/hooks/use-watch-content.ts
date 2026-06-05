@@ -175,18 +175,32 @@ export function useWatchContent() {
         let response: PlayResponse;
 
         if (type === 'series' && season && episode) {
-          console.log('[NW-Play] VOD: fetching series stream', {
-            seriesId: overrideMovieId || seriesId || movieId,
-            season,
-            episode,
-          });
-          response = await playVideo({
-            type: 'series',
-            title: decodedTitle,
-            seriesId: overrideMovieId || seriesId || movieId || undefined,
-            season: parseInt(season, 10),
-            episode: parseInt(episode, 10),
-          });
+          // When overrideMovieId is a dub content ID (s1: prefixed), it represents
+          // a standalone content entry for that language. Fetch it as a movie so
+          // the backend resolves the exact dub, not the default language.
+          if (overrideMovieId?.startsWith('s1:')) {
+            console.log('[NW-Play] VOD: fetching dub as movie', {
+              movieId: overrideMovieId,
+            });
+            response = await playVideo({
+              type: 'movie',
+              title: decodedTitle,
+              movieId: overrideMovieId,
+            });
+          } else {
+            console.log('[NW-Play] VOD: fetching series stream', {
+              seriesId: overrideMovieId || seriesId || movieId,
+              season,
+              episode,
+            });
+            response = await playVideo({
+              type: 'series',
+              title: decodedTitle,
+              seriesId: overrideMovieId || seriesId || movieId || undefined,
+              season: parseInt(season, 10),
+              episode: parseInt(episode, 10),
+            });
+          }
         } else {
           console.log('[NW-Play] VOD: fetching stream', {
             movieId: overrideMovieId || movieId,
