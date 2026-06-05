@@ -132,9 +132,9 @@ export function DebugOverlay() {
   useEffect(() => {
     if (!isStaging) return;
 
-    // Keyboard shortcut for desktop
+    // Keyboard shortcut for desktop: Ctrl+Shift+D (Windows/Linux) or Cmd+Shift+D (macOS)
     const keyHandler = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
         e.preventDefault();
         setVisible((v) => !v);
       }
