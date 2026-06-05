@@ -161,6 +161,14 @@ export function useVideoElement({
     const trackId = currentTrackId;
     const textTracks = video.textTracks;
 
+    console.log('[NW-Subtitle] Track mode switch:', {
+      trackId,
+      textTracksCount: textTracks.length,
+      videoReadyState: video.readyState,
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight,
+    });
+
     for (let i = 0; i < textTracks.length; i++) {
       textTracks[i].mode = 'hidden';
     }

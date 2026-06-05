@@ -105,6 +105,10 @@ export function MangaClient() {
   const [titles, setTitles] = useState<MangaTitle[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
+  const [searchOriginRect, setSearchOriginRect] = useState<DOMRect | null>(
+    null,
+  );
+  const searchRef = useRef<HTMLButtonElement>(null);
   const t = useTranslations('common.manga');
 
   const fetchData = useCallback(async (t: Tab) => {
@@ -195,21 +199,32 @@ export function MangaClient() {
     <main className="pb-32 animate-in fade-in">
       {/* Search Spotlight */}
       {showSearch && (
-        <MangaSearchSpotlight onClose={() => setShowSearch(false)} />
+        <MangaSearchSpotlight
+          originRect={searchOriginRect}
+          onClose={() => setShowSearch(false)}
+        />
       )}
 
       {/* Header — like music */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-2">
-        <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter">
+      <div className="flex items-center justify-between px-6 pt-6 pb-2 gap-3">
+        <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter shrink-0">
           {t('title')}
         </h1>
         <button
+          ref={searchRef}
           type="button"
-          onClick={() => setShowSearch(true)}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-card border-[2px] border-border hover:border-neo-cyan hover:bg-neo-cyan/10 transition-colors"
+          onClick={() => {
+            const rect = searchRef.current?.getBoundingClientRect();
+            if (rect) setSearchOriginRect(rect);
+            setShowSearch(true);
+          }}
+          className="flex-1 max-w-md h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-cyan hover:bg-neo-cyan/10 transition-colors cursor-pointer"
           aria-label={t('searchAriaLabel')}
         >
-          <Search className="w-4 h-4 text-foreground/50" />
+          <Search className="w-4 h-4 text-foreground/40 shrink-0" />
+          <span className="text-sm text-foreground/40 font-body truncate">
+            {t('searchPlaceholder')}
+          </span>
         </button>
       </div>
 

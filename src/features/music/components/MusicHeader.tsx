@@ -2,6 +2,7 @@
 
 import { Globe, Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useRef } from 'react';
 
 /**
  * Props for the {@link MusicHeader} component.
@@ -13,8 +14,8 @@ interface MusicHeaderProps {
   onOpenLangPicker: () => void;
   /** Toggles the {@link CreatePlaylistDialog}. */
   onToggleCreatePlaylist: () => void;
-  /** Opens the {@link MusicSearchSpotlight} overlay. */
-  onOpenSearch: () => void;
+  /** Opens the {@link MusicSearchSpotlight} overlay, passing the origin rect for animation. */
+  onOpenSearch: (originRect: DOMRect) => void;
 }
 
 /**
@@ -36,6 +37,7 @@ export function MusicHeader({
   onOpenSearch,
 }: MusicHeaderProps) {
   const t = useTranslations('music');
+  const searchRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div className="flex items-center justify-between px-6 pt-6 pb-2 gap-3">
@@ -43,8 +45,12 @@ export function MusicHeader({
         {t('title')}
       </h1>
       <button
+        ref={searchRef}
         type="button"
-        onClick={onOpenSearch}
+        onClick={() => {
+          const rect = searchRef.current?.getBoundingClientRect();
+          if (rect) onOpenSearch(rect);
+        }}
         className="flex-1 max-w-md h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors cursor-pointer"
         aria-label={t('searchMusic')}
       >

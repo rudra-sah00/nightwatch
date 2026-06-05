@@ -38,6 +38,16 @@ export function useMp4({
 
     const video = videoRef.current;
 
+    console.log('[NW-MP4] Setting new stream URL:', streamUrl?.slice(0, 80));
+    console.log('[NW-MP4] Video state before src change:', {
+      readyState: video.readyState,
+      networkState: video.networkState,
+      currentTime: video.currentTime,
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight,
+      paused: video.paused,
+    });
+
     // Clear any previous errors when loading new stream
     dispatch({ type: 'SET_ERROR', error: null });
     dispatch({ type: 'SET_LOADING', isLoading: true });
@@ -96,6 +106,10 @@ export function useMp4({
       if (metadataTimeout) clearTimeout(metadataTimeout);
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('error', handleError);
+      console.log('[NW-MP4] Cleanup: pausing and removing src', {
+        readyState: video.readyState,
+        currentTime: video.currentTime,
+      });
       video.pause();
       video.removeAttribute('src'); // Better than src='' which can cause network requests
     };

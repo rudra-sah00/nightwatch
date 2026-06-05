@@ -8,24 +8,54 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MangaTitle } from '@/features/manga/api';
 import { searchManga } from '@/features/manga/api';
 
-export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
+export function MangaSearchSpotlight({
+  originRect,
+  onClose,
+}: {
+  originRect?: DOMRect | null;
+  onClose: () => void;
+}) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MangaTitle[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const searchBarRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = useTranslations('common.manga');
 
+  // FLIP animation + initial setup
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
+
+    // FLIP animation: animate input bar from header search bar position
+    if (originRect && searchBarRef.current) {
+      const el = searchBarRef.current;
+      const finalRect = el.getBoundingClientRect();
+      const dx = originRect.left - finalRect.left;
+      const dy = originRect.top - finalRect.top;
+      const sx = originRect.width / finalRect.width;
+      const sy = originRect.height / finalRect.height;
+
+      el.animate(
+        [
+          {
+            transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+            opacity: 0.8,
+          },
+          { transform: 'translate(0, 0) scale(1, 1)', opacity: 1 },
+        ],
+        { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'both' },
+      );
+    }
+
     if (!window.Capacitor?.isNativePlatform?.()) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, []);
+  }, [originRect]);
 
   const close = () => {
     setVisible(false);
@@ -66,10 +96,13 @@ export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
       tabIndex={-1}
     >
       <div
-        className={`w-full max-w-xl mx-4 max-h-[80vh] flex flex-col overflow-hidden transition-all duration-200 ${visible ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`}
+        className={`w-full max-w-xl mx-4 max-h-[80vh] flex flex-col overflow-hidden transition-all duration-200 ${visible ? 'scale-100 opacity-100' : originRect ? 'scale-100 opacity-0' : 'scale-75 opacity-0'}`}
       >
         {/* Input */}
-        <div className="flex items-center bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl px-5 py-3.5 gap-3 shrink-0">
+        <div
+          ref={searchBarRef}
+          className="flex items-center bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl px-5 py-3.5 gap-3 shrink-0"
+        >
           <Search className="w-5 h-5 text-white/40 shrink-0" />
           <input
             ref={inputRef}
