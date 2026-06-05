@@ -128,11 +128,22 @@ export function DebugOverlay() {
     };
   }, [videoRef, addLog]);
 
-  // Triple-tap to toggle
+  // Triple-tap to toggle (mobile) + Ctrl+Shift+D (desktop)
   useEffect(() => {
     if (!isStaging) return;
+
+    // Keyboard shortcut for desktop
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        e.preventDefault();
+        setVisible((v) => !v);
+      }
+    };
+    document.addEventListener('keydown', keyHandler);
+
     const container = document.querySelector('.video-container');
-    if (!container) return;
+    if (!container)
+      return () => document.removeEventListener('keydown', keyHandler);
 
     const handler = () => {
       tapCountRef.current += 1;
@@ -148,10 +159,9 @@ export function DebugOverlay() {
     };
 
     container.addEventListener('touchend', handler);
-    container.addEventListener('dblclick', handler);
     return () => {
+      document.removeEventListener('keydown', keyHandler);
       container.removeEventListener('touchend', handler);
-      container.removeEventListener('dblclick', handler);
     };
   }, []);
 
