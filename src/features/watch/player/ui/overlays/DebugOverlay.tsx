@@ -65,6 +65,19 @@ export function DebugOverlay() {
       addLog(`🎞️ Quality → ${state.currentQuality}`);
   }, [state.currentQuality, visible, addLog]);
 
+  useEffect(() => {
+    if (!isStaging) return;
+    addLog(
+      `🔤 Subtitle → ${state.currentSubtitleTrack || 'OFF'} (tracks: ${state.subtitleTracks.length})`,
+    );
+  }, [state.currentSubtitleTrack, state.subtitleTracks.length, addLog]);
+
+  useEffect(() => {
+    if (!isStaging) return;
+    if (state.currentAudioTrack)
+      addLog(`🔊 Audio → ${state.currentAudioTrack}`);
+  }, [state.currentAudioTrack, addLog]);
+
   // Log stream URL changes (refetch detection)
   useEffect(() => {
     if (!visible || !isStaging) return;
