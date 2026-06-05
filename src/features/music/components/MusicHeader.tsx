@@ -2,6 +2,7 @@
 
 import { Globe, Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useRef } from 'react';
 
 /**
  * Props for the {@link MusicHeader} component.
@@ -13,8 +14,8 @@ interface MusicHeaderProps {
   onOpenLangPicker: () => void;
   /** Toggles the {@link CreatePlaylistDialog}. */
   onToggleCreatePlaylist: () => void;
-  /** Opens the {@link MusicSearchSpotlight} overlay. */
-  onOpenSearch: () => void;
+  /** Opens the {@link MusicSearchSpotlight} overlay, passing the origin rect for animation. */
+  onOpenSearch: (originRect: DOMRect) => void;
 }
 
 /**
@@ -36,13 +37,29 @@ export function MusicHeader({
   onOpenSearch,
 }: MusicHeaderProps) {
   const t = useTranslations('music');
+  const searchRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="flex items-center justify-between px-6 pt-6 pb-2">
-      <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter">
+    <div className="flex items-center justify-between px-6 pt-6 pb-2 gap-3">
+      <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter shrink-0">
         {t('title')}
       </h1>
-      <div className="flex items-center gap-2">
+      <button
+        ref={searchRef}
+        type="button"
+        onClick={() => {
+          const rect = searchRef.current?.getBoundingClientRect();
+          if (rect) onOpenSearch(rect);
+        }}
+        className="flex-1 max-w-md h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors cursor-pointer"
+        aria-label={t('searchMusic')}
+      >
+        <Search className="w-4 h-4 text-foreground/40 shrink-0" />
+        <span className="text-sm text-foreground/40 font-body truncate">
+          {t('searchPlaceholder')}
+        </span>
+      </button>
+      <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
           onClick={onOpenLangPicker}
@@ -64,14 +81,6 @@ export function MusicHeader({
           aria-label={t('createPlaylist')}
         >
           <Plus className="w-4 h-4 text-foreground/50" />
-        </button>
-        <button
-          type="button"
-          onClick={onOpenSearch}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors"
-          aria-label={t('searchMusic')}
-        >
-          <Search className="w-4 h-4 text-foreground/50" />
         </button>
       </div>
     </div>

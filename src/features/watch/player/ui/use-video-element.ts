@@ -161,33 +161,37 @@ export function useVideoElement({
     const trackId = currentTrackId;
     const textTracks = video.textTracks;
 
+    console.log('[NW-Subtitle] Track mode switch:', {
+      trackId,
+      textTracksCount: textTracks.length,
+      subtitleTracksCount: subtitleTracks.length,
+      textTrackIds: Array.from({ length: textTracks.length }, (_, i) => ({
+        id: textTracks[i].id,
+        label: textTracks[i].label,
+        language: textTracks[i].language,
+        kind: textTracks[i].kind,
+      })),
+    });
+
     for (let i = 0; i < textTracks.length; i++) {
       textTracks[i].mode = 'hidden';
     }
 
     if (trackId && trackId !== 'off') {
-      const targetTrack = subtitleTracks.find((t) => t.id === trackId);
-      let found = false;
+      // Find which index in our subtitleTracks array matches the selected ID
+      const targetIndex = subtitleTracks.findIndex((t) => t.id === trackId);
 
-      for (let i = 0; i < textTracks.length; i++) {
-        const track = textTracks[i];
-        if (
-          track.id === trackId ||
-          (targetTrack && track.label === targetTrack.label) ||
-          (targetTrack && track.language === targetTrack.language)
-        ) {
-          track.mode = 'showing';
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
+      if (targetIndex !== -1 && targetIndex < textTracks.length) {
+        // Direct index match — track elements render in the same order as subtitleTracks
+        textTracks[targetIndex].mode = 'showing';
+      } else {
+        // Fallback: match by id, label, or language on the TextTrack object
+        const targetTrack = subtitleTracks.find((t) => t.id === trackId);
         for (let i = 0; i < textTracks.length; i++) {
           const track = textTracks[i];
           if (
-            targetTrack &&
-            track.label.toLowerCase().includes(targetTrack.label.toLowerCase())
+            track.id === trackId ||
+            (targetTrack && track.label === targetTrack.label)
           ) {
             track.mode = 'showing';
             break;

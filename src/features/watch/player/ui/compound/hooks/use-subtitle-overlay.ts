@@ -31,8 +31,11 @@ export function useSubtitleOverlay({
       if (document.getElementById('hide-native-cues')) return;
       const style = document.createElement('style');
       style.id = 'hide-native-cues';
-      style.textContent =
-        'video::cue { color: transparent; background: transparent; text-shadow: none; }';
+      style.textContent = [
+        'video::cue { color: transparent; background: transparent; text-shadow: none; font-size: 0; line-height: 0; opacity: 0; }',
+        'video::-webkit-media-text-track-container { display: none !important; }',
+        'video::-webkit-media-text-track-display { display: none !important; }',
+      ].join('\n');
       document.head.appendChild(style);
     };
 

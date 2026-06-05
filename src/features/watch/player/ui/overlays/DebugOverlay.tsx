@@ -65,6 +65,19 @@ export function DebugOverlay() {
       addLog(`🎞️ Quality → ${state.currentQuality}`);
   }, [state.currentQuality, visible, addLog]);
 
+  useEffect(() => {
+    if (!isStaging) return;
+    addLog(
+      `🔤 Subtitle → ${state.currentSubtitleTrack || 'OFF'} (tracks: ${state.subtitleTracks.length})`,
+    );
+  }, [state.currentSubtitleTrack, state.subtitleTracks.length, addLog]);
+
+  useEffect(() => {
+    if (!isStaging) return;
+    if (state.currentAudioTrack)
+      addLog(`🔊 Audio → ${state.currentAudioTrack}`);
+  }, [state.currentAudioTrack, addLog]);
+
   // Log stream URL changes (refetch detection)
   useEffect(() => {
     if (!visible || !isStaging) return;
@@ -128,9 +141,10 @@ export function DebugOverlay() {
     };
   }, [videoRef, addLog]);
 
-  // Triple-tap to toggle
+  // Triple-tap to toggle (mobile) + fixed button (desktop)
   useEffect(() => {
     if (!isStaging) return;
+
     const container = document.querySelector('.video-container');
     if (!container) return;
 
@@ -148,10 +162,8 @@ export function DebugOverlay() {
     };
 
     container.addEventListener('touchend', handler);
-    container.addEventListener('dblclick', handler);
     return () => {
       container.removeEventListener('touchend', handler);
-      container.removeEventListener('dblclick', handler);
     };
   }, []);
 
@@ -189,70 +201,85 @@ export function DebugOverlay() {
 
   // Don't render anything in production
   if (!isStaging) return null;
-  if (!visible) return null;
 
   const video = videoRef.current;
   const hls = hlsRef.current;
 
   return (
-    <div
-      className="absolute top-0 left-0 right-0 bottom-0 z-[9998] pointer-events-none"
-      aria-hidden="true"
-    >
-      <div className="absolute top-2 left-2 right-2 max-h-[70%] overflow-hidden pointer-events-auto rounded-md bg-black/85 border border-green-500/60 p-2 font-mono text-[10px] leading-tight text-green-400 select-text">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-1 border-b border-green-500/30 pb-1">
-          <span className="text-green-300 font-bold text-[11px]">🟢 DEBUG</span>
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="text-[9px] bg-green-900/60 border border-green-500/40 rounded px-1.5 py-0.5 text-green-300 active:bg-green-700/60"
-          >
-            {copied ? '✓ Copied' : '📋 Copy'}
-          </button>
-        </div>
+    <>
+      {/* Debug toggle button — always visible on staging */}
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        className="absolute top-2 right-2 z-[9999] pointer-events-auto w-7 h-7 flex items-center justify-center rounded-full bg-black/60 border border-green-500/50 text-green-400 text-[10px] font-bold hover:bg-green-900/60 transition-colors"
+        aria-label="Toggle debug overlay"
+      >
+        🟢
+      </button>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mb-1.5">
-          <span>
-            ▶ {state.isPlaying ? 'PLAYING' : 'PAUSED'}
-            {state.isBuffering ? ' (buffering)' : ''}
-          </span>
-          <span>🎞️ {state.currentQuality}</span>
-          <span>
-            ⏱️ {state.currentTime.toFixed(1)}s / {state.duration.toFixed(1)}s
-          </span>
-          <span>📦 Buf: {state.buffered.toFixed(1)}s</span>
-          <span>📡 readyState: {video?.readyState ?? '-'}</span>
-          <span>🌐 networkState: {video?.networkState ?? '-'}</span>
-          {hls && (
-            <>
-              <span>
-                🔧 HLS lvl: {hls.currentLevel}/{hls.levels?.length ?? 0}
-              </span>
-              <span>
-                📊 {((hls.bandwidthEstimate ?? 0) / 1e6).toFixed(1)} Mbps
-              </span>
-            </>
-          )}
-          {!hls && <span>📱 Native AVPlayer</span>}
-        </div>
-
-        {/* Log */}
+      {!visible ? null : (
         <div
-          ref={logRef}
-          className="max-h-32 overflow-y-auto border-t border-green-500/30 pt-1 space-y-px"
+          className="absolute top-0 left-0 right-0 bottom-0 z-[9998] pointer-events-none"
+          aria-hidden="true"
         >
-          {logs.map((l) => (
-            <div key={`${l.time}-${l.msg}`} className="text-green-500/80">
-              <span className="text-green-700">
-                {new Date(l.time).toLocaleTimeString()}
-              </span>{' '}
-              {l.msg}
+          <div className="absolute top-2 left-2 right-2 max-h-[70%] overflow-hidden pointer-events-auto rounded-md bg-black/85 border border-green-500/60 p-2 font-mono text-[10px] leading-tight text-green-400 select-text">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-1 border-b border-green-500/30 pb-1">
+              <span className="text-green-300 font-bold text-[11px]">
+                🟢 DEBUG
+              </span>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="text-[9px] bg-green-900/60 border border-green-500/40 rounded px-1.5 py-0.5 text-green-300 active:bg-green-700/60"
+              >
+                {copied ? '✓ Copied' : '📋 Copy'}
+              </button>
             </div>
-          ))}
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mb-1.5">
+              <span>
+                ▶ {state.isPlaying ? 'PLAYING' : 'PAUSED'}
+                {state.isBuffering ? ' (buffering)' : ''}
+              </span>
+              <span>🎞️ {state.currentQuality}</span>
+              <span>
+                ⏱️ {state.currentTime.toFixed(1)}s / {state.duration.toFixed(1)}s
+              </span>
+              <span>📦 Buf: {state.buffered.toFixed(1)}s</span>
+              <span>📡 readyState: {video?.readyState ?? '-'}</span>
+              <span>🌐 networkState: {video?.networkState ?? '-'}</span>
+              {hls && (
+                <>
+                  <span>
+                    🔧 HLS lvl: {hls.currentLevel}/{hls.levels?.length ?? 0}
+                  </span>
+                  <span>
+                    📊 {((hls.bandwidthEstimate ?? 0) / 1e6).toFixed(1)} Mbps
+                  </span>
+                </>
+              )}
+              {!hls && <span>📱 Native AVPlayer</span>}
+            </div>
+
+            {/* Log */}
+            <div
+              ref={logRef}
+              className="max-h-32 overflow-y-auto border-t border-green-500/30 pt-1 space-y-px"
+            >
+              {logs.map((l) => (
+                <div key={`${l.time}-${l.msg}`} className="text-green-500/80">
+                  <span className="text-green-700">
+                    {new Date(l.time).toLocaleTimeString()}
+                  </span>{' '}
+                  {l.msg}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
