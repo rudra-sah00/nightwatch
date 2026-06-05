@@ -51,7 +51,7 @@ export function MusicHeader({
           const rect = searchRef.current?.getBoundingClientRect();
           if (rect) onOpenSearch(rect);
         }}
-        className="flex-1 max-w-md h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors cursor-pointer"
+        className="flex-1 max-w-md min-w-0 h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-yellow hover:bg-neo-yellow/10 transition-colors cursor-pointer"
         aria-label={t('searchMusic')}
       >
         <Search className="w-4 h-4 text-foreground/40 shrink-0" />

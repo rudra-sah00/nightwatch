@@ -107,7 +107,7 @@ export function MusicView() {
   }, [searchParams, player]);
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">
+    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-28">
       <MusicHeader
         selectedLangs={selectedLangs}
         onOpenLangPicker={() => setShowLangPicker(true)}
