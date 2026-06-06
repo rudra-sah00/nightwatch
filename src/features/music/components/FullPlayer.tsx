@@ -12,6 +12,7 @@ import {
   useMusicPlaybackProgress,
   useMusicPlayerContext,
 } from '../context/MusicPlayerContext';
+import { useNativeVolume } from '../hooks/use-native-volume';
 import { DesktopFullPlayer } from './DesktopFullPlayer';
 import { MobileFullPlayer } from './MobileFullPlayer';
 
@@ -59,6 +60,7 @@ export function FullPlayer() {
   const { progress, duration } = useMusicPlaybackProgress();
 
   const mobile = useIsMobile();
+  const nativeVol = useNativeVolume(mobile && !!expanded);
   const [closing, setClosing] = useState(false);
   const [lyrics, setLyrics] = useState<SyncedLyricLine[] | null>(null);
   const [recommendations, setRecommendations] = useState<MusicTrack[]>([]);
@@ -237,7 +239,11 @@ export function FullPlayer() {
         )
     : seek;
   const handleSetVolume = (v: number) => {
-    setVolume(v);
+    if (nativeVol.isNative) {
+      nativeVol.setVolume(v);
+    } else {
+      setVolume(v);
+    }
     if (isRemoteControlling) {
       window.dispatchEvent(
         new CustomEvent('music:remote-command', {
@@ -254,7 +260,7 @@ export function FullPlayer() {
         isPlaying={displayPlaying}
         progress={displayProgress}
         duration={displayDuration}
-        volume={volume}
+        volume={nativeVol.isNative ? nativeVol.volume : volume}
         queue={isRemoteControlling ? remoteQueue : queue}
         lyrics={lyrics}
         currentLineIndex={currentLineIndex}
