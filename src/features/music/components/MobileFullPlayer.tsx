@@ -225,7 +225,7 @@ export function MobileFullPlayer({
                 </div>
               )}
             </div>
-            <div className="shrink-0 w-full mb-2">
+            <div className="shrink-0 w-full mt-auto mb-2">
               <h2 className="text-white font-bold text-xl truncate">
                 {currentTrack.title}
               </h2>
@@ -329,7 +329,7 @@ export function MobileFullPlayer({
             </div>
 
             {/* Bottom bar: lyrics / eq / sleep / queue */}
-            <div className="flex items-center justify-around mt-6 py-2">
+            <div className="flex items-center justify-around mt-auto py-2">
               <button
                 type="button"
                 onClick={onToggleLyrics}
