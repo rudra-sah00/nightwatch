@@ -292,7 +292,7 @@ export function MobileFullPlayer({
                 </span>
               </div>
             </div>
-            <div className="shrink-0 flex items-center justify-center gap-12 mt-5">
+            <div className="shrink-0 flex items-center justify-center gap-12 mt-7">
               <button type="button" onClick={onPrev} className="text-white">
                 <SkipBack className="w-9 h-9 fill-current" />
               </button>
