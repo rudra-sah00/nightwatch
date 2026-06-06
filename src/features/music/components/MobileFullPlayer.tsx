@@ -225,7 +225,7 @@ export function MobileFullPlayer({
                 </div>
               )}
             </div>
-            <div className="shrink-0 w-full mt-auto mb-2">
+            <div className="shrink-0 w-full mt-3 mb-2">
               <h2 className="text-white font-bold text-xl truncate">
                 {currentTrack.title}
               </h2>
@@ -233,7 +233,7 @@ export function MobileFullPlayer({
                 {currentTrack.artist}
               </p>
             </div>
-            <div className="shrink-0 w-full mt-4">
+            <div className="shrink-0 w-full mt-6">
               <div
                 ref={seekBarRef}
                 className="w-full py-3 cursor-pointer relative"
