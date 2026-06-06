@@ -233,7 +233,7 @@ export function MobileFullPlayer({
                 {currentTrack.artist}
               </p>
             </div>
-            <div className="shrink-0 w-full">
+            <div className="shrink-0 w-full mt-4">
               <div
                 ref={seekBarRef}
                 className="w-full py-3 cursor-pointer relative"
@@ -292,7 +292,7 @@ export function MobileFullPlayer({
                 </span>
               </div>
             </div>
-            <div className="shrink-0 flex items-center justify-center gap-12 mt-3">
+            <div className="shrink-0 flex items-center justify-center gap-12 mt-5">
               <button type="button" onClick={onPrev} className="text-white">
                 <SkipBack className="w-9 h-9 fill-current" />
               </button>
@@ -311,7 +311,7 @@ export function MobileFullPlayer({
                 <SkipForward className="w-9 h-9 fill-current" />
               </button>
             </div>
-            <div className="shrink-0 flex items-center gap-3 mt-3">
+            <div className="shrink-0 flex items-center gap-3 mt-5">
               <Volume1 className="w-3.5 h-3.5 text-white/30" />
               <input
                 type="range"
