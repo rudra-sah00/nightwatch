@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Hook that bridges to native system volume on Capacitor (iOS/Android).
- * Falls back to no-op on web. Returns [volume (0-1), setVolume].
- * Also polls for hardware button changes to keep the slider in sync.
+ * Falls back to no-op on web. Returns volume (0-1) and setVolume.
+ * Listens to hardware volume button presses for instant slider sync.
  */
 export function useNativeVolume(enabled: boolean) {
   const [volume, setVolumeState] = useState(0.5);
-  const pollRef = useRef<ReturnType<typeof setInterval>>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   const isNative =
     typeof window !== 'undefined' && !!window.Capacitor?.isNativePlatform?.();
@@ -30,7 +30,7 @@ export function useNativeVolume(enabled: boolean) {
       } else {
         const { Volumes } = await import('@ottimis/capacitor-volumes');
         const { value } = await Volumes.getVolumeLevel({ type: 3 });
-        setVolumeState(value / 10); // Android returns 0-10, normalize to 0-1
+        setVolumeState(value / 10);
       }
     } catch {}
   }, [isNative, isIos]);
@@ -57,13 +57,31 @@ export function useNativeVolume(enabled: boolean) {
     [isNative, isIos],
   );
 
-  // Poll for hardware button changes
+  // Listen for hardware volume button presses → instant sync
   useEffect(() => {
     if (!enabled || !isNative) return;
     getVolume();
-    pollRef.current = setInterval(getVolume, 1000);
+
+    let active = true;
+    (async () => {
+      try {
+        const { VolumeButtons } = await import(
+          '@capacitor-community/volume-buttons'
+        );
+        await VolumeButtons.watchVolume({}, () => {
+          // Button pressed — immediately read the new system volume
+          if (active) getVolume();
+        });
+        cleanupRef.current = () => {
+          VolumeButtons.clearWatch().catch(() => {});
+        };
+      } catch {}
+    })();
+
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      active = false;
+      cleanupRef.current?.();
+      cleanupRef.current = null;
     };
   }, [enabled, isNative, getVolume]);
 
