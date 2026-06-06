@@ -327,14 +327,9 @@ export function MobileFullPlayer({
               />
               <Volume2 className="w-3.5 h-3.5 text-white/30" />
             </div>
-          </div>
-        )}
 
-        {/* ===== BOTTOM BAR ===== */}
-        {!showQueue && (
-          <div className="shrink-0 pb-1">
-            {/* Bottom bar: lyrics / eq / airplay / sleep / queue */}
-            <div className="flex items-center justify-around pb-1">
+            {/* Bottom bar: lyrics / eq / sleep / queue */}
+            <div className="mt-auto flex items-center justify-around py-2">
               <button
                 type="button"
                 onClick={onToggleLyrics}
