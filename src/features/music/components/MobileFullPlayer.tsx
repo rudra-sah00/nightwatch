@@ -329,7 +329,7 @@ export function MobileFullPlayer({
             </div>
 
             {/* Bottom bar: lyrics / eq / sleep / queue */}
-            <div className="mt-auto flex items-center justify-around py-2">
+            <div className="flex items-center justify-around mt-6 py-2">
               <button
                 type="button"
                 onClick={onToggleLyrics}
