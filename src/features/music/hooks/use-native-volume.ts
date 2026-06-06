@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export function useNativeVolume(enabled: boolean) {
   const [volume, setVolumeState] = useState(0.5);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const userSetRef = useRef(0); // timestamp of last manual set (to suppress feedback)
 
   const isNative =
     typeof window !== 'undefined' && !!window.Capacitor?.isNativePlatform?.();
@@ -38,6 +39,7 @@ export function useNativeVolume(enabled: boolean) {
   // Set system volume
   const setVolume = useCallback(
     async (v: number) => {
+      userSetRef.current = Date.now();
       setVolumeState(v);
       if (!isNative) return;
       try {
@@ -70,7 +72,8 @@ export function useNativeVolume(enabled: boolean) {
         );
         await VolumeButtons.watchVolume({}, () => {
           // Button pressed — immediately read the new system volume
-          if (active) getVolume();
+          // Skip if user just set volume from slider (prevents feedback loop)
+          if (active && Date.now() - userSetRef.current > 500) getVolume();
         });
         cleanupRef.current = () => {
           VolumeButtons.clearWatch().catch(() => {});
