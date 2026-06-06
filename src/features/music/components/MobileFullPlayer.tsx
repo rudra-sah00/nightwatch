@@ -184,7 +184,7 @@ export function MobileFullPlayer({
           /* ===== MAIN VIEW ===== */
           <div className="flex-1 flex flex-col min-h-0">
             {/* Fixed-height content area — same size for art and lyrics */}
-            <div className="shrink-0 flex flex-col" style={{ height: '50vh' }}>
+            <div className="shrink-0 flex flex-col" style={{ height: '45vh' }}>
               {showLyrics && hasLyrics ? (
                 <>
                   <div className="shrink-0 flex items-center gap-3 py-2 animate-in fade-in duration-300">
@@ -215,7 +215,7 @@ export function MobileFullPlayer({
                 </>
               ) : (
                 <div className="flex-1 flex items-center justify-center">
-                  <div className="w-full aspect-square max-h-[45vh]">
+                  <div className="w-full aspect-square max-h-[38vh]">
                     <img
                       src={currentTrack.image}
                       alt={currentTrack.title}
@@ -225,7 +225,7 @@ export function MobileFullPlayer({
                 </div>
               )}
             </div>
-            <div className="shrink-0 w-full mb-6">
+            <div className="shrink-0 w-full mb-4">
               <h2 className="text-white font-bold text-xl truncate">
                 {currentTrack.title}
               </h2>
@@ -233,7 +233,7 @@ export function MobileFullPlayer({
                 {currentTrack.artist}
               </p>
             </div>
-            <div className="shrink-0 w-full mt-4">
+            <div className="shrink-0 w-full mt-2">
               <div
                 ref={seekBarRef}
                 className="w-full py-3 cursor-pointer relative"
@@ -292,7 +292,7 @@ export function MobileFullPlayer({
                 </span>
               </div>
             </div>
-            <div className="shrink-0 flex items-center justify-center gap-12 mt-5">
+            <div className="shrink-0 flex items-center justify-center gap-12 mt-3">
               <button type="button" onClick={onPrev} className="text-white">
                 <SkipBack className="w-9 h-9 fill-current" />
               </button>
