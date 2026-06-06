@@ -320,7 +320,7 @@ export function MobileFullPlayer({
                 type="button"
                 onClick={onTogglePlay}
                 aria-label={isPlaying ? t('pause') : t('play')}
-                className="text-white"
+                className="text-white w-14 h-14 flex items-center justify-center"
               >
                 {isPlaying ? (
                   <Pause className="w-14 h-14 fill-current" />
