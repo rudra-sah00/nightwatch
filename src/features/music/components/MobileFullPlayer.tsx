@@ -154,10 +154,14 @@ export function MobileFullPlayer({
                   key={track.id}
                   type="button"
                   onClick={() => onPlay(track, queue)}
-                  className={`w-full flex items-center gap-3 py-2 text-left ${currentTrack?.id === track.id ? 'text-white' : 'text-white/60'}`}
+                  className={`w-full flex items-center gap-3 py-2 text-left ${currentTrack?.id === track.id ? 'text-white bg-white/5 rounded-lg px-1' : 'text-white/60'}`}
                 >
-                  <span className="w-5 text-white/20 text-[10px] font-mono text-right shrink-0">
-                    {i + 1}
+                  <span className="w-5 text-[10px] font-mono text-right shrink-0">
+                    {currentTrack?.id === track.id ? (
+                      <span className="text-neo-yellow">▶</span>
+                    ) : (
+                      <span className="text-white/20">{i + 1}</span>
+                    )}
                   </span>
                   <img
                     src={track.image}
