@@ -78,6 +78,13 @@ export function DebugOverlay() {
       addLog(`🔊 Audio → ${state.currentAudioTrack}`);
   }, [state.currentAudioTrack, addLog]);
 
+  useEffect(() => {
+    if (!isStaging || state.audioTracks.length === 0) return;
+    addLog(
+      `🎧 Audio tracks: ${state.audioTracks.map((t) => t.label).join(', ')}`,
+    );
+  }, [state.audioTracks, addLog]);
+
   // Log stream URL changes (refetch detection)
   useEffect(() => {
     if (!visible || !isStaging) return;

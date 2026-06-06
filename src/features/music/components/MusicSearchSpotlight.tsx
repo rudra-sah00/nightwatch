@@ -36,13 +36,7 @@ import { showSongMenu } from './SongContextMenu';
  *
  * @param props.onClose - Callback invoked after the closing animation completes.
  */
-export function MusicSearchSpotlight({
-  originRect,
-  onClose,
-}: {
-  originRect?: DOMRect | null;
-  onClose: () => void;
-}) {
+export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
   const t = useTranslations('music');
   const player = useMusicPlayerContext();
   const [query, setQuery] = useState('');
@@ -87,28 +81,17 @@ export function MusicSearchSpotlight({
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
 
-  // FLIP animation + initial setup
+  // Smooth entrance animation
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
 
-    // FLIP animation: animate input bar from header search bar position
-    if (originRect && searchBarRef.current) {
-      const el = searchBarRef.current;
-      const finalRect = el.getBoundingClientRect();
-      const dx = originRect.left - finalRect.left;
-      const dy = originRect.top - finalRect.top;
-      const sx = originRect.width / finalRect.width;
-      const sy = originRect.height / finalRect.height;
-
-      el.animate(
+    if (searchBarRef.current) {
+      searchBarRef.current.animate(
         [
-          {
-            transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
-            opacity: 0.8,
-          },
-          { transform: 'translate(0, 0) scale(1, 1)', opacity: 1 },
+          { transform: 'translateY(8px)', opacity: 0 },
+          { transform: 'translateY(0)', opacity: 1 },
         ],
-        { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'both' },
+        { duration: 250, easing: 'cubic-bezier(0.2, 0, 0, 1)', fill: 'both' },
       );
     }
 
@@ -124,7 +107,7 @@ export function MusicSearchSpotlight({
         clearTimeout(debounceRef.current);
       }
     };
-  }, [originRect]);
+  }, []);
 
   const close = () => {
     setVisible(false);
@@ -222,7 +205,7 @@ export function MusicSearchSpotlight({
       tabIndex={-1}
     >
       <div
-        className={`w-full max-w-xl mx-4 max-h-[80vh] flex flex-col overflow-hidden transition-all duration-200 ${visible ? 'scale-100 opacity-100' : originRect ? 'scale-100 opacity-0' : 'scale-75 opacity-0'}`}
+        className={`w-full max-w-xl mx-4 max-h-[80vh] flex flex-col overflow-hidden transition-all duration-200 ${visible ? 'scale-100 opacity-100' : 'scale-100 opacity-0'}`}
       >
         {/* Input */}
         <div

@@ -50,8 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const onVisible = () => {
       if (document.visibilityState === 'visible') revalidateTokenOnResume();
     };
+    const onOnline = () => revalidateTokenOnResume();
     document.addEventListener('visibilitychange', onVisible);
-    return () => document.removeEventListener('visibilitychange', onVisible);
+    window.addEventListener('online', onOnline);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('online', onOnline);
+    };
   }, []);
 
   const handleForceLogout = useCallback(

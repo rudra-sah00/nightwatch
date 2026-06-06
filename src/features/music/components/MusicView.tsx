@@ -47,9 +47,6 @@ export function MusicView() {
     podcasts: [],
   });
   const [showSearch, setShowSearch] = useState(false);
-  const [searchOriginRect, setSearchOriginRect] = useState<DOMRect | null>(
-    null,
-  );
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [loading, setLoading] = useState(true);
   const [playlistKey, setPlaylistKey] = useState(0);
@@ -107,15 +104,12 @@ export function MusicView() {
   }, [searchParams, player]);
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">
+    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-28">
       <MusicHeader
         selectedLangs={selectedLangs}
         onOpenLangPicker={() => setShowLangPicker(true)}
         onToggleCreatePlaylist={() => setShowCreatePlaylist((v) => !v)}
-        onOpenSearch={(rect) => {
-          setSearchOriginRect(rect);
-          setShowSearch(true);
-        }}
+        onOpenSearch={() => setShowSearch(true)}
       />
 
       {showCreatePlaylist && (
@@ -145,10 +139,7 @@ export function MusicView() {
       )}
 
       {showSearch && (
-        <MusicSearchSpotlight
-          originRect={searchOriginRect}
-          onClose={() => setShowSearch(false)}
-        />
+        <MusicSearchSpotlight onClose={() => setShowSearch(false)} />
       )}
     </div>
   );

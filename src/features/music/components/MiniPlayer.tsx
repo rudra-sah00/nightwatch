@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  ListMusic,
   Pause,
   Play,
   SkipBack,
@@ -19,7 +18,6 @@ import {
 } from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
 import { MusicDevicePicker } from './MusicDevicePicker';
-import { QueueOverlay } from './QueueOverlay';
 import { showSongMenu } from './SongContextMenu';
 
 /**
@@ -48,7 +46,6 @@ export function MiniPlayer() {
   const {
     currentTrack,
     isPlaying,
-    queue,
     togglePlay,
     next,
     prev,
@@ -62,7 +59,6 @@ export function MiniPlayer() {
     remoteIsPlaying,
     remoteProgress,
     remoteDuration,
-    remoteQueue,
   } = player;
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -104,12 +100,9 @@ export function MiniPlayer() {
       longPressTimer.current = null;
     }
   };
-  const [showQueue, setShowQueue] = useState(false);
-
   // Show MiniPlayer if local track OR remote controlling
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
-  const displayQueue = isRemoteControlling ? remoteQueue : queue;
 
   // Interpolate remote progress locally for smooth bar animation
   const [interpolatedSeconds, setInterpolatedSeconds] = useState(0);
@@ -331,24 +324,8 @@ export function MiniPlayer() {
             </>
           )}
           <MusicDevicePicker />
-          <button
-            type="button"
-            onClick={() => setShowQueue((v) => !v)}
-            className={`p-1.5 transition-colors ${showQueue ? 'text-neo-yellow' : 'text-foreground/20 hover:text-foreground'}`}
-            title={t('queueTitle')}
-          >
-            <ListMusic className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
-
-      <QueueOverlay
-        open={showQueue}
-        onClose={() => setShowQueue(false)}
-        displayQueue={displayQueue}
-        displayTrackId={displayTrack?.id}
-        isRemoteControlling={isRemoteControlling}
-      />
     </div>
   );
 }

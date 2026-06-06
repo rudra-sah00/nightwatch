@@ -98,5 +98,6 @@
     "failedToLoad": "Failed to load station"
   },
   "similarSongs": "Similar Songs",
-  "queue": "Queue — {count}"
+  "queue": "Queue — {count}",
+  "close": "Close"
 }

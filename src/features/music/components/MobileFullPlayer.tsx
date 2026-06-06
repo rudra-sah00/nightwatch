@@ -72,6 +72,15 @@ export function MobileFullPlayer({
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showEq, setShowEq] = useState(false);
   const [showSleep, setShowSleep] = useState(false);
+  const [closingQueue, setClosingQueue] = useState(false);
+
+  const handleCloseQueue = () => {
+    setClosingQueue(true);
+    setTimeout(() => {
+      setClosingQueue(false);
+      onToggleQueue();
+    }, 250);
+  };
 
   // Seek bar state
   const seekBarRef = useRef<HTMLDivElement>(null);
@@ -128,21 +137,23 @@ export function MobileFullPlayer({
         <button
           type="button"
           onClick={onClose}
-          className="shrink-0 flex justify-center pt-3 pb-6"
+          className="shrink-0 flex justify-center pt-3 pb-4"
         >
           <div className="w-10 h-1 rounded-full bg-white/30" />
         </button>
 
         {showQueue ? (
           /* ===== QUEUE MODE ===== */
-          <div className="flex-1 min-h-0 flex flex-col">
+          <div
+            className={`flex-1 min-h-0 flex flex-col transition-all duration-250 ${closingQueue ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-in fade-in slide-in-from-bottom-4 duration-300'}`}
+          >
             <div className="shrink-0 flex items-center justify-between pb-2">
               <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px]">
                 {t('queue', { count: queue.length })}
               </p>
               <button
                 type="button"
-                onClick={onToggleQueue}
+                onClick={handleCloseQueue}
                 className="text-white/50 text-xs font-bold uppercase tracking-wider"
               >
                 {t('close')}
@@ -154,10 +165,14 @@ export function MobileFullPlayer({
                   key={track.id}
                   type="button"
                   onClick={() => onPlay(track, queue)}
-                  className={`w-full flex items-center gap-3 py-2 text-left ${currentTrack?.id === track.id ? 'text-white' : 'text-white/60'}`}
+                  className={`w-full flex items-center gap-3 py-2 text-left ${currentTrack?.id === track.id ? 'text-white bg-white/5 rounded-lg px-1' : 'text-white/60'}`}
                 >
-                  <span className="w-5 text-white/20 text-[10px] font-mono text-right shrink-0">
-                    {i + 1}
+                  <span className="w-5 text-[10px] font-mono text-right shrink-0">
+                    {currentTrack?.id === track.id ? (
+                      <span className="text-neo-yellow">▶</span>
+                    ) : (
+                      <span className="text-white/20">{i + 1}</span>
+                    )}
                   </span>
                   <img
                     src={track.image}
@@ -179,8 +194,11 @@ export function MobileFullPlayer({
         ) : (
           /* ===== MAIN VIEW ===== */
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Fixed-height content area — same size for art and lyrics */}
-            <div className="shrink-0 flex flex-col" style={{ height: '50vh' }}>
+            {/* Album art / lyrics area */}
+            <div
+              className="shrink-0 flex flex-col mt-6"
+              style={{ height: '40vh' }}
+            >
               {showLyrics && hasLyrics ? (
                 <>
                   <div className="shrink-0 flex items-center gap-3 py-2 animate-in fade-in duration-300">
@@ -211,7 +229,7 @@ export function MobileFullPlayer({
                 </>
               ) : (
                 <div className="flex-1 flex items-center justify-center">
-                  <div className="w-full aspect-square max-h-[45vh]">
+                  <div className="w-full aspect-square max-h-[38vh]">
                     <img
                       src={currentTrack.image}
                       alt={currentTrack.title}
@@ -221,7 +239,7 @@ export function MobileFullPlayer({
                 </div>
               )}
             </div>
-            <div className="shrink-0 w-full mb-6">
+            <div className="shrink-0 w-full mt-6 mb-2">
               <h2 className="text-white font-bold text-xl truncate">
                 {currentTrack.title}
               </h2>
@@ -229,7 +247,7 @@ export function MobileFullPlayer({
                 {currentTrack.artist}
               </p>
             </div>
-            <div className="shrink-0 w-full mt-4">
+            <div className="shrink-0 w-full mt-8">
               <div
                 ref={seekBarRef}
                 className="w-full py-3 cursor-pointer relative"
@@ -288,7 +306,7 @@ export function MobileFullPlayer({
                 </span>
               </div>
             </div>
-            <div className="shrink-0 flex items-center justify-center gap-12 mt-5">
+            <div className="shrink-0 flex items-center justify-center gap-12 mt-14">
               <button type="button" onClick={onPrev} className="text-white">
                 <SkipBack className="w-9 h-9 fill-current" />
               </button>
@@ -307,7 +325,7 @@ export function MobileFullPlayer({
                 <SkipForward className="w-9 h-9 fill-current" />
               </button>
             </div>
-            <div className="shrink-0 flex items-center gap-3 mt-5">
+            <div className="shrink-0 flex items-center gap-3 mt-[5.2rem]">
               <Volume1 className="w-3.5 h-3.5 text-white/30" />
               <input
                 type="range"
@@ -323,14 +341,9 @@ export function MobileFullPlayer({
               />
               <Volume2 className="w-3.5 h-3.5 text-white/30" />
             </div>
-          </div>
-        )}
 
-        {/* ===== BOTTOM BAR ===== */}
-        {!showQueue && (
-          <div className="shrink-0 pb-1">
-            {/* Bottom bar: lyrics / eq / airplay / sleep / queue */}
-            <div className="flex items-center justify-around pb-1">
+            {/* Bottom bar: lyrics / eq / sleep / queue */}
+            <div className="flex items-center justify-around mt-8 py-2">
               <button
                 type="button"
                 onClick={onToggleLyrics}
