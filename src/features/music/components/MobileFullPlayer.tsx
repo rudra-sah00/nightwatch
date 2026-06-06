@@ -72,6 +72,15 @@ export function MobileFullPlayer({
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showEq, setShowEq] = useState(false);
   const [showSleep, setShowSleep] = useState(false);
+  const [closingQueue, setClosingQueue] = useState(false);
+
+  const handleCloseQueue = () => {
+    setClosingQueue(true);
+    setTimeout(() => {
+      setClosingQueue(false);
+      onToggleQueue();
+    }, 250);
+  };
 
   // Seek bar state
   const seekBarRef = useRef<HTMLDivElement>(null);
@@ -135,14 +144,16 @@ export function MobileFullPlayer({
 
         {showQueue ? (
           /* ===== QUEUE MODE ===== */
-          <div className="flex-1 min-h-0 flex flex-col">
+          <div
+            className={`flex-1 min-h-0 flex flex-col transition-all duration-250 ${closingQueue ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0 animate-in fade-in slide-in-from-bottom-4 duration-300'}`}
+          >
             <div className="shrink-0 flex items-center justify-between pb-2">
               <p className="text-white/30 font-headline font-bold uppercase tracking-widest text-[10px]">
                 {t('queue', { count: queue.length })}
               </p>
               <button
                 type="button"
-                onClick={onToggleQueue}
+                onClick={handleCloseQueue}
                 className="text-white/50 text-xs font-bold uppercase tracking-wider"
               >
                 {t('close')}
