@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   getBrowseModules,
   getMusicHome,
@@ -93,15 +93,20 @@ export function MusicView() {
   }, [loadData]);
 
   // Auto-play from AI navigation: /music?play=songId
+  const playRef = useRef(player.play);
+  playRef.current = player.play;
+  const playedIdRef = useRef<string | null>(null);
+
   useEffect(() => {
     const playSongId = searchParams.get('play');
-    if (!playSongId) return;
+    if (!playSongId || playSongId === playedIdRef.current) return;
+    playedIdRef.current = playSongId;
     getSong(playSongId)
       .then((song) => {
-        if (song) player.play(song, [song]);
+        if (song) playRef.current(song, [song]);
       })
       .catch(() => {});
-  }, [searchParams, player]);
+  }, [searchParams]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden pb-28">
