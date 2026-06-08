@@ -55,8 +55,13 @@ grep -oE '(images|fonts|sounds)/[^"'\'']+\.(png|jpg|ttf|ogg|mp3)' "$BACKUP/bundl
 done
 
 # Get thumbnail and preview video
-curl -sL -o "$BACKUP/thumbnail.png" "https://img.poki-cdn.com/cdn-cgi/image/q=78,scq=50,width=600,height=600,fit=cover,f=auto/{THUMB_HASH}/{slug}.png"
-curl -sL -o "$BACKUP/preview.mp4" "{VIDEO_URL}"
+curl -sL -o "$BACKUP/thumbnail.png" "https://img.poki-cdn.com/cdn-cgi/image/q=90,width=600,height=600,fit=cover,f=png/{THUMB_HASH}/{slug}.png"
+
+# Preview video: Poki hosts at v.poki-cdn.com/{VIDEO_UUID}/thumbnail.3x3.h264.mp4
+# To find the VIDEO_UUID: curl the game page and grep for the only full .mp4 URL:
+#   curl -sS "https://poki.com/en/g/{slug}" | grep -oE 'https://v\.poki-cdn\.com/[^"]+\.mp4'
+# This returns the hero game's preview video (only one per page).
+curl -sL -o "$BACKUP/preview.mp4" "https://v.poki-cdn.com/{VIDEO_UUID}/thumbnail.3x3.h264.mp4"
 ```
 
 ### Step 3: Identify Game Engine
@@ -64,6 +69,7 @@ curl -sL -o "$BACKUP/preview.mp4" "{VIDEO_URL}"
 | Engine | Signs | Files |
 |--------|-------|-------|
 | **Custom JS** | Single `bundle.js`, inline code | bundle.js, images/, fonts/ |
+| **Construct 3** | `c3main.js`, `data.json`, sprite sheets | scripts/c3main.js, scripts/main.js, images/*-lsheet*.webp |
 | **Unity WebGL** | `.wasm`, `.data`, `.framework.js`, `.loader.js` | Build/ folder, StreamingAssets/ |
 | **Unity (Brotli)** | Same as above but `.br` extension | Needs nginx Content-Encoding header |
 | **Defold** | `dmloader.js`, `.wasm`, `archive/` folder | game0.arcd, game0.arci, game0.dmanifest, game0.projectc |
@@ -108,6 +114,13 @@ window.happyTime = () => {};
 - Search `bundle.js` for sitelock: `grep 'bG9jYWxob3N0' bundle.js`
 - Patch sitelock: insert `!1&&` after `IS_RELEASE&&` to short-circuit
 - Unlock features: find lock check functions and make them return `true`
+
+**Construct 3 (Mophead Dash, other C3 games):**
+- Remove `<script src="//game-cdn.poki.com/scripts/v2/poki-sdk.js">` tag from index.html
+- Remove `<script src="scripts/register-sw.js">` (service worker not needed)
+- Inject PokiSDK mock before game scripts (includes `measure()` for leaderboard calls)
+- No binary sitelock — the Poki plugin (`avix-pokisdk-forc3`) in `scripts/main.js` just checks `typeof PokiSDK`
+- If game calls `PokiSDK.measure()` (in c3main.js), ensure mock includes it
 
 **Unity WebGL (Stunt Bike, Going Up, Happy Glass):**
 - Patch the framework `.js` file directly:
