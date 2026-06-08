@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
-import { getCookie } from '@/lib/cookies';
+import { apiFetch } from '@/lib/fetch';
 
 interface Game {
   slug: string;
@@ -20,11 +20,7 @@ export default function GamesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const csrf = getCookie('csrfToken');
-    fetch('/api/games', {
-      headers: { ...(csrf ? { 'x-csrf-token': csrf } : {}) },
-    })
-      .then((r) => r.json())
+    apiFetch<{ games: Game[] }>('/api/games')
       .then((data) => setGames(data.games ?? []))
       .catch(() => {})
       .finally(() => setLoading(false));

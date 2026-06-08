@@ -4,20 +4,8 @@ import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
-import { getCookie } from '@/lib/cookies';
 import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
-
-function gameApiFetch(path: string, opts: RequestInit = {}) {
-  const csrf = getCookie('csrfToken');
-  return fetch(path, {
-    ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(csrf ? { 'x-csrf-token': csrf } : {}),
-      ...opts.headers,
-    },
-  });
-}
+import { apiFetch } from '@/lib/fetch';
 
 export default function GamePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -28,15 +16,13 @@ export default function GamePage() {
   const [title, setTitle] = useState('');
 
   useEffect(() => {
-    gameApiFetch(`/api/games/${slug}/url`)
-      .then((r) => r.json())
+    apiFetch<{ url: string }>(`/api/games/${slug}/url`)
       .then((data) => setGameUrl(data.url))
       .catch(() => {});
 
-    gameApiFetch('/api/games')
-      .then((r) => r.json())
+    apiFetch<{ games: { slug: string; title: string }[] }>('/api/games')
       .then((data) => {
-        const game = data.games?.find((g: { slug: string }) => g.slug === slug);
+        const game = data.games?.find((g) => g.slug === slug);
         if (game) setTitle(game.title);
       })
       .catch(() => {});
