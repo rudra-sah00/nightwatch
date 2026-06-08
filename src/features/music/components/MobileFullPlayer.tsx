@@ -137,6 +137,7 @@ export function MobileFullPlayer({
         <button
           type="button"
           onClick={onClose}
+          aria-label={t('close')}
           className="shrink-0 flex justify-center pt-3 pb-4"
         >
           <div className="w-10 h-1 rounded-full bg-white/30" />
@@ -307,13 +308,19 @@ export function MobileFullPlayer({
               </div>
             </div>
             <div className="shrink-0 flex items-center justify-center gap-12 mt-14">
-              <button type="button" onClick={onPrev} className="text-white">
+              <button
+                type="button"
+                onClick={onPrev}
+                aria-label={t('prev')}
+                className="text-white"
+              >
                 <SkipBack className="w-9 h-9 fill-current" />
               </button>
               <button
                 type="button"
                 onClick={onTogglePlay}
-                className="text-white"
+                aria-label={isPlaying ? t('pause') : t('play')}
+                className="text-white w-14 h-14 flex items-center justify-center"
               >
                 {isPlaying ? (
                   <Pause className="w-14 h-14 fill-current" />
@@ -321,7 +328,12 @@ export function MobileFullPlayer({
                   <Play className="w-14 h-14 fill-current ml-1" />
                 )}
               </button>
-              <button type="button" onClick={onNext} className="text-white">
+              <button
+                type="button"
+                onClick={onNext}
+                aria-label={t('next')}
+                className="text-white"
+              >
                 <SkipForward className="w-9 h-9 fill-current" />
               </button>
             </div>

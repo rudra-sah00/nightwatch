@@ -51,11 +51,15 @@ const PROTECTED_PREFIXES = [
   '/continue-watching',
   '/library',
   '/ask-ai',
-  '/changelog',
+  '/games',
+  '/manga',
   '/watch/',
   '/live/',
   '/clip/',
 ];
+
+// Routes that should redirect to /home if already authenticated
+const AUTH_ROUTES = ['/login', '/signup'];
 
 function isProtectedRoute(pathname: string): boolean {
   // /clip/share is public
@@ -65,20 +69,27 @@ function isProtectedRoute(pathname: string): boolean {
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const rawCookie = req.headers.get('cookie') || '';
+  const hasSession = rawCookie.includes('refreshToken=');
 
   // Redirect unauthenticated users away from protected routes at the edge
-  // so the RSC payload is never generated, avoiding "Failed to fetch RSC" errors
-  if (isProtectedRoute(pathname)) {
-    const rawCookie = req.headers.get('cookie') || '';
-    if (!rawCookie.includes('refreshToken=')) {
-      return NextResponse.redirect(new URL('/login', req.url));
-    }
+  if (isProtectedRoute(pathname) && !hasSession) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/login';
+    url.searchParams.set('from', pathname);
+    return NextResponse.redirect(url);
   }
 
-  // Check raw Cookie header to avoid triggering dynamic route behavior
-  const rawCookie = req.headers.get('cookie') || '';
-  const hasLocale = rawCookie.includes(`${COOKIE_NAME}=`);
+  // Redirect authenticated users away from login/signup
+  if (
+    AUTH_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`)) &&
+    hasSession
+  ) {
+    return NextResponse.redirect(new URL('/home', req.url));
+  }
 
+  // Locale detection: set cookie if not present
+  const hasLocale = rawCookie.includes(`${COOKIE_NAME}=`);
   if (!hasLocale) {
     const locale = getPreferredLocale(req.headers.get('accept-language'));
     const response = NextResponse.next();
@@ -89,11 +100,12 @@ export function proxy(req: NextRequest) {
     });
     return response;
   }
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    '/((?!api/|_next/static|_next/image|logo.png|openwakeword|images).*)',
+    '/((?!api/|_next/static|_next/image|logo.png|openwakeword|images|monitoring|sw.js|swe-worker).*)',
   ],
 };

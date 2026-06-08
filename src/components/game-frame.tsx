@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { apiFetch } from '@/lib/fetch';
 import { useSocket } from '@/providers/socket-provider';
 
 export function GameFrame({
@@ -22,20 +23,8 @@ export function GameFrame({
 
   // Refresh game auth cookie every 45 minutes to prevent 403s during long sessions
   useEffect(() => {
-    const csrf =
-      typeof document !== 'undefined'
-        ? document.cookie
-            .split('; ')
-            .find((c) => c.startsWith('csrfToken='))
-            ?.split('=')[1]
-        : undefined;
     const refreshCookie = () => {
-      fetch(`/api/games/${slug}/url`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(csrf ? { 'x-csrf-token': csrf } : {}),
-        },
-      }).catch(() => {});
+      apiFetch(`/api/games/${slug}/url`).catch(() => {});
     };
     const id = setInterval(refreshCookie, 45 * 60 * 1000);
     return () => clearInterval(id);

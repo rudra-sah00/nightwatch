@@ -1,5 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+interface NWVolumePlugin {
+  getVolume: () => Promise<{ value: number }>;
+  setVolume: (opts: { value: number }) => Promise<{ value: number }>;
+}
+
+// Lazy-loaded plugin singletons (registered once, reused across renders)
+let nwVolumePlugin: NWVolumePlugin | null = null;
+let volumesPluginPromise: Promise<
+  typeof import('@ottimis/capacitor-volumes')
+> | null = null;
+
+async function getNWVolume(): Promise<NWVolumePlugin> {
+  if (!nwVolumePlugin) {
+    const { registerPlugin } = await import('@capacitor/core');
+    nwVolumePlugin = registerPlugin<NWVolumePlugin>('NWVolume');
+  }
+  return nwVolumePlugin;
+}
+
+async function getVolumesPlugin() {
+  if (!volumesPluginPromise) {
+    volumesPluginPromise = import('@ottimis/capacitor-volumes');
+  }
+  return volumesPluginPromise;
+}
+
 /**
  * Hook that bridges to native system volume on Capacitor (iOS/Android).
  * Falls back to no-op on web. Returns volume (0-1) and setVolume.
@@ -8,7 +34,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export function useNativeVolume(enabled: boolean) {
   const [volume, setVolumeState] = useState(0.5);
   const cleanupRef = useRef<(() => void) | null>(null);
-  const userSetRef = useRef(0); // timestamp of last manual set (to suppress feedback)
+  const userSetRef = useRef(0);
 
   const isNative =
     typeof window !== 'undefined' && !!window.Capacitor?.isNativePlatform?.();
@@ -16,27 +42,23 @@ export function useNativeVolume(enabled: boolean) {
     typeof window !== 'undefined' &&
     window.Capacitor?.getPlatform?.() === 'ios';
 
-  // Get current volume from native
   const getVolume = useCallback(async () => {
     if (!isNative) return;
     try {
       if (isIos) {
-        const { registerPlugin } = await import('@capacitor/core');
-        const NWVolume = registerPlugin<{
-          getVolume: () => Promise<{ value: number }>;
-          setVolume: (opts: { value: number }) => Promise<{ value: number }>;
-        }>('NWVolume');
-        const { value } = await NWVolume.getVolume();
+        const plugin = await getNWVolume();
+        const { value } = await plugin.getVolume();
         setVolumeState(value);
       } else {
-        const { Volumes } = await import('@ottimis/capacitor-volumes');
+        const { Volumes } = await getVolumesPlugin();
         const { value } = await Volumes.getVolumeLevel({ type: 3 });
         setVolumeState(value / 10);
       }
-    } catch {}
+    } catch {
+      /* native plugin unavailable */
+    }
   }, [isNative, isIos]);
 
-  // Set system volume
   const setVolume = useCallback(
     async (v: number) => {
       userSetRef.current = Date.now();
@@ -44,22 +66,19 @@ export function useNativeVolume(enabled: boolean) {
       if (!isNative) return;
       try {
         if (isIos) {
-          const { registerPlugin } = await import('@capacitor/core');
-          const NWVolume = registerPlugin<{
-            getVolume: () => Promise<{ value: number }>;
-            setVolume: (opts: { value: number }) => Promise<{ value: number }>;
-          }>('NWVolume');
-          await NWVolume.setVolume({ value: v });
+          const plugin = await getNWVolume();
+          await plugin.setVolume({ value: v });
         } else {
-          const { Volumes } = await import('@ottimis/capacitor-volumes');
+          const { Volumes } = await getVolumesPlugin();
           await Volumes.setVolumeLevel({ value: Math.round(v * 10), type: 3 });
         }
-      } catch {}
+      } catch {
+        /* native plugin unavailable */
+      }
     },
     [isNative, isIos],
   );
 
-  // Listen for hardware volume button presses → instant sync
   useEffect(() => {
     if (!enabled || !isNative) return;
     getVolume();
@@ -70,15 +89,20 @@ export function useNativeVolume(enabled: boolean) {
         const { VolumeButtons } = await import(
           '@capacitor-community/volume-buttons'
         );
+        if (!active) return;
         await VolumeButtons.watchVolume({}, () => {
-          // Button pressed — immediately read the new system volume
-          // Skip if user just set volume from slider (prevents feedback loop)
           if (active && Date.now() - userSetRef.current > 500) getVolume();
         });
+        if (!active) {
+          VolumeButtons.clearWatch().catch(() => {});
+          return;
+        }
         cleanupRef.current = () => {
           VolumeButtons.clearWatch().catch(() => {});
         };
-      } catch {}
+      } catch {
+        /* volume buttons plugin unavailable */
+      }
     })();
 
     return () => {
