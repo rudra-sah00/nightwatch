@@ -8,7 +8,7 @@ import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
 import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { clearStoredUser, storeUser } from '@/lib/auth';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
-import { setTokenExpiration } from '@/lib/fetch';
+import { apiFetch, setTokenExpiration } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
 
 // Persistent Native Caching Wrapper that automatically synchronizes the user's
@@ -128,6 +128,19 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
+        // Unregister push notification token before logging out
+        try {
+          const token = sessionStorage.getItem('nightwatch:fcm-token');
+          if (token) {
+            await apiFetch('/api/notifications/unregister', {
+              method: 'POST',
+              body: JSON.stringify({ token }),
+              headers: { 'Content-Type': 'application/json' },
+            });
+            sessionStorage.removeItem('nightwatch:fcm-token');
+          }
+        } catch {}
+
         try {
           await logoutUser();
         } catch {
