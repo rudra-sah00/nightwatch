@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "99440023345",
+    "project_id": "nightwatch-prod",
+    "storage_bucket": "nightwatch-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:99440023345:android:06350c21535c06d07b8210",
+        "android_client_info": {
+          "package_name": "com.nightwatch.in"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVZWTIUUFsP7FwLZIIS75qTjA21zazgWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
