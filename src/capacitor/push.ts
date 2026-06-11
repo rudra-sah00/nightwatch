@@ -10,15 +10,25 @@ async function sendTokenToBackend(token: string) {
   });
 }
 
+interface CapacitorPushPlugin {
+  checkPermissions(): Promise<{ receive: string }>;
+  requestPermissions(): Promise<{ receive: string }>;
+  register(): Promise<void>;
+  addListener(event: string, cb: (data: unknown) => void): void;
+}
+
 /**
  * Get the native PushNotifications plugin via Capacitor bridge.
  * Uses the injected native bridge directly to avoid "not implemented" errors
  * that occur when using the npm package with remote URLs.
  */
-function getNativePushPlugin() {
-  const cap = (window as any).Capacitor;
+function getNativePushPlugin(): CapacitorPushPlugin | null {
+  const cap = (window as { Capacitor?: { Plugins?: Record<string, unknown> } })
+    .Capacitor;
   if (!cap) return null;
-  const plugin = cap.Plugins?.PushNotifications;
+  const plugin = cap.Plugins?.PushNotifications as
+    | CapacitorPushPlugin
+    | undefined;
   return plugin || null;
 }
 
@@ -49,7 +59,7 @@ export async function registerNativePush() {
 
   if (permStatus === 'denied') return;
 
-  const addListener = (event: string, cb: (data: any) => void) => {
+  const addListener = (event: string, cb: (data: unknown) => void) => {
     try {
       plugin.addListener(event, cb);
     } catch {
@@ -57,9 +67,9 @@ export async function registerNativePush() {
     }
   };
 
-  addListener('registration', async (data: { value: string }) => {
+  addListener('registration', async (data) => {
     try {
-      await sendTokenToBackend(data.value);
+      await sendTokenToBackend((data as { value: string }).value);
     } catch {
       /* silent fail */
     }
@@ -67,8 +77,9 @@ export async function registerNativePush() {
 
   addListener('pushNotificationReceived', () => {});
 
-  addListener('pushNotificationActionPerformed', (action: any) => {
-    const url = action.notification?.data?.url;
+  addListener('pushNotificationActionPerformed', (action) => {
+    const url = (action as { notification?: { data?: { url?: string } } })
+      .notification?.data?.url;
     if (url) window.location.href = url;
   });
 
