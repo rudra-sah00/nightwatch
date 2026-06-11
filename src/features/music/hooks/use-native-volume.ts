@@ -1,29 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-interface NWVolumePlugin {
-  getVolume: () => Promise<{ value: number }>;
-  setVolume: (opts: { value: number }) => Promise<{ value: number }>;
+interface CapacitorPlugin {
+  [method: string]: (...args: unknown[]) => Promise<unknown>;
 }
 
-// Lazy-loaded plugin singletons (registered once, reused across renders)
-let nwVolumePlugin: NWVolumePlugin | null = null;
-let volumesPluginPromise: Promise<
-  typeof import('@ottimis/capacitor-volumes')
-> | null = null;
-
-async function getNWVolume(): Promise<NWVolumePlugin> {
-  if (!nwVolumePlugin) {
-    const { registerPlugin } = await import('@capacitor/core');
-    nwVolumePlugin = registerPlugin<NWVolumePlugin>('NWVolume');
-  }
-  return nwVolumePlugin;
-}
-
-async function getVolumesPlugin() {
-  if (!volumesPluginPromise) {
-    volumesPluginPromise = import('@ottimis/capacitor-volumes');
-  }
-  return volumesPluginPromise;
+function getPlugin(name: string): CapacitorPlugin | null {
+  const cap = (window as { Capacitor?: { Plugins?: Record<string, unknown> } })
+    .Capacitor;
+  return (cap?.Plugins?.[name] as CapacitorPlugin) || null;
 }
 
 /**
@@ -46,13 +30,17 @@ export function useNativeVolume(enabled: boolean) {
     if (!isNative) return;
     try {
       if (isIos) {
-        const plugin = await getNWVolume();
-        const { value } = await plugin.getVolume();
-        setVolumeState(value);
+        const plugin = getPlugin('NWVolume');
+        if (!plugin) return;
+        const result = (await plugin.getVolume()) as { value: number };
+        setVolumeState(result.value);
       } else {
-        const { Volumes } = await getVolumesPlugin();
-        const { value } = await Volumes.getVolumeLevel({ type: 3 });
-        setVolumeState(value);
+        const plugin = getPlugin('Volumes');
+        if (!plugin) return;
+        const result = (await plugin.getVolumeLevel({ type: 3 })) as {
+          value: number;
+        };
+        setVolumeState(result.value);
       }
     } catch {
       /* native plugin unavailable */
@@ -66,11 +54,13 @@ export function useNativeVolume(enabled: boolean) {
       if (!isNative) return;
       try {
         if (isIos) {
-          const plugin = await getNWVolume();
+          const plugin = getPlugin('NWVolume');
+          if (!plugin) return;
           await plugin.setVolume({ value: v });
         } else {
-          const { Volumes } = await getVolumesPlugin();
-          await Volumes.setVolumeLevel({ value: v, type: 3 });
+          const plugin = getPlugin('Volumes');
+          if (!plugin) return;
+          await plugin.setVolumeLevel({ value: v, type: 3 });
         }
       } catch {
         /* native plugin unavailable */
@@ -84,21 +74,21 @@ export function useNativeVolume(enabled: boolean) {
     getVolume();
 
     let active = true;
+    const plugin = getPlugin('VolumeButtons');
+    if (!plugin) return;
+
     (async () => {
       try {
-        const { VolumeButtons } = await import(
-          '@capacitor-community/volume-buttons'
-        );
         if (!active) return;
-        await VolumeButtons.watchVolume({}, () => {
+        await plugin.watchVolume({}, () => {
           if (active && Date.now() - userSetRef.current > 500) getVolume();
         });
         if (!active) {
-          VolumeButtons.clearWatch().catch(() => {});
+          plugin.clearWatch().catch(() => {});
           return;
         }
         cleanupRef.current = () => {
-          VolumeButtons.clearWatch().catch(() => {});
+          plugin.clearWatch().catch(() => {});
         };
       } catch {
         /* volume buttons plugin unavailable */
