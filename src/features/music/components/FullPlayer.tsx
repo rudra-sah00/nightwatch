@@ -78,6 +78,29 @@ export function FullPlayer() {
     }, 300);
   }, [setExpanded]);
 
+  // Android hardware back button closes fullscreen player
+  useEffect(() => {
+    if (!expanded || !mobile) return;
+    const isNative = window.Capacitor?.isNativePlatform?.();
+    if (!isNative || window.Capacitor?.getPlatform?.() === 'ios') return;
+    let removed = false;
+    let removeListener: (() => void) | null = null;
+    import('@capacitor/app').then(({ App }) => {
+      if (removed) return;
+      const handle = App.addListener('backButton', () => {
+        (window as any).__musicFullPlayerHandledBack = true;
+        handleClose();
+      });
+      removeListener = () => {
+        handle.then((h) => h.remove());
+      };
+    });
+    return () => {
+      removed = true;
+      removeListener?.();
+    };
+  }, [expanded, mobile, handleClose]);
+
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
   const displayProgress = isRemoteControlling ? remoteProgress : progress;
