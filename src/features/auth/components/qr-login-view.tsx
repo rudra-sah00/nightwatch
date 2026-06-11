@@ -30,11 +30,27 @@ export function QrLoginView({ onSwitchToEmail }: QrLoginViewProps) {
     QRCode.toCanvas(canvasRef.current, `nightwatch://qr?code=${code}`, {
       width: 180,
       margin: 2,
+      errorCorrectionLevel: 'H',
       color: {
         dark: isDark ? '#ffffff' : '#000000',
         light: isDark ? '#000000' : '#ffffff',
       },
-    }).then(() => setQrReady(true));
+    }).then(() => {
+      // Draw logo in the center of the QR code
+      const canvas = canvasRef.current!;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const logo = new Image();
+      logo.src = '/logo.png';
+      logo.onload = () => {
+        const size = canvas.width * 0.28;
+        const x = (canvas.width - size) / 2;
+        const y = (canvas.height - size) / 2;
+        ctx.drawImage(logo, x, y, size, size);
+        setQrReady(true);
+      };
+      logo.onerror = () => setQrReady(true);
+    });
   }, [code, theme]);
 
   const isExpired = status === 'expired';
