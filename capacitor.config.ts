@@ -11,7 +11,7 @@ const config: CapacitorConfig = {
   server: {
     url: isDev
       ? process.env.CAPACITOR_SERVER_URL || 'http://localhost:3000'
-      : 'https://nightwatch.in',
+      : 'https://www.nightwatch.in',
     cleartext: isDev,
     // Allow navigation and XHR/fetch to these origins (CDNs for HLS streams)
     allowNavigation: ['nightwatch.in', '*.nightwatch.in', 'localhost:*', '*'],

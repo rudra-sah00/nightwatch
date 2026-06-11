@@ -26,7 +26,6 @@ export function usePushNotifications() {
     if (lastRegisteredUser.current === userId) return;
 
     lastRegisteredUser.current = userId;
-    console.log('[Push] Registering push for user:', userId);
 
     // Native Capacitor push (Android/iOS)
     if (
@@ -37,7 +36,7 @@ export function usePushNotifications() {
     ) {
       import('@/capacitor/push')
         .then(({ registerNativePush }) => registerNativePush())
-        .catch((e) => console.error('[Push] Native registration failed:', e));
+        .catch(() => {});
       return;
     }
 
