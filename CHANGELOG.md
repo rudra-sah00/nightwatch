@@ -1,5 +1,93 @@
 # Changelog
 
+## [2.14.0](https://github.com/rudra-sah00/nightwatch/compare/v2.13.0...v2.14.0) (2026-06-10)
+
+
+### Features
+
+* add Firebase Cloud Messaging push notifications (web + Android + Electron) ([d4cc6d2](https://github.com/rudra-sah00/nightwatch/commit/d4cc6d2494fdb91f0f115e6494450297ec4d11f8))
+* allow portrait playback on mobile, remove rotate wall dead code ([2227365](https://github.com/rudra-sah00/nightwatch/commit/2227365ca68ab2e6eb71be3cf4297157da53c4cd))
+* centered search bars, player subtitle fix & debug overlay ([a49f72d](https://github.com/rudra-sah00/nightwatch/commit/a49f72d822145612dc9574056ca4358a1dd28c49))
+* **clips:** replace MediaRecorder with server-side HLS clipping ([9557778](https://github.com/rudra-sah00/nightwatch/commit/9557778e4b5873d3133c845c4b762c0dda81f08a))
+* **debug:** add Capacitor native video event tracing to debug overlay ([7399107](https://github.com/rudra-sah00/nightwatch/commit/739910782d94d9df1cbdf42777c73424bfa63cd9))
+* Firebase push notifications (web + Android + desktop) ([b5e3a9d](https://github.com/rudra-sah00/nightwatch/commit/b5e3a9d8e65ee57d1630271e5bea87d395a0a6f1))
+* **games:** add skeleton loading state to games page ([7f66b28](https://github.com/rudra-sah00/nightwatch/commit/7f66b28730fdaaeba9070261dbea370cf4ea5bc0))
+* long-press logo/profile in navbar to open sidebars on mobile ([ba7dd3a](https://github.com/rudra-sah00/nightwatch/commit/ba7dd3aba7468855f61ed8682f6ade53fb70167c))
+* **manga:** centered search bar with FLIP animation ([ac5b456](https://github.com/rudra-sah00/nightwatch/commit/ac5b456b8c537384349f4f1dbda5f6ff0a1dda84))
+* music player mobile UX, volume control, player fixes ([2ab2916](https://github.com/rudra-sah00/nightwatch/commit/2ab2916215c4ac134abcdfa6590789acc3a66af4))
+* **music:** move search bar to center of header ([a3e4a6e](https://github.com/rudra-sah00/nightwatch/commit/a3e4a6eac988f571122be6cafb0d850fbd97861e))
+* **music:** wire native system volume to fullscreen player on iOS/Android ([d95fb57](https://github.com/rudra-sah00/nightwatch/commit/d95fb57e4d3b74386553b3b9d8bdd4115d67c2b3))
+* **player:** add green-screen debug overlay on staging env ([a192b81](https://github.com/rudra-sah00/nightwatch/commit/a192b81abc229a6e479bed5ec69c918b7b0c2102))
+* **player:** wire DebugOverlay into VOD and Live players ([552e2cf](https://github.com/rudra-sah00/nightwatch/commit/552e2cf44c6c15f5a3a8892b8d2fd3e0a6c58668))
+* **watch-party:** enable AI noise suppression, echo cancellation, auto gain ([c62fd80](https://github.com/rudra-sah00/nightwatch/commit/c62fd805183349ae722abf96626ea91143a4e167))
+* YouTube-style inline player in portrait on mobile, fullscreen on tap ([0d54ce8](https://github.com/rudra-sah00/nightwatch/commit/0d54ce8b95dd2b2595cb5fad26d197fc409c8900))
+
+
+### Bug Fixes
+
+* add back button to mobile top bar, improve MP4 error handling on Capacitor iOS ([d48a4bc](https://github.com/rudra-sah00/nightwatch/commit/d48a4bc4570f9f70ec5ffb4be1519201a61d9c23))
+* **auth:** prevent logout when device is offline ([d88e88f](https://github.com/rudra-sah00/nightwatch/commit/d88e88ff031d7bed9c55522289d730313e803364))
+* **auth:** resolve 401 cascade logout + add server-side route protection ([f6c215e](https://github.com/rudra-sah00/nightwatch/commit/f6c215eab3dca24e47c5aab6ba1648a5a0a35a84))
+* **auth:** use apiFetch in games routes, harden proxy guard ([8764141](https://github.com/rudra-sah00/nightwatch/commit/8764141af2d3af71a98f3b50d7e027e59c645d20))
+* **clips:** pass streamUrl fallback for IPTV streams without token ([0a6309a](https://github.com/rudra-sah00/nightwatch/commit/0a6309a6612af2a3683691072ffeda3aafa65367))
+* **debug:** use touchend for triple-tap on mobile ([0f19677](https://github.com/rudra-sah00/nightwatch/commit/0f1967755643c9cc6b34e20d0618992ee61076af))
+* delay device list refresh after QR auth to wait for new session creation ([f2744c9](https://github.com/rudra-sah00/nightwatch/commit/f2744c9fe0d68ede28f6d013e929d099f596f5aa))
+* delay device list refresh after QR auth to wait for new session creation ([dfa96c8](https://github.com/rudra-sah00/nightwatch/commit/dfa96c87db52b6cf7f3d0602af7e6e1b74e92981))
+* **i18n:** add missing 'close' key to all music locale files ([94c8546](https://github.com/rudra-sah00/nightwatch/commit/94c85468fd7f453166e69823391e94f58c5486f3))
+* **i18n:** handle cookies() rejection during static prerendering ([cb87488](https://github.com/rudra-sah00/nightwatch/commit/cb87488db7e6261fe4de45e6d71c88685f3604d4))
+* **music/manga:** replace FLIP animation with smooth slide-up transition ([11833f1](https://github.com/rudra-sah00/nightwatch/commit/11833f1247ab1d03cdf1c12b47ae36365af9047d))
+* **music:** album art height 36vh → 40vh ([0f0a42d](https://github.com/rudra-sah00/nightwatch/commit/0f0a42dfbd3d14ee571ed55984a3702d8312c24f))
+* **music:** animate queue close with fade-out + slide-down ([48b6d9d](https://github.com/rudra-sah00/nightwatch/commit/48b6d9d4373823e1d8973d9127cc783ac33091be))
+* **music:** distribute space evenly - push controls down with mt-auto ([697d114](https://github.com/rudra-sah00/nightwatch/commit/697d11487333f58e8d0de00cb2cd9aee0c58253e))
+* **music:** final spacing adjustments for mobile fullscreen player ([c36220c](https://github.com/rudra-sah00/nightwatch/commit/c36220cd9266df9157e11d82aecaf643f2c65169))
+* **music:** fix queue close button translation + highlight current track ([5c39baa](https://github.com/rudra-sah00/nightwatch/commit/5c39baa956455a5b2b5189eb8e631f21f5003fa0))
+* **music:** instant volume sync on hardware button press ([c2eb35d](https://github.com/rudra-sah00/nightwatch/commit/c2eb35d704aed1a9e8cf1b62e026e16f264b861f))
+* **music:** move play/pause buttons down ([584e0c5](https://github.com/rudra-sah00/nightwatch/commit/584e0c544a802eea175a36d565607b5602e7e770))
+* **music:** move title up, seekbar down individually ([0d22fc6](https://github.com/rudra-sah00/nightwatch/commit/0d22fc6dba2174733c1e7d57014d60ee9d7fa176))
+* **music:** prevent horizontal page scroll on mobile ([f46d763](https://github.com/rudra-sah00/nightwatch/commit/f46d7631b6e0e232ddf6113a31f98ef9fd164e2c))
+* **music:** prevent skip buttons displacing on play/pause toggle ([ae889bc](https://github.com/rudra-sah00/nightwatch/commit/ae889bce8fd698367e674097355b9522de689615))
+* **music:** prevent volume slider feedback loop on iOS ([cdb300d](https://github.com/rudra-sah00/nightwatch/commit/cdb300d72de8c5d3236c7658abcbe45aeb5f127e))
+* **music:** production quality improvements ([5720d71](https://github.com/rudra-sah00/nightwatch/commit/5720d719af2e77df6837c3d5ce127d829e56f4b5))
+* **music:** push seekbar and controls down with more spacing ([ee1d23b](https://github.com/rudra-sah00/nightwatch/commit/ee1d23b030b12b015f0aa4203bebe7a3c09131a4))
+* **music:** remove huge gap between volume and bottom bar ([02b22f4](https://github.com/rudra-sah00/nightwatch/commit/02b22f46beca4bf1ec1d290ec9392472104d2667))
+* **music:** remove mt-auto on bottom bar, use mt-6 to sit below volume ([04fc1d9](https://github.com/rudra-sah00/nightwatch/commit/04fc1d9ff57f4527ed3657bf69e3fdd062545ffd))
+* **music:** remove queue button from mini player ([35632fd](https://github.com/rudra-sah00/nightwatch/commit/35632fdd232cfcc2f826a6774e5447a164c8d176))
+* **music:** smaller poster, move seekbar & controls up in mobile fullscreen ([b4f30f2](https://github.com/rudra-sah00/nightwatch/commit/b4f30f2b747027e118b0250e086bb247b6831222))
+* **music:** tighten spacing in mobile fullscreen player ([1153ca9](https://github.com/rudra-sah00/nightwatch/commit/1153ca962895b4a2111ac992c84c51cf90879efa))
+* **player:** add Ctrl+Shift+D for debug overlay on desktop, remove dblclick conflict ([5d1c76b](https://github.com/rudra-sah00/nightwatch/commit/5d1c76b16b1fe19bae4258cc907313ac59475794))
+* **player:** align settings with mini-screen button, seekbar above mini-screen in fullscreen ([5948688](https://github.com/rudra-sah00/nightwatch/commit/5948688de942abf00f0707db2dabbd8216c01b6f))
+* **player:** center settings bottom sheet in landscape, respect notch safe-area ([f3b35a0](https://github.com/rudra-sah00/nightwatch/commit/f3b35a02dfe5c7f7ca6b4354175a50ec1d12b233))
+* **player:** clear stale buffering on native iOS via timeupdate, improve debug logs ([ddef950](https://github.com/rudra-sah00/nightwatch/commit/ddef950b4926eeaf57b332751ce4fc34f293faa1))
+* **player:** enforce landscape orientation lock while in fullscreen ([e78431b](https://github.com/rudra-sah00/nightwatch/commit/e78431bb16b8a4a969b4cebba45b0ab7beb66a1c))
+* **player:** fix subtitle track switching using index-based matching ([09753aa](https://github.com/rudra-sah00/nightwatch/commit/09753aa21002fdd7374c450d8b433c5ee7d03605))
+* **player:** fully hide native cue boxes that occupy empty space ([0a77b44](https://github.com/rudra-sah00/nightwatch/commit/0a77b44ffe3c44f4e36354432ffed766d3f7b6bc))
+* **player:** hide desktop header on mobile (CSS-only), landscape safe-area padding ([b3af68d](https://github.com/rudra-sah00/nightwatch/commit/b3af68d2122c967ba2033f59e0ff0974b3eb90cd))
+* **player:** keep mobile controls layout in landscape fullscreen ([abf1dc3](https://github.com/rudra-sah00/nightwatch/commit/abf1dc3109989463b93345603c2f48e69d5af370))
+* **player:** keep mobile controls layout in landscape fullscreen ([2f625b9](https://github.com/rudra-sah00/nightwatch/commit/2f625b95108615d344ac83ce130630abc9aea9c3))
+* **player:** keep seekbar at bottom in fullscreen ([0361787](https://github.com/rudra-sah00/nightwatch/commit/03617872552036d88090f865945c0da814524c4e))
+* **player:** language dub switch for series now fetches as movie type ([0538eb9](https://github.com/rudra-sah00/nightwatch/commit/0538eb9cd90431f76010c0bb482443fd21fc9b75))
+* **player:** log subtitle/audio track changes in debug overlay ([a41a7d2](https://github.com/rudra-sah00/nightwatch/commit/a41a7d2cf163357d380c738cc19233c54187ad3c))
+* **player:** mobile fullscreen — fix settings portal, double back button, safe-area padding ([1520548](https://github.com/rudra-sah00/nightwatch/commit/1520548a155b1bd1c3c3f35a218712848863736e))
+* **player:** nudge settings icon left from corner in mobile fullscreen ([d09c83d](https://github.com/rudra-sah00/nightwatch/commit/d09c83d8ed26c404cba61577a2cfebcfe52a81e8))
+* **player:** parse HLS qualities on native iOS, fix stale buffering state ([b55bb75](https://github.com/rudra-sah00/nightwatch/commit/b55bb75e5d8bf9e3975604dab32f73d822772b49))
+* **player:** push mobile seekbar up from bottom edge in fullscreen ([e78e5fb](https://github.com/rudra-sah00/nightwatch/commit/e78e5fbab9e4f348bfe4b546ccd4b92fe71a4654))
+* **player:** replace keyboard shortcut with debug button on staging ([e47ca8f](https://github.com/rudra-sah00/nightwatch/commit/e47ca8f50d6f0157ae66879e87866b19e83041b4))
+* **player:** request native fullscreen on Android to hide system bars ([6a06fbf](https://github.com/rudra-sah00/nightwatch/commit/6a06fbf5785bce4f4dce168e5ae424e2eae9ffda))
+* **player:** resolve native stream URLs against backend URL to bypass CF Access ([0ad3f28](https://github.com/rudra-sah00/nightwatch/commit/0ad3f28f6da7e9ad20f45ca04277d3d11da06c05))
+* **player:** respect containerStyle on mobile portrait (fixes live player not loading) ([c31d389](https://github.com/rudra-sah00/nightwatch/commit/c31d389203b28a18b5596536dfa93f20e66347a4))
+* **player:** restore portrait layout, only hide desktop header in mobile fullscreen ([092b18f](https://github.com/rudra-sah00/nightwatch/commit/092b18f5cb72591640dc48cbe5492673e5e8091f))
+* **player:** retry native HLS on Capacitor iOS instead of refetching stream on pause/play ([54cd58a](https://github.com/rudra-sah00/nightwatch/commit/54cd58a969336a2264590b4d8c3313720ccf19fd))
+* **player:** support Cmd+Shift+D on macOS for debug overlay ([75365c5](https://github.com/rudra-sah00/nightwatch/commit/75365c5f1601102e0857018e62be9bb266834391))
+* **player:** use HLS.js for live streams on Capacitor (native AVPlayer can't handle proxied playlists) ([ba51826](https://github.com/rudra-sah00/nightwatch/commit/ba51826a7f8787c220ff7ef975767bd6f4e54de5))
+* remove biome-ignore, add originRect to deps properly ([ac5b456](https://github.com/rudra-sah00/nightwatch/commit/ac5b456b8c537384349f4f1dbda5f6ff0a1dda84))
+* remove unused onPip params (biome warnings) ([12bc835](https://github.com/rudra-sah00/nightwatch/commit/12bc8350f05d6dc017e1c9e217c9ed89662a3de5))
+* resolve relative stream URLs against origin for native iOS HLS playback ([15cf7c5](https://github.com/rudra-sah00/nightwatch/commit/15cf7c5bd0219b40595447c7c9203b6c89f6f729))
+
+
+### Reverts
+
+* **player:** restore original mobile layout — only keep settings portal fix ([d8f5200](https://github.com/rudra-sah00/nightwatch/commit/d8f52001b014048a9c8dbc538ae215f02fe72425))
+
 ## [2.13.0](https://github.com/rudra-sah00/nightwatch/compare/v2.12.0...v2.13.0) (2026-05-20)
 
 
