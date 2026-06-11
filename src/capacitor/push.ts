@@ -16,6 +16,9 @@ async function sendTokenToBackend(token: string) {
  * Requests permission, gets FCM token, sends to backend.
  */
 export async function registerNativePush() {
+  // Remove stale listeners from previous calls
+  await PushNotifications.removeAllListeners();
+
   const permission = await PushNotifications.requestPermissions();
   if (permission.receive !== 'granted') return;
 
@@ -26,6 +29,10 @@ export async function registerNativePush() {
       await sendTokenToBackend(token);
     },
   );
+
+  await PushNotifications.addListener('registrationError', (error) => {
+    console.error('[Push] Registration error:', error);
+  });
 
   PushNotifications.addListener('pushNotificationReceived', (notification) => {
     console.log('[Push] Foreground:', notification.title);
