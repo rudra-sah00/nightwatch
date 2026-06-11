@@ -20,18 +20,25 @@ export async function registerNativePush() {
   await PushNotifications.removeAllListeners();
 
   const permission = await PushNotifications.requestPermissions();
+  console.log('[Push] Permission result:', permission.receive);
   if (permission.receive !== 'granted') return;
 
   // Listen for token BEFORE calling register
   await PushNotifications.addListener(
     'registration',
     async ({ value: token }) => {
-      await sendTokenToBackend(token);
+      console.log('[Push] Got token:', token.slice(0, 20) + '...');
+      try {
+        await sendTokenToBackend(token);
+        console.log('[Push] Token sent to backend');
+      } catch (e) {
+        console.error('[Push] Failed to send token:', e);
+      }
     },
   );
 
   await PushNotifications.addListener('registrationError', (error) => {
-    console.error('[Push] Registration error:', error);
+    console.error('[Push] Registration error:', JSON.stringify(error));
   });
 
   PushNotifications.addListener('pushNotificationReceived', (notification) => {
@@ -43,5 +50,7 @@ export async function registerNativePush() {
     if (url) window.location.href = url;
   });
 
+  console.log('[Push] Calling register...');
   await PushNotifications.register();
+  console.log('[Push] Register called');
 }
