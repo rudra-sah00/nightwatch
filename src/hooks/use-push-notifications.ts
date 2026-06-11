@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/fetch';
 import { getFCMToken, onForegroundMessage } from '@/lib/firebase';
+import { useAuthStore } from '@/store/use-auth-store';
 
 const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || '';
 
@@ -12,16 +13,19 @@ const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || '';
  * - On Capacitor (Android/iOS): uses native push plugin
  * - On web/desktop: uses Firebase JS SDK + service worker
  *
+ * Re-registers whenever the user identity changes (login/logout/switch).
  * Should be mounted once in the authenticated layout.
  */
 export function usePushNotifications() {
-  const registered = useRef(false);
+  const userId = useAuthStore((s) => s.user?.id);
+  const lastRegisteredUser = useRef<string | null>(null);
 
   useEffect(() => {
-    if (registered.current) return;
     if (typeof window === 'undefined') return;
+    if (!userId) return;
+    if (lastRegisteredUser.current === userId) return;
 
-    registered.current = true;
+    lastRegisteredUser.current = userId;
 
     // Native Capacitor push (Android/iOS)
     if (
@@ -64,5 +68,5 @@ export function usePushNotifications() {
     });
 
     return () => unsub?.();
-  }, []);
+  }, [userId]);
 }

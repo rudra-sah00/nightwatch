@@ -1,6 +1,16 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import { apiFetch } from '@/lib/fetch';
 
+async function sendTokenToBackend(token: string) {
+  const platform =
+    window.Capacitor?.getPlatform?.() === 'ios' ? 'ios' : 'android';
+  await apiFetch('/api/notifications/register', {
+    method: 'POST',
+    body: JSON.stringify({ token, platform }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 /**
  * Register native push notifications on Capacitor (Android/iOS).
  * Requests permission, gets FCM token, sends to backend.
@@ -9,18 +19,15 @@ export async function registerNativePush() {
   const permission = await PushNotifications.requestPermissions();
   if (permission.receive !== 'granted') return;
 
-  await PushNotifications.register();
-
-  PushNotifications.addListener('registration', async ({ value: token }) => {
-    await apiFetch('/api/notifications/register', {
-      method: 'POST',
-      body: JSON.stringify({ token, platform: 'android' }),
-      headers: { 'Content-Type': 'application/json' },
-    });
-  });
+  // Listen for token BEFORE calling register
+  await PushNotifications.addListener(
+    'registration',
+    async ({ value: token }) => {
+      await sendTokenToBackend(token);
+    },
+  );
 
   PushNotifications.addListener('pushNotificationReceived', (notification) => {
-    // Foreground notification — handled natively by Android, no action needed
     console.log('[Push] Foreground:', notification.title);
   });
 
@@ -28,4 +35,6 @@ export async function registerNativePush() {
     const url = action.notification.data?.url;
     if (url) window.location.href = url;
   });
+
+  await PushNotifications.register();
 }
