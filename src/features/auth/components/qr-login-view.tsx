@@ -43,12 +43,12 @@ export function QrLoginView({ onSwitchToEmail }: QrLoginViewProps) {
       const logo = new Image();
       logo.src = '/logo.png';
       logo.onload = () => {
-        const size = canvas.width * 0.22;
+        const size = canvas.width * 0.28;
         const x = (canvas.width - size) / 2;
         const y = (canvas.height - size) / 2;
         // White background behind logo for contrast
         ctx.fillStyle = isDark ? '#000000' : '#ffffff';
-        ctx.fillRect(x - 4, y - 4, size + 8, size + 8);
+        ctx.fillRect(x - 2, y - 2, size + 4, size + 4);
         ctx.drawImage(logo, x, y, size, size);
         setQrReady(true);
       };
