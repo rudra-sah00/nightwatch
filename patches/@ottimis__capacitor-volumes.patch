@@ -1,0 +1,16 @@
+diff --git a/android/src/main/java/com/ottimis/capacitor/volumes/VolumesPlugin.java b/android/src/main/java/com/ottimis/capacitor/volumes/VolumesPlugin.java
+index 7eb21dfc031a07fe7ee518d90a3e1649cad273fb..2a5891150bb156b84e23f7fc1d30d0b61ae73ccf 100644
+--- a/android/src/main/java/com/ottimis/capacitor/volumes/VolumesPlugin.java
++++ b/android/src/main/java/com/ottimis/capacitor/volumes/VolumesPlugin.java
+@@ -32,9 +32,9 @@ public class VolumesPlugin extends Plugin {
+     @PluginMethod
+     public void setVolumeLevel(PluginCall call) {
+         Integer type = call.getInt("type", 3);
+-        Integer value = call.getInt("value");
++        Float value = call.getFloat("value", 0f);
+ 
+-        implementation.setVolumeLevel(type, value);
++        implementation.setVolumeLevel(type, value != null ? value : 0f);
+         call.resolve();
+     }
+ }
