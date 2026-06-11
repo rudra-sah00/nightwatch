@@ -16,12 +16,41 @@ async function sendTokenToBackend(token: string) {
  * Requests permission, gets FCM token, sends to backend.
  */
 export async function registerNativePush() {
+  // Wait for Capacitor bridge to be fully ready
+  const { Capacitor } = await import('@capacitor/core');
+  if (!Capacitor.isPluginAvailable('PushNotifications')) {
+    console.warn('[Push] PushNotifications plugin not available');
+    return;
+  }
+
   // Remove stale listeners from previous calls
   await PushNotifications.removeAllListeners();
 
-  const permission = await PushNotifications.requestPermissions();
-  console.log('[Push] Permission result:', permission.receive);
-  if (permission.receive !== 'granted') return;
+  // Check/request permission
+  let permStatus: string;
+  try {
+    const check = await PushNotifications.checkPermissions();
+    permStatus = check.receive;
+    console.log('[Push] Current permission:', permStatus);
+  } catch (e) {
+    console.warn('[Push] checkPermissions failed:', e);
+    permStatus = 'prompt';
+  }
+
+  if (permStatus === 'prompt' || permStatus === 'prompt-with-rationale') {
+    try {
+      const req = await PushNotifications.requestPermissions();
+      permStatus = req.receive;
+      console.log('[Push] After request:', permStatus);
+    } catch (e) {
+      console.warn('[Push] requestPermissions failed:', e);
+    }
+  }
+
+  if (permStatus === 'denied') {
+    console.log('[Push] Permission denied, cannot register');
+    return;
+  }
 
   // Listen for token BEFORE calling register
   await PushNotifications.addListener(
@@ -52,5 +81,5 @@ export async function registerNativePush() {
 
   console.log('[Push] Calling register...');
   await PushNotifications.register();
-  console.log('[Push] Register called');
+  console.log('[Push] Register complete');
 }
