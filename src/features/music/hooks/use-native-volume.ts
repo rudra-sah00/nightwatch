@@ -52,7 +52,7 @@ export function useNativeVolume(enabled: boolean) {
       } else {
         const { Volumes } = await getVolumesPlugin();
         const { value } = await Volumes.getVolumeLevel({ type: 3 });
-        setVolumeState(value / 10);
+        setVolumeState(value);
       }
     } catch {
       /* native plugin unavailable */
@@ -70,7 +70,7 @@ export function useNativeVolume(enabled: boolean) {
           await plugin.setVolume({ value: v });
         } else {
           const { Volumes } = await getVolumesPlugin();
-          await Volumes.setVolumeLevel({ value: Math.round(v * 10), type: 3 });
+          await Volumes.setVolumeLevel({ value: v, type: 3 });
         }
       } catch {
         /* native plugin unavailable */
