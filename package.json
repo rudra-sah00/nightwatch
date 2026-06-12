@@ -38,6 +38,8 @@
     "@anuradev/capacitor-phone-call-notification": "^7.5.5",
     "@capacitor-community/keep-awake": "^8.0.1",
     "@capacitor-community/volume-buttons": "8.0.0",
+    "@capacitor-firebase/analytics": "^8.3.0",
+    "@capacitor-firebase/crashlytics": "^8.3.0",
     "@capacitor/android": "^8.3.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/clipboard": "^8.0.1",
@@ -62,8 +64,6 @@
     "@ottimis/capacitor-volumes": "7.0.0",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.2.4",
-    "@sentry/electron": "^7.11.0",
-    "@sentry/nextjs": "^10.47.0",
     "@serwist/next": "^9.5.7",
     "@tailwindcss/typography": "^0.5.19",
     "agora-rtc-sdk-ng": "^4.24.2",
@@ -80,7 +80,7 @@
     "electron-window-state": "^5.0.3",
     "emoji-picker-react": "^4.17.1",
     "fast-uri": "^3.1.0",
-    "firebase": "11.9.0",
+    "firebase": "12.14.0",
     "hls.js": "^1.6.15",
     "import-in-the-middle": "^3.0.1",
     "jsqr": "1.4.0",
@@ -232,8 +232,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "electron",
-      "esbuild",
-      "@sentry/cli"
+      "esbuild"
     ],
     "patchedDependencies": {
       "@capacitor-community/volume-buttons@8.0.0": "patches/@capacitor-community__volume-buttons@8.0.0.patch",

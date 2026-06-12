@@ -1,12 +1,11 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
-  /** Feature name for Sentry context and fallback UI */
+  /** Feature name for error context and fallback UI */
   feature: string;
   /** Render nothing instead of fallback UI (for headless providers) */
   silent?: boolean;
@@ -23,7 +22,7 @@ interface State {
  * Feature-level error boundary that catches render errors in a specific
  * domain (music, calls, player, etc.) without crashing the entire app.
  *
- * - Reports to Sentry with feature context
+ * - Reports to Firebase Crashlytics on native platforms
  * - Shows a compact inline fallback (or nothing if `silent`)
  * - Provides a retry button to re-mount the subtree
  */
@@ -35,13 +34,23 @@ export class FeatureErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    Sentry.withScope((scope) => {
-      scope.setTag('feature', this.props.feature);
-      scope.setContext('componentStack', {
-        stack: info.componentStack,
-      });
-      Sentry.captureException(error);
-    });
+    console.error(`[${this.props.feature}]`, error, info.componentStack);
+    // Report to Firebase Crashlytics on native platforms
+    if (
+      typeof window !== 'undefined' &&
+      (
+        window as { Capacitor?: { isNativePlatform?: () => boolean } }
+      ).Capacitor?.isNativePlatform?.()
+    ) {
+      import('@/capacitor/firebase')
+        .then(({ recordException }) => {
+          recordException(
+            `[${this.props.feature}] ${error.message}`,
+            error.stack || info.componentStack || undefined,
+          );
+        })
+        .catch(() => {});
+    }
   }
 
   handleReset = () => {

@@ -10,6 +10,7 @@ import {
   useAudioTracks,
 } from '@/features/watch/player/hooks/useAudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
+import { trackEvent } from '@/lib/analytics';
 import { WS_EVENTS } from '@/lib/constants';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
@@ -218,6 +219,10 @@ export function useWatchContent() {
           });
           // Unified response handling via StreamUrlService (called within useStreamUrls)
           applyResponse(response);
+          trackEvent('video_play', {
+            contentId: overrideMovieId || movieId,
+            title: decodedTitle,
+          });
 
           // Audio track handling
           if (response.audioTracks && response.audioTracks.length > 0) {

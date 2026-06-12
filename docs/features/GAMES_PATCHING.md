@@ -1,249 +1,230 @@
-# Game Patching & Deployment Guide
+# Game Adding & Patching Guide
 
-## Quick Reference: Adding a New Game
+## Overview
 
-### Step 1: Capture Game Assets
+Games are HTML5 games sourced from Poki's CDN, patched to remove sitelock/ads, and served from Cloudflare R2 (`games.nightwatch.in`).
+
+## Prerequisites
+
+- `nightwatch-scraper` repo with `pnpm install` done
+- Wrangler logged in: `cd nightwatch-backend/workers/cdn-proxy && npx wrangler login`
+- Access to dev/prod Neon databases
+
+## Step 1: Capture Game Assets
 
 ```bash
-# Launch Chrome with remote debugging
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-  --remote-debugging-port=9222 --user-data-dir=/tmp/game-chrome \
-  "https://poki.com/en/g/{slug}"
-
-# Start CDP listener (captures all CDN URLs)
-cd /Users/rudra/Development/nightwatch
-nohup node --input-type=module -e "
-import fs from 'node:fs';
-const res = await fetch('http://localhost:9222/json');
-const tabs = await res.json();
-const ws = new WebSocket(tabs[0].webSocketDebuggerUrl);
-const urls = new Set();
-ws.onopen = () => ws.send(JSON.stringify({id:1, method:'Network.enable', params:{}}));
-ws.onmessage = (e) => {
-  const msg = JSON.parse(e.data);
-  if (msg.method === 'Network.requestWillBeSent') {
-    const url = msg.params.request.url.split('?')[0];
-    if (url.includes('gdn.poki.com')) { urls.add(url); console.log('[' + urls.size + '] ' + url); }
-  }
-};
-process.on('SIGINT', () => { fs.writeFileSync('/tmp/{slug}-urls.txt', [...urls].join('\n')); process.exit(0); });
-" > /tmp/capture-{slug}.log 2>&1 &
-
-# Click Play in Chrome, play for 2-3 minutes, then Ctrl+C the listener
+cd /Users/rudra/development/nightwatch-scraper
+pnpm game https://poki.com/en/g/{slug}
 ```
 
-The first URL reveals: `https://{GAME_ID}.gdn.poki.com/{VERSION_ID}/...`
+This opens a Playwright browser. Click Play, play for 2-3 minutes to load all assets, then **close the browser window**. URLs are saved to `traces/{slug}-urls.txt`.
 
-### Step 2: Download All Assets
+Output gives you:
+- **Game ID**: UUID in the CDN URL
+- **Version ID**: second UUID
+- **CDN Base**: `https://{GAME_ID}.gdn.poki.com/{VERSION_ID}`
+
+## Step 2: Download All Assets
 
 ```bash
-BACKUP="/Users/rudra/Development/nightwatch-games-backup/{slug}"
+BACKUP="/Users/rudra/development/nightwatch-games-backup/{slug}"
 CDN="https://{GAME_ID}.gdn.poki.com/{VERSION_ID}"
 mkdir -p "$BACKUP"
 
-# Download captured URLs
-while IFS= read -r url; do
+grep "{GAME_ID}" traces/{slug}-urls.txt | grep -v "^#" | while IFS= read -r url; do
   rel="${url#$CDN/}"
-  [[ "$rel" == "$url" ]] && continue
+  [ "$rel" = "$url" ] && continue
   mkdir -p "$BACKUP/$(dirname "$rel")"
-  curl -sS -f -H "Referer: https://poki.com/" -o "$BACKUP/$rel" "$url"
-done < /tmp/{slug}-urls.txt
-
-# For JS games: also extract referenced files from bundle.js
-grep -oE '(images|fonts|sounds)/[^"'\'']+\.(png|jpg|ttf|ogg|mp3)' "$BACKUP/bundle.js" | sort -u | while read f; do
-  [ ! -f "$BACKUP/$f" ] && curl -sS -f -H "Referer: https://poki.com/" -o "$BACKUP/$f" "$CDN/$f" 2>/dev/null
+  curl -sS -f -H "Referer: https://poki.com/" -o "$BACKUP/$rel" "$url" && echo "[OK] $rel" || echo "[FAIL] $rel"
 done
-
-# Get thumbnail and preview video
-curl -sL -o "$BACKUP/thumbnail.png" "https://img.poki-cdn.com/cdn-cgi/image/q=90,width=600,height=600,fit=cover,f=png/{THUMB_HASH}/{slug}.png"
-
-# Preview video: Poki hosts at v.poki-cdn.com/{VIDEO_UUID}/thumbnail.3x3.h264.mp4
-# To find the VIDEO_UUID: curl the game page and grep for the only full .mp4 URL:
-#   curl -sS "https://poki.com/en/g/{slug}" | grep -oE 'https://v\.poki-cdn\.com/[^"]+\.mp4'
-# This returns the hero game's preview video (only one per page).
-curl -sL -o "$BACKUP/preview.mp4" "https://v.poki-cdn.com/{VIDEO_UUID}/thumbnail.3x3.h264.mp4"
 ```
 
-### Step 3: Identify Game Engine
+## Step 3: Get Thumbnail & Preview Video
+
+```bash
+# Thumbnail (use the hash from img.poki-cdn.com URLs in the trace file)
+curl -sL -o "$BACKUP/thumbnail.png" \
+  "https://img.poki-cdn.com/cdn-cgi/image/q=90,width=600,height=600,fit=cover,f=png/{THUMB_HASH}/{slug}-logo.png"
+
+# Convert to PNG if needed (Poki often returns JPEG regardless of f=png)
+sips -s format png thumbnail.png --out thumbnail.png
+
+# Preview video: grep the only .mp4 URL from the game page
+VIDEO_URL=$(curl -sS "https://poki.com/en/g/{slug}" | grep -oE 'https://v\.poki-cdn\.com/[^"]+\.mp4')
+curl -sL -o "$BACKUP/preview.mp4" "$VIDEO_URL"
+```
+
+## Step 4: Identify Engine & Patch
+
+### Identify Engine
 
 | Engine | Signs | Files |
 |--------|-------|-------|
 | **Custom JS** | Single `bundle.js`, inline code | bundle.js, images/, fonts/ |
 | **Construct 3** | `c3main.js`, `data.json`, sprite sheets | scripts/c3main.js, scripts/main.js, images/*-lsheet*.webp |
 | **Unity WebGL** | `.wasm`, `.data`, `.framework.js`, `.loader.js` | Build/ folder, StreamingAssets/ |
-| **Unity (Brotli)** | Same as above but `.br` extension | Needs nginx Content-Encoding header |
-| **Defold** | `dmloader.js`, `.wasm`, `archive/` folder | game0.arcd, game0.arci, game0.dmanifest, game0.projectc |
+| **Defold** | `dmloader.js`, `.wasm`, `archive/` folder | game0.arcd, game0.arci |
 
-### Step 4: Patch the Game
+### Check for Sitelock
 
-#### A) Create index.html with PokiSDK Mock
+```bash
+grep -rl "bG9jYWxob3N0\|poki\|IS_RELEASE" *.js scripts/*.js 2>/dev/null
+```
 
-Every game needs this mock before any game scripts load:
+### Patch index.html
+
+Replace `index.html` with a patched version. **Always** include:
+
+1. Remove `<script src="//game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>`
+2. Remove `<script src="scripts/register-sw.js">` (service worker not needed)
+3. Add PokiSDK mock BEFORE game scripts:
 
 ```html
 <script>
 window.PokiSDK = {
-  init: () => Promise.resolve({ interstitial: false, rewarded: false }),
-  gameLoadingStart: () => {}, gameLoadingFinished: () => {}, gameLoadingProgress: () => {},
-  gameplayStart: () => {}, gameplayStop: () => {},
+  init: () => Promise.resolve(),
+  gameLoadingStart: () => {},
+  gameLoadingFinished: () => {},
+  gameLoadingProgress: () => {},
+  gameplayStart: () => {},
+  gameplayStop: () => {},
   commercialBreak: () => Promise.resolve(),
-  rewardedBreak: () => Promise.resolve({ success: false, rewarded: false }),
-  setDebug: () => {}, happyTime: () => {},
-  getURLParam: (k) => new URLSearchParams(window.location.search).get(k) || "",
-  shareableURL: () => Promise.resolve(""),
+  rewardedBreak: () => Promise.resolve(true),
+  setDebug: () => {},
+  happyTime: () => {},
+  getURLParam: (k) => new URLSearchParams(window.location.search).get(k) || '',
+  shareableURL: () => Promise.resolve(''),
   isAdBlocked: () => true,
-  displayAd: () => Promise.resolve(), destroyAd: () => {},
-  logError: () => {}, hasConsentManager: () => false, getConsentStatus: () => 'accepted',
+  displayAd: () => Promise.resolve(),
+  destroyAd: () => {},
+  logError: () => {},
+  measure: () => {},
+  hasConsentManager: () => false,
+  getConsentStatus: () => 'accepted',
 };
-// For Unity games - window-level bridge functions
-window.initPokiBridge = function() {
-  return { commercialBreak: () => Promise.resolve(), rewardedBreak: () => Promise.resolve({ success: false, rewarded: false }), gameplayStart: () => {}, gameplayStop: () => {}, happyTime: () => {}, setDebug: () => {}, logError: () => {}, displayAd: () => Promise.resolve(), destroyAd: () => {} };
-};
-window.commercialBreak = () => Promise.resolve();
-window.rewardedBreak = () => Promise.resolve({ success: false, rewarded: false });
-window.gameplayStart = () => {};
-window.gameplayStop = () => {};
-window.happyTime = () => {};
 </script>
 ```
 
-#### B) Engine-Specific Patching
+### Engine-Specific Patching
 
-**Custom JS (Stickman Hook, Dinosaur Game):**
-- Remove `<script src="//game-cdn.poki.com/scripts/v2/poki-sdk.js">` tag
-- Search `bundle.js` for sitelock: `grep 'bG9jYWxob3N0' bundle.js`
-- Patch sitelock: insert `!1&&` after `IS_RELEASE&&` to short-circuit
-- Unlock features: find lock check functions and make them return `true`
+**Construct 3** (e.g., Mophead Dash):
+- No sitelock in JS — the Poki plugin (`avix-pokisdk-forc3`) just checks `typeof PokiSDK`
+- Only need PokiSDK mock in index.html
+- If game calls `PokiSDK.measure()`, ensure mock includes it
 
-**Construct 3 (Mophead Dash, other C3 games):**
-- Remove `<script src="//game-cdn.poki.com/scripts/v2/poki-sdk.js">` tag from index.html
-- Remove `<script src="scripts/register-sw.js">` (service worker not needed)
-- Inject PokiSDK mock before game scripts (includes `measure()` for leaderboard calls)
-- No binary sitelock — the Poki plugin (`avix-pokisdk-forc3`) in `scripts/main.js` just checks `typeof PokiSDK`
-- If game calls `PokiSDK.measure()` (in c3main.js), ensure mock includes it
+**Custom JS** (e.g., Stickman Hook, bundle.js games):
+- Find sitelock: `grep 'bG9jYWxob3N0' bundle.js`
+- Patch: insert `!1&&` after `IS_RELEASE&&` to short-circuit
+- Or insert `return;` at start of the sitelock IIFE
 
-**Unity WebGL (Stunt Bike, Going Up, Happy Glass):**
-- Patch the framework `.js` file directly:
-  - Find `_JS_PokiSDK_*` functions and make them no-ops or add callbacks
-  - `_JS_PokiSDK_rewardedBreak` → call `SendMessage("PokiSDKManager","RewardedBreakComplete","true")`
-  - `_JS_PokiSDK_isAdBlocked` → `return 1`
-  - `_JS_PokiSDK_displayAd` → empty function
-- For `.br` (Brotli) files: nginx needs `Content-Encoding: br` header (already configured)
+**Games with obfuscated sitelocks** (e.g., Sniper Code):
+- These are HARD to patch — multiple layers of obfuscation
+- The sitelock whitelists `localhost` so it works locally but not on real domains
+- Approaches that DON'T reliably work:
+  - `return;` in sitelock function (may have multiple sitelock copies)
+  - `atob` override (URL may be built through lookup tables, not raw atob)
+  - `Location.prototype.href` override (may use other assignment methods)
+- **Recommendation: SKIP games with heavy obfuscated sitelocks** unless you can find and binary-replace the whitelist array
 
-**Defold (Level Devil):**
-- Patch `{Game}_wasm.js`:
-  - `_dmSysOpenURL` → add `if(jsurl.includes("poki")||jsurl.includes("sitelock"))return;`
-  - `_dmSysGetApplicationPath` → can spoof return URL if needed
-- For sitelocks in archives: binary patch `game*.arcd` files (search with `strings`)
-- **WARNING:** Defold games that check `window.location.hostname` in Lua bytecode CANNOT be bypassed (e.g., Monkey Mart)
-
-#### C) Sitelock Bypass Strategies (by difficulty)
-
-1. **Easy** - JS sitelock in bundle.js: Find and patch the check function
-2. **Medium** - Unity framework sitelock: Patch `_JS_PokiSDK_initPokiBridge` or framework JS
-3. **Hard** - Binary sitelock in game data: Use `strings` to find URLs, binary-patch with same-length replacement
-4. **Impossible** - Defold Lua checking `window.location.hostname`: Cannot override browser's location property
-
-### Step 5: Upload to MinIO
+## Step 5: Test Locally
 
 ```bash
-# Local
-AWS_ACCESS_KEY_ID=minioadmin AWS_SECRET_ACCESS_KEY=minioadmin \
-aws --endpoint-url http://localhost:9000 s3 sync {slug}/ s3://nightwatch-games/{slug}/ --exclude '._*' --quiet
-
-# Prod
-tar czf /tmp/{slug}.tar.gz --exclude='._*' {slug}/
-scp /tmp/{slug}.tar.gz rudra@rudrasahoo:/tmp/
-ssh rudra@rudrasahoo "
-  cd /tmp && tar xzf {slug}.tar.gz
-  MINIO_ID=\$(docker ps -q -f name=minio)
-  docker cp {slug} \$MINIO_ID:/tmp/{slug}
-  docker exec \$MINIO_ID mc mirror --overwrite /tmp/{slug}/ local/nightwatch-games/{slug}/
-  docker exec \$MINIO_ID rm -rf /tmp/{slug}
-  rm -rf /tmp/{slug} /tmp/{slug}.tar.gz
-"
+cd /Users/rudra/development/nightwatch-games-backup/{slug}
+npx -y http-server -p 8888 -c-1
+# Open http://127.0.0.1:8888
 ```
 
-### Step 6: Add to Database
+⚠️ **IMPORTANT**: Testing on localhost is NOT sufficient for sitelock verification. Poki games whitelist `localhost`. You must also test on a real domain (or use a non-localhost hostname) to confirm sitelock is actually patched.
+
+## Step 6: Upload to R2
 
 ```bash
-cd /Users/rudra/Development/nightwatch-backend
-node --input-type=module -e "
-import 'dotenv/config';
+cd /Users/rudra/development/nightwatch-backend/workers/cdn-proxy
+
+# Upload all files with correct content-types (6 parallel)
+find /Users/rudra/development/nightwatch-games-backup/{slug} -type f ! -name '._*' ! -name '.DS_Store' | while read f; do
+  rel="${f#/Users/rudra/development/nightwatch-games-backup/{slug}/}"
+  ext="${rel##*.}"
+  case "$ext" in
+    js) ct="application/javascript" ;;
+    json) ct="application/json" ;;
+    html) ct="text/html; charset=UTF-8" ;;
+    css) ct="text/css" ;;
+    wasm) ct="application/wasm" ;;
+    png) ct="image/png" ;;
+    webp) ct="image/webp" ;;
+    webm) ct="audio/webm" ;;
+    mp4) ct="video/mp4" ;;
+    ttf) ct="font/ttf" ;;
+    woff) ct="font/woff" ;;
+    woff2) ct="font/woff2" ;;
+    *) ct="application/octet-stream" ;;
+  esac
+  npx wrangler r2 object put "nightwatch-games/{slug}/$rel" --remote --file="$f" --content-type="$ct" >/dev/null 2>&1 && echo "[OK] $rel" || echo "[FAIL] $rel" &
+  count=$((count + 1))
+  if [ $((count % 6)) -eq 0 ]; then wait; fi
+done
+wait
+```
+
+**CRITICAL**: Always use `--content-type` flag. Without it, R2 serves files with empty MIME type → browsers reject module scripts.
+
+## Step 7: Insert into Database
+
+```bash
+cd /Users/rudra/development/nightwatch-backend && node --input-type=module -e "
 import postgres from 'postgres';
 import { randomUUID } from 'node:crypto';
-const local = postgres(process.env.DATABASE_URL);
-await local\`INSERT INTO games (id, slug, title, description, sort_order) VALUES (\${randomUUID()}, '{slug}', '{Title}', '{description}', {N}) ON CONFLICT (slug) DO NOTHING\`;
-await local.end();
+
+// Dev DB
+const dev = postgres('postgresql://neondb_owner:npg_n04ZmXzGbCkU@ep-snowy-band-aoq9n9uw-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require');
+await dev\`INSERT INTO games (id, slug, title, description, active, sort_order)
+VALUES (\${randomUUID()}, '{slug}', '{Title}', '{description}', true, {N})
+ON CONFLICT (slug) DO NOTHING\`;
+await dev.end();
+
+// Prod DB
 const prod = postgres('postgresql://neondb_owner:npg_n04ZmXzGbCkU@ep-gentle-feather-aoq3aww6-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require');
-await prod\`INSERT INTO games (id, slug, title, description, sort_order) VALUES (\${randomUUID()}, '{slug}', '{Title}', '{description}', {N}) ON CONFLICT (slug) DO NOTHING\`;
+await prod\`INSERT INTO games (id, slug, title, description, active, sort_order)
+VALUES (\${randomUUID()}, '{slug}', '{Title}', '{description}', true, {N})
+ON CONFLICT (slug) DO NOTHING\`;
 await prod.end();
 "
 ```
 
-### Step 7: Create Backend Route
+## Step 8: Purge CF Cache (if updating existing game)
+
+Go to Cloudflare Dashboard → nightwatch.in → Caching → Purge specific URLs:
+- `https://games.nightwatch.in/{slug}/index.html`
+- Any other modified files
+
+## Removing a Game
 
 ```bash
-mkdir -p src/modules/games/{slug}
-sed 's/subway-surfers/{slug}/g; s/SubwaySurfers/{PascalCase}/g' \
-  src/modules/games/subway-surfers/controller.ts > src/modules/games/{slug}/controller.ts
-sed 's/SubwaySurfers/{PascalCase}/g' \
-  src/modules/games/subway-surfers/routes.ts > src/modules/games/{slug}/routes.ts
+# 1. Delete from both DBs
+node --input-type=module -e "
+import postgres from 'postgres';
+const dev = postgres('DEV_URL');
+const prod = postgres('PROD_URL');
+await dev\`DELETE FROM games WHERE slug = '{slug}'\`;
+await prod\`DELETE FROM games WHERE slug = '{slug}'\`;
+await dev.end(); await prod.end();
+"
 
-# Register in games.routes.ts:
-# import {name}Routes from './{slug}/routes';
-# router.use('/{slug}', {name}Routes);
+# 2. Delete from R2 (each file individually via wrangler)
+# 3. Delete local backup: rm -rf nightwatch-games-backup/{slug}
 ```
 
-### Step 8: Create Frontend Page
+## Key Gotchas
 
-```bash
-mkdir -p "/Users/rudra/Development/nightwatch/src/app/(protected)/(main)/games/{slug}"
-sed 's/subway-surfers/{slug}/g; s/Subway Surfers/{Title}/g' \
-  ".../games/subway-surfers/page.tsx" > ".../games/{slug}/page.tsx"
+1. **MIME types on R2**: Always upload with `--content-type`. CF R2 does NOT auto-detect MIME types. Without it, JS module scripts fail with empty MIME type error.
 
-# Layout for title:
-echo 'import type { Metadata } from "next";
-export const metadata: Metadata = { title: "{Title}" };
-export default function Layout({ children }: { children: React.ReactNode }) { return children; }' > ".../games/{slug}/layout.tsx"
-```
+2. **CF Cache**: After re-uploading files, old versions may be cached at edge (24h TTL). Purge from dashboard.
 
-### Step 9: Push Everything
+3. **Sitelock testing**: `localhost` is whitelisted by Poki. Always verify on a real domain.
 
-```bash
-# Backend
-cd nightwatch-backend && pnpm run check:fix && git add -A && git commit -m "feat(games): add {slug}" && git push
+4. **localStorage**: Games save progress to localStorage. If game starts at wrong level, clear `localStorage` for the game domain.
 
-# Frontend
-cd nightwatch && git add -A && git commit -m "feat(games): add {slug} page" && git push
+5. **Construct 3 games**: Easiest to patch — just need PokiSDK mock, no JS file modifications needed.
 
-# Backup
-cd nightwatch-games-backup && git add -A && git commit -m "feat: add {slug}" && git push
-```
-
----
-
-## Common Issues & Fixes
-
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| 403 on game assets | Missing `nw_game` cookie | Game page must call `/api/games/{slug}/url` first |
-| 403 on thumbnails | nginx blocks all `/nightwatch-games/` | Already fixed: regex allows `thumbnail.png` and `preview.mp4` |
-| Black screen on load | Splash overlay stays on top | Add canvas-detect auto-hide script |
-| Unity `.br` files fail | Wrong MIME type | nginx adds `Content-Encoding: br` for `.br` files |
-| `initPokiBridge is not a function` | Unity Poki plugin | Add `window.initPokiBridge` + window-level functions |
-| `happyTime is not a function` | Missing SDK method | Add to PokiSDK mock |
-| Game stuck after level | `commercialBreak` not resolving | Mock resolves immediately; for Unity add `SendMessage` callback |
-| Sitelock redirect | Domain check in game code | Patch bundle.js or binary-patch game archives |
-| Ad button shows popup | `rewardedBreak` has no callback | Patch framework JS to call Unity `SendMessage` immediately |
-
-## File Locations
-
-- **Game backups:** `/Users/rudra/Development/nightwatch-games-backup/`
-- **GitHub backup:** `github.com/rudra-sah00/nightwatch-games-backup` (private)
-- **CDP capture script:** `/Users/rudra/Development/nightwatch/scripts/capture-game-assets.mjs`
-- **Backend routes:** `nightwatch-backend/src/modules/games/`
-- **Frontend pages:** `nightwatch/src/app/(protected)/(main)/games/`
-- **Prod MinIO:** `ssh rudra@rudrasahoo` → `docker exec $(docker ps -q -f name=minio) mc ...`
-- **Prod nginx:** `/opt/nginx/conf.d/s3.nightwatch.in.conf`
-- **Admin panel:** `rudrasahoo:7799/pages/games/`
+6. **Heavy obfuscation**: Games like Sniper Code have multiple redundant sitelocks with obfuscated lookup tables. These are not worth patching — skip them.

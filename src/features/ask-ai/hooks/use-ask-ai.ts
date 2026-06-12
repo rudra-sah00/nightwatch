@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import { useSocket } from '@/providers/socket-provider';
 
 /**
@@ -343,6 +344,7 @@ export function useAskAi() {
       // 5. Start streaming immediately — no audioReady wait (matching official sample)
       activeRef.current = true;
       setState('listening');
+      trackEvent('ask_ai_start');
 
       // 6. Start streaming mic audio (matching official: ScriptProcessor → base64 → socket)
       const source = audioCtx.createMediaStreamSource(stream);

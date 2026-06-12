@@ -1,11 +1,10 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
 import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
 
+// biome-ignore lint/correctness/noUnusedFunctionParameters: Next.js error boundary API
 export default function LiveError({
   error,
   reset,
@@ -15,10 +14,6 @@ export default function LiveError({
 }) {
   const t = useTranslations('common');
   const router = useRouter();
-
-  useEffect(() => {
-    Sentry.captureException(error, { tags: { feature: 'live-player' } });
-  }, [error]);
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">

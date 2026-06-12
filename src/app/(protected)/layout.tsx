@@ -1,6 +1,8 @@
 import dynamic from 'next/dynamic';
+import { FirebaseIdentity } from '@/components/layout/FirebaseIdentity';
 import { MobileAppLifecycle } from '@/components/layout/MobileAppLifecycle';
 import { PushNotifications } from '@/components/layout/PushNotifications';
+import { ScreenTracker } from '@/components/layout/ScreenTracker';
 import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
@@ -41,6 +43,8 @@ export default function ProtectedLayout({
             <RemoteDisc />
             <MobileAppLifecycle />
             <PushNotifications />
+            <FirebaseIdentity />
+            <ScreenTracker />
             <div className="h-full bg-background flex flex-col overflow-hidden">
               <main className="flex-1 w-full min-h-0">{children}</main>
             </div>

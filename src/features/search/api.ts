@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { Episode, SearchResult, ShowDetails } from './types';
@@ -16,6 +17,8 @@ export async function searchContent(
   const cacheKey = normalizedQuery;
   const cached = searchResultsCache.get(cacheKey);
   if (cached) return cached;
+
+  trackEvent('search', { query: normalizedQuery });
 
   const { results } = await apiFetch<{ results: SearchResult[] }>(
     `/api/video/search?q=${encodeURIComponent(normalizedQuery)}`,

@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import type { MusicTrack } from '../api';
 import { getSongRecommendations, getStreamUrl } from '../api';
 import type { EngineContext } from './types';
@@ -72,6 +73,7 @@ export async function playTrack(
     if (ctx.playId !== myPlayId) return;
 
     ctx.update({ isPlaying: true });
+    trackEvent('music_play', { trackId: track.id, title: track.title });
 
     // Notify transfer-pause listener
     if (typeof window !== 'undefined') {

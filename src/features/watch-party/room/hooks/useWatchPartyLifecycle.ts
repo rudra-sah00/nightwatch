@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 import { env } from '@/lib/env';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
@@ -237,6 +238,7 @@ export function useWatchPartyLifecycle({
         setRoom(normalizedRoom);
         setIsConnected(true);
         setRequestStatus('joined');
+        trackEvent('party_create', { roomId });
         return normalizedRoom;
       } else {
         setError(response.error || tp('failedCreateRoom'));
@@ -301,6 +303,7 @@ export function useWatchPartyLifecycle({
         setRoom(normalizedRoom);
         setIsConnected(true);
         setRequestStatus('joined');
+        trackEvent('party_join', { roomId });
         return { success: true, room: normalizedRoom };
       }
 

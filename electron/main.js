@@ -23,7 +23,6 @@ const _path = require('node:path');
     }
   } catch (_e) {}
 })();
-const Sentry = require('@sentry/electron/main');
 const Store = require('electron-store');
 const { protocol } = require('electron');
 
@@ -43,17 +42,6 @@ protocol.registerSchemesAsPrivileged([
     },
   },
 ]);
-
-// --- 0. INITIALIZE CRASH REPORTING ---
-// Catches native C++ crashes (V8 Out of Memory, renderer crashes, etc.)
-Sentry.init({
-  dsn:
-    process.env.SENTRY_DSN ||
-    process.env.VITE_SENTRY_DSN ||
-    process.env.NEXT_PUBLIC_SENTRY_DSN ||
-    '',
-  environment: app.isPackaged ? 'production' : 'development',
-});
 
 // --- 0.1. LOCAL SETTINGS STORAGE ---
 // Allows the React app to read/write native JSON config bypassing localStorage limits

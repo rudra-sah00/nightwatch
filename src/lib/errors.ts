@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import type { ApiError } from '@/types';
+import { reportCatchError } from './analytics';
 
 /** Runtime type guard for ApiError — replaces unsafe `err as ApiError` casts. */
 export function isApiError(err: unknown): err is ApiError {
@@ -47,6 +48,7 @@ export function handleApiError(
   fallback: string,
   t?: (key: string) => string,
 ): string {
+  reportCatchError(err);
   if (isApiError(err)) {
     const key = mapErrorCode(err.code);
     const msg = (key && t ? t(key) : undefined) || err.message || fallback;

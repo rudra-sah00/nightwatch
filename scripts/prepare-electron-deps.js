@@ -12,7 +12,6 @@ const path = require('node:path');
 const builtins = new Set(require('node:module').builtinModules);
 
 const ENTRY_DEPS = [
-  '@sentry/electron',
   'electron-store',
   'electron-log',
   'electron-updater',
@@ -99,45 +98,4 @@ for (const [name, srcDir] of collected) {
   fs.cpSync(srcDir, destDir, { recursive: true });
 }
 
-// --- GENERATE DUMMY PACKAGES FOR OPTIONAL SENTRY NODE INTEGRATIONS ---
-// @sentry/node@10 statically requires many server-side integrations (Prisma, Fastify, Hapi, etc.)
-// Because these are not in a try/catch, if the package is missing, the Electron main process crashes.
-// We don't want to bundle megabytes of server code in a desktop app, so we generate tiny dummy packages
-// that just export an empty object. This satisfies the require() without the bloat.
-const dummyPackages = [
-  '@prisma/instrumentation',
-  '@fastify/otel',
-  '@hapi/hapi',
-  'graphql',
-  'express',
-  'pg',
-  'mysql2',
-  'amqplib',
-  'dataloader',
-  'ioredis',
-  'kafkajs',
-  'koa',
-  'mongodb',
-  'mongoose',
-  'mysql',
-  'redis',
-  'tedious',
-  'undici',
-  'lru-memoizer',
-];
-
-for (const pkg of dummyPackages) {
-  const pkgDir = path.join(outDir, pkg);
-  if (!fs.existsSync(pkgDir)) {
-    fs.mkdirSync(pkgDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(pkgDir, 'package.json'),
-      JSON.stringify({ name: pkg, version: '1.0.0', main: 'index.js' }),
-    );
-    fs.writeFileSync(path.join(pkgDir, 'index.js'), 'module.exports = {};\n');
-  }
-}
-
-console.log(
-  `Prepared ${collected.size} real packages and ${dummyPackages.length} dummy packages in node_modules_electron/`,
-);
+console.log(`Prepared ${collected.size} packages in node_modules_electron/`);

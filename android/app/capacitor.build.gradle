@@ -12,6 +12,8 @@ dependencies {
     implementation project(':anuradev-capacitor-phone-call-notification')
     implementation project(':capacitor-community-keep-awake')
     implementation project(':capacitor-community-volume-buttons')
+    implementation project(':capacitor-firebase-analytics')
+    implementation project(':capacitor-firebase-crashlytics')
     implementation project(':capacitor-app')
     implementation project(':capacitor-clipboard')
     implementation project(':capacitor-filesystem')

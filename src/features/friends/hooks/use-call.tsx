@@ -16,6 +16,7 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import {
@@ -283,6 +284,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       setPeer(callPeer);
       peerRef.current = callPeer;
       updateCallState('outgoing', callPeer.name);
+      trackEvent('call_start', { peerId: callPeer.id });
       socket.emit(
         'call:initiate',
         { receiverId: callPeer.id },
@@ -296,6 +298,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const acceptCall = useCallback(() => {
     if (!socket || !peer || callStateRef.current !== 'incoming') return;
+    trackEvent('call_accept', { peerId: peer.id });
     socket.emit(
       'call:accept',
       { callerId: peer.id },
@@ -323,6 +326,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const endCall = useCallback(() => {
     if (!socket || !peer) return;
+    trackEvent('call_end', { peerId: peer.id });
     socket.emit('call:end', { peerId: peer.id });
     cleanup();
   }, [socket, peer, cleanup]);

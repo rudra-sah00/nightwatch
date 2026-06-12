@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { apiFetch } from '@/lib/fetch';
 
 export interface MangaTitle {
@@ -73,6 +74,7 @@ export async function getMangaDetail(titleId: number): Promise<MangaDetail> {
 export async function getMangaChapter(
   chapterId: number,
 ): Promise<MangaChapterViewer> {
+  trackEvent('manga_chapter_read', { chapter_id: chapterId });
   return apiFetch(`/api/manga/chapter/${chapterId}`);
 }
 
@@ -98,6 +100,10 @@ export async function addMangaFavorite(input: {
   author: string;
   portraitImageUrl: string;
 }) {
+  trackEvent('manga_favorite_add', {
+    title_id: input.titleId,
+    title: input.title,
+  });
   return apiFetch('/api/manga/favorites', {
     method: 'POST',
     body: JSON.stringify(input),
