@@ -5,6 +5,7 @@ import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { getProfile, invalidateProfileCache } from '@/features/profile/api';
 import {
+  apiFetch,
   getTokenExpiresAt,
   revalidateTokenOnResume,
   setTokenExpiration,
@@ -61,6 +62,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleForceLogout = useCallback(
     (payload: ForceLogoutPayload) => {
+      // Unregister push token by deviceId before clearing auth
+      import('@/lib/device-id')
+        .then(({ getDeviceId }) => {
+          const deviceId = getDeviceId();
+          apiFetch('/api/notifications/unregister', {
+            method: 'POST',
+            body: JSON.stringify({ deviceId }),
+            headers: { 'Content-Type': 'application/json' },
+          }).catch(() => {});
+        })
+        .catch(() => {});
       disconnect();
       setUser(null);
       clearCookiesAndRedirect(payload.message || t('sessionExpired'));
