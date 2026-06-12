@@ -14,6 +14,9 @@ patchedDependencies:
   '@capgo/capacitor-incoming-call-kit@8.1.1':
     hash: 4e3b122ca87f897e4c1346451a7caa655abe4a872eb90f429b500c4e4fb9e59c
     path: patches/@capgo__capacitor-incoming-call-kit@8.1.1.patch
+  '@ottimis/capacitor-volumes':
+    hash: 20cf109379666ad07d8aa3339c13738362e67c67581d0c937ac6fc6f88b761ee
+    path: patches/@ottimis__capacitor-volumes.patch
 
 importers:
 
@@ -93,7 +96,7 @@ importers:
         version: 1.40.0
       '@ottimis/capacitor-volumes':
         specifier: 7.0.0
-        version: 7.0.0(@capacitor/core@8.3.1)
+        version: 7.0.0(patch_hash=20cf109379666ad07d8aa3339c13738362e67c67581d0c937ac6fc6f88b761ee)(@capacitor/core@8.3.1)
       '@radix-ui/react-label':
         specifier: ^2.1.2
         version: 2.1.8(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -9770,7 +9773,7 @@ snapshots:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.6.1(@opentelemetry/api@1.9.1)
 
-  '@ottimis/capacitor-volumes@7.0.0(@capacitor/core@8.3.1)':
+  '@ottimis/capacitor-volumes@7.0.0(patch_hash=20cf109379666ad07d8aa3339c13738362e67c67581d0c937ac6fc6f88b761ee)(@capacitor/core@8.3.1)':
     dependencies:
       '@capacitor/core': 8.3.1
 
