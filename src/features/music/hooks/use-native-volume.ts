@@ -80,7 +80,7 @@ export function useNativeVolume(enabled: boolean) {
     (async () => {
       try {
         if (!active) return;
-        await plugin.watchVolume({}, () => {
+        await plugin.watchVolume({ suppressVolumeIndicator: false }, () => {
           if (active && Date.now() - userSetRef.current > 500) getVolume();
         });
         if (!active) {
