@@ -311,7 +311,8 @@ export function MobileFullPlayer({
                 </span>
               </div>
             </div>
-            <div className="shrink-0 flex items-center justify-center gap-12 mt-auto">
+            <div className="flex-1" />
+            <div className="shrink-0 flex items-center justify-center gap-12">
               <button
                 type="button"
                 onClick={onPrev}
@@ -341,7 +342,8 @@ export function MobileFullPlayer({
                 <SkipForward className="w-9 h-9 fill-current" />
               </button>
             </div>
-            <div className="shrink-0 flex items-center gap-3 mt-6">
+            <div className="flex-1" />
+            <div className="shrink-0 flex items-center gap-3">
               <Volume1 className="w-3.5 h-3.5 text-white/30" />
               <input
                 type="range"
