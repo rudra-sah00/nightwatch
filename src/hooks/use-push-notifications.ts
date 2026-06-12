@@ -19,6 +19,7 @@ const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || '';
  */
 export function usePushNotifications() {
   const userId = useAuthStore((s) => s.user?.id);
+  const sessionId = useAuthStore((s) => s.user?.sessionId);
   const lastRegisteredUser = useRef<string | null>(null);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export function usePushNotifications() {
       ).Capacitor?.isNativePlatform?.()
     ) {
       import('@/capacitor/push')
-        .then(({ registerNativePush }) => registerNativePush())
+        .then(({ registerNativePush }) => registerNativePush(sessionId))
         .catch(() => {});
       return;
     }
@@ -57,6 +58,7 @@ export function usePushNotifications() {
             token,
             platform: 'web',
             deviceId: getDeviceId(),
+            sessionId,
           }),
           headers: { 'Content-Type': 'application/json' },
         });
@@ -73,5 +75,5 @@ export function usePushNotifications() {
     });
 
     return () => unsub?.();
-  }, [userId]);
+  }, [userId, sessionId]);
 }

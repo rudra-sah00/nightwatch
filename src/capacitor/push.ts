@@ -1,13 +1,13 @@
 import { getDeviceId } from '@/lib/device-id';
 import { apiFetch } from '@/lib/fetch';
 
-async function sendTokenToBackend(token: string) {
+async function sendTokenToBackend(token: string, sessionId?: string | null) {
   const platform =
     window.Capacitor?.getPlatform?.() === 'ios' ? 'ios' : 'android';
   const deviceId = getDeviceId();
   await apiFetch('/api/notifications/register', {
     method: 'POST',
-    body: JSON.stringify({ token, platform, deviceId }),
+    body: JSON.stringify({ token, platform, deviceId, sessionId }),
     headers: { 'Content-Type': 'application/json' },
   });
 }
@@ -38,7 +38,7 @@ function getNativePushPlugin(): CapacitorPushPlugin | null {
  * Register native push notifications on Capacitor (Android/iOS).
  * Requests permission, gets FCM token, sends to backend.
  */
-export async function registerNativePush() {
+export async function registerNativePush(sessionId?: string | null) {
   const plugin = getNativePushPlugin();
   if (!plugin) return;
 
@@ -71,7 +71,7 @@ export async function registerNativePush() {
 
   addListener('registration', async (data) => {
     try {
-      await sendTokenToBackend((data as { value: string }).value);
+      await sendTokenToBackend((data as { value: string }).value, sessionId);
     } catch {
       /* silent fail */
     }
