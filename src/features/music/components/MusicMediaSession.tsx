@@ -45,7 +45,9 @@ export function MusicMediaSession() {
     if (!plugin) return;
 
     if (displayPlaying && displayTrack) {
-      plugin.start().catch(() => {});
+      plugin
+        .start({ title: displayTrack.title, artist: displayTrack.artist })
+        .catch(() => {});
     } else {
       plugin.stop().catch(() => {});
     }

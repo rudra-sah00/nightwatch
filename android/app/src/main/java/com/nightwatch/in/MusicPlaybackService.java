@@ -3,6 +3,7 @@ package com.nightwatch.in;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
@@ -28,11 +29,20 @@ public class MusicPlaybackService extends Service {
             return START_NOT_STICKY;
         }
 
+        String title = intent != null ? intent.getStringExtra("title") : null;
+        String artist = intent != null ? intent.getStringExtra("artist") : null;
+
+        Intent launchIntent = new Intent(this, MainActivity.class);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                this, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE);
+
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Nightwatch")
-                .setContentText("Playing music")
-                .setSmallIcon(android.R.drawable.ic_media_play)
-                .setSilent(true)
+                .setContentTitle(title != null ? title : "Nightwatch")
+                .setContentText(artist != null ? artist : "Playing music")
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
+                .setContentIntent(contentIntent)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(true)
                 .build();
 
@@ -50,10 +60,9 @@ public class MusicPlaybackService extends Service {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Music Playback",
-                    NotificationManager.IMPORTANCE_LOW
+                    NotificationManager.IMPORTANCE_DEFAULT
             );
             channel.setDescription("Keeps music playing in background");
-            channel.setSound(null, null);
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(channel);

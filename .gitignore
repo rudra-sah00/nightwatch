@@ -69,11 +69,6 @@ public/swe-worker-*.js
 node_modules_electron/
 desktop-build/
 public/sw.js.map
-
-# Tauri
-src-tauri/target/
-src-tauri/gen/
-src-tauri/Cargo.lock
 logs/
 
 # Capacitor native projects
