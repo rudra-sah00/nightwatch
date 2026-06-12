@@ -99,12 +99,16 @@ export function MobileFullPlayer({
   const currentTime = (progress / 100) * duration;
   const hasLyrics = lyrics && lyrics.length > 0;
 
+  const isAndroid =
+    typeof window !== 'undefined' &&
+    window.Capacitor?.getPlatform?.() === 'android';
+
   return (
     <div
       className={`fixed inset-0 z-[10100] overflow-hidden duration-300 fill-mode-both ${closing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'}`}
       style={{
         paddingTop: 'env(safe-area-inset-top, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingBottom: isAndroid ? '48px' : 'env(safe-area-inset-bottom, 0px)',
         transform: swipeOffset > 0 ? `translateY(${swipeOffset}px)` : undefined,
         transition: swipeOffset > 0 ? 'none' : undefined,
       }}
@@ -355,7 +359,7 @@ export function MobileFullPlayer({
             </div>
 
             {/* Bottom bar: lyrics / eq / sleep / queue */}
-            <div className="flex items-center justify-around mt-8 pt-2 pb-12">
+            <div className="flex items-center justify-around mt-8 py-2">
               <button
                 type="button"
                 onClick={onToggleLyrics}
