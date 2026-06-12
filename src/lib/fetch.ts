@@ -1,4 +1,5 @@
 import type { ApiError } from '@/types';
+import { reportError } from './analytics';
 import { getCookie } from './cookies';
 import { env } from './env';
 
@@ -299,6 +300,9 @@ export async function apiFetch<T>(
             ).code
           : undefined) || (errorData as Record<string, unknown>).code,
       );
+      if (response.status >= 500) {
+        reportError(`[API ${response.status}] ${endpoint}: ${msg}`);
+      }
       throw error;
     }
 

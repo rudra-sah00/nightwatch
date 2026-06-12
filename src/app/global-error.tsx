@@ -1,6 +1,5 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
 import NextError from 'next/error';
 import { useEffect, useState } from 'react';
 import './globals.css';
@@ -20,7 +19,9 @@ export default function GlobalError({
 
   useEffect(() => {
     setLocale(getLocaleFromCookie());
-    Sentry.captureException(error);
+    import('@/lib/analytics').then(({ reportCatchError }) =>
+      reportCatchError(error),
+    );
   }, [error]);
 
   return (

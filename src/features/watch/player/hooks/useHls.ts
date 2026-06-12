@@ -464,6 +464,9 @@ export function useHls({
                 hls.recoverMediaError();
                 break;
               default:
+                import('@/lib/analytics').then(({ reportError }) =>
+                  reportError(`[HLS Fatal] ${data.type}: ${data.details}`),
+                );
                 dispatch({
                   type: 'SET_ERROR',
                   error: 'Playback error occurred',

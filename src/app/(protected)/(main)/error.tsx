@@ -1,10 +1,9 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
 
+// biome-ignore lint/correctness/noUnusedFunctionParameters: Next.js error boundary API
 export default function MainError({
   error,
   reset,
@@ -13,10 +12,6 @@ export default function MainError({
   reset: () => void;
 }) {
   const t = useTranslations('common');
-
-  useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full p-8">

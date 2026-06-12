@@ -6,6 +6,7 @@
  * and exposes a unified API for the React hooks.
  */
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { trackEvent } from '@/lib/analytics';
 import type { DownloadItem } from '@/lib/electron-bridge';
 import { startHlsDownload } from './processors/hls';
 import { startMp4Download } from './processors/mp4';
@@ -66,6 +67,10 @@ export const mobileDownloadManager = {
     notifyProgress(item);
 
     await updateItem(args.contentId, { status: 'DOWNLOADING' });
+    trackEvent('download_start', {
+      content_id: args.contentId,
+      title: args.title,
+    });
     startDownloadTask(args.contentId, args.m3u8Url);
   },
 

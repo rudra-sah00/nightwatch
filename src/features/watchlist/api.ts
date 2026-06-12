@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { WatchlistItem } from './types';
@@ -34,6 +35,10 @@ export async function addToWatchlist(item: {
     body: JSON.stringify(item),
   });
   watchlistStatusCache.set(item.contentId, true);
+  trackEvent('watchlist_add', {
+    content_id: item.contentId,
+    title: item.title,
+  });
 }
 
 /**
@@ -45,6 +50,7 @@ export async function removeFromWatchlist(contentId: string): Promise<void> {
     method: 'DELETE',
   });
   watchlistStatusCache.set(contentId, false);
+  trackEvent('watchlist_remove', { content_id: contentId });
 }
 
 /**

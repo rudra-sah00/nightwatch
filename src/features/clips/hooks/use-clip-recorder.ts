@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import { startServerClip, stopServerClip } from '../api';
 
 const MAX_DURATION = 300;
@@ -61,6 +62,10 @@ export function useClipRecorder({
 
     setIsStopping(true);
     try {
+      trackEvent('clip_record_stop', {
+        clip_id: id,
+        duration: Math.floor((Date.now() - startTimeRef.current) / 1000),
+      });
       const endTime = Date.now() / 1000;
       await stopServerClip(id, endTime);
     } catch {
@@ -88,6 +93,7 @@ export function useClipRecorder({
       setIsRecording(true);
       setDuration(0);
       setIsStarting(false);
+      trackEvent('clip_record_start', { match_id: matchId });
 
       timerRef.current = setInterval(() => {
         const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);

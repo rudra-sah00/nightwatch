@@ -10,6 +10,7 @@ import type {
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { reportError, trackEvent } from '@/lib/analytics';
 
 /**
  * Agora SDK configuration and global handlers.
@@ -686,9 +687,11 @@ export function useAgora({
         if (cleaned) return;
         setIsClientReady(true);
         setConnectionState('CONNECTED');
+        trackEvent('party_media_connect');
         setRemoteUsers([...client.remoteUsers]);
       } catch (_err) {
         if (!cleaned) {
+          reportError(`[WatchParty] Agora join failed: ${_err}`);
           toast.error(tp('failedConnectVoice'));
         }
       }

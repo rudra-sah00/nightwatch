@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import { storeUser } from '@/lib/auth';
 import { setTokenExpiration } from '@/lib/fetch';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -58,6 +59,7 @@ export function useQrLogin() {
             storeUser(poll.user);
             if (poll.expiresIn) setTokenExpiration(poll.expiresIn);
             setUser(poll.user);
+            trackEvent('login_success', { method: 'qr' });
           } else if (poll.status === 'expired') {
             cleanup();
             setStatus('expired');

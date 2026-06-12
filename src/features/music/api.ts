@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 
@@ -57,6 +58,7 @@ export interface MusicAlbum {
  * @returns Combined results across songs, albums, and playlists.
  */
 export async function searchMusic(query: string): Promise<MusicSearchResult> {
+  trackEvent('music_search', { query });
   return apiFetch<MusicSearchResult>(
     `/api/music/search?q=${encodeURIComponent(query)}`,
   );
@@ -594,6 +596,7 @@ export async function getUserPlaylists(): Promise<UserPlaylist[]> {
  * @returns The newly created playlist.
  */
 export async function createUserPlaylist(name: string): Promise<UserPlaylist> {
+  trackEvent('music_playlist_create', { name });
   return apiFetch('/api/music/playlists', {
     method: 'POST',
     body: JSON.stringify({ name }),
@@ -676,6 +679,10 @@ export async function addTrackToPlaylist(
     duration: number;
   },
 ): Promise<unknown> {
+  trackEvent('music_add_to_playlist', {
+    playlist_id: playlistId,
+    track_id: track.trackId,
+  });
   return apiFetch(`/api/music/playlists/${playlistId}/tracks`, {
     method: 'POST',
     body: JSON.stringify(track),

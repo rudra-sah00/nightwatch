@@ -10,6 +10,7 @@ import { type ClipFilters, toggleClipPublic } from '@/features/clips/api';
 import { ClipCard } from '@/features/clips/components/ClipCard';
 import { useClips } from '@/features/clips/hooks/use-clips';
 import type { Clip } from '@/features/clips/types';
+import { trackEvent } from '@/lib/analytics';
 import { WS_EVENTS } from '@/lib/constants';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { mobileBridge } from '@/lib/mobile-bridge';
@@ -77,6 +78,7 @@ export function ClipsGrid() {
   );
 
   const shareOrCopy = useCallback(async (url: string, title: string) => {
+    trackEvent('clip_share', { title });
     if (checkIsMobile()) {
       await mobileBridge.share({ title, url }).catch(() => {});
     } else {

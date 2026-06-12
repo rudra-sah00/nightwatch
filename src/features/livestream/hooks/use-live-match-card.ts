@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
 import { generateRoomId } from '@/features/watch-party/room/utils';
+import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/providers/auth-provider';
 import type { LiveMatch } from '../types';
 
@@ -64,6 +65,7 @@ export function useLiveMatchCard(match: LiveMatch) {
       match.contentKind === 'channel' || match.type === 'all_channels'
         ? match.channelName || match.team1.name
         : `${match.team1.name} vs ${match.team2.name}`;
+    trackEvent('livestream_watch', { match_id: match.id, title });
     router.push(`/live/${match.id}?title=${encodeURIComponent(title)}`);
   };
 

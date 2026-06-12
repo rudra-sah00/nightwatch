@@ -4,6 +4,7 @@ import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
+import { trackEvent } from '@/lib/analytics';
 import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
 import { apiFetch } from '@/lib/fetch';
 
@@ -17,7 +18,10 @@ export default function GamePage() {
 
   useEffect(() => {
     apiFetch<{ url: string }>(`/api/games/${slug}/url`)
-      .then((data) => setGameUrl(data.url))
+      .then((data) => {
+        setGameUrl(data.url);
+        trackEvent('game_play', { slug });
+      })
       .catch(() => {});
 
     apiFetch<{ games: { slug: string; title: string }[] }>('/api/games')

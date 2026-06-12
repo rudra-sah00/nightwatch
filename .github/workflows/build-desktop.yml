@@ -71,7 +71,6 @@ jobs:
       - name: Build and Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
           DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}

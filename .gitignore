@@ -53,8 +53,11 @@ next-env.d.ts
 .gemini/
 .pnpm-store/
 
-# Sentry Config File
-.env.sentry-build-plugin
+# Vercel
+.vercel/
+
+# Cloudflare Wrangler
+.wrangler/
 
 .agent/
 .github/skills/

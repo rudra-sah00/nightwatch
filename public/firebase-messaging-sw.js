@@ -3,10 +3,10 @@
 // It handles push events when the app tab is not in the foreground.
 
 importScripts(
-  'https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js',
 );
 importScripts(
-  'https://www.gstatic.com/firebasejs/11.9.0/firebase-messaging-compat.js',
+  'https://www.gstatic.com/firebasejs/12.14.0/firebase-messaging-compat.js',
 );
 
 firebase.initializeApp({

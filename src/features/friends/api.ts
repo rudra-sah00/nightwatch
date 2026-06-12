@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { FriendProfile, FriendRequest, SentRequest } from './types';
@@ -67,6 +68,7 @@ export async function sendFriendRequest(username: string): Promise<void> {
     body: JSON.stringify({ username }),
   });
   friendsCache.clear();
+  trackEvent('friend_request_send', { username });
 }
 
 /**
@@ -80,6 +82,7 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
     body: JSON.stringify({ friendshipId }),
   });
   friendsCache.clear();
+  trackEvent('friend_request_accept');
 }
 
 /**

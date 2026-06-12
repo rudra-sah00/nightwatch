@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
@@ -34,8 +35,8 @@ export async function updateProfile(
     body: JSON.stringify(data),
     ...options,
   });
-  // Update cache with new data
   profileCache.set('me', result);
+  trackEvent('profile_update');
   return result;
 }
 
@@ -105,6 +106,7 @@ export async function changePassword(
     body: JSON.stringify({ currentPassword, newPassword }),
     ...options,
   });
+  trackEvent('password_change');
 }
 
 export async function deleteAccount(options?: RequestInit): Promise<void> {
