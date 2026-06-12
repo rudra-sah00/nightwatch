@@ -355,12 +355,7 @@ export function MobileFullPlayer({
             </div>
 
             {/* Bottom bar: lyrics / eq / sleep / queue */}
-            <div
-              className="flex items-center justify-around mt-8 py-2"
-              style={{
-                paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 16px))',
-              }}
-            >
+            <div className="flex items-center justify-around mt-8 pt-2 pb-12">
               <button
                 type="button"
                 onClick={onToggleLyrics}
