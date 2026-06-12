@@ -6,6 +6,7 @@ import {
 } from 'zustand/middleware';
 import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
 import type { LoginInput, RegisterInput } from '@/features/auth/schema';
+import { trackEvent } from '@/lib/analytics';
 import { clearStoredUser, storeUser } from '@/lib/auth';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { apiFetch, setTokenExpiration } from '@/lib/fetch';
@@ -104,11 +105,15 @@ export const useAuthStore = create<AuthState>()(
           sessionStorage.removeItem('guest_token');
           sessionStorage.removeItem('guest_refresh_token');
           set({ user: response.user, isAuthenticated: true });
+          trackEvent('login_success', { method: 'email' });
         }
         return response;
       },
 
-      register: async (data: RegisterInput) => registerUser(data),
+      register: async (data: RegisterInput) => {
+        trackEvent('signup_start');
+        return registerUser(data);
+      },
 
       verifyOtp: async (email, otp, context, mobileState) => {
         const { verifyOtp: apiVerifyOtp } = await import('@/features/auth/api');
@@ -123,22 +128,21 @@ export const useAuthStore = create<AuthState>()(
             setTokenExpiration(response.expiresIn);
           }
           set({ user: response.user, isAuthenticated: true });
+          trackEvent('login_success', { method: 'otp' });
         }
         return response;
       },
 
       logout: async () => {
+        trackEvent('logout');
         // Unregister push notification token before logging out
         try {
-          const token = sessionStorage.getItem('nightwatch:fcm-token');
-          if (token) {
-            await apiFetch('/api/notifications/unregister', {
-              method: 'POST',
-              body: JSON.stringify({ token }),
-              headers: { 'Content-Type': 'application/json' },
-            });
-            sessionStorage.removeItem('nightwatch:fcm-token');
-          }
+          const { getDeviceId } = await import('@/lib/device-id');
+          await apiFetch('/api/notifications/unregister', {
+            method: 'POST',
+            body: JSON.stringify({ deviceId: getDeviceId() }),
+            headers: { 'Content-Type': 'application/json' },
+          });
         } catch {}
 
         try {
