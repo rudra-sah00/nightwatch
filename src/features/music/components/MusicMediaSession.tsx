@@ -34,6 +34,23 @@ export function MusicMediaSession() {
   const displayProgress = isRemoteControlling ? remoteProgress : progress;
   const displayDuration = isRemoteControlling ? remoteDuration : duration;
 
+  // Start/stop Android foreground service for background playback
+  useEffect(() => {
+    const isAndroid =
+      typeof window !== 'undefined' &&
+      window.Capacitor?.getPlatform?.() === 'android';
+    if (!isAndroid) return;
+    const plugin = (window as { Capacitor?: { Plugins?: Record<string, any> } })
+      .Capacitor?.Plugins?.NWMusicService;
+    if (!plugin) return;
+
+    if (displayPlaying && displayTrack) {
+      plugin.start().catch(() => {});
+    } else {
+      plugin.stop().catch(() => {});
+    }
+  }, [displayPlaying, displayTrack]);
+
   // Sync metadata when track changes
   useEffect(() => {
     if (!('mediaSession' in navigator) || !displayTrack) {

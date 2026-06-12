@@ -12,6 +12,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(android.os.Bundle savedInstanceState) {
         registerPlugin(NWAudioSessionPlugin.class);
+        registerPlugin(NWMusicServicePlugin.class);
         super.onCreate(savedInstanceState);
 
         UiModeManager uiModeManager = (UiModeManager) getSystemService(Context.UI_MODE_SERVICE);
