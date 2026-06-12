@@ -311,7 +311,7 @@ export function MobileFullPlayer({
                 </span>
               </div>
             </div>
-            <div className="shrink-0 flex items-center justify-center gap-12 mt-14">
+            <div className="shrink-0 flex items-center justify-center gap-12 mt-auto">
               <button
                 type="button"
                 onClick={onPrev}
@@ -341,7 +341,7 @@ export function MobileFullPlayer({
                 <SkipForward className="w-9 h-9 fill-current" />
               </button>
             </div>
-            <div className="shrink-0 flex items-center gap-3 mt-[5.2rem]">
+            <div className="shrink-0 flex items-center gap-3 mt-6">
               <Volume1 className="w-3.5 h-3.5 text-white/30" />
               <input
                 type="range"
@@ -359,7 +359,7 @@ export function MobileFullPlayer({
             </div>
 
             {/* Bottom bar: lyrics / eq / sleep / queue */}
-            <div className="flex items-center justify-around mt-8 py-2">
+            <div className="flex items-center justify-around mt-4 py-2">
               <button
                 type="button"
                 onClick={onToggleLyrics}
