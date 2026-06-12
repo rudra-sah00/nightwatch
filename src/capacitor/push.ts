@@ -1,11 +1,13 @@
+import { getDeviceId } from '@/lib/device-id';
 import { apiFetch } from '@/lib/fetch';
 
 async function sendTokenToBackend(token: string) {
   const platform =
     window.Capacitor?.getPlatform?.() === 'ios' ? 'ios' : 'android';
+  const deviceId = getDeviceId();
   await apiFetch('/api/notifications/register', {
     method: 'POST',
-    body: JSON.stringify({ token, platform }),
+    body: JSON.stringify({ token, platform, deviceId }),
     headers: { 'Content-Type': 'application/json' },
   });
 }

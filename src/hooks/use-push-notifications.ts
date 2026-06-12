@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { getDeviceId } from '@/lib/device-id';
 import { apiFetch } from '@/lib/fetch';
 import { getFCMToken, onForegroundMessage } from '@/lib/firebase';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -52,7 +53,11 @@ export function usePushNotifications() {
 
         await apiFetch('/api/notifications/register', {
           method: 'POST',
-          body: JSON.stringify({ token, platform: 'web' }),
+          body: JSON.stringify({
+            token,
+            platform: 'web',
+            deviceId: getDeviceId(),
+          }),
           headers: { 'Content-Type': 'application/json' },
         });
       } catch {
