@@ -35,22 +35,14 @@ export class FeatureErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error(`[${this.props.feature}]`, error, info.componentStack);
-    // Report to Firebase Crashlytics on native platforms
-    if (
-      typeof window !== 'undefined' &&
-      (
-        window as { Capacitor?: { isNativePlatform?: () => boolean } }
-      ).Capacitor?.isNativePlatform?.()
-    ) {
-      import('@/capacitor/firebase')
-        .then(({ recordException }) => {
-          recordException(
-            `[${this.props.feature}] ${error.message}`,
-            error.stack || info.componentStack || undefined,
-          );
-        })
-        .catch(() => {});
-    }
+    import('@/lib/analytics')
+      .then(({ reportError }) => {
+        reportError(
+          `[${this.props.feature}] ${error.message}`,
+          error.stack || info.componentStack || undefined,
+        );
+      })
+      .catch(() => {});
   }
 
   handleReset = () => {

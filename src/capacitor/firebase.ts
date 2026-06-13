@@ -88,3 +88,9 @@ export function setAnalyticsUserProperty(key: string, value: string | null) {
     ?.setUserProperty({ key, value })
     .catch(() => {});
 }
+
+export function setAnalyticsEnabled(enabled: boolean) {
+  getAnalyticsPlugin()
+    ?.setEnabled({ enabled })
+    .catch(() => {});
+}
