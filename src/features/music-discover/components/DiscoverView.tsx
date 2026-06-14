@@ -1,21 +1,19 @@
 'use client';
 
-import { ArrowLeft, Heart, ThumbsDown, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getStreamUrl } from '@/features/music/api';
 import { type DiscoverSong, getDiscoverFeed, swipeSong } from '../api';
 
-/** Preloaded audio entry. */
 interface PreloadedAudio {
   songId: string;
   audio: HTMLAudioElement;
-  ready: boolean;
 }
 
-const PRELOAD_AHEAD = 3; // preload next 3 songs
-const PREVIEW_DURATION = 20; // seconds
+const PRELOAD_AHEAD = 3;
+const PREVIEW_DURATION = 20;
 
 export function DiscoverView() {
   const [feed, setFeed] = useState<DiscoverSong[]>([]);
@@ -28,8 +26,8 @@ export function DiscoverView() {
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dragRef = useRef({ startX: 0, currentX: 0, dragging: false });
   const cardRef = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
 
-  // Load feed
   useEffect(() => {
     setLoading(true);
     getDiscoverFeed(20)
@@ -41,7 +39,11 @@ export function DiscoverView() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Preload audio for upcoming songs
+  const currentSong = feed[currentIndex];
+  const nextSong = feed[currentIndex + 1];
+  const thirdSong = feed[currentIndex + 2];
+
+  // Preload audio
   const preloadSongs = useCallback(
     (startIdx: number) => {
       for (
@@ -51,25 +53,16 @@ export function DiscoverView() {
       ) {
         const song = feed[i];
         if (!song || preloadCache.current.has(song.id)) continue;
-
-        const entry: PreloadedAudio = {
-          songId: song.id,
-          audio: new Audio(),
-          ready: false,
-        };
+        const entry: PreloadedAudio = { songId: song.id, audio: new Audio() };
         preloadCache.current.set(song.id, entry);
-
         getStreamUrl(song.id, 96)
           .then((url) => {
             entry.audio.src = url;
             entry.audio.preload = 'auto';
-            entry.audio.volume = 0;
-            // Seek to 33% when metadata loads
             entry.audio.addEventListener(
               'loadedmetadata',
               () => {
                 entry.audio.currentTime = Math.floor(song.duration * 0.33);
-                entry.ready = true;
               },
               { once: true },
             );
@@ -81,54 +74,28 @@ export function DiscoverView() {
     [feed],
   );
 
-  // Trigger preload when feed or index changes
   useEffect(() => {
-    if (feed.length > 0) {
-      preloadSongs(currentIndex);
-    }
+    if (feed.length > 0) preloadSongs(currentIndex);
   }, [feed, currentIndex, preloadSongs]);
 
-  // Play current song from preload cache
-  const currentSong = feed[currentIndex];
-
+  // Play current
   useEffect(() => {
     if (!currentSong) return;
-
-    // Stop previous
     if (activeAudio.current) {
       activeAudio.current.pause();
       activeAudio.current = null;
     }
-    if (fadeTimer.current) {
-      clearTimeout(fadeTimer.current);
-    }
+    if (fadeTimer.current) clearTimeout(fadeTimer.current);
 
     const cached = preloadCache.current.get(currentSong.id);
+    const audio = cached?.audio || new Audio();
+    activeAudio.current = audio;
+    audio.volume = muted ? 0 : 0.8;
+
     if (cached) {
-      const audio = cached.audio;
-      audio.volume = muted ? 0 : 0.8;
       audio.currentTime = Math.floor(currentSong.duration * 0.33);
       audio.play().catch(() => {});
-      activeAudio.current = audio;
-
-      // Fade out after PREVIEW_DURATION seconds
-      fadeTimer.current = setTimeout(() => {
-        let vol = audio.volume;
-        const fadeInterval = setInterval(() => {
-          vol -= 0.1;
-          if (vol <= 0) {
-            clearInterval(fadeInterval);
-            audio.pause();
-          } else {
-            audio.volume = vol;
-          }
-        }, 100);
-      }, PREVIEW_DURATION * 1000);
     } else {
-      // Fallback: not preloaded yet, load now
-      const audio = new Audio();
-      activeAudio.current = audio;
-      audio.volume = muted ? 0 : 0.8;
       getStreamUrl(currentSong.id, 96)
         .then((url) => {
           audio.src = url;
@@ -136,48 +103,49 @@ export function DiscoverView() {
           audio.play().catch(() => {});
         })
         .catch(() => {});
-
-      fadeTimer.current = setTimeout(() => {
-        audio.pause();
-      }, PREVIEW_DURATION * 1000);
     }
+
+    fadeTimer.current = setTimeout(() => {
+      let vol = audio.volume;
+      const fade = setInterval(() => {
+        vol -= 0.1;
+        if (vol <= 0) {
+          clearInterval(fade);
+          audio.pause();
+        } else {
+          audio.volume = vol;
+        }
+      }, 100);
+    }, PREVIEW_DURATION * 1000);
 
     return () => {
       if (fadeTimer.current) clearTimeout(fadeTimer.current);
     };
   }, [currentSong, muted]);
 
-  // Update volume on mute toggle without restarting
   useEffect(() => {
-    if (activeAudio.current) {
-      activeAudio.current.volume = muted ? 0 : 0.8;
-    }
+    if (activeAudio.current) activeAudio.current.volume = muted ? 0 : 0.8;
   }, [muted]);
-
-  // Cleanup old preloaded audio
-  useEffect(() => {
-    return () => {
-      for (const entry of preloadCache.current.values()) {
-        entry.audio.pause();
-        entry.audio.src = '';
+  useEffect(
+    () => () => {
+      for (const e of preloadCache.current.values()) {
+        e.audio.pause();
+        e.audio.src = '';
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
-  // Handle swipe action
+  // Swipe
   const handleSwipe = useCallback(
     (action: 'like' | 'dislike') => {
       if (!currentSong) return;
       setSwipeDir(action === 'like' ? 'right' : 'left');
       swipeSong(currentSong.id, action).catch(() => {});
-
-      // Stop current audio immediately
       if (activeAudio.current) {
         activeAudio.current.pause();
         activeAudio.current = null;
       }
-
-      // Remove from cache
       const cached = preloadCache.current.get(currentSong.id);
       if (cached) {
         cached.audio.src = '';
@@ -186,19 +154,19 @@ export function DiscoverView() {
 
       setTimeout(() => {
         setSwipeDir(null);
+        setDragX(0);
         setCurrentIndex((i) => i + 1);
-        // Load more when running low
         if (currentIndex >= feed.length - 5) {
           getDiscoverFeed(20)
             .then((more) => setFeed((f) => [...f, ...more]))
             .catch(() => {});
         }
-      }, 250);
+      }, 300);
     },
     [currentSong, currentIndex, feed.length],
   );
 
-  // Touch/drag handlers
+  // Drag
   const onPointerDown = (e: React.PointerEvent) => {
     dragRef.current = {
       startX: e.clientX,
@@ -207,30 +175,21 @@ export function DiscoverView() {
     };
     cardRef.current?.setPointerCapture(e.pointerId);
   };
-
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragRef.current.dragging) return;
     dragRef.current.currentX = e.clientX;
-    const dx = dragRef.current.currentX - dragRef.current.startX;
-    if (cardRef.current) {
-      cardRef.current.style.transform = `translateX(${dx}px) rotate(${dx * 0.05}deg)`;
-      cardRef.current.style.transition = 'none';
-    }
+    setDragX(dragRef.current.currentX - dragRef.current.startX);
   };
-
   const onPointerUp = () => {
     if (!dragRef.current.dragging) return;
     dragRef.current.dragging = false;
     const dx = dragRef.current.currentX - dragRef.current.startX;
-    if (cardRef.current) {
-      cardRef.current.style.transition = 'transform 0.3s ease';
-      cardRef.current.style.transform = '';
-    }
     if (dx > 100) handleSwipe('like');
     else if (dx < -100) handleSwipe('dislike');
+    else setDragX(0);
   };
 
-  // Keyboard shortcuts
+  // Keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') handleSwipe('like');
@@ -259,10 +218,12 @@ export function DiscoverView() {
     );
   }
 
+  const swipeOpacity = Math.min(Math.abs(dragX) / 100, 1);
+
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div className="flex items-center gap-3 px-4 py-3 shrink-0">
         <Link
           href="/music"
           className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
@@ -272,33 +233,57 @@ export function DiscoverView() {
         <h1 className="font-headline text-lg font-black uppercase tracking-tight">
           Discover
         </h1>
-        <button
-          type="button"
-          onClick={() => setMuted(!muted)}
-          className="ml-auto p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
-        >
-          {muted ? (
-            <VolumeX className="w-5 h-5" />
-          ) : (
-            <Volume2 className="w-5 h-5" />
-          )}
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMuted(!muted)}
+            className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+          >
+            {muted ? (
+              <VolumeX className="w-5 h-5" />
+            ) : (
+              <Volume2 className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Card Stack */}
-      <div className="flex-1 flex items-center justify-center px-6 pb-4">
+      <div className="flex-1 flex items-center justify-center px-6 pb-6 relative">
+        {/* Third card (background) */}
+        {thirdSong && (
+          <div className="absolute w-[calc(100%-6rem)] max-w-[300px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/30 opacity-40 scale-[0.88] translate-y-4">
+            <Image src={thirdSong.image} alt="" fill className="object-cover" />
+          </div>
+        )}
+
+        {/* Second card (behind) */}
+        {nextSong && (
+          <div className="absolute w-[calc(100%-4.5rem)] max-w-[320px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/50 opacity-60 scale-[0.94] translate-y-2">
+            <Image src={nextSong.image} alt="" fill className="object-cover" />
+            <div className="absolute inset-0 bg-black/30" />
+          </div>
+        )}
+
+        {/* Current card */}
         <div
           ref={cardRef}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
-          className={`relative w-full max-w-sm aspect-[3/4] rounded-3xl overflow-hidden border-[3px] border-border shadow-xl cursor-grab active:cursor-grabbing select-none touch-none ${
-            swipeDir === 'right'
-              ? 'translate-x-[120%] rotate-12 transition-transform duration-300'
-              : swipeDir === 'left'
-                ? '-translate-x-[120%] -rotate-12 transition-transform duration-300'
-                : ''
-          }`}
+          style={{
+            transform:
+              swipeDir === 'right'
+                ? 'translateX(120%) rotate(15deg)'
+                : swipeDir === 'left'
+                  ? 'translateX(-120%) rotate(-15deg)'
+                  : `translateX(${dragX}px) rotate(${dragX * 0.06}deg)`,
+            transition:
+              swipeDir || !dragRef.current.dragging
+                ? 'transform 0.3s ease'
+                : 'none',
+          }}
+          className="relative w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-[3px] border-border shadow-2xl cursor-grab active:cursor-grabbing select-none touch-none z-10"
         >
           <Image
             src={currentSong.image}
@@ -307,47 +292,52 @@ export function DiscoverView() {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-            <h2 className="font-headline text-2xl font-black leading-tight line-clamp-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+
+          {/* Song info */}
+          <div className="absolute bottom-0 left-0 right-0 p-5">
+            <h2 className="font-headline text-xl font-black leading-tight text-white line-clamp-2">
               {currentSong.title}
             </h2>
             <p className="text-sm text-white/70 mt-1 line-clamp-1">
               {currentSong.artist}
             </p>
-            <p className="text-xs text-white/50 mt-0.5">
-              {currentSong.album} • {currentSong.year}
-            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+                {currentSong.language}
+              </span>
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+                {currentSong.year}
+              </span>
+            </div>
           </div>
-          {swipeDir === 'right' && (
-            <div className="absolute top-6 left-6 px-4 py-2 rounded-xl border-2 border-green-400 text-green-400 font-headline font-black text-xl rotate-[-15deg]">
-              LIKE
+
+          {/* Swipe indicators */}
+          {dragX > 30 && (
+            <div
+              className="absolute top-6 left-6 px-4 py-2 rounded-xl border-2 border-green-400 bg-green-400/20 text-green-400 font-headline font-black text-lg rotate-[-12deg]"
+              style={{ opacity: swipeOpacity }}
+            >
+              LIKE ♪
             </div>
           )}
-          {swipeDir === 'left' && (
-            <div className="absolute top-6 right-6 px-4 py-2 rounded-xl border-2 border-red-400 text-red-400 font-headline font-black text-xl rotate-[15deg]">
-              NOPE
+          {dragX < -30 && (
+            <div
+              className="absolute top-6 right-6 px-4 py-2 rounded-xl border-2 border-red-400 bg-red-400/20 text-red-400 font-headline font-black text-lg rotate-[12deg]"
+              style={{ opacity: swipeOpacity }}
+            >
+              SKIP
             </div>
           )}
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex items-center justify-center gap-8 pb-6">
-        <button
-          type="button"
-          onClick={() => handleSwipe('dislike')}
-          className="w-16 h-16 flex items-center justify-center rounded-full border-[3px] border-red-400 text-red-400 hover:bg-red-400/10 transition-colors active:scale-90"
-        >
-          <ThumbsDown className="w-7 h-7" />
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSwipe('like')}
-          className="w-20 h-20 flex items-center justify-center rounded-full border-[3px] border-green-400 text-green-400 hover:bg-green-400/10 transition-colors active:scale-90"
-        >
-          <Heart className="w-9 h-9" />
-        </button>
+      {/* Bottom hint */}
+      <div className="shrink-0 pb-6 flex flex-col items-center gap-1">
+        <p className="text-xs text-foreground/40 font-medium">
+          ← swipe left to skip • swipe right to like →
+        </p>
+        <p className="text-[10px] text-foreground/30">or use arrow keys</p>
       </div>
     </div>
   );
