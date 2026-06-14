@@ -275,7 +275,10 @@ export function LoginForm(
                       }
                     } catch (err: unknown) {
                       const { toast } = await import('sonner');
-                      const msg = err instanceof Error ? err.message : 'Google sign-in failed';
+                      const msg =
+                        err instanceof Error
+                          ? err.message
+                          : 'Google sign-in failed';
                       toast.error(msg);
                     }
                   } else {
