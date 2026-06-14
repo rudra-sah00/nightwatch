@@ -29,6 +29,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 
 ### Feature Details
 - [Authentication](./docs/features/AUTHENTICATION.md): Dual-factor HTTP-only cookie sessions and Anti-Bot protection.
+- [Google OAuth](./docs/features/GOOGLE_AUTH.md): Google Sign-In integration (web redirect + native iOS/Android).
 - [Livestream Framework](./docs/features/LIVESTREAM.md): RTMP ingestion, HLS transmission, and Agora RTM Live Chat loops.
 - [Livestream Clipping](./docs/features/CLIPS.md): Record live moments, FFmpeg processing, MinIO storage, public sharing, and Library page.
 - [User Profile](./docs/features/PROFILE.md): Zod validation, S3 avatar uploads, and Security mutations.
