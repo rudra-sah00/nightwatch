@@ -7,13 +7,25 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getStreamUrl } from '@/features/music/api';
 import { type DiscoverSong, getDiscoverFeed, swipeSong } from '../api';
 
+/** Preloaded audio entry. */
+interface PreloadedAudio {
+  songId: string;
+  audio: HTMLAudioElement;
+  ready: boolean;
+}
+
+const PRELOAD_AHEAD = 3; // preload next 3 songs
+const PREVIEW_DURATION = 20; // seconds
+
 export function DiscoverView() {
   const [feed, setFeed] = useState<DiscoverSong[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(false);
   const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const preloadCache = useRef<Map<string, PreloadedAudio>>(new Map());
+  const activeAudio = useRef<HTMLAudioElement | null>(null);
+  const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dragRef = useRef({ startX: 0, currentX: 0, dragging: false });
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -29,35 +41,128 @@ export function DiscoverView() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Preload audio for upcoming songs
+  const preloadSongs = useCallback(
+    (startIdx: number) => {
+      for (
+        let i = startIdx;
+        i < Math.min(startIdx + PRELOAD_AHEAD, feed.length);
+        i++
+      ) {
+        const song = feed[i];
+        if (!song || preloadCache.current.has(song.id)) continue;
+
+        const entry: PreloadedAudio = {
+          songId: song.id,
+          audio: new Audio(),
+          ready: false,
+        };
+        preloadCache.current.set(song.id, entry);
+
+        getStreamUrl(song.id, 96)
+          .then((url) => {
+            entry.audio.src = url;
+            entry.audio.preload = 'auto';
+            entry.audio.volume = 0;
+            // Seek to 33% when metadata loads
+            entry.audio.addEventListener(
+              'loadedmetadata',
+              () => {
+                entry.audio.currentTime = Math.floor(song.duration * 0.33);
+                entry.ready = true;
+              },
+              { once: true },
+            );
+            entry.audio.load();
+          })
+          .catch(() => {});
+      }
+    },
+    [feed],
+  );
+
+  // Trigger preload when feed or index changes
+  useEffect(() => {
+    if (feed.length > 0) {
+      preloadSongs(currentIndex);
+    }
+  }, [feed, currentIndex, preloadSongs]);
+
+  // Play current song from preload cache
   const currentSong = feed[currentIndex];
 
-  // Play preview audio (33% of duration, 20 seconds)
   useEffect(() => {
     if (!currentSong) return;
-    let cancelled = false;
-    const audio = new Audio();
-    audioRef.current = audio;
-    audio.volume = muted ? 0 : 0.8;
 
-    getStreamUrl(currentSong.id, 96)
-      .then((url) => {
-        if (cancelled) return;
-        audio.src = url;
-        audio.currentTime = Math.floor(currentSong.duration * 0.33);
-        audio.play().catch(() => {});
-        // Stop after 20 seconds
-        setTimeout(() => {
-          if (!cancelled) audio.pause();
-        }, 20000);
-      })
-      .catch(() => {});
+    // Stop previous
+    if (activeAudio.current) {
+      activeAudio.current.pause();
+      activeAudio.current = null;
+    }
+    if (fadeTimer.current) {
+      clearTimeout(fadeTimer.current);
+    }
+
+    const cached = preloadCache.current.get(currentSong.id);
+    if (cached) {
+      const audio = cached.audio;
+      audio.volume = muted ? 0 : 0.8;
+      audio.currentTime = Math.floor(currentSong.duration * 0.33);
+      audio.play().catch(() => {});
+      activeAudio.current = audio;
+
+      // Fade out after PREVIEW_DURATION seconds
+      fadeTimer.current = setTimeout(() => {
+        let vol = audio.volume;
+        const fadeInterval = setInterval(() => {
+          vol -= 0.1;
+          if (vol <= 0) {
+            clearInterval(fadeInterval);
+            audio.pause();
+          } else {
+            audio.volume = vol;
+          }
+        }, 100);
+      }, PREVIEW_DURATION * 1000);
+    } else {
+      // Fallback: not preloaded yet, load now
+      const audio = new Audio();
+      activeAudio.current = audio;
+      audio.volume = muted ? 0 : 0.8;
+      getStreamUrl(currentSong.id, 96)
+        .then((url) => {
+          audio.src = url;
+          audio.currentTime = Math.floor(currentSong.duration * 0.33);
+          audio.play().catch(() => {});
+        })
+        .catch(() => {});
+
+      fadeTimer.current = setTimeout(() => {
+        audio.pause();
+      }, PREVIEW_DURATION * 1000);
+    }
 
     return () => {
-      cancelled = true;
-      audio.pause();
-      audio.src = '';
+      if (fadeTimer.current) clearTimeout(fadeTimer.current);
     };
   }, [currentSong, muted]);
+
+  // Update volume on mute toggle without restarting
+  useEffect(() => {
+    if (activeAudio.current) {
+      activeAudio.current.volume = muted ? 0 : 0.8;
+    }
+  }, [muted]);
+
+  // Cleanup old preloaded audio
+  useEffect(() => {
+    return () => {
+      for (const entry of preloadCache.current.values()) {
+        entry.audio.pause();
+        entry.audio.src = '';
+      }
+    };
+  }, []);
 
   // Handle swipe action
   const handleSwipe = useCallback(
@@ -65,6 +170,19 @@ export function DiscoverView() {
       if (!currentSong) return;
       setSwipeDir(action === 'like' ? 'right' : 'left');
       swipeSong(currentSong.id, action).catch(() => {});
+
+      // Stop current audio immediately
+      if (activeAudio.current) {
+        activeAudio.current.pause();
+        activeAudio.current = null;
+      }
+
+      // Remove from cache
+      const cached = preloadCache.current.get(currentSong.id);
+      if (cached) {
+        cached.audio.src = '';
+        preloadCache.current.delete(currentSong.id);
+      }
 
       setTimeout(() => {
         setSwipeDir(null);
@@ -75,7 +193,7 @@ export function DiscoverView() {
             .then((more) => setFeed((f) => [...f, ...more]))
             .catch(() => {});
         }
-      }, 300);
+      }, 250);
     },
     [currentSong, currentIndex, feed.length],
   );
@@ -182,7 +300,6 @@ export function DiscoverView() {
                 : ''
           }`}
         >
-          {/* Background image */}
           <Image
             src={currentSong.image}
             alt={currentSong.title}
@@ -190,11 +307,7 @@ export function DiscoverView() {
             className="object-cover"
             priority
           />
-
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-          {/* Song info */}
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
             <h2 className="font-headline text-2xl font-black leading-tight line-clamp-2">
               {currentSong.title}
@@ -206,8 +319,6 @@ export function DiscoverView() {
               {currentSong.album} • {currentSong.year}
             </p>
           </div>
-
-          {/* Swipe indicators */}
           {swipeDir === 'right' && (
             <div className="absolute top-6 left-6 px-4 py-2 rounded-xl border-2 border-green-400 text-green-400 font-headline font-black text-xl rotate-[-15deg]">
               LIKE
