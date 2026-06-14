@@ -54,6 +54,23 @@ jobs:
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Write env for Next.js build
+        run: |
+          cat >> .env.production.local << EOF
+          NEXT_PUBLIC_BACKEND_URL=${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
+          NEXT_PUBLIC_AGORA_APP_ID=${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_CF_WORKER_URL=${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
+          NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+          NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+          EOF
+
       - name: Build Project Artifacts (Production)
         if: inputs.environment == 'production'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
