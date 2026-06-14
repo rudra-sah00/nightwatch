@@ -19,6 +19,7 @@ import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
+import { GoogleAccountSection } from './google-account-section';
 
 /**
  * Profile editing form with avatar upload, inline-editable display name and
@@ -354,6 +355,9 @@ export function UpdateProfileForm() {
           {t('publicIdentity.copyLink')}
         </Button>
       </section>
+
+      {/* Google Account Connection */}
+      <GoogleAccountSection />
 
       {/* Danger Zone */}
       <section className="bg-card border border-neo-red/30 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-neo-red/10">

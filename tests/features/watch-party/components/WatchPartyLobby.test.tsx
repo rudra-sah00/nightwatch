@@ -45,6 +45,8 @@ describe('WatchPartyLobby', () => {
     profilePhoto: null,
     sessionId: 'session-123',
     createdAt: new Date().toISOString(),
+    googleId: null,
+    googleEmail: null,
   };
 
   const defaultProps = {

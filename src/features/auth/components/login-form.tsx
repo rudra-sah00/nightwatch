@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
 import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
+import { GoogleSignInButton } from './google-sign-in-button';
 
 /**
  * Login form with a two-step flow rendered inside an {@link AuthCard}.
@@ -260,7 +261,7 @@ export function LoginForm(
             >
               {t('submit')}
             </Button>
-            {/* The Login form has no second 'Back' button, returning to uniform styling */}
+            <GoogleSignInButton />
           </div>
         </form>
       )}

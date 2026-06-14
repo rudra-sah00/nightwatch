@@ -31,6 +31,8 @@ describe('PublicProfilePage (Server Component)', () => {
     username: 'testuser',
     profilePhoto: 'https://example.com/photo.jpg',
     createdAt: '2024-01-01T00:00:00.000Z',
+    googleId: null,
+    googleEmail: null,
     email: 'test@example.com',
     sessionId: 'mock-session-id',
     activity: [

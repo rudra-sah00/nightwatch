@@ -5,6 +5,8 @@ export interface User {
   username: string | null;
   email: string;
   profilePhoto: string | null;
+  googleId: string | null;
+  googleEmail: string | null;
 
   sessionId: string;
   createdAt: string;

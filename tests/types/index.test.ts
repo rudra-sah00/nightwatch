@@ -17,6 +17,8 @@ describe('User Type', () => {
       profilePhoto: 'https://example.com/photo.jpg',
       sessionId: 'session-abc',
       createdAt: '2024-01-15T10:00:00Z',
+      googleId: null,
+      googleEmail: null,
     };
 
     expect(user.id).toBe('user-123');
@@ -33,6 +35,8 @@ describe('User Type', () => {
       profilePhoto: null,
       sessionId: 'session-abc',
       createdAt: '2024-01-15T10:00:00Z',
+      googleId: null,
+      googleEmail: null,
     };
 
     expect(user.username).toBeNull();
@@ -51,6 +55,8 @@ describe('LoginResponse Type', () => {
         profilePhoto: null,
         sessionId: 'session-abc',
         createdAt: '2024-01-15T10:00:00Z',
+        googleId: null,
+        googleEmail: null,
       },
       accessToken: 'access-token-123',
       refreshToken: 'refresh-token-123',

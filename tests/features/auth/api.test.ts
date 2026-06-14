@@ -149,6 +149,8 @@ describe('Auth API', () => {
           profilePhoto: null,
           sessionId: 'test-session-1',
           createdAt: new Date().toISOString(),
+          googleId: null,
+          googleEmail: null,
         },
       };
 
@@ -180,6 +182,8 @@ describe('Auth API', () => {
           profilePhoto: null,
           sessionId: 'test-session-2',
           createdAt: new Date().toISOString(),
+          googleId: null,
+          googleEmail: null,
         },
       };
 

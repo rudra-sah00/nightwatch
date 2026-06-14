@@ -57,6 +57,8 @@ const mockUser = {
   profilePhoto: null,
   sessionId: 'session-1',
   createdAt: '2025-01-01T00:00:00Z',
+  googleId: null,
+  googleEmail: null,
 };
 
 function renderAuthProvider() {

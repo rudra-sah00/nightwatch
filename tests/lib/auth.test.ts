@@ -46,6 +46,8 @@ describe('Auth Utils', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       localStorage.setItem('user', JSON.stringify(mockUser));
@@ -79,6 +81,8 @@ describe('Auth Utils', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       storeUser(mockUser);
@@ -96,6 +100,8 @@ describe('Auth Utils', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       const user2 = {
@@ -106,6 +112,8 @@ describe('Auth Utils', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-02',
+        googleId: null,
+        googleEmail: null,
       };
 
       storeUser(user1);
@@ -124,6 +132,8 @@ describe('Auth Utils', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       storeUser(mockUser);
@@ -143,6 +153,8 @@ describe('Auth Utils', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       storeUser(mockUser);
@@ -192,6 +204,8 @@ describe('Auth Utils', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       expect(() => storeUser(mockUser)).not.toThrow();

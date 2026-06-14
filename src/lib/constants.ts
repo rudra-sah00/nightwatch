@@ -5,6 +5,11 @@ export const API_ROUTES = {
     LOGOUT: '/api/auth/logout',
     REGISTER: '/api/auth/register',
     REFRESH: '/api/auth/refresh',
+    GOOGLE_LOGIN: '/api/auth/google/login',
+  },
+  GOOGLE: {
+    CONNECT: '/api/user/google/connect',
+    DISCONNECT: '/api/user/google/disconnect',
   },
 } as const;
 

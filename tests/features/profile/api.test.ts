@@ -34,6 +34,8 @@ describe('Profile API', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
@@ -53,6 +55,8 @@ describe('Profile API', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
@@ -72,6 +76,8 @@ describe('Profile API', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
@@ -97,6 +103,8 @@ describe('Profile API', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
@@ -120,6 +128,8 @@ describe('Profile API', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
@@ -143,6 +153,8 @@ describe('Profile API', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
@@ -307,6 +319,8 @@ describe('Profile API', () => {
         profilePhoto: null,
         sessionId: 'test-session',
         createdAt: '2024-01-01',
+        googleId: null,
+        googleEmail: null,
       };
 
       vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
