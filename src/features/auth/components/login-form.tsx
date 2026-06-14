@@ -9,7 +9,11 @@ import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
-import { getGoogleOAuthUrl } from '../google-api';
+import {
+  getGoogleOAuthUrl,
+  googleLogin,
+  nativeGoogleSignIn,
+} from '../google-api';
 import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
 
@@ -251,8 +255,28 @@ export function LoginForm(
                 type="button"
                 variant="neo-yellow"
                 size="xl"
-                onClick={() => {
-                  window.location.href = getGoogleOAuthUrl('login');
+                onClick={async () => {
+                  if (window.Capacitor?.isNativePlatform?.()) {
+                    try {
+                      const idToken = await nativeGoogleSignIn();
+                      const response = await googleLogin({ idToken });
+                      if (response.user) {
+                        const { storeUser } = await import('@/lib/auth');
+                        const { setTokenExpiration } = await import(
+                          '@/lib/fetch'
+                        );
+                        const { useAuthStore } = await import(
+                          '@/store/use-auth-store'
+                        );
+                        storeUser(response.user);
+                        useAuthStore.getState().setUser(response.user);
+                        if (response.expiresIn)
+                          setTokenExpiration(response.expiresIn);
+                      }
+                    } catch {}
+                  } else {
+                    window.location.href = getGoogleOAuthUrl('login');
+                  }
                 }}
                 className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter gap-2"
               >

@@ -88,6 +88,9 @@ importers:
       '@capgo/capacitor-incoming-call-kit':
         specifier: ^8.1.1
         version: 8.1.1(patch_hash=4e3b122ca87f897e4c1346451a7caa655abe4a872eb90f429b500c4e4fb9e59c)(@capacitor/core@8.3.1)
+      '@codetrix-studio/capacitor-google-auth':
+        specifier: 3.4.0-rc.4
+        version: 3.4.0-rc.4(@capacitor/core@8.3.1)
       '@marsidev/react-turnstile':
         specifier: ^1.4.1
         version: 1.4.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -712,6 +715,11 @@ packages:
     resolution: {integrity: sha512-yBqkcboSJ8D3jcSscAMZQ++1qknljoGwtsOxCGoOHFSxSnVaBWfHoiI9NTBVL5HoLz+DSEZmaDDxeSUZO8Ixug==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
+
+  '@codetrix-studio/capacitor-google-auth@3.4.0-rc.4':
+    resolution: {integrity: sha512-d548/xKrbMHHbzMYSWnlgZCLZYo2zzY7Onrh3x8ujojrb7atkNK68I6su5WgmaBt4E+R4gxBsWams4554aOFjA==}
+    peerDependencies:
+      '@capacitor/core': ^6.0.0
 
   '@csstools/color-helpers@5.1.0':
     resolution: {integrity: sha512-S11EXWJyy0Mz5SYvRmY8nJYTFFd1LCNV+7cXyAgQtOOuzb4EsgfqDufL+9esx72/eLhsRdGZwaldu/h+E4t4BA==}
@@ -7950,6 +7958,10 @@ snapshots:
       '@capacitor/core': 8.3.1
 
   '@capgo/capacitor-incoming-call-kit@8.1.1(patch_hash=4e3b122ca87f897e4c1346451a7caa655abe4a872eb90f429b500c4e4fb9e59c)(@capacitor/core@8.3.1)':
+    dependencies:
+      '@capacitor/core': 8.3.1
+
+  '@codetrix-studio/capacitor-google-auth@3.4.0-rc.4(@capacitor/core@8.3.1)':
     dependencies:
       '@capacitor/core': 8.3.1
 

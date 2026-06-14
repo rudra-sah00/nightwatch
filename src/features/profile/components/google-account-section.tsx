@@ -6,8 +6,10 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
+  connectGoogle,
   disconnectGoogle,
   getGoogleOAuthUrl,
+  nativeGoogleSignIn,
 } from '@/features/auth/google-api';
 import { invalidateProfileCache } from '@/features/profile/api';
 import { useAuth } from '@/providers/auth-provider';
@@ -19,13 +21,31 @@ export function GoogleAccountSection() {
   const t = useTranslations('profile');
   const { user, updateUser } = useAuth();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   if (!user) return null;
 
   const isConnected = !!user.googleId;
 
-  const handleConnect = () => {
-    window.location.href = getGoogleOAuthUrl('connect');
+  const handleConnect = async () => {
+    if (window.Capacitor?.isNativePlatform?.()) {
+      setIsConnecting(true);
+      try {
+        const idToken = await nativeGoogleSignIn();
+        const { user: updated } = await connectGoogle({ idToken });
+        updateUser(updated);
+        invalidateProfileCache();
+        toast.success(t('google.disconnected'));
+      } catch (err: unknown) {
+        const msg =
+          err instanceof Error ? err.message : t('google.disconnectFailed');
+        toast.error(msg);
+      } finally {
+        setIsConnecting(false);
+      }
+    } else {
+      window.location.href = getGoogleOAuthUrl('connect');
+    }
   };
 
   const handleDisconnect = async () => {
@@ -78,8 +98,12 @@ export function GoogleAccountSection() {
           variant="neo-outline"
           size="default"
           onClick={handleConnect}
+          disabled={isConnecting}
           className="w-full md:w-auto shrink-0"
         >
+          {isConnecting ? (
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          ) : null}
           {t('google.connect')}
         </Button>
       )}

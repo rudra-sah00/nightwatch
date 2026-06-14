@@ -3,8 +3,7 @@ import { apiFetch } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
 
 /**
- * Builds a Google OAuth consent URL for redirect-based flow.
- * Works on web and Capacitor WebView (iOS/Android) — no native plugin needed.
+ * Builds a Google OAuth consent URL for redirect-based flow (web/desktop).
  */
 export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
@@ -22,18 +21,35 @@ export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
 }
 
 /**
- * Login with Google — sends the auth code to the backend.
+ * Native Google Sign-In for iOS/Android via Capacitor plugin.
+ * Returns the idToken for backend verification.
+ */
+export async function nativeGoogleSignIn(): Promise<string> {
+  const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+  await GoogleAuth.initialize();
+  const result = await GoogleAuth.signIn();
+  const idToken = result.authentication?.idToken;
+  if (!idToken) throw new Error('Google sign-in failed: no idToken');
+  return idToken;
+}
+
+/**
+ * Login with Google — sends auth code (web) or idToken (native) to backend.
  */
 export async function googleLogin(
-  code: string,
+  payload: { code: string } | { idToken: string },
   options?: RequestInit,
 ): Promise<LoginResponse> {
+  const body =
+    'code' in payload
+      ? {
+          code: payload.code,
+          redirectUri: `${window.location.origin}/auth/google/callback`,
+        }
+      : { idToken: payload.idToken };
   return apiFetch<LoginResponse>(API_ROUTES.AUTH.GOOGLE_LOGIN, {
     method: 'POST',
-    body: JSON.stringify({
-      code,
-      redirectUri: `${window.location.origin}/auth/google/callback`,
-    }),
+    body: JSON.stringify(body),
     ...options,
   });
 }
@@ -42,15 +58,19 @@ export async function googleLogin(
  * Connect Google account to existing user (from profile page).
  */
 export async function connectGoogle(
-  code: string,
+  payload: { code: string } | { idToken: string },
   options?: RequestInit,
 ): Promise<{ user: User }> {
+  const body =
+    'code' in payload
+      ? {
+          code: payload.code,
+          redirectUri: `${window.location.origin}/auth/google/callback`,
+        }
+      : { idToken: payload.idToken };
   return apiFetch<{ user: User }>(API_ROUTES.GOOGLE.CONNECT, {
     method: 'POST',
-    body: JSON.stringify({
-      code,
-      redirectUri: `${window.location.origin}/auth/google/callback`,
-    }),
+    body: JSON.stringify(body),
     ...options,
   });
 }

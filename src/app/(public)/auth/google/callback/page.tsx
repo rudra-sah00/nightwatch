@@ -31,13 +31,13 @@ export default function GoogleCallbackPage() {
     const handleCallback = async () => {
       try {
         if (state === 'connect') {
-          const { user } = await connectGoogle(code);
+          const { user } = await connectGoogle({ code });
           useAuthStore.getState().updateUser(user);
           invalidateProfileCache();
           toast.success('Google account connected');
           router.replace('/profile');
         } else {
-          const response = await googleLogin(code);
+          const response = await googleLogin({ code });
           if (response.user) {
             storeUser(response.user);
             useAuthStore.getState().setUser(response.user);
