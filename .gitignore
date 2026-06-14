@@ -75,3 +75,4 @@ logs/
 # ios/
 # android/
 out/
+.vercel
