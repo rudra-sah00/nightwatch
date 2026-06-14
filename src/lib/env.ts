@@ -14,6 +14,7 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
 const agoraAppId = process.env.NEXT_PUBLIC_AGORA_APP_ID;
 const turnstileKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 if (!backendUrl || !wsUrl || !agoraAppId) {
   throw new Error(
@@ -34,4 +35,5 @@ export const env = {
   WS_URL: wsUrl,
   AGORA_APP_ID: agoraAppId,
   TURNSTILE_SITE_KEY: turnstileKey || '',
+  GOOGLE_CLIENT_ID: googleClientId || '',
 } as const;

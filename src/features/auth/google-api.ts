@@ -1,8 +1,7 @@
 import { API_ROUTES } from '@/lib/constants';
+import { env } from '@/lib/env';
 import { apiFetch } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
-
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 /**
  * Builds a Google OAuth consent URL for redirect-based flow.
@@ -11,7 +10,7 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
   const redirectUri = `${window.location.origin}/auth/google/callback`;
   const params = new URLSearchParams({
-    client_id: GOOGLE_CLIENT_ID || '',
+    client_id: env.GOOGLE_CLIENT_ID,
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'openid email profile',
