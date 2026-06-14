@@ -33,6 +33,8 @@ export async function nativeGoogleSignIn(): Promise<string> {
         '99440023345-b4aomde426cgkhb4p4dukm6ccg4jgn9p.apps.googleusercontent.com',
     },
   });
+  // Always sign out first so the account picker shows every time
+  await SocialLogin.logout({ provider: 'google' }).catch(() => {});
   const res = await SocialLogin.login({
     provider: 'google',
     options: { scopes: ['email', 'profile'] },
