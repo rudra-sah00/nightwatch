@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
+import { trackEvent } from '@/lib/analytics';
 import { useSocket } from '@/providers/socket-provider';
 import type { VideoMetadata } from '../context/types';
 import {
@@ -265,6 +266,7 @@ export function useWatchProgress({
     const video = videoRef.current;
     if (!video) return;
     const handleEnded = () => {
+      trackEvent('video_complete', { contentId: metadata?.movieId });
       flushActivity(true);
       updateProgress();
     };
@@ -274,5 +276,5 @@ export function useWatchProgress({
       flushActivity(true);
       updateProgress();
     };
-  }, [videoRef, flushActivity, updateProgress]);
+  }, [videoRef, flushActivity, updateProgress, metadata?.movieId]);
 }

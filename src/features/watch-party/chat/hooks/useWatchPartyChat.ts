@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   getPartyMessages,
@@ -131,6 +132,7 @@ export function useWatchPartyChat({
         isSystem: false,
         timestamp: optimisticMsg.timestamp,
       });
+      trackEvent('party_chat_send', { roomId: room.id });
 
       // Persist to backend
       const response = await sendPartyMessage(room.id, content);

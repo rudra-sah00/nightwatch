@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import type {
   SoundboardResponse,
@@ -159,6 +160,7 @@ export function useSoundboard({
 
       // 1. Play locally
       playSoundEffect(soundUrl);
+      trackEvent('party_soundboard', { name });
 
       // 2. Broadcast via RTM
       rtmSendMessage({

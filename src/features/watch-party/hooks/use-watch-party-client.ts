@@ -9,6 +9,7 @@ import type {
   RoomPreview,
 } from '@/features/watch-party/room/types';
 import { useDesktopApp } from '@/hooks/use-desktop-app';
+import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 
@@ -327,6 +328,7 @@ export function useWatchPartyClient({
 
   const confirmLeave = async () => {
     setShowLeaveDialog(false);
+    trackEvent('party_leave', { roomId });
     try {
       sessionStorage.removeItem('guest_token');
     } catch {}
@@ -342,6 +344,7 @@ export function useWatchPartyClient({
       await copyToClipboard(finalUrl);
       setCopied(true);
       toast.success(tp('inviteCopied'));
+      trackEvent('party_invite_copy', { roomId });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error(tp('copyFailed'));

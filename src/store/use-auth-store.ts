@@ -128,7 +128,10 @@ export const useAuthStore = create<AuthState>()(
             setTokenExpiration(response.expiresIn);
           }
           set({ user: response.user, isAuthenticated: true });
-          trackEvent('login_success', { method: 'otp' });
+          trackEvent(
+            context === 'register' ? 'signup_complete' : 'login_success',
+            { method: 'otp' },
+          );
         }
         return response;
       },

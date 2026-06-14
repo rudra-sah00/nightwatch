@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 
 /** Options for {@link useEmojiReactions}. */
@@ -28,6 +29,7 @@ export function useEmojiReactions({
   const handleTriggerEmoji = (emoji: string) => {
     if (!userId) return;
 
+    trackEvent('party_emoji_reaction', { emoji });
     rtmSendMessage?.({
       type: 'INTERACTION',
       kind: 'emoji',

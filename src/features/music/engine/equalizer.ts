@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import type { EngineContext, EqualizerBand } from './types';
 
 export function connectEqualizer(ctx: EngineContext): void {
@@ -95,6 +96,7 @@ export function setEqBands(ctx: EngineContext, bands: EqualizerBand[]): void {
   for (let i = 0; i < bands.length && i < ctx.eqFilters.length; i++) {
     ctx.eqFilters[i].gain.value = bands[i].gain;
   }
+  trackEvent('music_equalizer_change');
   try {
     localStorage.setItem('nightwatch:eq-bands', JSON.stringify(bands));
   } catch {

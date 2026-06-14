@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 import { useSocket } from '@/providers/socket-provider';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
@@ -180,6 +181,7 @@ export function useWatchPartyMembers({
       if (!room?.id) return;
       const response = await kickMember(room.id, memberId);
       if (response.success) {
+        trackEvent('party_kick', { roomId: room.id });
         toast.success(t('memberRemoved'));
         rtmSendMessage?.({
           type: 'KICK',

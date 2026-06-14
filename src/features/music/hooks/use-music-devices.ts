@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import { useSocket } from '@/providers/socket-provider';
 import type { MusicTrack } from '../api';
 
@@ -240,6 +241,7 @@ export function useMusicDevices(
     deviceId?: string,
   ) => {
     if (!socket || !currentTrack) return;
+    trackEvent('music_device_transfer');
     socket.emit(
       EVENTS.TRANSFER_PLAYBACK,
       { targetSocketId, track: currentTrack, queue: [], progress, isPlaying },

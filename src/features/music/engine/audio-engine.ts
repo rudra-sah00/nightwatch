@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import type { MusicTrack } from '../api';
 import { abortCrossfade, startCrossfade } from './crossfade';
 import {
@@ -190,6 +191,10 @@ export class AudioEngine {
 
   private handleEnded() {
     this.stopProgressTimer();
+    trackEvent('music_track_complete', {
+      trackId: this.ctx.state.currentTrack?.id,
+      title: this.ctx.state.currentTrack?.title,
+    });
     if (this.ctx.state.repeat === 'one') {
       this.ctx.audio.currentTime = 0;
       this.ctx.audio.play().catch(() => this.ctx.update({ isPlaying: false }));
@@ -436,6 +441,7 @@ export class AudioEngine {
   setCrossfadeDuration(seconds: number) {
     const val = Math.max(0, Math.min(12, seconds));
     this.ctx.update({ crossfadeDuration: val });
+    trackEvent('music_crossfade_change', { duration: val, enabled: val > 0 });
     if (val > 0) invalidatePreBuffer(this.ctx);
     try {
       localStorage.setItem('nightwatch:crossfade', String(val));

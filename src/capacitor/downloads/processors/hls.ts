@@ -3,6 +3,7 @@
  * Equivalent of electron/modules/downloads/processors/hls.js
  */
 import { Directory, Filesystem } from '@capacitor/filesystem';
+import { trackEvent } from '@/lib/analytics';
 import { downloadFile } from '../network';
 import {
   activeAbortControllers,
@@ -141,6 +142,7 @@ export async function startHlsDownload(
       speed: '',
       localPlaylistPath: `${VAULT_DIR}/${contentId}/local.m3u8`,
     });
+    trackEvent('download_complete', { content_id: contentId });
   } catch (err) {
     if (controller.signal.aborted) return;
     await updateItem(contentId, {

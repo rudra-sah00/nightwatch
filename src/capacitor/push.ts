@@ -1,3 +1,4 @@
+import { trackEvent } from '@/lib/analytics';
 import { getDeviceId } from '@/lib/device-id';
 import { apiFetch } from '@/lib/fetch';
 
@@ -82,6 +83,7 @@ export async function registerNativePush(sessionId?: string | null) {
   addListener('pushNotificationActionPerformed', (action) => {
     const url = (action as { notification?: { data?: { url?: string } } })
       .notification?.data?.url;
+    trackEvent('notification_open', { url });
     if (url) window.location.href = url;
   });
 

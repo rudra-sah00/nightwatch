@@ -3,6 +3,7 @@
  * Equivalent of electron/modules/downloads/processors/mp4.js
  */
 
+import { trackEvent } from '@/lib/analytics';
 import { downloadFile } from '../network';
 import { activeAbortControllers, updateItem, VAULT_DIR } from '../state';
 
@@ -25,6 +26,7 @@ export async function startMp4Download(
       isMp4: true,
       localPlaylistPath: filePath,
     });
+    trackEvent('download_complete', { content_id: contentId });
   } catch (err) {
     if (controller.signal.aborted) return;
     await updateItem(contentId, {

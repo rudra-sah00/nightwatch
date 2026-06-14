@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import type { PartyEvent } from '../types';
 
 interface UseWatchPartyHostSyncProps {
@@ -34,6 +35,7 @@ export function useWatchPartyHostSync({
     const handlePlay = () => {
       if (playPauseDebounce) clearTimeout(playPauseDebounce);
       playPauseDebounce = setTimeout(() => {
+        trackEvent('party_sync_play');
         onPartyEventRef.current({
           eventType: 'play',
           videoTime: videoElement.currentTime,
@@ -45,6 +47,7 @@ export function useWatchPartyHostSync({
     const handlePause = () => {
       if (playPauseDebounce) clearTimeout(playPauseDebounce);
       playPauseDebounce = setTimeout(() => {
+        trackEvent('party_sync_pause');
         onPartyEventRef.current({
           eventType: 'pause',
           videoTime: videoElement.currentTime,
@@ -60,6 +63,7 @@ export function useWatchPartyHostSync({
 
       if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
       syncDebounceTimer = setTimeout(() => {
+        trackEvent('party_sync_seek');
         onPartyEventRef.current({
           eventType: 'seek',
           videoTime: videoElement.currentTime,

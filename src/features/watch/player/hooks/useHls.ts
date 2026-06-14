@@ -363,6 +363,12 @@ export function useHls({
         hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
           const level = hls.levels[data.level];
           if (level) {
+            import('@/lib/analytics').then(({ trackEvent }) =>
+              trackEvent('video_quality_switch', {
+                height: level.height,
+                auto: hls.autoLevelEnabled,
+              }),
+            );
             dispatch({
               type: 'SET_CURRENT_QUALITY',
               quality: `${level.height}p`,
@@ -464,8 +470,15 @@ export function useHls({
                 hls.recoverMediaError();
                 break;
               default:
-                import('@/lib/analytics').then(({ reportError }) =>
-                  reportError(`[HLS Fatal] ${data.type}: ${data.details}`),
+                import('@/lib/analytics').then(
+                  ({ reportError, trackEvent }) => {
+                    reportError(`[HLS Fatal] ${data.type}: ${data.details}`);
+                    trackEvent('video_error', {
+                      type: data.type,
+                      details: data.details,
+                      fatal: true,
+                    });
+                  },
                 );
                 dispatch({
                   type: 'SET_ERROR',
