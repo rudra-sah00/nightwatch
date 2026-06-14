@@ -208,6 +208,7 @@
     "connect": "Connect",
     "disconnect": "Disconnect",
     "disconnected": "Google account disconnected",
-    "disconnectFailed": "Failed to disconnect Google account"
+    "disconnectFailed": "Failed to disconnect Google account",
+    "connected": "Google account connected"
   }
 }

@@ -35,7 +35,7 @@ export function GoogleAccountSection() {
         const { user: updated } = await connectGoogle({ idToken });
         updateUser(updated);
         invalidateProfileCache();
-        toast.success(t('google.disconnected'));
+        toast.success(t('google.connected'));
       } catch (err: unknown) {
         const msg =
           err instanceof Error ? err.message : t('google.disconnectFailed');
