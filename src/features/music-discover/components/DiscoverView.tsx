@@ -201,8 +201,26 @@ export function DiscoverView() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-neo-yellow border-t-transparent rounded-full animate-spin" />
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
+        <div className="flex items-center gap-3 px-4 py-3 shrink-0">
+          <div className="w-9 h-9 rounded-full bg-muted animate-pulse" />
+          <div className="h-5 w-24 rounded bg-muted animate-pulse" />
+        </div>
+        <div className="flex-1 flex items-center justify-center px-6 pb-6 relative">
+          <div className="absolute w-[calc(100%-6rem)] max-w-[300px] aspect-[3/4] rounded-3xl bg-muted/40 animate-pulse scale-[0.88] translate-y-4" />
+          <div className="absolute w-[calc(100%-4.5rem)] max-w-[320px] aspect-[3/4] rounded-3xl bg-muted/60 animate-pulse scale-[0.94] translate-y-2" />
+          <div className="relative w-full max-w-[340px] aspect-[3/4] rounded-3xl bg-muted animate-pulse z-10 flex flex-col justify-end p-5 gap-2">
+            <div className="h-6 w-3/4 rounded bg-muted-foreground/10" />
+            <div className="h-4 w-1/2 rounded bg-muted-foreground/10" />
+            <div className="flex gap-2 mt-1">
+              <div className="h-5 w-14 rounded-full bg-muted-foreground/10" />
+              <div className="h-5 w-10 rounded-full bg-muted-foreground/10" />
+            </div>
+          </div>
+        </div>
+        <div className="shrink-0 pb-6 flex flex-col items-center gap-1">
+          <div className="h-3 w-48 rounded bg-muted animate-pulse" />
+        </div>
       </div>
     );
   }
