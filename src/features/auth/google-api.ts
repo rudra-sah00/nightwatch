@@ -25,10 +25,20 @@ export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
  * Returns the idToken for backend verification.
  */
 export async function nativeGoogleSignIn(): Promise<string> {
-  const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
-  await GoogleAuth.initialize();
-  const result = await GoogleAuth.signIn();
-  const idToken = result.authentication?.idToken;
+  const { SocialLogin } = await import('@capgo/capacitor-social-login');
+  await SocialLogin.initialize({
+    google: {
+      webClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+      iOSClientId:
+        '99440023345-b4aomde426cgkhb4p4dukm6ccg4jgn9p.apps.googleusercontent.com',
+    },
+  });
+  const res = await SocialLogin.login({
+    provider: 'google',
+    options: { scopes: ['email', 'profile'] },
+  });
+  const result = res.result as { idToken?: string };
+  const idToken = result?.idToken;
   if (!idToken) throw new Error('Google sign-in failed: no idToken');
   return idToken;
 }

@@ -59,5 +59,8 @@ project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/.p
 include ':capgo-capacitor-incoming-call-kit'
 project(':capgo-capacitor-incoming-call-kit').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit/android')
 
+include ':capgo-capacitor-social-login'
+project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-social-login@8.3.22_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-social-login/android')
+
 include ':ottimis-capacitor-volumes'
 project(':ottimis-capacitor-volumes').projectDir = new File('../node_modules/.pnpm/@ottimis+capacitor-volumes@7.0.0_patch_hash=20cf109379666ad07d8aa3339c13738362e67c67581_c9519b3a286eb6032157adacd1b05239/node_modules/@ottimis/capacitor-volumes/android')

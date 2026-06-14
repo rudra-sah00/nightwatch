@@ -17,14 +17,6 @@ const config: CapacitorConfig = {
     allowNavigation: ['nightwatch.in', '*.nightwatch.in', 'localhost:*', '*'],
   },
   plugins: {
-    GoogleAuth: {
-      scopes: ['profile', 'email'],
-      serverClientId:
-        '99440023345-oojcjkc66bksspt27f1adpbq5lh02pg0.apps.googleusercontent.com',
-      iosClientId:
-        '99440023345-b4aomde426cgkhb4p4dukm6ccg4jgn9p.apps.googleusercontent.com',
-      forceCodeForRefreshToken: false,
-    },
     Keyboard: {
       resize: KeyboardResize.None,
     },

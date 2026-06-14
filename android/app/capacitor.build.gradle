@@ -28,6 +28,7 @@ dependencies {
     implementation project(':capacitor-status-bar')
     implementation project(':capawesome-capacitor-badge')
     implementation project(':capgo-capacitor-incoming-call-kit')
+    implementation project(':capgo-capacitor-social-login')
     implementation project(':ottimis-capacitor-volumes')
 
 }

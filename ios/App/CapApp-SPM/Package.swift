@@ -29,7 +29,8 @@ let package = Package(
         .package(name: "CapacitorSplashScreen", path: "../../../node_modules/.pnpm/@capacitor+splash-screen@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/splash-screen"),
         .package(name: "CapacitorStatusBar", path: "../../../node_modules/.pnpm/@capacitor+status-bar@8.0.2_@capacitor+core@8.3.1/node_modules/@capacitor/status-bar"),
         .package(name: "CapawesomeCapacitorBadge", path: "../../../node_modules/.pnpm/@capawesome+capacitor-badge@8.0.2_@capacitor+core@8.3.1/node_modules/@capawesome/capacitor-badge"),
-        .package(name: "CapgoCapacitorIncomingCallKit", path: "../../../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit")
+        .package(name: "CapgoCapacitorIncomingCallKit", path: "../../../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit"),
+        .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/.pnpm/@capgo+capacitor-social-login@8.3.22_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-social-login")
     ],
     targets: [
         .target(
@@ -54,7 +55,8 @@ let package = Package(
                 .product(name: "CapacitorSplashScreen", package: "CapacitorSplashScreen"),
                 .product(name: "CapacitorStatusBar", package: "CapacitorStatusBar"),
                 .product(name: "CapawesomeCapacitorBadge", package: "CapawesomeCapacitorBadge"),
-                .product(name: "CapgoCapacitorIncomingCallKit", package: "CapgoCapacitorIncomingCallKit")
+                .product(name: "CapgoCapacitorIncomingCallKit", package: "CapgoCapacitorIncomingCallKit"),
+                .product(name: "CapgoCapacitorSocialLogin", package: "CapgoCapacitorSocialLogin")
             ]
         )
     ]
