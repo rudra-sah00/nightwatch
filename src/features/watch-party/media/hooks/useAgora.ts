@@ -10,7 +10,7 @@ import type {
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { reportError, trackEvent } from '@/lib/analytics';
+import { crashLog, reportError, trackEvent } from '@/lib/analytics';
 
 /**
  * Agora SDK configuration and global handlers.
@@ -683,6 +683,7 @@ export function useAgora({
       });
 
       try {
+        crashLog(`Agora joining: ${channel}`);
         await client.join(appId, channel, token, uid);
         if (cleaned) return;
         setIsClientReady(true);

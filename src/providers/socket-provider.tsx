@@ -11,6 +11,7 @@ import {
   useState,
 } from 'react';
 import type { Socket } from 'socket.io-client';
+import { crashLog, reportError } from '@/lib/analytics';
 import {
   disconnectSocket,
   getSocket,
@@ -54,7 +55,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
 
     const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => setIsConnected(false);
+    const onDisconnect = (reason: string) => {
+      setIsConnected(false);
+      crashLog(`Socket disconnected: ${reason}`);
+      if (reason === 'transport error' || reason === 'transport close') {
+        reportError(`Socket transport failure: ${reason}`);
+      }
+    };
+    const onConnectError = (err: Error) => {
+      crashLog(`Socket connect_error: ${err.message}`);
+      reportError(`Socket connect_error: ${err.message}`);
+    };
 
     // If already connected (e.g. fast reconnect), set immediately
     if (socket.connected) {
@@ -63,10 +74,12 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
+    socket.on('connect_error', onConnectError);
 
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
+      socket.off('connect_error', onConnectError);
     };
   }, [socket]);
 

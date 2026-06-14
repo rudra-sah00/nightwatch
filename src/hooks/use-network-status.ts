@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { setCrashNetworkState } from '@/lib/crash-context';
 
 /**
  * Tracks the browser's online/offline connectivity state.
@@ -20,8 +21,16 @@ export function useNetworkStatus() {
     setMounted(true);
     setIsOffline(!window.navigator.onLine);
 
-    const handleOffline = () => setIsOffline(true);
-    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => {
+      setIsOffline(true);
+      setCrashNetworkState('offline');
+    };
+    const handleOnline = () => {
+      setIsOffline(false);
+      setCrashNetworkState('online');
+    };
+
+    setCrashNetworkState(window.navigator.onLine ? 'online' : 'offline');
 
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);

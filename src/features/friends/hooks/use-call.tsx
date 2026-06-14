@@ -16,7 +16,7 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { trackEvent } from '@/lib/analytics';
+import { crashLog, reportError, trackEvent } from '@/lib/analytics';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import {
@@ -270,7 +270,11 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
           await connectAgora(channel, data.token, data.appId, data.uid);
         }
       } catch (err) {
-        if (err instanceof Error) toast.error(err.message);
+        crashLog('Voice call Agora join failed');
+        if (err instanceof Error) {
+          reportError(`Voice call failed: ${err.message}`);
+          toast.error(err.message);
+        }
         cleanup();
       }
     },

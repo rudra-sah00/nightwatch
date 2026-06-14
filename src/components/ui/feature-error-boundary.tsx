@@ -35,6 +35,9 @@ export class FeatureErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error(`[${this.props.feature}]`, error, info.componentStack);
+    import('@/lib/crash-context').then(({ setCrashFeature }) =>
+      setCrashFeature(this.props.feature),
+    );
     import('@/lib/analytics')
       .then(({ reportError }) => {
         reportError(

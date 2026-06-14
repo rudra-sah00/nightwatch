@@ -3,7 +3,7 @@
  * Equivalent of electron/modules/downloads/processors/hls.js
  */
 import { Directory, Filesystem } from '@capacitor/filesystem';
-import { trackEvent } from '@/lib/analytics';
+import { crashLog, reportError, trackEvent } from '@/lib/analytics';
 import { downloadFile } from '../network';
 import {
   activeAbortControllers,
@@ -145,9 +145,12 @@ export async function startHlsDownload(
     trackEvent('download_complete', { content_id: contentId });
   } catch (err) {
     if (controller.signal.aborted) return;
+    const msg = err instanceof Error ? err.message : 'Download failed';
+    crashLog(`HLS download failed: ${contentId}`);
+    reportError(`Download failure [HLS]: ${msg}`);
     await updateItem(contentId, {
       status: 'FAILED',
-      error: err instanceof Error ? err.message : 'Download failed',
+      error: msg,
       speed: '',
     });
   } finally {

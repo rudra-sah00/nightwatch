@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { trackScreen } from '@/lib/analytics';
+import { setCrashScreen } from '@/lib/crash-context';
 
 /**
  * Maps pathnames to readable screen names for Firebase Analytics.
@@ -57,7 +58,9 @@ export function ScreenTracker() {
   useEffect(() => {
     if (!pathname || pathname === lastPath.current) return;
     lastPath.current = pathname;
-    trackScreen(pathToScreenName(pathname));
+    const screen = pathToScreenName(pathname);
+    trackScreen(screen);
+    setCrashScreen(screen);
   }, [pathname]);
 
   return null;

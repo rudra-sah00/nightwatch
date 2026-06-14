@@ -9,6 +9,7 @@ interface FirebaseCrashlyticsPlugin {
   log(options: { message: string }): Promise<void>;
   setUserId(options: { userId: string }): Promise<void>;
   setEnabled(options: { enabled: boolean }): Promise<void>;
+  setCustomKey(options: { key: string; value: string }): Promise<void>;
   recordException(options: {
     message: string;
     stacktrace?: string;
@@ -48,6 +49,12 @@ function getAnalyticsPlugin(): FirebaseAnalyticsPlugin | null {
 export function setCrashlyticsUserId(userId: string) {
   getCrashlyticsPlugin()
     ?.setUserId({ userId })
+    .catch(() => {});
+}
+
+export function setCrashlyticsCustomKey(key: string, value: string) {
+  getCrashlyticsPlugin()
+    ?.setCustomKey({ key, value })
     .catch(() => {});
 }
 

@@ -3,7 +3,7 @@
  * Equivalent of electron/modules/downloads/processors/mp4.js
  */
 
-import { trackEvent } from '@/lib/analytics';
+import { crashLog, reportError, trackEvent } from '@/lib/analytics';
 import { downloadFile } from '../network';
 import { activeAbortControllers, updateItem, VAULT_DIR } from '../state';
 
@@ -29,6 +29,9 @@ export async function startMp4Download(
     trackEvent('download_complete', { content_id: contentId });
   } catch (err) {
     if (controller.signal.aborted) return;
+    const msg = err instanceof Error ? err.message : 'Download failed';
+    crashLog(`MP4 download failed: ${contentId}`);
+    reportError(`Download failure [MP4]: ${msg}`);
     await updateItem(contentId, {
       status: 'FAILED',
       error: err instanceof Error ? err.message : 'Download failed',

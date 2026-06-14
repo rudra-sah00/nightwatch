@@ -1,4 +1,4 @@
-import { trackEvent } from '@/lib/analytics';
+import { crashLog, reportError, trackEvent } from '@/lib/analytics';
 import type { MusicTrack } from '../api';
 import { getSongRecommendations, getStreamUrl } from '../api';
 import type { EngineContext } from './types';
@@ -90,6 +90,7 @@ export async function playTrack(
   } catch {
     if (ctx.playId !== myPlayId) return;
     // Retry once
+    crashLog(`Music playback failed, retrying: ${track.id}`);
     try {
       await new Promise((r) => setTimeout(r, 1000));
       if (ctx.playId !== myPlayId) return;
@@ -101,7 +102,10 @@ export async function playTrack(
       if (ctx.playId !== myPlayId) return;
       ctx.update({ isPlaying: true });
     } catch {
-      if (ctx.playId === myPlayId) ctx.update({ isPlaying: false });
+      if (ctx.playId === myPlayId) {
+        reportError(`Music playback failed: ${track.id}`);
+        ctx.update({ isPlaying: false });
+      }
     }
   }
 }
