@@ -2,14 +2,16 @@ import { API_ROUTES } from '@/lib/constants';
 import { apiFetch } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
 
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+const GOOGLE_IOS_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '';
+
 /**
  * Builds a Google OAuth consent URL for redirect-based flow (web/desktop).
  */
 export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
   const redirectUri = `${window.location.origin}/auth/google/callback`;
   const params = new URLSearchParams({
-    client_id: clientId,
+    client_id: GOOGLE_CLIENT_ID,
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'openid email profile',
@@ -28,8 +30,8 @@ export async function nativeGoogleSignIn(): Promise<string> {
   const { SocialLogin } = await import('@capgo/capacitor-social-login');
   await SocialLogin.initialize({
     google: {
-      webClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-      iOSClientId: process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '',
+      webClientId: GOOGLE_CLIENT_ID,
+      iOSClientId: GOOGLE_IOS_CLIENT_ID,
     },
   });
   // Always sign out first so the account picker shows every time
