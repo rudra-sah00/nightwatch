@@ -28,8 +28,10 @@ export async function nativeGoogleSignIn(): Promise<string> {
   const { SocialLogin } = await import('@capgo/capacitor-social-login');
   await SocialLogin.initialize({
     google: {
-      webClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-      iOSClientId: process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '',
+      webClientId:
+        '99440023345-oojcjkc66bksspt27f1adpbq5lh02pg0.apps.googleusercontent.com',
+      iOSClientId:
+        '99440023345-b4aomde426cgkhb4p4dukm6ccg4jgn9p.apps.googleusercontent.com',
     },
   });
   // Always sign out first so the account picker shows every time
