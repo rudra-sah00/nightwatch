@@ -275,11 +275,11 @@ export function LoginForm(
                       }
                     } catch (err: unknown) {
                       const { toast } = await import('sonner');
-                      const msg =
-                        err instanceof Error
-                          ? err.message
-                          : 'Google sign-in failed';
-                      toast.error(msg);
+                      const e = err as { message?: string };
+                      toast.error(
+                        e?.message ||
+                          'No account linked to this Google account',
+                      );
                     }
                   } else {
                     window.location.href = getGoogleOAuthUrl('login');
