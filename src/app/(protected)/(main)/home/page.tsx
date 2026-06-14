@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { ExploreHome } from '@/features/search/components/ExploreHome';
 import { HomeClient } from '@/features/search/components/HomeClient';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -11,5 +12,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  return <HomeClient />;
+  return (
+    <>
+      <HomeClient />
+      <ExploreHome />
+    </>
+  );
 }
