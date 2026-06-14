@@ -1,7 +1,6 @@
 'use client';
 
-import { Compass, Globe, Plus, Search } from 'lucide-react';
-import Link from 'next/link';
+import { Globe, Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 /**
@@ -55,13 +54,6 @@ export function MusicHeader({
         </span>
       </button>
       <div className="flex items-center gap-2 shrink-0">
-        <Link
-          href="/music/discover"
-          className="h-10 px-4 flex items-center gap-1.5 rounded-full bg-neo-yellow border-[2px] border-border hover:brightness-110 transition-all font-headline font-bold text-[10px] uppercase tracking-wider text-black"
-        >
-          <Compass className="w-4 h-4" />
-          <span className="hidden sm:inline">{t('explore')}</span>
-        </Link>
         <button
           type="button"
           onClick={onOpenLangPicker}
