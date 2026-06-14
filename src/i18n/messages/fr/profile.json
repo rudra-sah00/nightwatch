@@ -200,5 +200,14 @@
     "minutesAgo": "{count}m ago",
     "hoursAgo": "{count}h ago",
     "daysAgo": "{count}d ago"
+  },
+  "google": {
+    "title": "Google Account",
+    "description": "Connect your Google account to sign in faster",
+    "connectedAs": "Connected as {email}",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "disconnected": "Google account disconnected",
+    "disconnectFailed": "Failed to disconnect Google account"
   }
 }
