@@ -177,14 +177,14 @@ import postgres from 'postgres';
 import { randomUUID } from 'node:crypto';
 
 // Dev DB
-const dev = postgres('postgresql://neondb_owner:npg_n04ZmXzGbCkU@ep-snowy-band-aoq9n9uw-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require');
+const dev = postgres(process.env.DEV_DATABASE_URL);
 await dev\`INSERT INTO games (id, slug, title, description, active, sort_order)
 VALUES (\${randomUUID()}, '{slug}', '{Title}', '{description}', true, {N})
 ON CONFLICT (slug) DO NOTHING\`;
 await dev.end();
 
 // Prod DB
-const prod = postgres('postgresql://neondb_owner:npg_n04ZmXzGbCkU@ep-gentle-feather-aoq3aww6-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require');
+const prod = postgres(process.env.PROD_DATABASE_URL);
 await prod\`INSERT INTO games (id, slug, title, description, active, sort_order)
 VALUES (\${randomUUID()}, '{slug}', '{Title}', '{description}', true, {N})
 ON CONFLICT (slug) DO NOTHING\`;
