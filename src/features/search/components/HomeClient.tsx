@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { useSearchInput } from '@/features/search/hooks/use-search-input';
 
 /**
@@ -22,6 +23,14 @@ export function HomeClient() {
     handleSearch,
     handleManualSearch,
   } = useSearchInput();
+
+  const [exploreOn, setExploreOn] = useState(false);
+
+  useEffect(() => {
+    setExploreOn(localStorage.getItem('nightwatch:exploreOnHome') === 'true');
+  }, []);
+
+  if (exploreOn) return null;
 
   return (
     <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 relative h-[calc(100dvh-120px)] min-h-[600px] w-full overflow-hidden">

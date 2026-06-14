@@ -29,6 +29,24 @@ interface ExploreData {
   sections: ExploreSection[];
 }
 
+/**
+ * Strips emoji characters from section titles.
+ * Keeps letters, numbers, whitespace, and basic punctuation.
+ */
+function stripEmojis(text: string): string {
+  const cleaned: string[] = [];
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    // Skip known emoji/symbol ranges
+    if (code >= 0x2600 && code <= 0x27ff) continue;
+    if (code >= 0xfe00 && code <= 0xfeff) continue;
+    if (code >= 0x1f000 && code <= 0x1ffff) continue;
+    if (code >= 0xe0000 && code <= 0xe007f) continue;
+    cleaned.push(char);
+  }
+  return cleaned.join('').trim();
+}
+
 export function ExploreHome() {
   const [data, setData] = useState<ExploreData | null>(null);
   const [enabled, setEnabled] = useState(false);
@@ -40,10 +58,18 @@ export function ExploreHome() {
 
   useEffect(() => {
     if (!enabled) return;
+
     fetch('/api/video/explore/home', { credentials: 'include' })
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => {});
+      .then((response) => {
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then((result) => {
+        if (result) setData(result);
+      })
+      .catch(() => {
+        // Silently fail — explore is non-critical
+      });
   }, [enabled]);
 
   if (!enabled || !data?.sections?.length) return null;
@@ -53,7 +79,7 @@ export function ExploreHome() {
       {data.sections.slice(0, 8).map((section) => (
         <section key={section.title}>
           <h2 className="font-headline font-black text-xl uppercase tracking-tight text-foreground mb-4">
-            {section.title}
+            {stripEmojis(section.title)}
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {section.items.map((item) => (
