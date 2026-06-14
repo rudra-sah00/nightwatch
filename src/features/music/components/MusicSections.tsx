@@ -61,6 +61,13 @@ export interface MusicSectionsData {
   trendingSongs: TrendingItem[];
   genres: GenreItem[];
   podcasts: PodcastItem[];
+  forYou?: {
+    id: string;
+    title: string;
+    artist: string;
+    image: string;
+    duration: number;
+  }[];
 }
 
 /**
@@ -105,6 +112,7 @@ export function MusicSections({
     trendingSongs,
     genres,
     podcasts,
+    forYou,
   } = data;
 
   /** Play a single song by ID. */
@@ -162,6 +170,23 @@ export function MusicSections({
 
   return (
     <>
+      {/* For You — personalized from swipe history */}
+      {forYou && forYou.length > 0 && (
+        <Section title={t('forYou')}>
+          <ScrollRow>
+            {forYou.map((s) => (
+              <Card
+                key={s.id}
+                image={s.image}
+                title={s.title}
+                subtitle={s.artist}
+                onClick={() => playSong(s.id)}
+              />
+            ))}
+          </ScrollRow>
+        </Section>
+      )}
+
       {/* User Playlists */}
       <UserPlaylists key={playlistKey} />
 

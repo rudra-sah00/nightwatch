@@ -143,6 +143,13 @@ interface MusicHomeData {
     subtitle: string;
   }[];
   radio: { id: string; title: string; image: string; language: string }[];
+  forYou?: {
+    id: string;
+    title: string;
+    artist: string;
+    image: string;
+    duration: number;
+  }[];
 }
 
 // Client-side cache for music home data (10 min TTL).

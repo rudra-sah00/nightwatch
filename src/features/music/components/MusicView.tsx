@@ -45,6 +45,7 @@ export function MusicView() {
     trendingSongs: [],
     genres: [],
     podcasts: [],
+    forYou: [],
   });
   const [showSearch, setShowSearch] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
@@ -82,6 +83,7 @@ export function MusicView() {
           trendingSongs: trending,
           genres: browse.genres,
           podcasts,
+          forYou: home.forYou || [],
         });
       })
       .catch(() => {})
