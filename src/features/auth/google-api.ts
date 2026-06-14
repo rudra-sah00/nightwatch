@@ -1,5 +1,4 @@
 import { API_ROUTES } from '@/lib/constants';
-import { env } from '@/lib/env';
 import { apiFetch } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
 
@@ -8,9 +7,10 @@ import type { LoginResponse, User } from '@/types';
  * Works on web and Capacitor WebView (iOS/Android) — no native plugin needed.
  */
 export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
   const redirectUri = `${window.location.origin}/auth/google/callback`;
   const params = new URLSearchParams({
-    client_id: env.GOOGLE_CLIENT_ID,
+    client_id: clientId,
     redirect_uri: redirectUri,
     response_type: 'code',
     scope: 'openid email profile',
