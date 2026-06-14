@@ -29,8 +29,7 @@ export async function nativeGoogleSignIn(): Promise<string> {
   await SocialLogin.initialize({
     google: {
       webClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-      iOSClientId:
-        '99440023345-b4aomde426cgkhb4p4dukm6ccg4jgn9p.apps.googleusercontent.com',
+      iOSClientId: process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '',
     },
   });
   // Always sign out first so the account picker shows every time
