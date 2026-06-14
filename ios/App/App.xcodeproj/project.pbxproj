@@ -20,6 +20,7 @@
 		C1D2E3F50000000000000006 /* NWAudioSessionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F40000000000000005 /* NWAudioSessionPlugin.swift */; };
 		D1E2F4060000000000000008 /* NWPipPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F4050000000000000007 /* NWPipPlugin.swift */; };
 		E1F20507000000000000000A /* NWCallKitPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1F205060000000000000009 /* NWCallKitPlugin.swift */; };
+		9A0000000000000000000002 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9A0000000000000000000001 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		C1D2E3F40000000000000005 /* NWAudioSessionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWAudioSessionPlugin.swift; sourceTree = "<group>"; };
 		D1E2F4050000000000000007 /* NWPipPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWPipPlugin.swift; sourceTree = "<group>"; };
 		E1F205060000000000000009 /* NWCallKitPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWCallKitPlugin.swift; sourceTree = "<group>"; };
+		9A0000000000000000000001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				9A0000000000000000000001 /* GoogleService-Info.plist */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				C1D2E3F40000000000000005 /* NWAudioSessionPlugin.swift */,
@@ -155,6 +158,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9A0000000000000000000002 /* GoogleService-Info.plist in Resources */,
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,

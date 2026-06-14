@@ -273,7 +273,11 @@ export function LoginForm(
                         if (response.expiresIn)
                           setTokenExpiration(response.expiresIn);
                       }
-                    } catch {}
+                    } catch (err: unknown) {
+                      const { toast } = await import('sonner');
+                      const msg = err instanceof Error ? err.message : 'Google sign-in failed';
+                      toast.error(msg);
+                    }
                   } else {
                     window.location.href = getGoogleOAuthUrl('login');
                   }

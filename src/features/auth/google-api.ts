@@ -22,7 +22,7 @@ export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
 
 /**
  * Native Google Sign-In for iOS/Android via Capacitor plugin.
- * Returns the idToken for backend verification.
+ * Returns the accessToken for backend verification.
  */
 export async function nativeGoogleSignIn(): Promise<string> {
   const { SocialLogin } = await import('@capgo/capacitor-social-login');
@@ -37,10 +37,13 @@ export async function nativeGoogleSignIn(): Promise<string> {
     provider: 'google',
     options: { scopes: ['email', 'profile'] },
   });
-  const result = res.result as { idToken?: string };
-  const idToken = result?.idToken;
-  if (!idToken) throw new Error('Google sign-in failed: no idToken');
-  return idToken;
+  const result = res.result as {
+    accessToken?: { token?: string };
+    idToken?: string;
+  };
+  const token = result?.idToken;
+  if (!token) throw new Error('Google sign-in failed');
+  return token;
 }
 
 /**
