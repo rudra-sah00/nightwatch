@@ -3,7 +3,6 @@
 import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import { type DiscoverSong, getDiscoverFeed, swipeSong } from '../api';
 import { useDiscoverPreview } from '../hooks/use-discover-preview';
@@ -68,7 +67,6 @@ export function DiscoverView() {
       undoTimer.current = null;
     }
     hapticLight();
-    toast.dismiss('swipe-feedback');
   }, []);
 
   // Swipe
@@ -102,18 +100,13 @@ export function DiscoverView() {
         setCanUndo(false);
       }, UNDO_WINDOW);
 
-      if (action === 'like') {
-        toast('Added to your taste ♪', {
-          id: 'swipe-feedback',
-          duration: UNDO_WINDOW,
-          action: { label: 'Undo', onClick: handleUndo },
-        });
-      }
-
       setTimeout(() => {
-        setSwipeDir(null);
-        setDragX(0);
+        // Increment index first, THEN clear swipeDir in next tick
         setCurrentIndex((i) => i + 1);
+        requestAnimationFrame(() => {
+          setSwipeDir(null);
+          setDragX(0);
+        });
         if (currentIndex >= feed.length - 5) {
           swipePromise.then(() =>
             getDiscoverFeed(20)
@@ -137,7 +130,6 @@ export function DiscoverView() {
       currentIndex,
       feed.length,
       handleFirstInteraction,
-      handleUndo,
       stopCurrent,
       cleanupSong,
     ],
@@ -274,6 +266,7 @@ export function DiscoverView() {
           animating={!!swipeDir}
         />
         <DiscoverCard
+          key={currentSong.id}
           song={currentSong}
           dragX={dragX}
           swipeDir={swipeDir}
