@@ -167,7 +167,7 @@ export function MusicView() {
       {showExplore && (
         <Link
           href="/music/discover"
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 h-12 px-4 sm:px-6 flex items-center gap-2 rounded-full bg-neo-yellow border-[3px] border-black shadow-lg hover:scale-105 active:scale-95 transition-transform"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 h-12 px-4 sm:px-6 flex items-center gap-2 rounded-full bg-neo-yellow border-[3px] border-black shadow-lg hover:scale-105 active:scale-95 transition-transform"
         >
           <Compass className="w-5 h-5 text-black" />
           <span className="hidden sm:block font-headline font-black text-sm uppercase tracking-wider text-black">
