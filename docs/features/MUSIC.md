@@ -402,6 +402,143 @@ All music data is sourced from JioSaavn's internal web API (`https://www.jiosaav
 | `reco.getreco` | `getSongRecommendations()` | Similar songs for a given song ID |
 | `reco.getAlbumReco` | `getAlbumRecommendations()` | Similar albums for a given album ID |
 
+## Discover / Explore Songs (Swipe-Based Recommendation Engine)
+
+A Tinder-style song discovery system where users swipe right (like) or left (skip) on song cards. The backend builds personalized feeds using JioSaavn's radio/recommendation APIs, seeded from the user's like history.
+
+### Frontend Structure
+
+```
+src/features/music-discover/
+├── api.ts                          # API functions (feed, swipe, listen, liked)
+├── hooks/
+│   └── use-discover-preview.ts     # Audio preview (preload, play, fade, pause/resume)
+└── components/
+    ├── DiscoverView.tsx            # Orchestrator (state, swipe logic, keyboard shortcuts)
+    ├── DiscoverCard.tsx            # Current song card (image, info, swipe indicators, attribution)
+    ├── DiscoverCardStack.tsx       # Background cards (2nd & 3rd in stack)
+    └── DiscoverActions.tsx         # 5 action buttons (dislike, undo, pause, playlist, like)
+```
+
+### UI Components
+
+| Component | Responsibility |
+|-----------|---------------|
+| `DiscoverView` | State management, swipe logic, drag handlers, keyboard shortcuts, feed pagination |
+| `DiscoverCard` | Visual card with song image, title, artist, language, year, seed attribution, swipe overlay |
+| `DiscoverCardStack` | Stacked background cards with depth animation |
+| `DiscoverActions` | 5 buttons: ✕ skip, ↺ undo, ⏸ pause/play, ＋ add-to-playlist, ♥ like |
+
+### Action Buttons
+
+| Button | Icon | Action | Haptic |
+|--------|------|--------|--------|
+| Skip | ✕ (red) | Swipe left / dislike | `hapticMedium` |
+| Undo | ↺ | Revert last swipe (5s window) | `hapticLight` |
+| Pause/Play | ⏸/▶ | Toggle audio preview | — |
+| Add to Playlist | ＋ | Open playlist picker, add current song | `hapticLight` |
+| Like | ♥ (green) | Swipe right / like | `hapticSuccess` |
+
+### Audio Preview
+
+- Preloads next 3 songs in the feed (`PRELOAD_AHEAD = 3`)
+- Starts playback from 33% into the song duration
+- 20-second preview with gradual fade-out in the last 2 seconds
+- Audio unlocked on first user interaction (autoplay policy)
+- Pause/resume via action button
+
+### Swipe Mechanics
+
+- Drag threshold: 80px triggers swipe
+- Haptic feedback at threshold crossing (`hapticLight`)
+- Card animates off-screen with rotation (350ms)
+- Next card scales up from background stack
+- Keyboard: ArrowLeft = skip, ArrowRight = like, Ctrl+Z = undo
+- Client-side `swipedIds` ref prevents double-swipes and deduplicates feed
+
+### Undo System
+
+- 5-second window after each swipe
+- Toast notification "Added to your taste ♪" with Undo action button
+- Ctrl+Z keyboard shortcut
+- Reverts `currentIndex` and removes song from `swipedIds`
+
+### Seed Attribution
+
+Cards display "Because you liked {seed song title}" when the backend provides a `seed` field, showing users why each song was recommended.
+
+### API Endpoints (Frontend → Backend)
+
+| Function | Method | Path | Description |
+|----------|--------|------|-------------|
+| `getDiscoverFeed(limit)` | GET | `/api/music/discover/feed?limit=` | Get next batch of songs |
+| `swipeSong(songId, action, meta)` | POST | `/api/music/discover/swipe` | Record like/dislike with artist/language |
+| `recordListen(songId)` | POST | `/api/music/discover/listen` | Record implicit listen (60%+ played) |
+| `getLikedSongs(limit, cursor)` | GET | `/api/music/discover/liked?limit=&cursor=` | Paginated liked songs |
+
+### Implicit Listen Tracking
+
+The `MusicPlayerContext` monitors playback progress. When a song reaches 60% completion:
+1. `recordListen(songId)` fires once per song per session (deduped via `useRef`)
+2. Backend stores in `music_listens` collection (skips if already explicitly swiped)
+3. Listen history songs are used as additional seeds in the discover feed algorithm
+
+### Backend: Feed Algorithm
+
+```
+User opens Discover
+  ├── 1. Song Radio (3 seeds: 2 rotating + 1 recent)
+  │     ├── Uses ctx=android for JioSaavn webradio.createEntityStation
+  │     ├── Returns 30 songs per seed, 20+ unique artists each
+  │     └── Rotating seed offset stored in Redis (cycles through ALL likes)
+  │
+  ├── 2. Implicit Listen Seed (1 random from last 20 listens)
+  │     └── Song radio from a song user played 60%+
+  │
+  ├── 3. Featured Radio Station (1 random, language-matched)
+  │     └── ~20 songs from genre-based station
+  │
+  ├── 4. Trending (15 songs, language-matched)
+  │
+  └── 5. Featured Playlist (1 random editorial, 15 songs)
+
+  Post-processing:
+  ├── Filter: already-swiped songs excluded
+  ├── Filter: artist soft-ban (3+ dislikes from same artist)
+  ├── Sort: language ratio (70% preferred, 30% diverse)
+  ├── Reorder: artist spacing (no same artist within 3 positions)
+  └── Cache: remaining songs in Redis pool (1h TTL), serve 20
+```
+
+### Backend: Rotating Seed Offset
+
+- Redis key: `discover:seed_offset:{userId}` (7-day TTL)
+- Each feed request advances offset by 2
+- Cycles through ALL liked songs over time
+- User with 500 likes → 250 unique feed sessions before repeat
+- Resets to 0 after full cycle
+
+### Backend: Artist Soft-Ban
+
+- Tracks dislike count per primary artist from swipe history
+- 3+ dislikes from same artist → songs from that artist excluded from feed
+- Cached in Redis: `discover:banned_artists:{userId}` (7-day TTL)
+
+### Backend: Data Storage
+
+| Collection | Doc ID Pattern | Fields | Cap |
+|------------|---------------|--------|-----|
+| `music_swipes` | `{userId}_{songId}` | userId, songId, action, artist, language, createdAt | 1000/user |
+| `music_listens` | `{userId}_{songId}` | userId, songId, createdAt | 1000/user |
+
+### Redis Keys (Discover)
+
+| Key | TTL | Purpose |
+|-----|-----|---------|
+| `discover:pool:{userId}` | 1h | Cached song pool for pagination |
+| `discover:seed_offset:{userId}` | 7d | Rotating seed position through likes |
+| `discover:banned_artists:{userId}` | 7d | Soft-banned artist list |
+
 ## Internationalization
 
 Music UI strings are translated across 14 languages via `next-intl`. Translation files are at `src/i18n/messages/{locale}/music.json`.
