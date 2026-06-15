@@ -45,6 +45,14 @@ export const AnalyticsEvents = {
   MUSIC_CROSSFADE_CHANGE: 'music_crossfade_change',
   MUSIC_DEVICE_TRANSFER: 'music_device_transfer',
 
+  // Music Discover
+  DISCOVER_SWIPE_LIKE: 'discover_swipe_like',
+  DISCOVER_SWIPE_DISLIKE: 'discover_swipe_dislike',
+  DISCOVER_UNDO: 'discover_undo',
+  DISCOVER_ADD_TO_PLAYLIST: 'discover_add_to_playlist',
+  DISCOVER_PREVIEW_PLAY: 'discover_preview_play',
+  DISCOVER_SESSION_START: 'discover_session_start',
+
   // Friends & Calls
   FRIEND_REQUEST_SEND: 'friend_request_send',
   FRIEND_REQUEST_ACCEPT: 'friend_request_accept',

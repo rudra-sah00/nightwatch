@@ -17,6 +17,8 @@ import {
   getUserPlaylists,
   type UserPlaylist,
 } from '@/features/music/api';
+import { trackEvent } from '@/lib/analytics';
+import { AnalyticsEvents } from '@/lib/analytics-events';
 import { hapticLight } from '@/lib/haptics';
 import type { DiscoverSong } from '../api';
 
@@ -66,6 +68,9 @@ export function DiscoverActions({
         });
         hapticLight();
         toast.success('Added to playlist');
+        trackEvent(AnalyticsEvents.DISCOVER_ADD_TO_PLAYLIST, {
+          songId: song.id,
+        });
         setShowPlaylists(false);
       } catch {
         toast.error('Already in playlist');

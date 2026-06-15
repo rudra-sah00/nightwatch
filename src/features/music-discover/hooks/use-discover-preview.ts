@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getStreamUrl } from '@/features/music/api';
+import { trackEvent } from '@/lib/analytics';
+import { AnalyticsEvents } from '@/lib/analytics-events';
 import type { DiscoverSong } from '../api';
 
 interface PreloadedAudio {
@@ -75,7 +77,12 @@ export function useDiscoverPreview(
       audio.currentTime = Math.floor(currentSong.duration * 0.33);
       audio
         .play()
-        .then(() => setIsPlaying(true))
+        .then(() => {
+          setIsPlaying(true);
+          trackEvent(AnalyticsEvents.DISCOVER_PREVIEW_PLAY, {
+            songId: currentSong.id,
+          });
+        })
         .catch(() => {});
     };
 

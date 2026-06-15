@@ -3,6 +3,8 @@
 import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
+import { AnalyticsEvents } from '@/lib/analytics-events';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
 import { type DiscoverSong, getDiscoverFeed, swipeSong } from '../api';
 import { useDiscoverPreview } from '../hooks/use-discover-preview';
@@ -43,6 +45,9 @@ export function DiscoverView() {
       .then((songs) => {
         setFeed(songs);
         setCurrentIndex(0);
+        trackEvent(AnalyticsEvents.DISCOVER_SESSION_START, {
+          count: songs.length,
+        });
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -61,6 +66,7 @@ export function DiscoverView() {
     setCanUndo(false);
     lastSwipe.current = null;
     hapticLight();
+    trackEvent(AnalyticsEvents.DISCOVER_UNDO);
   }, []);
 
   // Swipe
@@ -79,8 +85,18 @@ export function DiscoverView() {
 
       if (action === 'like') {
         hapticSuccess();
+        trackEvent(AnalyticsEvents.DISCOVER_SWIPE_LIKE, {
+          songId: currentSong.id,
+          artist: currentSong.artist,
+          language: currentSong.language,
+        });
       } else {
         hapticMedium();
+        trackEvent(AnalyticsEvents.DISCOVER_SWIPE_DISLIKE, {
+          songId: currentSong.id,
+          artist: currentSong.artist,
+          language: currentSong.language,
+        });
       }
 
       const swipePromise = swipeSong(currentSong.id, action, {
