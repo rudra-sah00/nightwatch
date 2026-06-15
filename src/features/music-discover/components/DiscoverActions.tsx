@@ -9,6 +9,7 @@ import {
   RotateCcw,
   X,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -171,12 +172,31 @@ export function DiscoverActions({
                     key={p.id}
                     type="button"
                     onClick={() => handleAddToPlaylist(p.id)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10 text-left transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 text-left transition-colors"
                   >
-                    <ListMusic className="w-4 h-4 shrink-0 text-white/40" />
-                    <span className="text-xs font-headline font-bold uppercase tracking-wider text-white/70 truncate">
-                      {p.name}
-                    </span>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white/5 border border-white/10">
+                      {p.coverUrl ? (
+                        <Image
+                          src={p.coverUrl}
+                          alt=""
+                          width={40}
+                          height={40}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ListMusic className="w-4 h-4 text-white/30" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-headline font-bold text-white/80 truncate">
+                        {p.name}
+                      </p>
+                      <p className="text-[10px] text-white/40">
+                        {p.trackCount} songs
+                      </p>
+                    </div>
                   </button>
                 ))
               )}

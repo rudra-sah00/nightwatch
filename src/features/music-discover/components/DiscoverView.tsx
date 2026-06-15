@@ -10,8 +10,6 @@ import { DiscoverActions } from './DiscoverActions';
 import { DiscoverCard } from './DiscoverCard';
 import { DiscoverCardStack } from './DiscoverCardStack';
 
-const UNDO_WINDOW = 5000;
-
 export function DiscoverView() {
   const [feed, setFeed] = useState<DiscoverSong[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,7 +22,6 @@ export function DiscoverView() {
   const dragRef = useRef({ startX: 0, currentX: 0, dragging: false });
   const cardRef = useRef<HTMLDivElement>(null);
   const swipedIds = useRef<Set<string>>(new Set());
-  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSwipe = useRef<{
     song: DiscoverSong;
     action: 'like' | 'dislike';
@@ -63,10 +60,6 @@ export function DiscoverView() {
     setCurrentIndex(index);
     setCanUndo(false);
     lastSwipe.current = null;
-    if (undoTimer.current) {
-      clearTimeout(undoTimer.current);
-      undoTimer.current = null;
-    }
     hapticLight();
   }, []);
 
@@ -98,14 +91,9 @@ export function DiscoverView() {
       stopCurrent();
       cleanupSong(currentSong.id);
 
-      // Store for undo
+      // Store for undo (last 1 swipe, no timeout)
       lastSwipe.current = { song: currentSong, action, index: currentIndex };
       setCanUndo(true);
-      if (undoTimer.current) clearTimeout(undoTimer.current);
-      undoTimer.current = setTimeout(() => {
-        lastSwipe.current = null;
-        setCanUndo(false);
-      }, UNDO_WINDOW);
 
       // After animation: advance to next card
       setTimeout(() => {
