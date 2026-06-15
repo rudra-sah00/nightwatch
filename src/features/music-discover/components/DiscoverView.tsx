@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { hapticLight, hapticMedium, hapticSuccess } from '@/lib/haptics';
@@ -17,9 +18,12 @@ export function DiscoverView() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(false);
-  const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
   const [dragX, setDragX] = useState(0);
   const [canUndo, setCanUndo] = useState(false);
+  const [outgoing, setOutgoing] = useState<{
+    song: DiscoverSong;
+    dir: 'left' | 'right';
+  } | null>(null);
   const dragRef = useRef({ startX: 0, currentX: 0, dragging: false });
   const cardRef = useRef<HTMLDivElement>(null);
   const swipedIds = useRef<Set<string>>(new Set());
@@ -75,7 +79,8 @@ export function DiscoverView() {
       if (!currentSong || swipedIds.current.has(currentSong.id)) return;
       handleFirstInteraction();
       swipedIds.current.add(currentSong.id);
-      setSwipeDir(action === 'like' ? 'right' : 'left');
+      const dir = action === 'like' ? 'right' : 'left';
+      setOutgoing({ song: currentSong, dir });
 
       if (action === 'like') {
         hapticSuccess();
@@ -100,30 +105,29 @@ export function DiscoverView() {
         setCanUndo(false);
       }, UNDO_WINDOW);
 
+      // Advance index immediately — new card appears from stack
+      setCurrentIndex((i) => i + 1);
+      setDragX(0);
+      // Remove outgoing card after animation
       setTimeout(() => {
-        // Increment index first, THEN clear swipeDir in next tick
-        setCurrentIndex((i) => i + 1);
-        requestAnimationFrame(() => {
-          setSwipeDir(null);
-          setDragX(0);
-        });
-        if (currentIndex >= feed.length - 5) {
-          swipePromise.then(() =>
-            getDiscoverFeed(20)
-              .then((more) =>
-                setFeed((f) => {
-                  const existingIds = new Set(f.map((s) => s.id));
-                  const unique = more.filter(
-                    (s) =>
-                      !existingIds.has(s.id) && !swipedIds.current.has(s.id),
-                  );
-                  return [...f, ...unique];
-                }),
-              )
-              .catch(() => {}),
-          );
-        }
-      }, 350);
+        setOutgoing(null);
+      }, 400);
+
+      if (currentIndex >= feed.length - 5) {
+        swipePromise.then(() =>
+          getDiscoverFeed(20)
+            .then((more) =>
+              setFeed((f) => {
+                const existingIds = new Set(f.map((s) => s.id));
+                const unique = more.filter(
+                  (s) => !existingIds.has(s.id) && !swipedIds.current.has(s.id),
+                );
+                return [...f, ...unique];
+              }),
+            )
+            .catch(() => {}),
+        );
+      }
     },
     [
       currentSong,
@@ -263,19 +267,39 @@ export function DiscoverView() {
         <DiscoverCardStack
           nextSong={nextSong}
           thirdSong={thirdSong}
-          animating={!!swipeDir}
+          animating={!!outgoing}
         />
         <DiscoverCard
-          key={currentSong.id}
           song={currentSong}
           dragX={dragX}
-          swipeDir={swipeDir}
+          swipeDir={null}
           dragging={dragRef.current.dragging}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           cardRef={cardRef}
         />
+        {/* Outgoing card — flies off screen */}
+        {outgoing && (
+          <div
+            className="absolute w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-[3px] border-border shadow-2xl z-20 pointer-events-none"
+            style={{
+              transform:
+                outgoing.dir === 'right'
+                  ? 'translateX(150%) rotate(20deg) scale(0.9)'
+                  : 'translateX(-150%) rotate(-20deg) scale(0.9)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <Image
+              src={outgoing.song.image}
+              alt=""
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
+          </div>
+        )}
       </div>
 
       {/* Action Buttons */}
