@@ -21,6 +21,7 @@ export function DiscoverView() {
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(false);
   const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const preloadCache = useRef<Map<string, PreloadedAudio>>(new Map());
   const activeAudio = useRef<HTMLAudioElement | null>(null);
   const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -78,8 +79,8 @@ export function DiscoverView() {
     if (feed.length > 0) preloadSongs(currentIndex);
   }, [feed, currentIndex, preloadSongs]);
 
-  // Play current
-  useEffect(() => {
+  // Play audio
+  const playCurrentAudio = useCallback(() => {
     if (!currentSong) return;
     if (activeAudio.current) {
       activeAudio.current.pause();
@@ -92,15 +93,24 @@ export function DiscoverView() {
     activeAudio.current = audio;
     audio.volume = muted ? 0 : 0.8;
 
-    if (cached) {
+    const startPlay = () => {
       audio.currentTime = Math.floor(currentSong.duration * 0.33);
-      audio.play().catch(() => {});
+      const playPromise = audio.play();
+      if (playPromise) {
+        playPromise.catch(() => {
+          // Autoplay blocked — will start on interaction
+        });
+      }
+    };
+
+    if (cached?.audio.src) {
+      startPlay();
     } else {
       getStreamUrl(currentSong.id, 96)
         .then((url) => {
           audio.src = url;
-          audio.currentTime = Math.floor(currentSong.duration * 0.33);
-          audio.play().catch(() => {});
+          audio.addEventListener('loadeddata', startPlay, { once: true });
+          audio.load();
         })
         .catch(() => {});
     }
@@ -108,20 +118,30 @@ export function DiscoverView() {
     fadeTimer.current = setTimeout(() => {
       let vol = audio.volume;
       const fade = setInterval(() => {
-        vol -= 0.1;
+        vol -= 0.08;
         if (vol <= 0) {
           clearInterval(fade);
           audio.pause();
         } else {
           audio.volume = vol;
         }
-      }, 100);
+      }, 150);
     }, PREVIEW_DURATION * 1000);
-
-    return () => {
-      if (fadeTimer.current) clearTimeout(fadeTimer.current);
-    };
   }, [currentSong, muted]);
+
+  // Play when song changes or after first interaction
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentSong triggers replay on song change
+  useEffect(() => {
+    if (hasInteracted) playCurrentAudio();
+  }, [currentSong, hasInteracted, playCurrentAudio]);
+
+  // First interaction handler — unlock audio
+  const handleFirstInteraction = useCallback(() => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+      playCurrentAudio();
+    }
+  }, [hasInteracted, playCurrentAudio]);
 
   useEffect(() => {
     if (activeAudio.current) activeAudio.current.volume = muted ? 0 : 0.8;
@@ -140,6 +160,7 @@ export function DiscoverView() {
   const handleSwipe = useCallback(
     (action: 'like' | 'dislike') => {
       if (!currentSong) return;
+      handleFirstInteraction();
       setSwipeDir(action === 'like' ? 'right' : 'left');
       swipeSong(currentSong.id, action).catch(() => {});
       if (activeAudio.current) {
@@ -161,13 +182,14 @@ export function DiscoverView() {
             .then((more) => setFeed((f) => [...f, ...more]))
             .catch(() => {});
         }
-      }, 300);
+      }, 350);
     },
-    [currentSong, currentIndex, feed.length],
+    [currentSong, currentIndex, feed.length, handleFirstInteraction],
   );
 
   // Drag
   const onPointerDown = (e: React.PointerEvent) => {
+    handleFirstInteraction();
     dragRef.current = {
       startX: e.clientX,
       currentX: e.clientX,
@@ -184,8 +206,8 @@ export function DiscoverView() {
     if (!dragRef.current.dragging) return;
     dragRef.current.dragging = false;
     const dx = dragRef.current.currentX - dragRef.current.startX;
-    if (dx > 100) handleSwipe('like');
-    else if (dx < -100) handleSwipe('dislike');
+    if (dx > 80) handleSwipe('like');
+    else if (dx < -80) handleSwipe('dislike');
     else setDragX(0);
   };
 
@@ -236,7 +258,7 @@ export function DiscoverView() {
     );
   }
 
-  const swipeOpacity = Math.min(Math.abs(dragX) / 100, 1);
+  const swipeOpacity = Math.min(Math.abs(dragX) / 80, 1);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
@@ -254,7 +276,10 @@ export function DiscoverView() {
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setMuted(!muted)}
+            onClick={() => {
+              handleFirstInteraction();
+              setMuted(!muted);
+            }}
             className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
           >
             {muted ? (
@@ -266,20 +291,47 @@ export function DiscoverView() {
         </div>
       </div>
 
+      {/* Tap to start overlay */}
+      {!hasInteracted && (
+        <button
+          type="button"
+          onClick={handleFirstInteraction}
+          className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+        >
+          <div className="bg-card px-6 py-3 rounded-full border-2 border-border shadow-lg">
+            <span className="font-headline font-bold text-sm uppercase">
+              Tap to start ♪
+            </span>
+          </div>
+        </button>
+      )}
+
       {/* Card Stack */}
       <div className="flex-1 flex items-center justify-center px-6 pb-6 relative">
-        {/* Third card (background) */}
+        {/* Third card */}
         {thirdSong && (
-          <div className="absolute w-[calc(100%-6rem)] max-w-[300px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/30 opacity-40 scale-[0.88] translate-y-4">
+          <div
+            className="absolute w-[calc(100%-6rem)] max-w-[300px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/30 scale-[0.88] translate-y-4 transition-all duration-300"
+            style={{ opacity: swipeDir ? 0.6 : 0.4 }}
+          >
             <Image src={thirdSong.image} alt="" fill className="object-cover" />
+            <div className="absolute inset-0 bg-black/40" />
           </div>
         )}
 
-        {/* Second card (behind) */}
+        {/* Second card */}
         {nextSong && (
-          <div className="absolute w-[calc(100%-4.5rem)] max-w-[320px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/50 opacity-60 scale-[0.94] translate-y-2">
+          <div
+            className="absolute w-[calc(100%-4.5rem)] max-w-[320px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/50 transition-all duration-300"
+            style={{
+              opacity: swipeDir ? 0.8 : 0.6,
+              transform: swipeDir
+                ? 'scale(1) translateY(0px)'
+                : 'scale(0.94) translateY(8px)',
+            }}
+          >
             <Image src={nextSong.image} alt="" fill className="object-cover" />
-            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-black/20" />
           </div>
         )}
 
@@ -292,13 +344,14 @@ export function DiscoverView() {
           style={{
             transform:
               swipeDir === 'right'
-                ? 'translateX(120%) rotate(15deg)'
+                ? 'translateX(150%) rotate(20deg) scale(0.9)'
                 : swipeDir === 'left'
-                  ? 'translateX(-120%) rotate(-15deg)'
-                  : `translateX(${dragX}px) rotate(${dragX * 0.06}deg)`,
+                  ? 'translateX(-150%) rotate(-20deg) scale(0.9)'
+                  : `translateX(${dragX}px) rotate(${dragX * 0.08}deg)`,
+            opacity: swipeDir ? 0 : 1,
             transition:
               swipeDir || !dragRef.current.dragging
-                ? 'transform 0.3s ease'
+                ? 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)'
                 : 'none',
           }}
           className="relative w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-[3px] border-border shadow-2xl cursor-grab active:cursor-grabbing select-none touch-none z-10"
@@ -310,7 +363,7 @@ export function DiscoverView() {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
 
           {/* Song info */}
           <div className="absolute bottom-0 left-0 right-0 p-5">
@@ -321,27 +374,27 @@ export function DiscoverView() {
               {currentSong.artist}
             </p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/10 text-white/60 backdrop-blur-sm">
                 {currentSong.language}
               </span>
-              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white/10 text-white/60 backdrop-blur-sm">
                 {currentSong.year}
               </span>
             </div>
           </div>
 
           {/* Swipe indicators */}
-          {dragX > 30 && (
+          {dragX > 20 && (
             <div
-              className="absolute top-6 left-6 px-4 py-2 rounded-xl border-2 border-green-400 bg-green-400/20 text-green-400 font-headline font-black text-lg rotate-[-12deg]"
+              className="absolute top-6 left-6 px-4 py-2 rounded-xl border-2 border-green-400 bg-green-400/20 backdrop-blur-sm text-green-400 font-headline font-black text-lg rotate-[-12deg]"
               style={{ opacity: swipeOpacity }}
             >
               LIKE ♪
             </div>
           )}
-          {dragX < -30 && (
+          {dragX < -20 && (
             <div
-              className="absolute top-6 right-6 px-4 py-2 rounded-xl border-2 border-red-400 bg-red-400/20 text-red-400 font-headline font-black text-lg rotate-[12deg]"
+              className="absolute top-6 right-6 px-4 py-2 rounded-xl border-2 border-red-400 bg-red-400/20 backdrop-blur-sm text-red-400 font-headline font-black text-lg rotate-[12deg]"
               style={{ opacity: swipeOpacity }}
             >
               SKIP
@@ -353,9 +406,8 @@ export function DiscoverView() {
       {/* Bottom hint */}
       <div className="shrink-0 pb-6 flex flex-col items-center gap-1">
         <p className="text-xs text-foreground/40 font-medium">
-          ← swipe left to skip • swipe right to like →
+          ← skip • like →
         </p>
-        <p className="text-[10px] text-foreground/30">or use arrow keys</p>
       </div>
     </div>
   );
