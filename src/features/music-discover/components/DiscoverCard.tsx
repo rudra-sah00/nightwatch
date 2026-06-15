@@ -39,9 +39,10 @@ export function DiscoverCard({
             : swipeDir === 'left'
               ? 'translateX(-150%) rotate(-20deg) scale(0.9)'
               : `translateX(${dragX}px) rotate(${dragX * 0.08}deg)`,
-        transition:
-          swipeDir || !dragging
-            ? 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)'
+        transition: dragging
+          ? 'none'
+          : swipeDir
+            ? 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             : 'none',
       }}
       className="relative w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-[3px] border-border shadow-2xl cursor-grab active:cursor-grabbing select-none touch-none z-10"
