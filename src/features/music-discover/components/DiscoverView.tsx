@@ -157,12 +157,14 @@ export function DiscoverView() {
   );
 
   // Swipe
+  const swipedIds = useRef<Set<string>>(new Set());
   const handleSwipe = useCallback(
     (action: 'like' | 'dislike') => {
-      if (!currentSong) return;
+      if (!currentSong || swipedIds.current.has(currentSong.id)) return;
       handleFirstInteraction();
+      swipedIds.current.add(currentSong.id);
       setSwipeDir(action === 'like' ? 'right' : 'left');
-      swipeSong(currentSong.id, action).catch(() => {});
+      const swipePromise = swipeSong(currentSong.id, action).catch(() => {});
       if (activeAudio.current) {
         activeAudio.current.pause();
         activeAudio.current = null;
@@ -178,9 +180,20 @@ export function DiscoverView() {
         setDragX(0);
         setCurrentIndex((i) => i + 1);
         if (currentIndex >= feed.length - 5) {
-          getDiscoverFeed(20)
-            .then((more) => setFeed((f) => [...f, ...more]))
-            .catch(() => {});
+          swipePromise.then(() =>
+            getDiscoverFeed(20)
+              .then((more) =>
+                setFeed((f) => {
+                  const existingIds = new Set(f.map((s) => s.id));
+                  const unique = more.filter(
+                    (s) =>
+                      !existingIds.has(s.id) && !swipedIds.current.has(s.id),
+                  );
+                  return [...f, ...unique];
+                }),
+              )
+              .catch(() => {}),
+          );
         }
       }, 350);
     },
