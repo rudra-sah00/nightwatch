@@ -247,6 +247,24 @@ export function MusicPlayerProvider({
   // Track daily listening time
   useMusicProgress({ isPlaying: state.isPlaying });
 
+  // Record implicit listen when user plays 60%+ of a song
+  const listenRecordedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (state.currentTrack?.id !== listenRecordedRef.current) {
+      listenRecordedRef.current = null;
+    }
+    if (
+      state.currentTrack &&
+      progressState.progress >= 60 &&
+      listenRecordedRef.current !== state.currentTrack.id
+    ) {
+      listenRecordedRef.current = state.currentTrack.id;
+      import('@/features/music-discover/api').then((m) =>
+        m.recordListen(state.currentTrack!.id).catch(() => {}),
+      );
+    }
+  }, [state.currentTrack, progressState.progress]);
+
   // Stop local playback when another device takes over
   useEffect(() => {
     const onTakeover = () => {

@@ -36,3 +36,11 @@ export async function getLikedSongs(limit = 30, cursor?: string) {
     `/api/music/discover/liked?${params}`,
   );
 }
+
+export async function recordListen(songId: string) {
+  return apiFetch('/api/music/discover/listen', {
+    method: 'POST',
+    body: JSON.stringify({ songId }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
