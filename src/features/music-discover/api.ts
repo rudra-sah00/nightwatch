@@ -9,6 +9,7 @@ export interface DiscoverSong {
   duration: number;
   language: string;
   year: number;
+  seed?: string;
   features?: {
     bpm: number;
     energy: number;
@@ -21,10 +22,14 @@ export async function getDiscoverFeed(limit = 20): Promise<DiscoverSong[]> {
   return apiFetch<DiscoverSong[]>(`/api/music/discover/feed?limit=${limit}`);
 }
 
-export async function swipeSong(songId: string, action: 'like' | 'dislike') {
+export async function swipeSong(
+  songId: string,
+  action: 'like' | 'dislike',
+  meta?: { artist?: string; language?: string },
+) {
   return apiFetch('/api/music/discover/swipe', {
     method: 'POST',
-    body: JSON.stringify({ songId, action }),
+    body: JSON.stringify({ songId, action, ...meta }),
     headers: { 'Content-Type': 'application/json' },
   });
 }
