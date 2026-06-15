@@ -16,14 +16,14 @@ export function DiscoverCardStack({
 }: DiscoverCardStackProps) {
   return (
     <>
-      {/* Third card — furthest back */}
+      {/* Third card — furthest back, smallest */}
       {thirdSong && (
         <div
           className="absolute w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/30 transition-all duration-300"
           style={{
             transform: animating
-              ? 'scale(0.92) translateY(16px)'
-              : 'scale(0.88) translateY(32px)',
+              ? 'scale(0.92) translateY(-8px)'
+              : 'scale(0.88) translateY(-14px)',
             opacity: animating ? 0.5 : 0.4,
             zIndex: 1,
           }}
@@ -39,8 +39,8 @@ export function DiscoverCardStack({
           className="absolute w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/50 transition-all duration-300"
           style={{
             transform: animating
-              ? 'scale(0.97) translateY(6px)'
-              : 'scale(0.93) translateY(16px)',
+              ? 'scale(0.97) translateY(-3px)'
+              : 'scale(0.93) translateY(-7px)',
             opacity: animating ? 0.8 : 0.6,
             zIndex: 2,
           }}
