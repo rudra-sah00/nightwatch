@@ -16,35 +16,37 @@ export function DiscoverCardStack({
 }: DiscoverCardStackProps) {
   return (
     <>
-      {/* Third card — behind, shifted down more */}
+      {/* Third card — furthest back */}
       {thirdSong && (
         <div
           className="absolute w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/30 transition-all duration-300"
           style={{
-            opacity: animating ? 0.5 : 0.35,
             transform: animating
-              ? 'scale(0.95) translateY(12px)'
-              : 'scale(0.9) translateY(20px)',
+              ? 'scale(0.92) translateY(16px)'
+              : 'scale(0.88) translateY(32px)',
+            opacity: animating ? 0.5 : 0.4,
+            zIndex: 1,
           }}
         >
           <Image src={thirdSong.image} alt="" fill className="object-cover" />
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-black/50" />
         </div>
       )}
 
-      {/* Second card — directly behind, shifted down slightly */}
+      {/* Second card — middle */}
       {nextSong && (
         <div
           className="absolute w-full max-w-[340px] aspect-[3/4] rounded-3xl overflow-hidden border-2 border-border/50 transition-all duration-300"
           style={{
-            opacity: animating ? 0.85 : 0.6,
             transform: animating
-              ? 'scale(1) translateY(0px)'
-              : 'scale(0.95) translateY(10px)',
+              ? 'scale(0.97) translateY(6px)'
+              : 'scale(0.93) translateY(16px)',
+            opacity: animating ? 0.8 : 0.6,
+            zIndex: 2,
           }}
         >
           <Image src={nextSong.image} alt="" fill className="object-cover" />
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-black/30" />
         </div>
       )}
     </>
