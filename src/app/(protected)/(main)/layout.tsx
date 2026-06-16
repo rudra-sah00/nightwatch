@@ -24,6 +24,7 @@ const GlobalTour = dynamic(
 
 import { useFriendNotifications } from '@/features/friends/hooks/use-friend-notifications';
 import { useNetworkStatus } from '@/hooks/use-network-status';
+import { PageTitleProvider } from '@/hooks/use-page-title';
 import { checkIsMobile } from '@/lib/electron-bridge';
 
 type SidebarContextType = {
@@ -243,5 +244,9 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <MainLayoutInner>{children}</MainLayoutInner>;
+  return (
+    <PageTitleProvider>
+      <MainLayoutInner>{children}</MainLayoutInner>
+    </PageTitleProvider>
+  );
 }

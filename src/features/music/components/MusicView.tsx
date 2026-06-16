@@ -20,6 +20,7 @@ import { MusicHeader } from './MusicHeader';
 import { MusicSearchSpotlight } from './MusicSearchSpotlight';
 import { MusicSections, type MusicSectionsData } from './MusicSections';
 import { MusicSkeleton } from './MusicSkeleton';
+import { PlaylistActionMenu } from './PlaylistActionMenu';
 
 /**
  * Top-level orchestrator for the `/music` home page.
@@ -54,6 +55,7 @@ export function MusicView() {
     forYou: [],
   });
   const [showSearch, setShowSearch] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [loading, setLoading] = useState(true);
   const [playlistKey, setPlaylistKey] = useState(0);
@@ -129,9 +131,23 @@ export function MusicView() {
       <MusicHeader
         selectedLangs={selectedLangs}
         onOpenLangPicker={() => setShowLangPicker(true)}
-        onToggleCreatePlaylist={() => setShowCreatePlaylist((v) => !v)}
+        onToggleCreatePlaylist={() => setShowActionMenu(true)}
         onOpenSearch={() => setShowSearch(true)}
       />
+
+      {showActionMenu && (
+        <PlaylistActionMenu
+          onClose={() => setShowActionMenu(false)}
+          onCreatePlaylist={() => setShowCreatePlaylist(true)}
+          onImportSpotify={() => {
+            const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+            const redirectUri = `${window.location.origin}/music/spotify/callback`;
+            const scopes = 'playlist-read-private playlist-read-collaborative';
+            const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
+            window.location.href = url;
+          }}
+        />
+      )}
 
       {showCreatePlaylist && (
         <CreatePlaylistDialog

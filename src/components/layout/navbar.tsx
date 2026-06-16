@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useRef } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { usePageTitle } from '@/hooks/use-page-title';
 import { useAuth } from '@/providers/auth-provider';
 
 function useLongPress(onLongPress: () => void, delay = 500) {
@@ -50,11 +51,20 @@ function useLongPress(onLongPress: () => void, delay = 500) {
 export function Navbar() {
   const { user } = useAuth();
   const { expanded: musicExpanded } = useMusicPlayerContext();
+  const { title: pageTitle } = usePageTitle();
   const t = useTranslations('common.nav');
   const { setLeftOpen, setRightOpen } = useSidebar();
 
   const logoLongPress = useLongPress(() => setLeftOpen(true));
   const profileLongPress = useLongPress(() => setRightOpen(true));
+
+  const scrollToTop = useCallback(() => {
+    const main = document.getElementById('main-content');
+    const scrollable = main?.querySelector('.overflow-y-auto');
+    if (scrollable) {
+      scrollable.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
 
   return (
     <nav
@@ -90,6 +100,19 @@ export function Navbar() {
             </span>
           </Link>
         </div>
+
+        {/* Center: Page Title */}
+        {pageTitle && (
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className="absolute left-1/2 -translate-x-1/2 [-webkit-app-region:no-drag] cursor-pointer hover:opacity-70 transition-opacity"
+          >
+            <span className="font-headline font-black uppercase text-sm md:text-base tracking-widest text-foreground">
+              {pageTitle}
+            </span>
+          </button>
+        )}
 
         {/* Right Side: Profile */}
         <div className="flex-1 flex justify-end items-center shrink-0 gap-3">

@@ -15,6 +15,7 @@ import {
 } from '@/features/livestream/hooks/use-iptv';
 import { createPartyRoom } from '@/features/watch-party/room/services/watch-party.api';
 import { generateRoomId } from '@/features/watch-party/room/utils';
+import { usePageTitle } from '@/hooks/use-page-title';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function LiveClient() {
@@ -25,6 +26,12 @@ export default function LiveClient() {
   const [isCatOpen, setIsCatOpen] = useState(false);
   const t = useTranslations('live');
   const router = useRouter();
+  const { setTitle } = usePageTitle();
+
+  useEffect(() => {
+    setTitle(t('heroTitle'));
+    return () => setTitle('');
+  }, [setTitle, t]);
 
   const { categories } = useIptvCategories();
   const { channels, total, totalPages, isLoading } = useIptvChannels(
