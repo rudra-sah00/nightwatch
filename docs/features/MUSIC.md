@@ -487,27 +487,28 @@ The `MusicPlayerContext` monitors playback progress. When a song reaches 60% com
 
 ```
 User opens Discover
-  ├── 1. Song Radio (3 seeds: 2 rotating + 1 recent)
-  │     ├── Uses ctx=android for JioSaavn webradio.createEntityStation
-  │     ├── Returns 30 songs per seed, 20+ unique artists each
-  │     └── Rotating seed offset stored in Redis (cycles through ALL likes)
+  ├── Signals: engagement velocity, interest decay, artist affinity, session momentum
   │
-  ├── 2. Implicit Listen Seed (1 random from last 20 listens)
-  │     └── Song radio from a song user played 60%+
+  ├── EXPLOIT (80%): Proven taste
+  │     ├── Weighted random seed selection (0.97^daysSinceLike × engagementBonus)
+  │     ├── Seed count adapts to streak (4 if engaged, 2 if frustrated, 3 default)
+  │     ├── Song radio per seed (ctx=android, 30 songs each)
+  │     ├── Implicit listen seed (1 random from music_listens)
+  │     ├── Top affinity artist station (if dislike streak ≤ -3)
+  │     └── Universal hits injection (≥70% like-rate songs, if frustrated)
   │
-  ├── 3. Featured Radio Station (1 random, language-matched)
-  │     └── ~20 songs from genre-based station
+  ├── EXPLORE (20%): Unknown territory
+  │     ├── Featured station from language user has NEVER liked
+  │     ├── Trending songs (language-matched)
+  │     └── Featured playlist (if on like streak ≥ 3)
   │
-  ├── 4. Trending (15 songs, language-matched)
-  │
-  └── 5. Featured Playlist (1 random editorial, 15 songs)
-
-  Post-processing:
-  ├── Filter: already-swiped songs excluded
-  ├── Filter: artist soft-ban (3+ dislikes from same artist)
-  ├── Sort: language ratio (70% preferred, 30% diverse)
-  ├── Reorder: artist spacing (no same artist within 3 positions)
-  └── Cache: remaining songs in Redis pool (1h TTL), serve 20
+  └── Post-processing:
+        ├── Filter: already-swiped songs excluded
+        ├── Filter: artist soft-ban (3+ dislikes, instant skips = 2x penalty)
+        ├── Sort: language ratio with interest decay weights
+        ├── Reorder: artist spacing (no same artist within 3 positions)
+        ├── Diversity: no same language 3x in a row, no duplicate albums
+        └── Cache: remaining songs in Redis pool (1h TTL), serve 20
 ```
 
 ### Backend: Rotating Seed Offset
