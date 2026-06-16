@@ -92,7 +92,7 @@ export function RecordButton({
       type="button"
       onClick={onStart}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-headline font-bold uppercase tracking-widest backdrop-blur-sm transition-colors"
-      title="Record clip (max 5 min)"
+      title={t('clipRecordTitle')}
     >
       <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
       <span>{t('clip')}</span>

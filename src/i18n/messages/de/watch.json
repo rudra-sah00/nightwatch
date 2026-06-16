@@ -56,7 +56,8 @@
     "speed": "Geschwindigkeit",
     "normal": "Normal",
     "auto": "Auto",
-    "locked": "Gesperrt"
+    "locked": "Gesperrt",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "Untertitel",

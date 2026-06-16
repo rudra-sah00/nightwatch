@@ -81,5 +81,6 @@
   "clipSave": "Kaydet",
   "clipCancel": "İptal",
   "clipRename": "Klibi yeniden adlandır",
-  "clipDelete": "Klibi sil"
+  "clipDelete": "Klibi sil",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

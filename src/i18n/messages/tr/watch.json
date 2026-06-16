@@ -56,7 +56,8 @@
     "speed": "Hız",
     "normal": "Normal",
     "auto": "Otomatik",
-    "locked": "Kilitli"
+    "locked": "Kilitli",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "Altyazılar",

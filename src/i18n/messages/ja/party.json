@@ -40,7 +40,8 @@
   },
   "video": {
     "noOneOnCamera": "まだ誰もカメラをオンにしていません",
-    "turnOnCamera": "カメラをオンにするか、他の人が参加するのを待ちましょう"
+    "turnOnCamera": "カメラをオンにするか、他の人が参加するのを待ちましょう",
+    "resize": "Resize"
   },
   "status": {
     "connected": "接続済み",

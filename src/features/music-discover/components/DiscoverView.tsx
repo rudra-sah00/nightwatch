@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { trackEvent } from '@/lib/analytics';
 import { AnalyticsEvents } from '@/lib/analytics-events';
@@ -13,6 +14,7 @@ import { DiscoverCard } from './DiscoverCard';
 import { DiscoverCardStack } from './DiscoverCardStack';
 
 export function DiscoverView() {
+  const t = useTranslations('music');
   const [feed, setFeed] = useState<DiscoverSong[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -220,9 +222,11 @@ export function DiscoverView() {
   if (!currentSong) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6">
-        <p className="font-headline text-lg font-bold">No more songs!</p>
+        <p className="font-headline text-lg font-bold">
+          {t('discover.noMoreSongs')}
+        </p>
         <p className="text-sm text-foreground/60">
-          Come back later for fresh picks.
+          {t('discover.comeBackLater')}
         </p>
       </div>
     );

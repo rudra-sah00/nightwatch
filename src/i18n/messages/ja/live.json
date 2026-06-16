@@ -81,5 +81,6 @@
   "clipSave": "保存",
   "clipCancel": "キャンセル",
   "clipRename": "クリップ名を変更",
-  "clipDelete": "クリップを削除"
+  "clipDelete": "クリップを削除",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

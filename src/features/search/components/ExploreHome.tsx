@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 const ContentDetailModal = dynamic(
@@ -56,6 +57,7 @@ function stripEmojis(text: string): string {
 }
 
 export function ExploreHome() {
+  const t = useTranslations('search');
   const router = useRouter();
   const [data, setData] = useState<ExploreData | null>(null);
   const [enabled, setEnabled] = useState(false);
@@ -110,7 +112,7 @@ export function ExploreHome() {
               </span>
               <input
                 type="text"
-                placeholder="Search movies, shows..."
+                placeholder={t('home.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearch}

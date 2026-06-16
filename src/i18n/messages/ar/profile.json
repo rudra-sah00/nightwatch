@@ -96,7 +96,9 @@
     "customConcurrent": "مخصص (1-10)",
     "customSpeed": "مخصص ميجابايت/ث",
     "shortcuts": "Keyboard Shortcuts",
-    "shortcutsDescription": "View all available keyboard shortcuts."
+    "shortcutsDescription": "View all available keyboard shortcuts.",
+    "crossfadeOff": "Off",
+    "crossfadeMax": "12s"
   },
   "publicProfile": {
     "returnBase": "العودة للقاعدة",

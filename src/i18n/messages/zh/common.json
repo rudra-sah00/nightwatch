@@ -7,7 +7,11 @@
     "downloads": "下载",
     "profile": "个人资料",
     "logoAlt": "Nightwatch 标志",
-    "music": "Music"
+    "music": "Music",
+    "library": "Library",
+    "manga": "Manga",
+    "games": "Games",
+    "askAi": "Ask AI"
   },
   "language": {
     "title": "语言"
@@ -401,5 +405,16 @@
     "newRequest": "New friend request received",
     "requestAccepted": "Friend request accepted!",
     "incomingCall": "{name} is calling you..."
+  },
+  "gamesPage": {
+    "heroPlay": "PLAY",
+    "heroGames": "GAMES",
+    "heroDescription": "Arcade classics right in your browser",
+    "searchPlaceholder": "Search games...",
+    "back": "Back",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "exitButton": "✕ Exit",
+    "loading": "Loading game..."
   }
 }

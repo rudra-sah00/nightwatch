@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
@@ -15,6 +16,7 @@ interface Game {
 }
 
 export default function GamesPage() {
+  const t = useTranslations('common.gamesPage');
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -40,14 +42,14 @@ export default function GamesPage() {
         <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-yellow border-[4px] border-border opacity-20 rotate-12" />
         <div className="container mx-auto px-6 py-12 md:px-10 relative z-10">
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-foreground font-headline uppercase leading-none mb-4">
-            PLAY
+            {t('heroPlay')}
             <br />
             <span className="bg-background px-4 inline-block border-[4px] border-border -rotate-1 ml-2 mt-2">
-              GAMES
+              {t('heroGames')}
             </span>
           </h1>
           <p className="font-headline font-bold uppercase tracking-widest text-foreground bg-background inline-block px-4 py-2 border-[3px] border-border">
-            Arcade classics right in your browser
+            {t('heroDescription')}
           </p>
         </div>
       </div>
@@ -58,7 +60,7 @@ export default function GamesPage() {
             <NeoSearchBar
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search games..."
+              placeholder={t('searchPlaceholder')}
             />
           </div>
 

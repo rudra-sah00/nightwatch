@@ -56,7 +56,8 @@
     "speed": "गति",
     "normal": "सामान्य",
     "auto": "स्वचालित",
-    "locked": "लॉक"
+    "locked": "लॉक",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "उपशीर्षक",

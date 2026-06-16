@@ -81,5 +81,6 @@
   "clipSave": "Salva",
   "clipCancel": "Annulla",
   "clipRename": "Rinomina clip",
-  "clipDelete": "Elimina clip"
+  "clipDelete": "Elimina clip",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

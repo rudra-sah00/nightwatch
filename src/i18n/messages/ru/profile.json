@@ -96,7 +96,9 @@
     "customConcurrent": "Пользовательский (1-10)",
     "customSpeed": "Пользовательский МБ/с",
     "shortcuts": "Keyboard Shortcuts",
-    "shortcutsDescription": "View all available keyboard shortcuts."
+    "shortcutsDescription": "View all available keyboard shortcuts.",
+    "crossfadeOff": "Off",
+    "crossfadeMax": "12s"
   },
   "publicProfile": {
     "returnBase": "Вернуться на базу",

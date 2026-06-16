@@ -81,5 +81,6 @@
   "clipSave": "सहेजें",
   "clipCancel": "रद्द करें",
   "clipRename": "क्लिप का नाम बदलें",
-  "clipDelete": "क्लिप हटाएं"
+  "clipDelete": "क्लिप हटाएं",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

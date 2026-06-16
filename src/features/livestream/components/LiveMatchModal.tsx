@@ -308,7 +308,7 @@ function LiveMatchModalContent({
 
                   {/* VS */}
                   <span className="text-xl md:text-6xl font-black font-headline text-foreground tracking-widest">
-                    VS
+                    {t('vs')}
                   </span>
 
                   {/* Live time desc */}
@@ -339,7 +339,10 @@ function LiveMatchModalContent({
                     channelTitle
                   ) : (
                     <>
-                      {team1Name} <span className="text-neo-red">vs</span>{' '}
+                      {team1Name}{' '}
+                      <span className="text-neo-red">
+                        {t('vs').toLowerCase()}
+                      </span>{' '}
                       {team2Name}
                     </>
                   )}

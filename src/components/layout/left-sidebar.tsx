@@ -65,11 +65,11 @@ export function LeftSidebar() {
     { href: '/continue-watching', label: t('continue'), icon: History },
     { href: '/live', label: t('live'), icon: Radio },
     { href: '/watchlist', label: t('watchlist'), icon: Plus },
-    { href: '/library', label: 'Library', icon: Library },
+    { href: '/library', label: t('library'), icon: Library },
     { href: '/music', label: t('music'), icon: Music },
-    { href: '/manga', label: 'Manga', icon: BookOpen },
-    { href: '/games', label: 'Games', icon: Gamepad2 },
-    { href: '/ask-ai', label: 'Ask AI', icon: Bot },
+    { href: '/manga', label: t('manga'), icon: BookOpen },
+    { href: '/games', label: t('games'), icon: Gamepad2 },
+    { href: '/ask-ai', label: t('askAi'), icon: Bot },
   ];
 
   const showDownloadsLink = isMounted && (isDesktopApp || mobile);

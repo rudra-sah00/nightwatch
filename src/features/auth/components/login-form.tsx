@@ -86,7 +86,7 @@ export function LoginForm(
             type="button"
             onClick={props.onShowQr}
             className="text-foreground/40 hover:text-foreground transition-colors"
-            aria-label="QR Login"
+            aria-label={t('qr.ariaLabel')}
           >
             <QrCode className="w-5 h-5" />
           </button>

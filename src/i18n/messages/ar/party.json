@@ -40,7 +40,8 @@
   },
   "video": {
     "noOneOnCamera": "لا أحد أمام الكاميرا بعد",
-    "turnOnCamera": "شغّل الكاميرا أو انتظر انضمام الآخرين"
+    "turnOnCamera": "شغّل الكاميرا أو انتظر انضمام الآخرين",
+    "resize": "Resize"
   },
   "status": {
     "connected": "متصل",

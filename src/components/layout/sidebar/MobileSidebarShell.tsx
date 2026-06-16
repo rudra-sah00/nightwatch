@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface MobileSidebarShellProps {
   visible: boolean;
   closing: boolean;
@@ -16,6 +18,7 @@ export function MobileSidebarShell({
   onClose,
   children,
 }: MobileSidebarShellProps) {
+  const t = useTranslations('common');
   if (!visible) return null;
 
   const animClass = closing
@@ -28,7 +31,7 @@ export function MobileSidebarShell({
         type="button"
         className={`absolute inset-0 bg-black/40 backdrop-blur-sm duration-200 ${closing ? 'animate-out fade-out' : 'animate-in fade-in'}`}
         onClick={onClose}
-        aria-label="Close"
+        aria-label={t('actions.close')}
         tabIndex={-1}
       />
       <aside

@@ -90,6 +90,7 @@ export function OfflineContentDetailModal({
 
   const td = useTranslations('common.downloads');
   const ta = useTranslations('common.actions');
+  const tc = useTranslations('search.contentDetail');
   const episodesSectionRef = useRef<HTMLDivElement>(null);
 
   // Loading state
@@ -107,14 +108,14 @@ export function OfflineContentDetailModal({
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
         <p className="text-foreground text-lg font-headline font-black uppercase tracking-widest">
-          Failed to load content
+          {tc('failedToLoad')}
         </p>
         <Button
           variant="neo-outline"
           className="mt-6 border-[3px] border-border font-black uppercase "
           onClick={onClose}
         >
-          Close
+          {tc('close')}
         </Button>
       </div>
     );
@@ -197,7 +198,7 @@ export function OfflineContentDetailModal({
                   className="absolute top-4 left-4 z-10 px-4 py-2 bg-card text-foreground border-[3px] border-border font-black font-headline uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-[opacity,background-color] hover:bg-neo-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055ff] focus-visible:ring-offset-2"
                   onClick={() => setShowTrailer(false)}
                 >
-                  Close Preview
+                  {tc('closePreview')}
                 </button>
               </div>
             ) : !imageError ? (
@@ -223,7 +224,7 @@ export function OfflineContentDetailModal({
             ) : (
               <div className="w-full h-full bg-background flex items-center justify-center">
                 <span className="text-foreground font-black font-headline uppercase tracking-widest">
-                  No Image Available
+                  {tc('noImageAvailable')}
                 </span>
               </div>
             )}

@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
 import { trackEvent } from '@/lib/analytics';
@@ -9,6 +10,7 @@ import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
 import { apiFetch } from '@/lib/fetch';
 
 export default function GamePage() {
+  const t = useTranslations('common.gamesPage');
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -143,7 +145,7 @@ export default function GamePage() {
           className="flex items-center gap-2 text-foreground/40 hover:text-foreground font-headline font-bold uppercase tracking-widest text-xs transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          {t('back')}
         </button>
         <button
           type="button"
@@ -155,7 +157,7 @@ export default function GamePage() {
           ) : (
             <Maximize className="w-4 h-4" />
           )}
-          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+          {isFullscreen ? t('exitFullscreen') : t('fullscreen')}
         </button>
       </div>
       <div
@@ -172,7 +174,7 @@ export default function GamePage() {
             onClick={toggleFullscreen}
             className="absolute bottom-3 right-3 z-[100000] bg-black/60 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider backdrop-blur-sm"
           >
-            ✕ Exit
+            {t('exitButton')}
           </button>
         )}
         {gameUrl ? (
@@ -180,7 +182,7 @@ export default function GamePage() {
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-background">
             <p className="font-headline font-bold uppercase tracking-widest text-xs text-foreground/40 animate-pulse">
-              Loading game...
+              {t('loading')}
             </p>
           </div>
         )}

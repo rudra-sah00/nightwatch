@@ -56,7 +56,8 @@
     "speed": "속도",
     "normal": "보통",
     "auto": "자동",
-    "locked": "잠김"
+    "locked": "잠김",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "자막",

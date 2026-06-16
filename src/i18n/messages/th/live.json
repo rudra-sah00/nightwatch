@@ -81,5 +81,6 @@
   "clipSave": "บันทึก",
   "clipCancel": "ยกเลิก",
   "clipRename": "เปลี่ยนชื่อคลิป",
-  "clipDelete": "ลบคลิป"
+  "clipDelete": "ลบคลิป",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

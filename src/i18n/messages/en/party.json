@@ -58,7 +58,8 @@
   },
   "video": {
     "noOneOnCamera": "No one on camera yet",
-    "turnOnCamera": "Turn on your camera or wait for others to join"
+    "turnOnCamera": "Turn on your camera or wait for others to join",
+    "resize": "Resize"
   },
   "status": {
     "connected": "Connected",

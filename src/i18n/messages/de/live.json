@@ -81,5 +81,6 @@
   "clipSave": "Speichern",
   "clipCancel": "Abbrechen",
   "clipRename": "Clip umbenennen",
-  "clipDelete": "Clip löschen"
+  "clipDelete": "Clip löschen",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

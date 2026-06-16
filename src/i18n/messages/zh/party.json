@@ -40,7 +40,8 @@
   },
   "video": {
     "noOneOnCamera": "还没有人开启摄像头",
-    "turnOnCamera": "打开您的摄像头或等待其他人加入"
+    "turnOnCamera": "打开您的摄像头或等待其他人加入",
+    "resize": "Resize"
   },
   "status": {
     "connected": "已连接",

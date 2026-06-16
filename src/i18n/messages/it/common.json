@@ -7,7 +7,11 @@
     "downloads": "Download",
     "profile": "Profilo",
     "logoAlt": "Logo Nightwatch",
-    "music": "Music"
+    "music": "Music",
+    "library": "Library",
+    "manga": "Manga",
+    "games": "Games",
+    "askAi": "Ask AI"
   },
   "language": {
     "title": "Lingua"
@@ -401,5 +405,16 @@
     "newRequest": "New friend request received",
     "requestAccepted": "Friend request accepted!",
     "incomingCall": "{name} is calling you..."
+  },
+  "gamesPage": {
+    "heroPlay": "PLAY",
+    "heroGames": "GAMES",
+    "heroDescription": "Arcade classics right in your browser",
+    "searchPlaceholder": "Search games...",
+    "back": "Back",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "exitButton": "✕ Exit",
+    "loading": "Loading game..."
   }
 }

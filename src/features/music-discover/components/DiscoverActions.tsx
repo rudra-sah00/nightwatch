@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -39,6 +40,7 @@ export function DiscoverActions({
   isPlaying,
   canUndo,
 }: DiscoverActionsProps) {
+  const t = useTranslations('music');
   const [showPlaylists, setShowPlaylists] = useState(false);
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
 
@@ -89,7 +91,7 @@ export function DiscoverActions({
             type="button"
             onClick={() => onSwipe('dislike')}
             className="w-12 h-12 rounded-full border-2 border-red-400/50 flex items-center justify-center hover:bg-red-400/10 active:scale-90 transition-transform"
-            aria-label="Skip"
+            aria-label={t('discover.skip')}
           >
             <X className="w-5 h-5 text-red-400" />
           </button>
@@ -100,7 +102,7 @@ export function DiscoverActions({
             onClick={onUndo}
             disabled={!canUndo}
             className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:bg-muted active:scale-90 transition-transform disabled:opacity-30 disabled:cursor-not-allowed"
-            aria-label="Undo"
+            aria-label={t('discover.undo')}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -110,7 +112,7 @@ export function DiscoverActions({
             type="button"
             onClick={onTogglePlay}
             className="w-12 h-12 rounded-full border-2 border-border bg-card flex items-center justify-center hover:bg-muted active:scale-90 transition-transform shadow-md"
-            aria-label={isPlaying ? 'Pause' : 'Play'}
+            aria-label={isPlaying ? t('discover.pause') : t('discover.play')}
           >
             {isPlaying ? (
               <Pause className="w-5 h-5" />
@@ -127,7 +129,7 @@ export function DiscoverActions({
               setShowPlaylists(true);
             }}
             className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:bg-muted active:scale-90 transition-transform"
-            aria-label="Add to playlist"
+            aria-label={t('discover.addToPlaylist')}
           >
             <ListPlus className="w-4 h-4" />
           </button>
@@ -137,7 +139,7 @@ export function DiscoverActions({
             type="button"
             onClick={() => onSwipe('like')}
             className="w-12 h-12 rounded-full border-2 border-green-400/50 flex items-center justify-center hover:bg-green-400/10 active:scale-90 transition-transform"
-            aria-label="Like"
+            aria-label={t('discover.like')}
           >
             <Heart className="w-5 h-5 text-green-400" />
           </button>

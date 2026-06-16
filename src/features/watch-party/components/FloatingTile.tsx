@@ -1,6 +1,7 @@
 'use client';
 
 import { Mic, MicOff } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import type { TileLayout } from '../hooks/use-floating-tiles';
@@ -46,6 +47,7 @@ export const FloatingTile = memo(function FloatingTile({
   minW,
   minH,
 }: FloatingTileProps) {
+  const t = useTranslations('party');
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const tileRef = useRef<HTMLDivElement>(null);
 
@@ -247,7 +249,7 @@ export const FloatingTile = memo(function FloatingTile({
           className="w-full h-full text-white/40"
           fill="currentColor"
           role="img"
-          aria-label="Resize"
+          aria-label={t('video.resize')}
         >
           <circle cx="8" cy="8" r="1.5" />
           <circle cx="4" cy="8" r="1.5" />

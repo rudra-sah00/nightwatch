@@ -56,7 +56,8 @@
     "speed": "Скорость",
     "normal": "Обычная",
     "auto": "Авто",
-    "locked": "Заблокировано"
+    "locked": "Заблокировано",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "Субтитры",

@@ -40,7 +40,8 @@
   },
   "video": {
     "noOneOnCamera": "Henüz kimse kamerada değil",
-    "turnOnCamera": "Kameranızı açın veya başkalarının katılmasını bekleyin"
+    "turnOnCamera": "Kameranızı açın veya başkalarının katılmasını bekleyin",
+    "resize": "Resize"
   },
   "status": {
     "connected": "Bağlandı",

@@ -56,7 +56,8 @@
     "speed": "السرعة",
     "normal": "عادي",
     "auto": "تلقائي",
-    "locked": "مقفل"
+    "locked": "مقفل",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "الترجمة",

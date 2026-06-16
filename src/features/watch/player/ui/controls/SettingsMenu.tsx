@@ -278,7 +278,7 @@ export function SettingsMenu({
                   setIsOpen(false);
                   setCurrentScreen('main');
                 }}
-                aria-label="Close settings"
+                aria-label={t('closeAriaLabel')}
               />
               {/* Bottom sheet */}
               <div

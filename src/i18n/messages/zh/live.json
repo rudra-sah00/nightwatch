@@ -81,5 +81,6 @@
   "clipSave": "保存",
   "clipCancel": "取消",
   "clipRename": "重命名剪辑",
-  "clipDelete": "删除剪辑"
+  "clipDelete": "删除剪辑",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

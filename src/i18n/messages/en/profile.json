@@ -112,7 +112,9 @@
     "unlimited": "Unlimited",
     "cancel": "Cancel",
     "customConcurrent": "Custom (1-10)",
-    "customSpeed": "Custom MB/s"
+    "customSpeed": "Custom MB/s",
+    "crossfadeOff": "Off",
+    "crossfadeMax": "12s"
   },
   "publicProfile": {
     "returnBase": "Return Base",

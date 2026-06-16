@@ -223,7 +223,7 @@ export function RemoteControlSheet({
             type="button"
             onClick={onClose}
             className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
-            aria-label="Close"
+            aria-label={t('actions.close')}
           >
             <ChevronDown className="w-5 h-5" />
           </button>

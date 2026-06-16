@@ -40,7 +40,8 @@
   },
   "video": {
     "noOneOnCamera": "아직 카메라를 켠 사람이 없습니다",
-    "turnOnCamera": "카메라를 켜거나 다른 사람이 참가할 때까지 기다리세요"
+    "turnOnCamera": "카메라를 켜거나 다른 사람이 참가할 때까지 기다리세요",
+    "resize": "Resize"
   },
   "status": {
     "connected": "연결됨",

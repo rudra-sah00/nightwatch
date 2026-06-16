@@ -56,7 +56,8 @@
     "speed": "速度",
     "normal": "正常",
     "auto": "自动",
-    "locked": "已锁定"
+    "locked": "已锁定",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "字幕",

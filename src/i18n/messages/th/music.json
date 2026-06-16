@@ -101,5 +101,15 @@
   },
   "similarSongs": "Similar Songs",
   "queue": "Queue — {count}",
-  "close": "Close"
+  "close": "Close",
+  "discover": {
+    "noMoreSongs": "No more songs!",
+    "comeBackLater": "Come back later for fresh picks.",
+    "skip": "Skip",
+    "undo": "Undo",
+    "pause": "Pause",
+    "play": "Play",
+    "addToPlaylist": "Add to playlist",
+    "like": "Like"
+  }
 }

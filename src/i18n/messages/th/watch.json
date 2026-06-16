@@ -56,7 +56,8 @@
     "speed": "ความเร็ว",
     "normal": "ปกติ",
     "auto": "อัตโนมัติ",
-    "locked": "ล็อค"
+    "locked": "ล็อค",
+    "closeAriaLabel": "Close settings"
   },
   "subtitles": {
     "title": "คำบรรยาย",

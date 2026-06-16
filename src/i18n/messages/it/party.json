@@ -40,7 +40,8 @@
   },
   "video": {
     "noOneOnCamera": "Nessuno davanti alla telecamera",
-    "turnOnCamera": "Accendi la telecamera o aspetta che altri si uniscano"
+    "turnOnCamera": "Accendi la telecamera o aspetta che altri si uniscano",
+    "resize": "Resize"
   },
   "status": {
     "connected": "Connesso",

@@ -81,5 +81,6 @@
   "clipSave": "저장",
   "clipCancel": "취소",
   "clipRename": "클립 이름 변경",
-  "clipDelete": "클립 삭제"
+  "clipDelete": "클립 삭제",
+  "clipRecordTitle": "Record clip (max 5 min)"
 }

@@ -559,7 +559,9 @@ export function AppPreferences() {
                 </p>
               </div>
               <span className="text-sm font-headline font-bold text-foreground">
-                {crossfadeSec === 0 ? 'Off' : `${crossfadeSec}s`}
+                {crossfadeSec === 0
+                  ? t('preferences.crossfadeOff')
+                  : `${crossfadeSec}s`}
               </span>
             </div>
             <div className="relative w-full h-8 flex items-center">
@@ -589,8 +591,8 @@ export function AppPreferences() {
               />
             </div>
             <div className="flex justify-between text-xs font-headline text-muted-foreground">
-              <span>Off</span>
-              <span>12s</span>
+              <span>{t('preferences.crossfadeOff')}</span>
+              <span>{t('preferences.crossfadeMax')}</span>
             </div>
           </div>
         </div>
