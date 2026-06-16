@@ -32,6 +32,16 @@
 				<string>com.googleusercontent.apps.99440023345-b4aomde426cgkhb4p4dukm6ccg4jgn9p</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>Spotify</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nightwatch</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>

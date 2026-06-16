@@ -142,8 +142,11 @@ export function MusicView() {
           onCreatePlaylist={() => setShowCreatePlaylist(true)}
           onImportSpotify={async () => {
             const { SpotifyAuth } = await import('capacitor-spotify-auth');
+            const { checkIsMobile } = await import('@/lib/electron-bridge');
             const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
-            const redirectUri = `${window.location.origin}/music/spotify/callback`;
+            const redirectUri = checkIsMobile()
+              ? 'nightwatch://music/spotify/callback'
+              : `${window.location.origin}/music/spotify/callback`;
             try {
               const result = await SpotifyAuth.authorize({
                 clientId,
