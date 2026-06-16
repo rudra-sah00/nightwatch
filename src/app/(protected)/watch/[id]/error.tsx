@@ -4,9 +4,8 @@ import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-// biome-ignore lint/correctness/noUnusedFunctionParameters: Next.js error boundary API
 export default function WatchError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };

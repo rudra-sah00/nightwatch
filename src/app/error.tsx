@@ -4,9 +4,8 @@ import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
-// biome-ignore lint/correctness/noUnusedFunctionParameters: Next.js error boundary API
 export default function ErrorPage({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
