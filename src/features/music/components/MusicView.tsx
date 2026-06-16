@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import {
   getBrowseModules,
   getMusicHome,
@@ -15,6 +14,7 @@ import {
   getTrending,
 } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useAuth } from '@/providers/auth-provider';
 import { CreatePlaylistDialog } from './CreatePlaylistDialog';
 import { LanguagePickerDialog } from './LanguagePickerDialog';
 import { MusicHeader } from './MusicHeader';
@@ -22,6 +22,7 @@ import { MusicSearchSpotlight } from './MusicSearchSpotlight';
 import { MusicSections, type MusicSectionsData } from './MusicSections';
 import { MusicSkeleton } from './MusicSkeleton';
 import { PlaylistActionMenu } from './PlaylistActionMenu';
+import { SpotifyPlaylistPicker } from './SpotifyPlaylistPicker';
 
 /**
  * Top-level orchestrator for the `/music` home page.
@@ -40,9 +41,11 @@ import { PlaylistActionMenu } from './PlaylistActionMenu';
 export function MusicView() {
   const searchParams = useSearchParams();
   const player = useMusicPlayerContext();
+  const user = useAuth((s) => s.user);
   const t = useTranslations('music');
   const [showExplore, setShowExplore] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showPlaylistPicker, setShowPlaylistPicker] = useState(false);
 
   const [data, setData] = useState<MusicSectionsData>({
     charts: [],
@@ -140,40 +143,50 @@ export function MusicView() {
         <PlaylistActionMenu
           onClose={() => setShowActionMenu(false)}
           onCreatePlaylist={() => setShowCreatePlaylist(true)}
-          onImportSpotify={async () => {
-            try {
-              const { SpotifyAuth } = await import('capacitor-spotify-auth');
-              const { checkIsMobile } = await import('@/lib/electron-bridge');
-              const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
-              const redirectUri = checkIsMobile()
-                ? 'nightwatch://music/spotify/callback'
-                : `${window.location.origin}/music/spotify/callback`;
-              alert(
-                `Debug: clientId=${clientId.slice(0, 8)}... mobile=${checkIsMobile()} uri=${redirectUri}`,
-              );
-              const result = await SpotifyAuth.authorize({
-                clientId,
-                redirectUri,
-                scopes: 'playlist-read-private playlist-read-collaborative',
-              });
-              // Got code natively — fire import directly
-              const { apiFetch } = await import('@/lib/fetch');
-              apiFetch('/api/music/spotify/import', {
-                method: 'POST',
-                body: JSON.stringify({
-                  code: result.code,
+          spotifyConnected={
+            user?.connectedServices?.includes('spotify') ?? false
+          }
+          onSpotifyAction={async () => {
+            const connected =
+              user?.connectedServices?.includes('spotify') ?? false;
+            if (connected) {
+              setShowPlaylistPicker(true);
+            } else {
+              try {
+                const { SpotifyAuth } = await import('capacitor-spotify-auth');
+                const { checkIsMobile } = await import('@/lib/electron-bridge');
+                const clientId =
+                  process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
+                const redirectUri = checkIsMobile()
+                  ? 'nightwatch://music/spotify/callback'
+                  : `${window.location.origin}/music/spotify/callback`;
+                const result = await SpotifyAuth.authorize({
+                  clientId,
                   redirectUri,
-                }),
-                headers: { 'Content-Type': 'application/json' },
-              })
-                .then(() => toast.success(t('spotifyImportStarted')))
-                .catch(() => toast.error(t('spotifyImportFailed')));
-            } catch (err) {
-              alert(
-                `Spotify error: ${err instanceof Error ? err.message : String(err)}`,
-              );
+                  scopes: 'playlist-read-private playlist-read-collaborative',
+                });
+                const { apiFetch } = await import('@/lib/fetch');
+                await apiFetch('/api/music/spotify/connect', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    code: result.code,
+                    redirectUri,
+                  }),
+                  headers: { 'Content-Type': 'application/json' },
+                });
+                setShowPlaylistPicker(true);
+              } catch {
+                // User cancelled
+              }
             }
           }}
+        />
+      )}
+
+      {showPlaylistPicker && (
+        <SpotifyPlaylistPicker
+          onClose={() => setShowPlaylistPicker(false)}
+          onImported={() => setPlaylistKey((k) => k + 1)}
         />
       )}
 

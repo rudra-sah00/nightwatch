@@ -39,7 +39,7 @@
   "deletePlaylist": "Eliminar",
   "deletePlaylistTitle": "Eliminar lista",
   "deletePlaylistDescription": "Esta acción no se puede deshacer. Todas las canciones de esta lista se perderán.",
-  "cancel": "Cancelar",
+  "cancel": "Cancel",
   "songCount": "{count, plural, one {# canción} other {# canciones}}",
   "queueTitle": "Cola",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

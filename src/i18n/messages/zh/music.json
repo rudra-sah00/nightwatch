@@ -39,7 +39,7 @@
   "deletePlaylist": "删除",
   "deletePlaylistTitle": "删除播放列表",
   "deletePlaylistDescription": "此操作无法撤销。此播放列表中的所有歌曲将丢失。",
-  "cancel": "取消",
+  "cancel": "Cancel",
   "songCount": "{count} 首歌曲",
   "queueTitle": "队列",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

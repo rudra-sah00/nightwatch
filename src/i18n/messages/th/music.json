@@ -39,7 +39,7 @@
   "deletePlaylist": "ลบ",
   "deletePlaylistTitle": "ลบเพลย์ลิสต์",
   "deletePlaylistDescription": "การดำเนินการนี้ไม่สามารถย้อนกลับได้ เพลงทั้งหมดในเพลย์ลิสต์นี้จะหายไป",
-  "cancel": "ยกเลิก",
+  "cancel": "Cancel",
   "songCount": "{count} เพลง",
   "queueTitle": "คิว",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

@@ -39,7 +39,7 @@
   "deletePlaylist": "Sil",
   "deletePlaylistTitle": "Çalma listesini sil",
   "deletePlaylistDescription": "Bu işlem geri alınamaz. Bu çalma listesindeki tüm şarkılar kaybolacak.",
-  "cancel": "İptal",
+  "cancel": "Cancel",
   "songCount": "{count} şarkı",
   "queueTitle": "Sıra",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

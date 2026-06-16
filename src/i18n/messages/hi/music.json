@@ -39,7 +39,7 @@
   "deletePlaylist": "हटाएं",
   "deletePlaylistTitle": "प्लेलिस्ट हटाएं",
   "deletePlaylistDescription": "यह क्रिया पूर्ववत नहीं की जा सकती। इस प्लेलिस्ट के सभी गाने खो जाएंगे।",
-  "cancel": "रद्द करें",
+  "cancel": "Cancel",
   "songCount": "{count, plural, one {# गाना} other {# गाने}}",
   "queueTitle": "कतार",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

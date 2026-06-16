@@ -39,7 +39,7 @@
   "deletePlaylist": "Elimina",
   "deletePlaylistTitle": "Elimina playlist",
   "deletePlaylistDescription": "Questa azione non può essere annullata. Tutte le canzoni in questa playlist andranno perse.",
-  "cancel": "Annulla",
+  "cancel": "Cancel",
   "songCount": "{count, plural, one {# canzone} other {# canzoni}}",
   "queueTitle": "Coda",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

@@ -39,7 +39,7 @@
   "deletePlaylist": "Excluir",
   "deletePlaylistTitle": "Excluir playlist",
   "deletePlaylistDescription": "Esta ação não pode ser desfeita. Todas as músicas desta playlist serão perdidas.",
-  "cancel": "Cancelar",
+  "cancel": "Cancel",
   "songCount": "{count, plural, one {# música} other {# músicas}}",
   "queueTitle": "Fila",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

@@ -39,7 +39,7 @@
   "deletePlaylist": "삭제",
   "deletePlaylistTitle": "플레이리스트 삭제",
   "deletePlaylistDescription": "이 작업은 되돌릴 수 없습니다. 이 플레이리스트의 모든 곡이 삭제됩니다.",
-  "cancel": "취소",
+  "cancel": "Cancel",
   "songCount": "{count}곡",
   "queueTitle": "대기열",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

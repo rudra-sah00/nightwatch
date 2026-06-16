@@ -39,7 +39,7 @@
   "deletePlaylist": "Löschen",
   "deletePlaylistTitle": "Playlist löschen",
   "deletePlaylistDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Songs in dieser Playlist gehen verloren.",
-  "cancel": "Abbrechen",
+  "cancel": "Cancel",
   "songCount": "{count, plural, one {# Song} other {# Songs}}",
   "queueTitle": "Warteschlange",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }

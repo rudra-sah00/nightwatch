@@ -6,17 +6,15 @@ import { useEffect, useState } from 'react';
 interface PlaylistActionMenuProps {
   onClose: () => void;
   onCreatePlaylist: () => void;
-  onImportSpotify: () => void;
+  onSpotifyAction: () => void;
+  spotifyConnected: boolean;
 }
 
-/**
- * Menu shown when user taps the + button in the music header.
- * Matches the minimal text-only design of CreatePlaylistDialog.
- */
 export function PlaylistActionMenu({
   onClose,
   onCreatePlaylist,
-  onImportSpotify,
+  onSpotifyAction,
+  spotifyConnected,
 }: PlaylistActionMenuProps) {
   const t = useTranslations('music');
   const [visible, setVisible] = useState(false);
@@ -60,11 +58,13 @@ export function PlaylistActionMenu({
           type="button"
           onClick={() => {
             close();
-            onImportSpotify();
+            onSpotifyAction();
           }}
           className="text-[#1DB954]/70 text-lg font-headline font-black uppercase tracking-wider cursor-pointer hover:text-[#1DB954] transition-colors"
         >
-          {t('importFromSpotify')}
+          {spotifyConnected
+            ? t('selectPlaylistsToImport')
+            : t('connectToSpotify')}
         </button>
 
         <button

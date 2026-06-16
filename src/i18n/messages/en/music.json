@@ -113,6 +113,9 @@
     "like": "Like"
   },
   "importFromSpotify": "Import from Spotify",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}",
   "spotifyImporting": "Connecting to Spotify...",
   "spotifyImportStarted": "Import started! You'll be notified when done.",
   "spotifyImportQueued": "Import queued — check back soon!",

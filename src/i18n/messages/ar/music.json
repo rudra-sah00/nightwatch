@@ -39,7 +39,7 @@
   "deletePlaylist": "حذف",
   "deletePlaylistTitle": "حذف قائمة التشغيل",
   "deletePlaylistDescription": "لا يمكن التراجع عن هذا الإجراء. ستفقد جميع الأغاني في قائمة التشغيل هذه.",
-  "cancel": "إلغاء",
+  "cancel": "Cancel",
   "songCount": "{count, plural, zero {لا أغاني} one {أغنية واحدة} two {أغنيتان} few {# أغانٍ} many {# أغنية} other {# أغنية}}",
   "queueTitle": "قائمة الانتظار",
   "trending": "Trending",
@@ -118,5 +118,8 @@
   "spotifyImportQueued": "Import queued — check back soon!",
   "spotifyAuthFailed": "Spotify authentication failed",
   "spotifyImportFailed": "Failed to start import",
-  "spotifyImportDone": "Spotify playlists imported!"
+  "spotifyImportDone": "Spotify playlists imported!",
+  "connectToSpotify": "Connect to Spotify",
+  "selectPlaylistsToImport": "Select playlists to import",
+  "importSelected": "Import {count}"
 }
