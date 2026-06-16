@@ -3,9 +3,8 @@
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-// biome-ignore lint/correctness/noUnusedFunctionParameters: Next.js error boundary API
 export default function MainError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
