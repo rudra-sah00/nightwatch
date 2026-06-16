@@ -111,5 +111,12 @@
     "play": "Play",
     "addToPlaylist": "Add to playlist",
     "like": "Like"
-  }
+  },
+  "importFromSpotify": "Import from Spotify",
+  "spotifyImporting": "Connecting to Spotify...",
+  "spotifyImportStarted": "Import started! You'll be notified when done.",
+  "spotifyImportQueued": "Import queued — check back soon!",
+  "spotifyAuthFailed": "Spotify authentication failed",
+  "spotifyImportFailed": "Failed to start import",
+  "spotifyImportDone": "Spotify playlists imported!"
 }
