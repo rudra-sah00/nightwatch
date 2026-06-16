@@ -114,7 +114,7 @@ importers:
         version: 1.2.4(@types/react@19.2.8)(react@19.2.4)
       '@serwist/next':
         specifier: ^9.5.7
-        version: 9.5.7(@serwist/cli@9.5.7(@types/node@20.19.30)(browserslist@4.28.1)(esbuild@0.27.2)(typescript@5.9.3))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)(webpack@5.105.4(esbuild@0.27.2)(lightningcss@1.30.2)(postcss@8.5.10))
+        version: 9.5.7(@serwist/cli@9.5.7(@types/node@20.19.30)(browserslist@4.28.2)(esbuild@0.27.2)(typescript@5.9.3))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)(webpack@5.105.4(esbuild@0.27.2)(lightningcss@1.30.2)(postcss@8.5.10))
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.19(tailwindcss@4.1.18)
@@ -125,8 +125,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4(agora-rtc-sdk-ng@4.24.2(debug@4.4.3))
       capacitor-spotify-auth:
-        specifier: ^1.0.0
-        version: 1.0.0(@capacitor/core@8.3.1)
+        specifier: ^1.0.1
+        version: 1.0.1(@capacitor/core@8.3.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -228,7 +228,7 @@ importers:
         version: 8.0.1
       serwist:
         specifier: ^9.5.7
-        version: 9.5.7(browserslist@4.28.1)(typescript@5.9.3)
+        version: 9.5.7(browserslist@4.28.2)(typescript@5.9.3)
       socket.io-client:
         specifier: ^4.8.3
         version: 4.8.3
@@ -268,7 +268,7 @@ importers:
         version: 1.58.2
       '@serwist/cli':
         specifier: ^9.5.7
-        version: 9.5.7(@types/node@20.19.30)(browserslist@4.28.1)(esbuild@0.27.2)(typescript@5.9.3)
+        version: 9.5.7(@types/node@20.19.30)(browserslist@4.28.2)(esbuild@0.27.2)(typescript@5.9.3)
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.1.18
@@ -3177,6 +3177,9 @@ packages:
   '@types/node@20.19.42':
     resolution: {integrity: sha512-5L7SUaFC1RyDraj2yRhyBzHTobyXHmohD100CChNtyPyleoq37Mqab5Gn8XEKI04dfN/oqPdpHk38MgcQWHbZg==}
 
+  '@types/node@20.19.43':
+    resolution: {integrity: sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA==}
+
   '@types/node@24.12.2':
     resolution: {integrity: sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==}
 
@@ -3375,6 +3378,11 @@ packages:
 
   acorn@8.16.0:
     resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  acorn@8.17.0:
+    resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -3586,6 +3594,11 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
+  baseline-browser-mapping@2.10.37:
+    resolution: {integrity: sha512-girxaJ7WZssDOFhzCGZTDKoTa1gk6A1TbflaYTpykLJ4UU9Fz9kx1aREM8JCuoVHbL8X8T/mJg7w2oYSq72Oig==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
   big-integer@1.6.52:
     resolution: {integrity: sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==}
     engines: {node: '>=0.6'}
@@ -3628,6 +3641,11 @@ packages:
 
   browserslist@4.28.1:
     resolution: {integrity: sha512-ZC5Bd0LgJXgwGqUknZY/vkUQ04r8NXnJZ3yYi4vDmSiZmC/pdSN0NbNRPxZpbtO4uAfDUAFffO8IZoM3Gj8IkA==}
+    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
+    hasBin: true
+
+  browserslist@4.28.2:
+    resolution: {integrity: sha512-48xSriZYYg+8qXna9kwqjIVzuQxi+KYWp2+5nCYnYKPTr0LvD89Jqk2Or5ogxz0NUMfIjhh2lIUX/LyX9B4oIg==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
@@ -3698,8 +3716,11 @@ packages:
   caniuse-lite@1.0.30001797:
     resolution: {integrity: sha512-l8xKG+gwAIExZGl9FrF7KUwuOmk6wbEPC9Xoy/RtnWv1XG0Q4LFlagaLpUv3Kiza3W/wm27zy0yWJEieYKAP6w==}
 
-  capacitor-spotify-auth@1.0.0:
-    resolution: {integrity: sha512-93G9vN9SFxCebJRRxUdoblQftTic4IJZs51uSsAn0Z7UcZYUyI8bPniyZbST7XuttENAJs4Vvn9j47+FyNg+PQ==}
+  caniuse-lite@1.0.30001799:
+    resolution: {integrity: sha512-hG1bReV+OUU+MOqK4t/ZWI0tZOyz3rqS9XuhOUz1cIcbwBKjOyJEJuw9ER5JuNyqxNk8u/JUVbGibBOL1yrjFw==}
+
+  capacitor-spotify-auth@1.0.1:
+    resolution: {integrity: sha512-ZhmrWubwDNBzuKVQ3IlMObz4PqFX3erN6077AVk2lzTbigSrXde2IBV3346rcgDWOK+RLrc8iNQYs/yP++3ZsQ==}
     peerDependencies:
       '@capacitor/core': ^7.0.0
 
@@ -4201,6 +4222,9 @@ packages:
   electron-to-chromium@1.5.283:
     resolution: {integrity: sha512-3vifjt1HgrGW/h76UEeny+adYApveS9dH2h3p57JYzBSXJIKUJAvtmIytDKjcSCt9xHfrNCFJ7gts6vkhuq++w==}
 
+  electron-to-chromium@1.5.373:
+    resolution: {integrity: sha512-G2Hym8JIf/QreuseqkDibgH8Ci8KfJzqGDKdakbhSx9UltwRBH2cBLAWU/lBX0sCdv0TlhyxQyDCnSfxgMWsjA==}
+
   electron-updater@6.8.3:
     resolution: {integrity: sha512-Z6sgw3jgbikWKXei1ENdqFOxBP0WlXg3TtKfz0rgw2vIZFJUyI4pD7ZN7jrkm7EoMK+tcm/qTnPUdqfZukBlBQ==}
 
@@ -4257,8 +4281,8 @@ packages:
     resolution: {integrity: sha512-LgQMM4WXU3QI+SYgEc2liRgznaD5ojbmY3sb8LxyguVkIg5FxdpTkvk72te2R38/TGKxH634oLxXRGY6d7AP+Q==}
     engines: {node: '>=10.13.0'}
 
-  enhanced-resolve@5.23.0:
-    resolution: {integrity: sha512-yJN/BOOLxcOW2aQgeif9mSnaUB8KtvmMMp56oA1kx1CRfBKbhZm2pJ+NBY+3eOboHxix8lfjWpHE0Ei5U8RbSA==}
+  enhanced-resolve@5.24.0:
+    resolution: {integrity: sha512-SkE2t82KlkkxQRVMVLAGKxLfORGQfrkx5dkj+vlgXRVNEdPc4eZcR+J/Fvj8C+yKSFH5L0q3NFlyufOVQnCcYQ==}
     engines: {node: '>=10.13.0'}
 
   entities@4.5.0:
@@ -5855,6 +5879,10 @@ packages:
   node-releases@2.0.27:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
 
+  node-releases@2.0.47:
+    resolution: {integrity: sha512-Uzmd6LXpouKo8EUK68IjH4+E01w/hXyV3R3g/geCJo+rXLNfh1xucB+LOzYEOQPSiUK3h/xZf0cQGcSsmyL2Og==}
+    engines: {node: '>=18'}
+
   nopt@6.0.0:
     resolution: {integrity: sha512-ZwLpbTgdhuZUnZzjd7nb1ZV+4DoiC6/sfiVKok72ym/4Tlf+DFdlHYmT2JPmcNNWV6Pi3SDf1kT+A4r9RTuT9g==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
@@ -7281,8 +7309,8 @@ packages:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
 
-  watchpack@2.5.1:
-    resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
+  watchpack@2.5.2:
+    resolution: {integrity: sha512-6i/00NBjP4yGPs+caKSyRfpTF/8Torsu0MOW3mMzIbhgISFder8i7xbqgHlLMwJrdiN8ndBV3UA1/AfzPSr+jg==}
     engines: {node: '>=10.13.0'}
 
   wcwidth@1.0.1:
@@ -10062,11 +10090,24 @@ snapshots:
     transitivePeerDependencies:
       - browserslist
 
-  '@serwist/cli@9.5.7(@types/node@20.19.30)(browserslist@4.28.1)(esbuild@0.27.2)(typescript@5.9.3)':
+  '@serwist/build@9.5.7(browserslist@4.28.2)(typescript@5.9.3)':
+    dependencies:
+      '@serwist/utils': 9.5.7(browserslist@4.28.2)
+      common-tags: 1.8.2
+      glob: 10.5.0
+      pretty-bytes: 6.1.1
+      source-map: 0.8.0-beta.0
+      zod: 4.3.6
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - browserslist
+
+  '@serwist/cli@9.5.7(@types/node@20.19.30)(browserslist@4.28.2)(esbuild@0.27.2)(typescript@5.9.3)':
     dependencies:
       '@inquirer/prompts': 8.3.0(@types/node@20.19.30)
-      '@serwist/build': 9.5.7(browserslist@4.28.1)(typescript@5.9.3)
-      '@serwist/utils': 9.5.7(browserslist@4.28.1)
+      '@serwist/build': 9.5.7(browserslist@4.28.2)(typescript@5.9.3)
+      '@serwist/utils': 9.5.7(browserslist@4.28.2)
       chalk: 5.6.2
       chokidar: 5.0.0
       common-tags: 1.8.2
@@ -10083,7 +10124,7 @@ snapshots:
       - browserslist
       - typescript
 
-  '@serwist/next@9.5.7(@serwist/cli@9.5.7(@types/node@20.19.30)(browserslist@4.28.1)(esbuild@0.27.2)(typescript@5.9.3))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)(webpack@5.105.4(esbuild@0.27.2)(lightningcss@1.30.2)(postcss@8.5.10))':
+  '@serwist/next@9.5.7(@serwist/cli@9.5.7(@types/node@20.19.30)(browserslist@4.28.2)(esbuild@0.27.2)(typescript@5.9.3))(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)(webpack@5.105.4(esbuild@0.27.2)(lightningcss@1.30.2)(postcss@8.5.10))':
     dependencies:
       '@serwist/build': 9.5.7(browserslist@4.28.1)(typescript@5.9.3)
       '@serwist/utils': 9.5.7(browserslist@4.28.1)
@@ -10098,7 +10139,7 @@ snapshots:
       serwist: 9.5.7(browserslist@4.28.1)(typescript@5.9.3)
       zod: 4.3.6
     optionalDependencies:
-      '@serwist/cli': 9.5.7(@types/node@20.19.30)(browserslist@4.28.1)(esbuild@0.27.2)(typescript@5.9.3)
+      '@serwist/cli': 9.5.7(@types/node@20.19.30)(browserslist@4.28.2)(esbuild@0.27.2)(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
       - webpack
@@ -10106,6 +10147,10 @@ snapshots:
   '@serwist/utils@9.5.7(browserslist@4.28.1)':
     optionalDependencies:
       browserslist: 4.28.1
+
+  '@serwist/utils@9.5.7(browserslist@4.28.2)':
+    optionalDependencies:
+      browserslist: 4.28.2
 
   '@serwist/webpack-plugin@9.5.7(browserslist@4.28.1)(typescript@5.9.3)(webpack@5.105.4(esbuild@0.27.2)(lightningcss@1.30.2)(postcss@8.5.10))':
     dependencies:
@@ -10419,6 +10464,11 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/node@20.19.43':
+    dependencies:
+      undici-types: 6.21.0
+    optional: true
+
   '@types/node@24.12.2':
     dependencies:
       undici-types: 7.16.0
@@ -10673,14 +10723,17 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
-  acorn-import-phases@1.0.4(acorn@8.16.0):
+  acorn-import-phases@1.0.4(acorn@8.17.0):
     dependencies:
-      acorn: 8.16.0
+      acorn: 8.17.0
     optional: true
 
   acorn@8.15.0: {}
 
   acorn@8.16.0: {}
+
+  acorn@8.17.0:
+    optional: true
 
   agent-base@6.0.2:
     dependencies:
@@ -10924,6 +10977,9 @@ snapshots:
 
   baseline-browser-mapping@2.10.34: {}
 
+  baseline-browser-mapping@2.10.37:
+    optional: true
+
   big-integer@1.6.52: {}
 
   bindings@1.5.0:
@@ -10993,6 +11049,15 @@ snapshots:
       electron-to-chromium: 1.5.283
       node-releases: 2.0.27
       update-browserslist-db: 1.2.3(browserslist@4.28.1)
+
+  browserslist@4.28.2:
+    dependencies:
+      baseline-browser-mapping: 2.10.37
+      caniuse-lite: 1.0.30001799
+      electron-to-chromium: 1.5.373
+      node-releases: 2.0.47
+      update-browserslist-db: 1.2.3(browserslist@4.28.2)
+    optional: true
 
   buffer-crc32@0.2.13: {}
 
@@ -11112,7 +11177,10 @@ snapshots:
 
   caniuse-lite@1.0.30001797: {}
 
-  capacitor-spotify-auth@1.0.0(@capacitor/core@8.3.1):
+  caniuse-lite@1.0.30001799:
+    optional: true
+
+  capacitor-spotify-auth@1.0.1(@capacitor/core@8.3.1):
     dependencies:
       '@capacitor/core': 8.3.1
 
@@ -11606,6 +11674,9 @@ snapshots:
 
   electron-to-chromium@1.5.283: {}
 
+  electron-to-chromium@1.5.373:
+    optional: true
+
   electron-updater@6.8.3:
     dependencies:
       builder-util-runtime: 9.5.1
@@ -11689,7 +11760,7 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.3.0
 
-  enhanced-resolve@5.23.0:
+  enhanced-resolve@5.24.0:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.3
@@ -12683,7 +12754,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.19.42
+      '@types/node': 20.19.43
       merge-stream: 2.0.0
       supports-color: 8.1.1
     optional: true
@@ -13620,6 +13691,9 @@ snapshots:
 
   node-releases@2.0.27: {}
 
+  node-releases@2.0.47:
+    optional: true
+
   nopt@6.0.0:
     dependencies:
       abbrev: 1.1.1
@@ -14410,6 +14484,15 @@ snapshots:
     transitivePeerDependencies:
       - browserslist
 
+  serwist@9.5.7(browserslist@4.28.2)(typescript@5.9.3):
+    dependencies:
+      '@serwist/utils': 9.5.7(browserslist@4.28.2)
+      idb: 8.0.3
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - browserslist
+
   set-blocking@2.0.0: {}
 
   set-function-length@1.2.2:
@@ -14825,7 +14908,7 @@ snapshots:
   terser@5.48.0:
     dependencies:
       '@jridgewell/source-map': 0.3.11
-      acorn: 8.16.0
+      acorn: 8.17.0
       commander: 2.20.3
       source-map-support: 0.5.21
     optional: true
@@ -15029,6 +15112,13 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
+  update-browserslist-db@1.2.3(browserslist@4.28.2):
+    dependencies:
+      browserslist: 4.28.2
+      escalade: 3.2.0
+      picocolors: 1.1.1
+    optional: true
+
   update-notifier@7.3.1:
     dependencies:
       boxen: 8.0.1
@@ -15173,9 +15263,8 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
-  watchpack@2.5.1:
+  watchpack@2.5.2:
     dependencies:
-      glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
     optional: true
 
@@ -15208,11 +15297,11 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@webassemblyjs/wasm-edit': 1.14.1
       '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.16.0
-      acorn-import-phases: 1.0.4(acorn@8.16.0)
-      browserslist: 4.28.1
+      acorn: 8.17.0
+      acorn-import-phases: 1.0.4(acorn@8.17.0)
+      browserslist: 4.28.2
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.23.0
+      enhanced-resolve: 5.24.0
       es-module-lexer: 2.1.0
       eslint-scope: 5.1.1
       events: 3.3.0
@@ -15225,7 +15314,7 @@ snapshots:
       schema-utils: 4.3.3
       tapable: 2.3.3
       terser-webpack-plugin: 5.6.1(esbuild@0.27.2)(lightningcss@1.30.2)(postcss@8.5.10)(webpack@5.105.4(esbuild@0.27.2)(lightningcss@1.30.2)(postcss@8.5.10))
-      watchpack: 2.5.1
+      watchpack: 2.5.2
       webpack-sources: 3.5.0
     transitivePeerDependencies:
       - '@minify-html/node'
