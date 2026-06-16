@@ -46,6 +46,10 @@ export function MusicView() {
   const [showExplore, setShowExplore] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showPlaylistPicker, setShowPlaylistPicker] = useState(false);
+  const [spotifyPlaylists, setSpotifyPlaylists] = useState<
+    | { id: string; name: string; image: string; trackCount: number }[]
+    | undefined
+  >(undefined);
 
   const [data, setData] = useState<MusicSectionsData>({
     charts: [],
@@ -150,6 +154,7 @@ export function MusicView() {
             const connected =
               user?.connectedServices?.includes('spotify') ?? false;
             if (connected) {
+              setSpotifyPlaylists(undefined);
               setShowPlaylistPicker(true);
             } else {
               try {
@@ -166,7 +171,14 @@ export function MusicView() {
                   scopes: 'playlist-read-private playlist-read-collaborative',
                 });
                 const { apiFetch } = await import('@/lib/fetch');
-                await apiFetch('/api/music/spotify/connect', {
+                const playlists = await apiFetch<
+                  {
+                    id: string;
+                    name: string;
+                    image: string;
+                    trackCount: number;
+                  }[]
+                >('/api/music/spotify/connect', {
                   method: 'POST',
                   body: JSON.stringify({
                     code: result.code,
@@ -174,6 +186,7 @@ export function MusicView() {
                   }),
                   headers: { 'Content-Type': 'application/json' },
                 });
+                setSpotifyPlaylists(playlists);
                 setShowPlaylistPicker(true);
               } catch {
                 // User cancelled
@@ -187,6 +200,7 @@ export function MusicView() {
         <SpotifyPlaylistPicker
           onClose={() => setShowPlaylistPicker(false)}
           onImported={() => setPlaylistKey((k) => k + 1)}
+          initialPlaylists={spotifyPlaylists}
         />
       )}
 
