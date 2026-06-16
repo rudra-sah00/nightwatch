@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import {
   getBrowseModules,
   getMusicHome,
@@ -139,12 +140,31 @@ export function MusicView() {
         <PlaylistActionMenu
           onClose={() => setShowActionMenu(false)}
           onCreatePlaylist={() => setShowCreatePlaylist(true)}
-          onImportSpotify={() => {
-            const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
+          onImportSpotify={async () => {
+            const { SpotifyAuth } = await import('capacitor-spotify-auth');
+            const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
             const redirectUri = `${window.location.origin}/music/spotify/callback`;
-            const scopes = 'playlist-read-private playlist-read-collaborative';
-            const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
-            window.location.href = url;
+            try {
+              const result = await SpotifyAuth.authorize({
+                clientId,
+                redirectUri,
+                scopes: 'playlist-read-private playlist-read-collaborative',
+              });
+              // Got code natively — fire import directly
+              const { apiFetch } = await import('@/lib/fetch');
+              apiFetch('/api/music/spotify/import', {
+                method: 'POST',
+                body: JSON.stringify({
+                  code: result.code,
+                  redirectUri,
+                }),
+                headers: { 'Content-Type': 'application/json' },
+              })
+                .then(() => toast.success(t('spotifyImportStarted')))
+                .catch(() => toast.error(t('spotifyImportFailed')));
+            } catch {
+              // User cancelled or error — do nothing
+            }
           }}
         />
       )}

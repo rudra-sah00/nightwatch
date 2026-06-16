@@ -124,6 +124,9 @@ importers:
       agora-rtm-sdk:
         specifier: 2.2.4
         version: 2.2.4(agora-rtc-sdk-ng@4.24.2(debug@4.4.3))
+      capacitor-spotify-auth:
+        specifier: ^1.0.0
+        version: 1.0.0(@capacitor/core@8.3.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -3694,6 +3697,11 @@ packages:
 
   caniuse-lite@1.0.30001797:
     resolution: {integrity: sha512-l8xKG+gwAIExZGl9FrF7KUwuOmk6wbEPC9Xoy/RtnWv1XG0Q4LFlagaLpUv3Kiza3W/wm27zy0yWJEieYKAP6w==}
+
+  capacitor-spotify-auth@1.0.0:
+    resolution: {integrity: sha512-93G9vN9SFxCebJRRxUdoblQftTic4IJZs51uSsAn0Z7UcZYUyI8bPniyZbST7XuttENAJs4Vvn9j47+FyNg+PQ==}
+    peerDependencies:
+      '@capacitor/core': ^7.0.0
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -11103,6 +11111,10 @@ snapshots:
   camelcase@8.0.0: {}
 
   caniuse-lite@1.0.30001797: {}
+
+  capacitor-spotify-auth@1.0.0(@capacitor/core@8.3.1):
+    dependencies:
+      '@capacitor/core': 8.3.1
 
   ccount@2.0.1: {}
 
