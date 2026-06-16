@@ -28,6 +28,10 @@ export function useConnectedAccounts() {
       setDisconnecting(provider);
       try {
         await disconnectService(provider);
+        if (provider === 'spotify') {
+          const { SpotifyAuth } = await import('capacitor-spotify-auth');
+          await SpotifyAuth.logout();
+        }
         updateUser({
           connectedServices: connectedServices.filter((s) => s !== provider),
         });

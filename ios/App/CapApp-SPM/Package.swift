@@ -31,7 +31,7 @@ let package = Package(
         .package(name: "CapawesomeCapacitorBadge", path: "../../../node_modules/.pnpm/@capawesome+capacitor-badge@8.0.2_@capacitor+core@8.3.1/node_modules/@capawesome/capacitor-badge"),
         .package(name: "CapgoCapacitorIncomingCallKit", path: "../../../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit"),
         .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/.pnpm/@capgo+capacitor-social-login@8.3.22_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-social-login"),
-        .package(name: "CapacitorSpotifyAuth", path: "../../../node_modules/.pnpm/capacitor-spotify-auth@1.0.3_@capacitor+core@8.3.1/node_modules/capacitor-spotify-auth")
+        .package(name: "CapacitorSpotifyAuth", path: "../../../node_modules/.pnpm/capacitor-spotify-auth@1.0.4_@capacitor+core@8.3.1/node_modules/capacitor-spotify-auth")
     ],
     targets: [
         .target(
