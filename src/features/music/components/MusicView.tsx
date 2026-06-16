@@ -144,12 +144,13 @@ export function MusicView() {
             try {
               const { SpotifyAuth } = await import('capacitor-spotify-auth');
               const { checkIsMobile } = await import('@/lib/electron-bridge');
-              const clientId =
-                process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
+              const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
               const redirectUri = checkIsMobile()
                 ? 'nightwatch://music/spotify/callback'
                 : `${window.location.origin}/music/spotify/callback`;
-              alert(`Debug: clientId=${clientId.slice(0, 8)}... mobile=${checkIsMobile()} uri=${redirectUri}`);
+              alert(
+                `Debug: clientId=${clientId.slice(0, 8)}... mobile=${checkIsMobile()} uri=${redirectUri}`,
+              );
               const result = await SpotifyAuth.authorize({
                 clientId,
                 redirectUri,
@@ -168,7 +169,9 @@ export function MusicView() {
                 .then(() => toast.success(t('spotifyImportStarted')))
                 .catch(() => toast.error(t('spotifyImportFailed')));
             } catch (err) {
-              alert(`Spotify error: ${err instanceof Error ? err.message : String(err)}`);
+              alert(
+                `Spotify error: ${err instanceof Error ? err.message : String(err)}`,
+              );
             }
           }}
         />
