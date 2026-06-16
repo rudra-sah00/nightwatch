@@ -175,7 +175,8 @@
     "preferences": "Preferences",
     "security": "Security",
     "devices": "Devices",
-    "activity": "Activity"
+    "activity": "Activity",
+    "connectedAccounts": "Connected Accounts"
   },
   "devices": {
     "title": "Active Devices",
@@ -212,5 +213,12 @@
     "disconnected": "Google account disconnected",
     "disconnectFailed": "Failed to disconnect Google account",
     "connected": "Google account connected"
+  },
+  "connectedAccounts": {
+    "empty": "No accounts connected yet. Import playlists from the Music page to connect a service.",
+    "disconnect": "Disconnect",
+    "disconnecting": "Disconnecting...",
+    "disconnected": "{provider} disconnected",
+    "disconnectFailed": "Failed to disconnect"
   }
 }

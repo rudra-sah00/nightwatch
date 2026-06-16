@@ -7,6 +7,7 @@ export interface User {
   profilePhoto: string | null;
   googleId: string | null;
   googleEmail: string | null;
+  connectedServices?: string[];
 
   sessionId: string;
   createdAt: string;

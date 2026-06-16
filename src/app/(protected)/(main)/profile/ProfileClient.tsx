@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Monitor, Palette, Shield } from 'lucide-react';
+import { ChevronRight, Link2, Monitor, Palette, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ActivityGraph } from '@/features/profile/components/activity-graph';
@@ -11,6 +11,11 @@ const sections = [
   { href: '/profile/preferences', icon: Palette, key: 'preferences' },
   { href: '/profile/security', icon: Shield, key: 'security' },
   { href: '/profile/devices', icon: Monitor, key: 'devices' },
+  {
+    href: '/profile/connected-accounts',
+    icon: Link2,
+    key: 'connectedAccounts',
+  },
 ] as const;
 
 export default function ProfileClient() {
