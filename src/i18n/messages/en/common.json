@@ -59,7 +59,7 @@
   "tour": {
     "welcome": {
       "title": "Welcome to Nightwatch",
-      "description": "Let us show you around your new minimalist cinema experience. Form follows function."
+      "description": "Let us show you around your personal streaming companion. Synchronized playback, music, manga, and more."
     },
     "search": {
       "title": "Find Your Film",
@@ -70,16 +70,16 @@
       "description": "Pick up right where you left off. Every frame saved."
     },
     "live": {
-      "title": "Live Events",
-      "description": "Join watch parties and live streams currently happening."
+      "title": "Live Streams",
+      "description": "Watch live streams and join live chat in real-time."
     },
     "watchlist": {
       "title": "Your Queue",
       "description": "Save movies and episodes here to watch later."
     },
     "downloads": {
-      "title": "Offline Vault",
-      "description": "Watch movies anywhere, anytime. Access your offline downloads here."
+      "title": "Offline Downloads",
+      "description": "Download movies and shows to watch offline, anywhere."
     },
     "library": {
       "title": "Your Library",
@@ -87,35 +87,51 @@
     },
     "music": {
       "title": "Music",
-      "description": "Listen to curated radio stations and music while you browse."
+      "description": "Stream music with synced lyrics, playlists, equalizer, crossfade, and Spotify Connect-like device transfer."
+    },
+    "manga": {
+      "title": "Manga",
+      "description": "Read manga chapters with a smooth reader. Swipe through pages seamlessly."
     },
     "askAi": {
       "title": "Ask AI",
-      "description": "Talk to your AI assistant. Ask for recommendations, search content, or control playback with your voice."
+      "description": "Voice-to-voice AI assistant. Get recommendations, search content, or control playback hands-free."
     },
     "profile": {
-      "title": "Profile Settings",
-      "description": "Manage your account, preferences, and view your activity here."
+      "title": "Profile & Settings",
+      "description": "Manage your account, security, preferences, and connected devices."
     },
     "ready": {
-      "title": "You are ready",
-      "description": "Enjoy the pure cinematic experience. No distractions. Just film."
+      "title": "You're All Set",
+      "description": "Enjoy the experience. No distractions, just content."
     },
     "sidebar": {
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
     "friends": {
-      "title": "Friends & Social",
-      "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
+      "title": "Friends & Voice Calls",
+      "description": "See who's online, start voice calls, and manage friend requests. Hover the right edge to open."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
     "games": {
       "title": "Games",
       "description": "Take a break with browser games. Play right inside Nightwatch."
-    }
+    },
+    "mobileNav": {
+      "title": "Tap & Hold to Navigate",
+      "description": "Long-press the logo to open navigation, or long-press your profile to see friends."
+    },
+    "mobileSidebar": {
+      "title": "← Swipe to Navigate",
+      "description": "Swipe from the left edge to open this menu anytime. Home, Live, Music, Manga, Downloads, and more."
+    },
+    "mobileFriends": {
+      "title": "Friends Panel →",
+      "description": "Swipe from the right edge to see friends, online status, and start voice calls."
+    },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "Creator Identity",

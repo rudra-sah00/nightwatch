@@ -12,8 +12,6 @@ import { useTheme } from '@/providers/theme-provider';
 
 /**
  * Resolve whether the current theme is dark.
- * @param theme - The active theme value.
- * @returns `true` if the resolved theme is dark.
  */
 function isDark(theme: string) {
   if (theme === 'dark') return true;
@@ -27,8 +25,7 @@ function isDark(theme: string) {
  *
  * Activates when the URL contains `?tour=true` and the user is on `/home`.
  * Builds platform-specific step sequences (mobile vs desktop) that highlight
- * key UI elements like the search bar, sidebar navigation, friends panel, and
- * profile link. Automatically cleans up the `tour` query param on completion.
+ * key UI elements. Automatically cleans up the `tour` query param on completion.
  *
  * Renders nothing to the DOM.
  */
@@ -54,8 +51,8 @@ export function GlobalTour() {
     const fg = dark ? '#fafafa' : '#1a1a1a';
     const overlay = dark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)';
 
-    const title = (text: string, color?: string) =>
-      `<span class="font-headline font-black text-xl uppercase tracking-tighter" style="color:${color ?? fg}">${text}</span>`;
+    const title = (text: string) =>
+      `<span class="font-headline font-black text-xl uppercase tracking-tighter" style="color:${fg}">${text}</span>`;
     const desc = (text: string) =>
       `<span class="font-body text-sm font-medium" style="color:${fg};opacity:0.7">${text}</span>`;
 
@@ -122,11 +119,10 @@ export function GlobalTour() {
 }
 
 /**
- * Build tour steps optimized for mobile (swipe-based navigation).
- * @returns An array of `DriveStep` objects for the mobile tour.
+ * Build tour steps for mobile — emphasizes long-press and swipe gestures.
  */
 function buildMobileSteps(
-  title: (t: string, c?: string) => string,
+  title: (t: string) => string,
   desc: (t: string) => string,
   t: (key: string) => string,
   setLeftOpen: (v: boolean) => void,
@@ -149,20 +145,61 @@ function buildMobileSteps(
       },
     },
     {
+      element: 'a[href="/home"]',
       popover: {
-        title: title('← Swipe Right'),
-        description: desc(
-          'Swipe from the left edge to open the navigation menu. It has Home, Live, Music, Downloads, and more.',
-        ),
+        title: title(t('mobileNav.title')),
+        description: desc(t('mobileNav.description')),
+        side: 'bottom',
+        align: 'start',
+      },
+    },
+    {
+      popover: {
+        title: title(t('mobileSidebar.title')),
+        description: desc(t('mobileSidebar.description')),
       },
       onHighlightStarted: () => setLeftOpen(true),
     },
     {
+      element: 'a[href="/music"]',
       popover: {
-        title: title('Swipe Left →'),
-        description: desc(
-          'Swipe from the right edge to see your friends, online status, and start voice calls.',
-        ),
+        title: title(t('music.title')),
+        description: desc(t('music.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/manga"]',
+      popover: {
+        title: title(t('manga.title')),
+        description: desc(t('manga.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/ask-ai"]',
+      popover: {
+        title: title(t('askAi.title')),
+        description: desc(t('askAi.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/downloads"]',
+      popover: {
+        title: title(t('downloads.title')),
+        description: desc(t('downloads.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      popover: {
+        title: title(t('mobileFriends.title')),
+        description: desc(t('mobileFriends.description')),
       },
       onHighlightStarted: () => {
         setLeftOpen(false);
@@ -189,11 +226,10 @@ function buildMobileSteps(
 }
 
 /**
- * Build tour steps optimized for desktop (hover-based sidebars).
- * @returns An array of `DriveStep` objects for the desktop tour.
+ * Build tour steps for desktop — hover-based sidebars, full feature walkthrough.
  */
 function buildDesktopSteps(
-  title: (t: string, c?: string) => string,
+  title: (t: string) => string,
   desc: (t: string) => string,
   t: (key: string) => string,
   isDesktopApp: boolean,
@@ -262,24 +298,20 @@ function buildDesktopSteps(
         align: 'center',
       },
     },
-    ...(isDesktopApp
-      ? [
-          {
-            element: 'a[href="/downloads"]',
-            popover: {
-              title: title(t('downloads.title')),
-              description: desc(t('downloads.description')),
-              side: 'right' as const,
-              align: 'center' as const,
-            },
-          },
-        ]
-      : []),
     {
       element: 'a[href="/music"]',
       popover: {
         title: title(t('music.title')),
         description: desc(t('music.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/manga"]',
+      popover: {
+        title: title(t('manga.title')),
+        description: desc(t('manga.description')),
         side: 'right',
         align: 'center',
       },
@@ -302,6 +334,19 @@ function buildDesktopSteps(
         align: 'center',
       },
     },
+    ...(isDesktopApp
+      ? [
+          {
+            element: 'a[href="/downloads"]',
+            popover: {
+              title: title(t('downloads.title')),
+              description: desc(t('downloads.description')),
+              side: 'right' as const,
+              align: 'center' as const,
+            },
+          },
+        ]
+      : []),
     {
       element: 'aside:last-of-type',
       popover: {

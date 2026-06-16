@@ -85,6 +85,14 @@
       "title": "라이브러리",
       "description": "저장한 클립, 녹화 및 수집한 콘텐츠를 한곳에서 탐색하세요."
     },
+    "music": {
+      "title": "Music",
+      "description": "Listen to curated radio stations and music while you browse."
+    },
+    "manga": {
+      "title": "Manga",
+      "description": "Read manga chapters with a smooth reader. Swipe through pages seamlessly."
+    },
     "askAi": {
       "title": "AI에게 물어보기",
       "description": "AI 어시스턴트와 대화하세요. 추천을 요청하거나, 콘텐츠를 검색하거나, 음성으로 재생을 제어하세요."
@@ -101,21 +109,29 @@
       "title": "Navigation",
       "description": "Your main menu lives here. Hover the left edge anytime to open it."
     },
-    "nextBtn": "Next",
-    "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
     "friends": {
       "title": "Friends & Social",
       "description": "Your friends list, online status, and friend requests. Hover the right edge to open it anytime."
     },
-    "music": {
-      "title": "Music",
-      "description": "Listen to curated radio stations and music while you browse."
-    },
     "games": {
       "title": "Games",
       "description": "Play browser games inside Nightwatch."
-    }
+    },
+    "mobileNav": {
+      "title": "Tap & Hold to Navigate",
+      "description": "Long-press the logo to open navigation, or long-press your profile to see friends."
+    },
+    "mobileSidebar": {
+      "title": "← Swipe to Navigate",
+      "description": "Swipe from the left edge to open this menu anytime. Home, Live, Music, Manga, Downloads, and more."
+    },
+    "mobileFriends": {
+      "title": "Friends Panel →",
+      "description": "Swipe from the right edge to see friends, online status, and start voice calls."
+    },
+    "nextBtn": "Next",
+    "prevBtn": "Back",
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "크리에이터 정보",
