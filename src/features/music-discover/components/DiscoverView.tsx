@@ -21,6 +21,7 @@ export function DiscoverView() {
   const [dragX, setDragX] = useState(0);
   const [canUndo, setCanUndo] = useState(false);
   const isAnimating = useRef(false);
+  const cardStartTime = useRef(Date.now());
   const dragRef = useRef({ startX: 0, currentX: 0, dragging: false });
   const cardRef = useRef<HTMLDivElement>(null);
   const swipedIds = useRef<Set<string>>(new Set());
@@ -63,6 +64,7 @@ export function DiscoverView() {
     const { song, index } = lastSwipe.current;
     swipedIds.current.delete(song.id);
     setCurrentIndex(index);
+    cardStartTime.current = Date.now();
     setCanUndo(false);
     lastSwipe.current = null;
     hapticLight();
@@ -102,6 +104,7 @@ export function DiscoverView() {
       const swipePromise = swipeSong(currentSong.id, action, {
         artist: currentSong.artist,
         language: currentSong.language,
+        timeOnCard: Math.round((Date.now() - cardStartTime.current) / 1000),
       }).catch(() => {});
 
       stopCurrent();
@@ -116,6 +119,7 @@ export function DiscoverView() {
         setSwipeDir(null);
         setDragX(0);
         setCurrentIndex((i) => i + 1);
+        cardStartTime.current = Date.now();
         isAnimating.current = false;
 
         if (currentIndex >= feed.length - 5) {

@@ -25,7 +25,7 @@ export async function getDiscoverFeed(limit = 20): Promise<DiscoverSong[]> {
 export async function swipeSong(
   songId: string,
   action: 'like' | 'dislike',
-  meta?: { artist?: string; language?: string },
+  meta?: { artist?: string; language?: string; timeOnCard?: number },
 ) {
   return apiFetch('/api/music/discover/swipe', {
     method: 'POST',
