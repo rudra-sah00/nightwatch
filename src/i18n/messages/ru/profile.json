@@ -216,6 +216,9 @@
   },
   "connectedAccounts": {
     "empty": "No accounts connected yet. Import playlists from the Music page to connect a service.",
+    "connect": "Connect",
+    "connecting": "Connecting...",
+    "connected": "{provider} connected",
     "disconnect": "Disconnect",
     "disconnecting": "Disconnecting...",
     "disconnected": "{provider} disconnected",

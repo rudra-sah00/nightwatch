@@ -135,3 +135,26 @@ export async function getPublicProfile(
     };
   }>(`/api/user/public/${id}`, options);
 }
+
+/**
+ * Disconnect a connected service (e.g., Spotify).
+ */
+export async function disconnectService(provider: string): Promise<void> {
+  trackEvent('connected_account_disconnect', { provider });
+  await apiFetch(`/api/music/${provider}/disconnect`, { method: 'DELETE' });
+}
+
+/**
+ * Connect Spotify — sends auth code to backend which saves the refresh token.
+ */
+export async function connectSpotify(
+  code: string,
+  redirectUri: string,
+): Promise<void> {
+  trackEvent('connected_account_connect', { provider: 'spotify' });
+  await apiFetch('/api/music/spotify/import', {
+    method: 'POST',
+    body: JSON.stringify({ code, redirectUri }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
