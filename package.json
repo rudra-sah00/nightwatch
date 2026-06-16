@@ -69,7 +69,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "agora-rtc-sdk-ng": "^4.24.2",
     "agora-rtm-sdk": "2.2.4",
-    "capacitor-spotify-auth": "^1.0.1",
+    "capacitor-spotify-auth": "^1.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "debug": "^4.4.3",
