@@ -10,7 +10,7 @@ interface PreloadedAudio {
 }
 
 const PRELOAD_AHEAD = 3;
-const PREVIEW_DURATION = 20;
+const PREVIEW_DURATION = 45;
 
 export function useDiscoverPreview(
   feed: DiscoverSong[],
