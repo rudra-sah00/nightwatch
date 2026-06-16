@@ -705,3 +705,46 @@ Additional fields (e.g., `albumId`, `language`, `year`, `hasLyrics`) are passed 
 - **Media Session API**: Track metadata, playback state, and position are synced to the OS via `navigator.mediaSession`. Lock screen controls (play/pause/next/prev) are registered. Position state is updated reactively via the progress context. When remote controlling another device, shows the remote track info and forwards media key actions as `music:remote-command` events.
 - **Background Playback**: On Capacitor (iOS/Android), the audio element continues playing when the app is backgrounded. Lock screen controls remain functional.
 - **Keyboard Shortcuts**: Global shortcuts registered via `useMusicShortcuts` — Space (play/pause), ←→ (prev/next), ↑↓ (volume ±10%), M (mute), S (shuffle), R (repeat cycle). Suppressed when input/textarea is focused. When remote controlling, all shortcuts dispatch `music:remote-command` events instead of calling local engine methods.
+
+## Spotify Playlist Import
+
+Users can import their Spotify playlists into Nightwatch. The import matches each Spotify track to a JioSaavn equivalent using fuzzy title+artist scoring.
+
+### Flow
+
+1. User clicks `+` button in MusicHeader → `PlaylistActionMenu` opens
+2. User selects "Import from Spotify"
+3. Browser redirects to Spotify OAuth (`playlist-read-private`, `playlist-read-collaborative` scopes)
+4. After granting access, Spotify redirects to `/music/spotify/callback`
+5. Callback page sends the auth code to `POST /api/music/spotify/import` (fire-and-forget)
+6. User is immediately redirected back to `/music` — no blocking
+7. Backend queues the import via BullMQ, processes each playlist in the background
+8. On completion, backend publishes `spotify:import:done` via Redis Pub/Sub → WebSocket
+9. `UserPlaylists` component listens for the event, refreshes the playlist list, and shows a toast
+
+### Matching Algorithm
+
+For each Spotify track, the worker:
+1. Searches JioSaavn with `"{title} {artist}"` — fetches top 5 results
+2. Normalizes both strings (lowercase, strip special chars, collapse whitespace)
+3. Scores each result: `titleScore × 0.7 + artistScore × 0.3` (exact=1.0, contains=0.8, word overlap ratio)
+4. Takes the best match — rejects if score < 0.5
+
+### Components
+
+- `PlaylistActionMenu` — Action menu (Create Playlist / Import from Spotify)
+- `SpotifyCallbackPage` — OAuth redirect handler at `/music/spotify/callback`
+- `UserPlaylists` — Listens for `spotify:import:done` WebSocket event
+
+### Environment Variables
+
+- `NEXT_PUBLIC_SPOTIFY_CLIENT_ID` — Spotify app Client ID (public, used for OAuth redirect)
+- `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` — Backend-only (used for token exchange)
+
+### Cross-Platform Support
+
+| Platform | OAuth Mechanism |
+|----------|----------------|
+| Web | Standard browser redirect |
+| Electron | Opens in BrowserWindow, intercepts callback URL |
+| iOS/Android (Capacitor) | `Browser.open()` → app URL scheme redirect |
