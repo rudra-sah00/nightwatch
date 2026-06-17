@@ -125,8 +125,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4(agora-rtc-sdk-ng@4.24.2(debug@4.4.3))
       capacitor-spotify-auth:
-        specifier: ^1.0.4
-        version: 1.0.4(@capacitor/core@8.3.1)
+        specifier: ^1.0.5
+        version: 1.0.5(@capacitor/core@8.3.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -3719,8 +3719,8 @@ packages:
   caniuse-lite@1.0.30001799:
     resolution: {integrity: sha512-hG1bReV+OUU+MOqK4t/ZWI0tZOyz3rqS9XuhOUz1cIcbwBKjOyJEJuw9ER5JuNyqxNk8u/JUVbGibBOL1yrjFw==}
 
-  capacitor-spotify-auth@1.0.4:
-    resolution: {integrity: sha512-ZIL8zx26WfSd8CIxX9CZti5H/d4jEmWfLjFdeRDYkHYh+iwkPkkghWOzc5K5d24hrFoaqmf7UIn/niftuGYqhQ==}
+  capacitor-spotify-auth@1.0.5:
+    resolution: {integrity: sha512-P+B0YXoyRKI74WRZEeNxeLwT0WwHxHqgrp7RzLBXrvPRRqKErMnbd1qYC711p2nPiK26fcocwgFY8RWll295ng==}
     peerDependencies:
       '@capacitor/core': ^7.0.0
 
@@ -11180,7 +11180,7 @@ snapshots:
   caniuse-lite@1.0.30001799:
     optional: true
 
-  capacitor-spotify-auth@1.0.4(@capacitor/core@8.3.1):
+  capacitor-spotify-auth@1.0.5(@capacitor/core@8.3.1):
     dependencies:
       '@capacitor/core': 8.3.1
 
