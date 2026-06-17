@@ -3,13 +3,10 @@
 import { Music } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactSkeleton from 'react-loading-skeleton';
-import { toast } from 'sonner';
 import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
 import { getUserPlaylists, type UserPlaylist } from '@/features/music/api';
-import { WS_EVENTS } from '@/lib/constants';
-import { useSocket } from '@/providers/socket-provider';
 import { ScrollRow, Section } from './MusicPrimitives';
 
 /**
@@ -29,30 +26,13 @@ export function UserPlaylists() {
   const t = useTranslations('music');
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
   const [loading, setLoading] = useState(true);
-  const { socket } = useSocket();
 
-  const fetchPlaylists = useCallback(() => {
+  useEffect(() => {
     getUserPlaylists()
       .then(setPlaylists)
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    fetchPlaylists();
-  }, [fetchPlaylists]);
-
-  useEffect(() => {
-    if (!socket) return;
-    const onImportDone = () => {
-      fetchPlaylists();
-      toast.success(t('spotifyImportDone'));
-    };
-    socket.on(WS_EVENTS.SPOTIFY_IMPORT_DONE, onImportDone);
-    return () => {
-      socket.off(WS_EVENTS.SPOTIFY_IMPORT_DONE, onImportDone);
-    };
-  }, [socket, t, fetchPlaylists]);
 
   if (loading) {
     return (

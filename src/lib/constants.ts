@@ -30,5 +30,4 @@ export const WS_EVENTS = {
   WATCH_UPDATE_PROGRESS: 'watch:update_progress',
   WATCH_GET_CONTINUE: 'watch:get_continue_watching',
   CLIP_READY: 'clip:ready',
-  SPOTIFY_IMPORT_DONE: 'spotify:import:done',
 } as const;

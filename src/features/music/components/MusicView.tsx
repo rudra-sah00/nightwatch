@@ -14,15 +14,12 @@ import {
   getTrending,
 } from '@/features/music/api';
 import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
-import { useAuth } from '@/providers/auth-provider';
 import { CreatePlaylistDialog } from './CreatePlaylistDialog';
 import { LanguagePickerDialog } from './LanguagePickerDialog';
 import { MusicHeader } from './MusicHeader';
 import { MusicSearchSpotlight } from './MusicSearchSpotlight';
 import { MusicSections, type MusicSectionsData } from './MusicSections';
 import { MusicSkeleton } from './MusicSkeleton';
-import { PlaylistActionMenu } from './PlaylistActionMenu';
-import { SpotifyPlaylistPicker } from './SpotifyPlaylistPicker';
 
 /**
  * Top-level orchestrator for the `/music` home page.
@@ -41,16 +38,9 @@ import { SpotifyPlaylistPicker } from './SpotifyPlaylistPicker';
 export function MusicView() {
   const searchParams = useSearchParams();
   const player = useMusicPlayerContext();
-  const user = useAuth((s) => s.user);
-  const updateUser = useAuth((s) => s.updateUser);
   const t = useTranslations('music');
   const [showExplore, setShowExplore] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [showPlaylistPicker, setShowPlaylistPicker] = useState(false);
-  const [spotifyPlaylists, setSpotifyPlaylists] = useState<
-    | { id: string; name: string; image: string; trackCount: number }[]
-    | undefined
-  >(undefined);
 
   const [data, setData] = useState<MusicSectionsData>({
     charts: [],
@@ -64,7 +54,6 @@ export function MusicView() {
     forYou: [],
   });
   const [showSearch, setShowSearch] = useState(false);
-  const [showActionMenu, setShowActionMenu] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
   const [loading, setLoading] = useState(true);
   const [playlistKey, setPlaylistKey] = useState(0);
@@ -140,76 +129,9 @@ export function MusicView() {
       <MusicHeader
         selectedLangs={selectedLangs}
         onOpenLangPicker={() => setShowLangPicker(true)}
-        onToggleCreatePlaylist={() => setShowActionMenu(true)}
+        onToggleCreatePlaylist={() => setShowCreatePlaylist(true)}
         onOpenSearch={() => setShowSearch(true)}
       />
-
-      {showActionMenu && (
-        <PlaylistActionMenu
-          onClose={() => setShowActionMenu(false)}
-          onCreatePlaylist={() => setShowCreatePlaylist(true)}
-          spotifyConnected={
-            user?.connectedServices?.includes('spotify') ?? false
-          }
-          onSpotifyAction={async () => {
-            const connected =
-              user?.connectedServices?.includes('spotify') ?? false;
-            if (connected) {
-              setSpotifyPlaylists(undefined);
-              setShowPlaylistPicker(true);
-            } else {
-              try {
-                const { SpotifyAuth } = await import('capacitor-spotify-auth');
-                const { checkIsMobile } = await import('@/lib/electron-bridge');
-                const clientId =
-                  process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
-                const redirectUri = checkIsMobile()
-                  ? 'nightwatch://music/spotify/callback'
-                  : `${window.location.origin}/music/spotify/callback`;
-                const result = await SpotifyAuth.authorize({
-                  clientId,
-                  redirectUri,
-                  scopes: 'playlist-read-private playlist-read-collaborative',
-                });
-                const { apiFetch } = await import('@/lib/fetch');
-                const playlists = await apiFetch<
-                  {
-                    id: string;
-                    name: string;
-                    image: string;
-                    trackCount: number;
-                  }[]
-                >('/api/music/spotify/connect', {
-                  method: 'POST',
-                  body: JSON.stringify({
-                    code: result.code,
-                    redirectUri,
-                  }),
-                  headers: { 'Content-Type': 'application/json' },
-                });
-                setSpotifyPlaylists(playlists);
-                updateUser({
-                  connectedServices: [
-                    ...(user?.connectedServices ?? []),
-                    'spotify',
-                  ],
-                });
-                setShowPlaylistPicker(true);
-              } catch {
-                // User cancelled
-              }
-            }
-          }}
-        />
-      )}
-
-      {showPlaylistPicker && (
-        <SpotifyPlaylistPicker
-          onClose={() => setShowPlaylistPicker(false)}
-          onImported={() => setPlaylistKey((k) => k + 1)}
-          initialPlaylists={spotifyPlaylists}
-        />
-      )}
 
       {showCreatePlaylist && (
         <CreatePlaylistDialog
