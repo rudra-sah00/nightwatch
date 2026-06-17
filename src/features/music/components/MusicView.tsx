@@ -165,7 +165,7 @@ export function MusicView() {
                   process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
                 const redirectUri = checkIsMobile()
                   ? 'nightwatch://music/spotify/callback'
-                  : `${window.location.origin}/en/music/spotify/callback`;
+                  : `${window.location.origin}/music/spotify/callback`;
                 const result = await SpotifyAuth.authorize({
                   clientId,
                   redirectUri,
