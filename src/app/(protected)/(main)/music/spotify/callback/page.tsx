@@ -33,8 +33,8 @@ export default function SpotifyCallbackPage() {
 
     const redirectUri = `${window.location.origin}/music/spotify/callback`;
 
-    // Fire and forget — backend queues the job
-    apiFetch('/api/music/spotify/import', {
+    // Fire and forget — backend saves token
+    apiFetch('/api/music/spotify/connect', {
       method: 'POST',
       body: JSON.stringify({ code, redirectUri }),
       headers: { 'Content-Type': 'application/json' },
