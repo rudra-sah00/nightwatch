@@ -42,6 +42,7 @@ export function MusicView() {
   const searchParams = useSearchParams();
   const player = useMusicPlayerContext();
   const user = useAuth((s) => s.user);
+  const updateUser = useAuth((s) => s.updateUser);
   const t = useTranslations('music');
   const [showExplore, setShowExplore] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -164,7 +165,7 @@ export function MusicView() {
                   process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
                 const redirectUri = checkIsMobile()
                   ? 'nightwatch://music/spotify/callback'
-                  : `${window.location.origin}/music/spotify/callback`;
+                  : `${window.location.origin}/en/music/spotify/callback`;
                 const result = await SpotifyAuth.authorize({
                   clientId,
                   redirectUri,
@@ -187,6 +188,12 @@ export function MusicView() {
                   headers: { 'Content-Type': 'application/json' },
                 });
                 setSpotifyPlaylists(playlists);
+                updateUser({
+                  connectedServices: [
+                    ...(user?.connectedServices ?? []),
+                    'spotify',
+                  ],
+                });
                 setShowPlaylistPicker(true);
               } catch {
                 // User cancelled

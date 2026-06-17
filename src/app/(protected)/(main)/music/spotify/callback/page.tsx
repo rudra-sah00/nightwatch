@@ -31,7 +31,7 @@ export default function SpotifyCallbackPage() {
       return;
     }
 
-    const redirectUri = `${window.location.origin}/music/spotify/callback`;
+    const redirectUri = `${window.location.origin}/en/music/spotify/callback`;
 
     // Fire and forget — backend queues the job
     apiFetch('/api/music/spotify/import', {
