@@ -10,6 +10,7 @@ import {
   useAudioTracks,
 } from '@/features/watch/player/hooks/useAudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
+import { extractTokenFromUrl } from '@/features/watch/utils';
 import { reportError, trackEvent } from '@/lib/analytics';
 import { WS_EVENTS } from '@/lib/constants';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
@@ -20,7 +21,7 @@ import type { PlayResponse } from '@/types/content';
  * Core hook for VOD playback page logic.
  * Handles metadata derivation and stream fetching.
  */
-const MAX_STREAM_RETRIES = 2;
+const MAX_STREAM_RETRIES = 3;
 const COLD_START_RETRY_DELAY_MS = 3000;
 
 export function useWatchContent() {
@@ -342,6 +343,9 @@ export function useWatchContent() {
     }
   }, [streamUrl]);
 
+  const streamUrlRef = useRef(streamUrl);
+  streamUrlRef.current = streamUrl;
+
   useEffect(() => {
     const handleUnload = () => stopVideo();
     window.addEventListener('pagehide', handleUnload);
@@ -351,8 +355,9 @@ export function useWatchContent() {
       if (replacingSessionTimerRef.current) {
         clearTimeout(replacingSessionTimerRef.current);
       }
+      const token = extractTokenFromUrl(streamUrlRef.current);
       if (socket?.connected) {
-        socket.emit(WS_EVENTS.STREAM_STOP);
+        socket.emit(WS_EVENTS.STREAM_STOP, { token });
       }
       stopVideo();
     };
