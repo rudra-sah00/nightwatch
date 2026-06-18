@@ -38,6 +38,9 @@ export function mapErrorCode(code: string | undefined): string | undefined {
  * Centralized API error handler. Resolves a user-friendly message,
  * shows a toast, and returns the message string.
  *
+ * Only reports 5xx and network errors to crash reporting.
+ * 4xx errors are expected client-side conditions (auth, validation, not-found).
+ *
  * @param err - The caught error
  * @param fallback - Pre-translated fallback message string
  * @param t - Optional translation function scoped to `errors` namespace.
@@ -48,7 +51,14 @@ export function handleApiError(
   fallback: string,
   t?: (key: string) => string,
 ): string {
-  reportCatchError(err);
+  // Only report server errors (5xx) and unexpected errors to crash reporting.
+  // 4xx are expected client-side conditions that shouldn't pollute crash data.
+  if (isApiError(err)) {
+    if (!err.status || err.status >= 500) reportCatchError(err);
+  } else {
+    reportCatchError(err);
+  }
+
   if (isApiError(err)) {
     const key = mapErrorCode(err.code);
     const msg = (key && t ? t(key) : undefined) || err.message || fallback;

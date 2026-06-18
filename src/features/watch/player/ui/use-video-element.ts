@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import type { PlayerAction } from '../context/types';
 
 interface SubtitleTrackDef {
@@ -88,12 +89,14 @@ export function useVideoElement({
     };
     const handleWaiting = () => {
       dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+      trackEvent('video_buffer_start');
     };
     const handlePlaying = () => {
       clearPendingError();
       dispatch({ type: 'SET_LOADING', isLoading: false });
       dispatch({ type: 'SET_BUFFERING', isBuffering: false });
       dispatch({ type: 'SET_ERROR', error: null });
+      trackEvent('video_buffer_end');
     };
     const handleCanPlay = () => {
       clearPendingError();
@@ -160,18 +163,6 @@ export function useVideoElement({
 
     const trackId = currentTrackId;
     const textTracks = video.textTracks;
-
-    console.log('[NW-Subtitle] Track mode switch:', {
-      trackId,
-      textTracksCount: textTracks.length,
-      subtitleTracksCount: subtitleTracks.length,
-      textTrackIds: Array.from({ length: textTracks.length }, (_, i) => ({
-        id: textTracks[i].id,
-        label: textTracks[i].label,
-        language: textTracks[i].language,
-        kind: textTracks[i].kind,
-      })),
-    });
 
     for (let i = 0; i < textTracks.length; i++) {
       textTracks[i].mode = 'hidden';

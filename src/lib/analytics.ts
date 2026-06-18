@@ -21,34 +21,75 @@ function isElectron(): boolean {
 
 function shouldTrack(): boolean {
   if (typeof window === 'undefined') return false;
+  if (process.env.NODE_ENV === 'development') return false;
   return getAnalyticsConsent();
 }
 
-// --- Web/Desktop Firebase Analytics helpers ---
+// --- Cached module references to avoid repeated dynamic import overhead ---
+
+let _nativeModule: typeof import('@/capacitor/firebase') | null = null;
+let _nativeModulePromise: Promise<
+  typeof import('@/capacitor/firebase')
+> | null = null;
+
+function getNativeFirebase() {
+  if (_nativeModule) return Promise.resolve(_nativeModule);
+  if (!_nativeModulePromise) {
+    _nativeModulePromise = import('@/capacitor/firebase').then((m) => {
+      _nativeModule = m;
+      return m;
+    });
+  }
+  return _nativeModulePromise;
+}
+
+let _webAnalyticsModule: typeof import('firebase/analytics') | null = null;
 
 async function logWebEvent(name: string, params?: Record<string, unknown>) {
   const { getFirebaseAnalytics } = await import('@/lib/firebase');
   const analytics = await getFirebaseAnalytics();
   if (!analytics) return;
-  const { logEvent } = await import('firebase/analytics');
-  logEvent(analytics, name, params);
+  if (!_webAnalyticsModule) {
+    _webAnalyticsModule = await import('firebase/analytics');
+  }
+  _webAnalyticsModule.logEvent(analytics, name, params);
+}
+
+// --- Rate limiting for error reporting ---
+
+const _recentErrors = new Map<string, number>();
+const ERROR_COOLDOWN_MS = 10_000;
+
+function isRateLimited(message: string): boolean {
+  const key = message.slice(0, 120);
+  const last = _recentErrors.get(key);
+  const now = Date.now();
+  if (last && now - last < ERROR_COOLDOWN_MS) return true;
+  _recentErrors.set(key, now);
+  // Evict old entries to prevent memory leak
+  if (_recentErrors.size > 50) {
+    for (const [k, t] of _recentErrors) {
+      if (now - t > ERROR_COOLDOWN_MS) _recentErrors.delete(k);
+    }
+  }
+  return false;
 }
 
 // --- Crash Reporting ---
 
 export function reportError(message: string, stack?: string) {
   if (typeof window === 'undefined') return;
+  if (isRateLimited(message)) return;
 
   if (isNative()) {
-    import('@/capacitor/firebase')
+    getNativeFirebase()
       .then(({ recordException }) => recordException(message, stack))
       .catch(() => {});
   } else {
-    // Log as a Firebase Analytics event on web/desktop
     logWebEvent('app_exception', {
       description: message,
       fatal: false,
-      stack: stack?.slice(0, 1000),
+      stack: stack?.slice(0, 4000),
     }).catch(() => {});
   }
 }
@@ -64,7 +105,7 @@ export function crashLog(message: string) {
   if (typeof window === 'undefined') return;
 
   if (isNative()) {
-    import('@/capacitor/firebase')
+    getNativeFirebase()
       .then(({ logCrashlyticsMessage }) => logCrashlyticsMessage(message))
       .catch(() => {});
   } else {
@@ -78,7 +119,7 @@ export function trackEvent(name: string, params?: Record<string, unknown>) {
   if (!shouldTrack()) return;
 
   if (isNative()) {
-    import('@/capacitor/firebase')
+    getNativeFirebase()
       .then(({ logEvent }) => logEvent(name, params))
       .catch(() => {});
   } else {
@@ -90,7 +131,7 @@ export function trackScreen(screenName: string) {
   if (!shouldTrack()) return;
 
   if (isNative()) {
-    import('@/capacitor/firebase')
+    getNativeFirebase()
       .then(({ setAnalyticsScreen }) => setAnalyticsScreen(screenName))
       .catch(() => {});
   } else {
@@ -104,7 +145,7 @@ export function setAnalyticsUser(userId: string | null) {
   if (typeof window === 'undefined') return;
 
   if (isNative()) {
-    import('@/capacitor/firebase')
+    getNativeFirebase()
       .then(({ setCrashlyticsUserId, setAnalyticsUserId }) => {
         if (userId) setCrashlyticsUserId(userId);
         setAnalyticsUserId(userId);
@@ -115,9 +156,14 @@ export function setAnalyticsUser(userId: string | null) {
       .then(({ getFirebaseAnalytics }) => getFirebaseAnalytics())
       .then((analytics) => {
         if (!analytics) return;
-        import('firebase/analytics').then(({ setUserId }) => {
-          setUserId(analytics, userId);
-        });
+        if (!_webAnalyticsModule) {
+          import('firebase/analytics').then((m) => {
+            _webAnalyticsModule = m;
+            m.setUserId(analytics, userId);
+          });
+        } else {
+          _webAnalyticsModule.setUserId(analytics, userId);
+        }
       })
       .catch(() => {});
   }
@@ -129,7 +175,7 @@ export function setUserProperty(key: string, value: string | null) {
   if (!shouldTrack()) return;
 
   if (isNative()) {
-    import('@/capacitor/firebase')
+    getNativeFirebase()
       .then(({ setAnalyticsUserProperty }) =>
         setAnalyticsUserProperty(key, value),
       )
@@ -139,9 +185,14 @@ export function setUserProperty(key: string, value: string | null) {
       .then(({ getFirebaseAnalytics }) => getFirebaseAnalytics())
       .then((analytics) => {
         if (!analytics) return;
-        import('firebase/analytics').then(({ setUserProperties }) => {
-          setUserProperties(analytics, { [key]: value });
-        });
+        if (!_webAnalyticsModule) {
+          import('firebase/analytics').then((m) => {
+            _webAnalyticsModule = m;
+            m.setUserProperties(analytics, { [key]: value });
+          });
+        } else {
+          _webAnalyticsModule.setUserProperties(analytics, { [key]: value });
+        }
       })
       .catch(() => {});
   }

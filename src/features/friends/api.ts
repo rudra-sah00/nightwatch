@@ -95,6 +95,7 @@ export async function rejectFriendRequest(friendshipId: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ friendshipId }),
   });
+  trackEvent('friend_request_reject');
 }
 
 /**
@@ -121,6 +122,7 @@ export async function removeFriend(friendUserId: string): Promise<void> {
     body: JSON.stringify({ userId: friendUserId }),
   });
   friendsCache.clear();
+  trackEvent('friend_remove');
 }
 
 /**
@@ -134,6 +136,7 @@ export async function blockUser(userId: string): Promise<void> {
     body: JSON.stringify({ userId }),
   });
   friendsCache.clear();
+  trackEvent('friend_block');
 }
 
 /**

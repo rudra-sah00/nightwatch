@@ -1,5 +1,6 @@
 import type { Dispatch } from 'react';
 import { useCallback, useEffect, useRef } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import type { PlayerAction } from '../context/types';
 
 /**
@@ -171,6 +172,7 @@ export function usePlayerHandlers({
       if (Number.isFinite(time) && videoRef.current) {
         videoRef.current.currentTime = time;
       }
+      trackEvent('video_seek');
       showControls();
     },
     [videoRef, showControls, readOnly],
@@ -181,6 +183,7 @@ export function usePlayerHandlers({
     (seconds: number) => {
       if (readOnly) return;
       seek(seconds);
+      trackEvent('video_skip', { seconds });
       showControls();
     },
     [seek, showControls, readOnly],
@@ -212,6 +215,7 @@ export function usePlayerHandlers({
   const handleTogglePlay = useCallback(() => {
     if (readOnly) return;
     togglePlay();
+    trackEvent('video_pause');
     showControls();
   }, [togglePlay, showControls, readOnly]);
 
@@ -246,6 +250,7 @@ export function usePlayerHandlers({
         videoRef.current.playbackRate = rate;
       }
       dispatch({ type: 'SET_PLAYBACK_RATE', rate });
+      trackEvent('video_speed_change', { rate });
       showControls();
     },
     [videoRef, dispatch, showControls, readOnly],

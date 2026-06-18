@@ -263,6 +263,7 @@ export class AudioEngine {
       }
       this.stopProgressTimer();
       this.ctx.update({ isPlaying: false });
+      trackEvent('music_pause');
     } else {
       if (this.ctx.audioContext?.state === 'suspended') {
         this.ctx.audioContext.resume();
@@ -327,6 +328,7 @@ export class AudioEngine {
     }
 
     this.ctx.update({ queueIndex: nextIdx });
+    trackEvent('music_next');
     await this.playTrack(queue[nextIdx]);
   }
 
@@ -343,6 +345,7 @@ export class AudioEngine {
       return;
     }
     this.ctx.update({ queueIndex: prevIdx });
+    trackEvent('music_previous');
     await this.playTrack(this.ctx.state.queue[prevIdx]);
   }
 
@@ -394,12 +397,15 @@ export class AudioEngine {
       );
     }
     this.ctx.update({ shuffle });
+    trackEvent('music_shuffle_toggle', { enabled: shuffle });
   }
 
   cycleRepeat() {
     const modes: RepeatMode[] = ['off', 'all', 'one'];
     const idx = modes.indexOf(this.ctx.state.repeat);
-    this.ctx.update({ repeat: modes[(idx + 1) % modes.length] });
+    const newMode = modes[(idx + 1) % modes.length];
+    this.ctx.update({ repeat: newMode });
+    trackEvent('music_repeat_change', { mode: newMode });
   }
 
   setVolume(v: number) {
@@ -430,10 +436,12 @@ export class AudioEngine {
 
   setSleepTimer(minutes: number) {
     setSleepTimer(this.ctx, minutes, () => this.stop());
+    trackEvent('music_sleep_timer_set', { minutes });
   }
 
   clearSleepTimer() {
     clearSleepTimer(this.ctx);
+    trackEvent('music_sleep_timer_clear');
   }
 
   // ─── Settings ──────────────────────────────────────────────────

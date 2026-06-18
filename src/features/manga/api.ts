@@ -112,7 +112,11 @@ export async function addMangaFavorite(input: {
 }
 
 export async function removeMangaFavorite(titleId: number) {
-  return apiFetch(`/api/manga/favorites/${titleId}`, { method: 'DELETE' });
+  const result = await apiFetch(`/api/manga/favorites/${titleId}`, {
+    method: 'DELETE',
+  });
+  trackEvent('manga_favorite_remove', { title_id: titleId });
+  return result;
 }
 
 export async function checkMangaFavorite(

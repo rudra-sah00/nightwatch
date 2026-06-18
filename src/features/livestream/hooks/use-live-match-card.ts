@@ -99,6 +99,7 @@ export function useLiveMatchCard(match: LiveMatch) {
       if (response.room) {
         toast.success(t('creating'), { id: 'live-party-creating' });
         router.push(`/watch-party/${response.room.id}?new=true`);
+        trackEvent('livestream_watch_party', { match_id: match.id });
       } else {
         toast.error(response.error || tp('failedCreateRoom'), {
           id: 'live-party-error',

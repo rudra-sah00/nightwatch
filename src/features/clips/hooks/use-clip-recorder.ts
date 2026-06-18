@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { trackEvent } from '@/lib/analytics';
+import { reportError, trackEvent } from '@/lib/analytics';
 import { startServerClip, stopServerClip } from '../api';
 
 const MAX_DURATION = 300;
@@ -101,6 +101,7 @@ export function useClipRecorder({
         if (elapsed >= MAX_DURATION) stop();
       }, 1000);
     } catch {
+      reportError('[Clips] Recording start failed');
       cleanup();
     }
   }, [matchId, title, streamToken, streamUrl, stop, cleanup]);

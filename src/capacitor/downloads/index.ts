@@ -87,6 +87,7 @@ export const mobileDownloadManager = {
     } catch {
       /* folder may not exist */
     }
+    trackEvent('download_cancel', { content_id: contentId });
     notifyProgress({
       contentId,
       title: '',

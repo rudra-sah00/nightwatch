@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { forgotPassword } from '@/features/auth/api';
 import { loginSchema } from '@/features/auth/schema';
+import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
 
@@ -117,6 +118,7 @@ export function useLoginForm() {
       } catch (err: unknown) {
         setCaptchaToken(null);
         captchaRef.current?.reset();
+        trackEvent('login_failure');
 
         if (
           err &&

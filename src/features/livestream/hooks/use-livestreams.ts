@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { reportError } from '@/lib/analytics';
 import { fetchLiveMatchDetail, fetchLivestreamSchedule } from '../api';
 import type { LiveMatch } from '../types';
 
@@ -46,6 +47,7 @@ export function useLivestreams(sportType = 'basketball') {
       setSchedule(sortedData);
     } catch (err: unknown) {
       if (controller.signal.aborted) return;
+      reportError('[Livestream] Schedule fetch failed');
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       if (!controller.signal.aborted) setIsLoading(false);
@@ -122,6 +124,7 @@ export function useLiveMatch(id: string | null) {
         }
       } catch (err: unknown) {
         if (!isPoll) {
+          reportError('[Livestream] Match fetch failed');
           setError(err instanceof Error ? err : new Error(String(err)));
         }
         // Swallow poll errors silently — keep the existing match alive

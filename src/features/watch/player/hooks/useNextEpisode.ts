@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import type { VideoMetadata } from '../context/types';
 import {
   fetchNextEpisodeInfo,
@@ -154,6 +155,7 @@ export function useNextEpisode({
       const url = await prepareNextEpisodeCommand(info, metadata);
       if (url) {
         onNavigate(url);
+        trackEvent('video_next_episode_auto');
       } else {
         setIsLoadingNext(false);
       }
@@ -166,6 +168,7 @@ export function useNextEpisode({
   const cancelNextEpisode = useCallback(() => {
     setCancelled(true);
     setShowNextEpisode(false);
+    trackEvent('video_next_episode_cancel');
   }, []);
 
   return {

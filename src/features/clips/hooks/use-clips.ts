@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { reportError, trackEvent } from '@/lib/analytics';
 import { type ClipFilters, deleteClip, getClips, renameClip } from '../api';
 import type { Clip } from '../types';
 
@@ -70,18 +71,20 @@ export function useClips(filters?: ClipFilters) {
   const remove = useCallback(async (id: string) => {
     try {
       await deleteClip(id);
+      trackEvent('clip_delete', { clip_id: id });
       setClips((prev) => prev.filter((c) => c.id !== id));
     } catch {
-      /* silent */
+      reportError('[Clips] Operation failed');
     }
   }, []);
 
   const rename = useCallback(async (id: string, title: string) => {
     try {
       await renameClip(id, title);
+      trackEvent('clip_rename', { clip_id: id });
       setClips((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
     } catch {
-      /* silent */
+      reportError('[Clips] Operation failed');
     }
   }, []);
 

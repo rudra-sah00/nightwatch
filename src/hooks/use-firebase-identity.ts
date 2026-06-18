@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { setAnalyticsUser, setPlatformProperties } from '@/lib/analytics';
+import { setCrashAppVersion } from '@/lib/crash-context';
 import { useAuthStore } from '@/store/use-auth-store';
 
 /**
@@ -14,6 +15,7 @@ export function useFirebaseIdentity() {
 
   useEffect(() => {
     setPlatformProperties();
+    setCrashAppVersion(process.env.NEXT_PUBLIC_APP_VERSION ?? 'unknown');
   }, []);
 
   useEffect(() => {

@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { mobileBridge } from '@/lib/mobile-bridge';
 import type { PlayerAction } from '../context/types';
@@ -363,6 +364,7 @@ export function useFullscreen({
           electronAPI: { toggleFullscreen: () => Promise<void> };
         }
       ).electronAPI.toggleFullscreen();
+      trackEvent('video_fullscreen');
       return;
     }
 
@@ -373,6 +375,7 @@ export function useFullscreen({
       } else {
         await enterFullscreen();
       }
+      trackEvent('video_fullscreen');
       return;
     }
 
@@ -385,6 +388,7 @@ export function useFullscreen({
     } else {
       await enterFullscreen();
     }
+    trackEvent('video_fullscreen');
   }, [enterFullscreen, exitFullscreen, isMobile, playerIsFullscreen]);
 
   // Hide status bar on mobile when entering fullscreen, show on exit

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 import {
   applySubtitleSettings,
   type SubtitleSettings,
@@ -88,6 +89,7 @@ export function useSubtitleSelector({
   const handleTrackChange = (trackId: string | null) => {
     setIsLoading(true);
     onTrackChange?.(trackId);
+    trackEvent('video_subtitle_change', { trackId });
     setIsLoading(false);
   };
 

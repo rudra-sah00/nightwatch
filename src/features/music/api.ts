@@ -648,6 +648,7 @@ export async function updateUserPlaylist(
  */
 export async function deleteUserPlaylist(id: string): Promise<void> {
   await apiFetch(`/api/music/playlists/${id}`, { method: 'DELETE' });
+  trackEvent('music_playlist_delete', { playlist_id: id });
 }
 
 /**
@@ -710,6 +711,7 @@ export async function removeTrackFromPlaylist(
   await apiFetch(`/api/music/playlists/${playlistId}/tracks/${trackEntryId}`, {
     method: 'DELETE',
   });
+  trackEvent('music_remove_from_playlist', { playlist_id: playlistId });
 }
 
 /** A single line of time-synced (LRC) lyrics. */

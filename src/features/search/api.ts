@@ -25,6 +25,8 @@ export async function searchContent(
     options,
   );
 
+  if (results.length === 0)
+    trackEvent('search_no_results', { query: normalizedQuery });
   searchResultsCache.set(cacheKey, results);
   return results;
 }

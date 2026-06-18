@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { trackEvent } from '@/lib/analytics';
+import { reportError, trackEvent } from '@/lib/analytics';
 import { useSocket } from '@/providers/socket-provider';
 
 /**
@@ -150,6 +150,7 @@ export function useAskAi() {
     const onError = (data: unknown) => {
       const msg = typeof data === 'string' ? data : JSON.stringify(data);
       setError(msg);
+      reportError(`[AskAI] ${msg}`);
     };
 
     const onStreamComplete = () => {
@@ -397,6 +398,7 @@ export function useAskAi() {
         msg = err instanceof Error ? err.message : 'Failed to start';
       }
       setError(msg);
+      reportError(`[AskAI] Start failed: ${msg}`);
       setState('idle');
       activeRef.current = false;
     }
@@ -438,6 +440,7 @@ export function useAskAi() {
 
     // Tell server to stop
     socketRef.current?.emit('ask-ai:stop');
+    trackEvent('ask_ai_end');
     setState('idle');
   }, []);
 
