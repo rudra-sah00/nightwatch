@@ -324,6 +324,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   const rejectCall = useCallback(() => {
     if (!socket || !peer) return;
+    trackEvent('call_decline', { peerId: peer.id });
     socket.emit('call:reject', { callerId: peer.id });
     cleanup();
   }, [socket, peer, cleanup]);

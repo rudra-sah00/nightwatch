@@ -10,7 +10,7 @@ import {
   useAudioTracks,
 } from '@/features/watch/player/hooks/useAudioTracks';
 import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
-import { trackEvent } from '@/lib/analytics';
+import { reportError, trackEvent } from '@/lib/analytics';
 import { WS_EVENTS } from '@/lib/constants';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
@@ -227,6 +227,9 @@ export function useWatchContent() {
         }
       } catch (err) {
         console.error('[NW-Play] VOD: stream error', err);
+        reportError(
+          `[Watch] Stream load failed: ${(err as { status?: number })?.status || 'unknown'}`,
+        );
         const httpStatus = (err as { status?: number })?.status;
         if (
           (httpStatus === 500 || httpStatus === 503) &&

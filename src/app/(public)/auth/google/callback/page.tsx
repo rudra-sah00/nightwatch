@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { connectGoogle, googleLogin } from '@/features/auth/google-api';
 import { invalidateProfileCache } from '@/features/profile/api';
+import { trackEvent } from '@/lib/analytics';
 import { storeUser } from '@/lib/auth';
 import { setTokenExpiration } from '@/lib/fetch';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -39,6 +40,7 @@ export default function GoogleCallbackPage() {
         } else {
           const response = await googleLogin({ code });
           if (response.user) {
+            trackEvent('login_success', { method: 'google' });
             storeUser(response.user);
             useAuthStore.getState().setUser(response.user);
             if (response.expiresIn) setTokenExpiration(response.expiresIn);

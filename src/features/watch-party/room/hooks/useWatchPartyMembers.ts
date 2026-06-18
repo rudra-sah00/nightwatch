@@ -82,6 +82,7 @@ export function useWatchPartyMembers({
 
       const response = await approveJoinRequest(room.id, memberId);
       if (response.success) {
+        trackEvent('party_approve_member', { roomId: room.id });
         toast.success(t('memberApproved'));
         setRoom((prev) => {
           if (!prev) return null;
@@ -155,6 +156,7 @@ export function useWatchPartyMembers({
       if (!room?.id) return;
       const response = await rejectJoinRequest(room.id, memberId);
       if (response.success) {
+        trackEvent('party_reject_member', { roomId: room.id });
         toast.success(t('memberRejected'));
         rtmSendMessageToPeer?.(memberId, {
           type: 'JOIN_REJECTED',
