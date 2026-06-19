@@ -1,51 +1,46 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { getWatchlist } from '@/features/watchlist/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { getWatchlist, removeFromWatchlist } from '@/features/watchlist/api';
 import type { WatchlistItem } from '@/features/watchlist/types';
 
 /**
  * Hook for managing the watchlist page state.
- * Moved from app/ layer to features/ layer for better organization.
+ * Uses TanStack Query for caching + optimistic removal via useMutation.
  */
 export function useWatchlist() {
-  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Cancels in-flight watchlist requests when the
-  // component unmounts (navigating away) so stale responses don't arrive
-  // after the user has already moved to another page.
-  const abortRef = useRef<AbortController | null>(null);
+  const { data: watchlist = [], isLoading: loading } = useQuery({
+    queryKey: ['watchlist'],
+    queryFn: () => getWatchlist(),
+  });
 
-  const fetchWatchlist = useCallback(async () => {
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
+  const removeMutation = useMutation({
+    mutationFn: removeFromWatchlist,
+    onMutate: async (contentId) => {
+      await queryClient.cancelQueries({ queryKey: ['watchlist'] });
+      const previous = queryClient.getQueryData<WatchlistItem[]>(['watchlist']);
+      queryClient.setQueryData<WatchlistItem[]>(['watchlist'], (old) =>
+        old?.filter((item) => item.contentId !== contentId),
+      );
+      return { previous };
+    },
+    onError: (_err, _contentId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['watchlist'], context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['watchlist'] });
+    },
+  });
 
-    setLoading(true);
-    try {
-      const items = await getWatchlist(undefined, controller.signal);
-      if (controller.signal.aborted) return;
-      setWatchlist(items);
-    } catch {
-      // Ignore — includes AbortError from intentional cancellation
-    } finally {
-      if (!controller.signal.aborted) setLoading(false);
-    }
-  }, []);
-
-  const removeItem = useCallback((contentId: string) => {
-    setWatchlist((prev) => prev.filter((item) => item.contentId !== contentId));
-  }, []);
-
-  useEffect(() => {
-    fetchWatchlist();
-
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, [fetchWatchlist]);
+  const removeItem = (contentId: string) => {
+    removeMutation.mutate(contentId);
+  };
 
   const isEmpty = !loading && watchlist.length === 0;
 

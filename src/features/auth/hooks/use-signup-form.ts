@@ -77,8 +77,7 @@ export function useSignupForm() {
       try {
         const { available } = await checkUsername(username);
         setUsernameStatus(available ? 'available' : 'taken');
-      } catch (err) {
-        console.error('[SignupForm] Username check failed:', err);
+      } catch (_err) {
         setUsernameStatus('idle');
       }
     }, 400);
@@ -100,8 +99,7 @@ export function useSignupForm() {
       try {
         const { valid } = await validateInvite(invite);
         setIsInviteValid(valid);
-      } catch (err) {
-        console.error('[SignupForm] Invite validation failed:', err);
+      } catch (_err) {
         setIsInviteValid(false);
       }
     };
@@ -187,7 +185,6 @@ export function useSignupForm() {
         }
         return { success: true };
       } catch (err: unknown) {
-        console.error('[SignupForm] Registration failed:', err);
         const apiError = err as ApiError;
 
         // Handle specific validation errors from the backend (e.g. email already taken)

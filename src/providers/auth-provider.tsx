@@ -3,9 +3,8 @@
 import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
-import { getProfile, invalidateProfileCache } from '@/features/profile/api';
+import { getProfile } from '@/features/profile/api';
 import {
-  apiFetch,
   getTokenExpiresAt,
   revalidateTokenOnResume,
   setTokenExpiration,
@@ -66,11 +65,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       import('@/lib/device-id')
         .then(({ getDeviceId }) => {
           const deviceId = getDeviceId();
-          apiFetch('/api/notifications/unregister', {
-            method: 'POST',
-            body: JSON.stringify({ deviceId }),
-            headers: { 'Content-Type': 'application/json' },
-          }).catch(() => {});
+          import('@/features/auth/api').then(({ unregisterPushToken }) =>
+            unregisterPushToken(deviceId).catch(() => {}),
+          );
         })
         .catch(() => {});
       disconnect();
@@ -130,7 +127,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const syncProfile = async () => {
       try {
-        invalidateProfileCache();
         const { user: profileData } = await getProfile({
           signal: controller.signal,
         });

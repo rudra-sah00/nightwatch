@@ -27,9 +27,3 @@ export function hapticSuccess() {
   if (isNative)
     Haptics.notification({ type: NotificationType.Success }).catch(() => {});
 }
-
-/** Trigger an error notification haptic. */
-export function hapticError() {
-  if (isNative)
-    Haptics.notification({ type: NotificationType.Error }).catch(() => {});
-}

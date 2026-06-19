@@ -24,7 +24,6 @@ export function usePlayerAudioSubtitleSelectors() {
   // Apply saved settings on mount
   useEffect(() => {
     applySubtitleSettings(subtitleSettings);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subtitleSettings]);
 
   const handleSubtitleSettingsChange = (newSettings: SubtitleSettings) => {

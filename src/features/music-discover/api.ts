@@ -1,22 +1,7 @@
 import { apiFetch } from '@/lib/fetch';
+import type { DiscoverSong } from './types';
 
-export interface DiscoverSong {
-  id: string;
-  title: string;
-  artist: string;
-  album: string;
-  image: string;
-  duration: number;
-  language: string;
-  year: number;
-  seed?: string;
-  features?: {
-    bpm: number;
-    energy: number;
-    danceability: number;
-    valence: number;
-  };
-}
+export type { DiscoverSong } from './types';
 
 export async function getDiscoverFeed(limit = 20): Promise<DiscoverSong[]> {
   return apiFetch<DiscoverSong[]>(`/api/music/discover/feed?limit=${limit}`);
@@ -32,14 +17,6 @@ export async function swipeSong(
     body: JSON.stringify({ songId, action, ...meta }),
     headers: { 'Content-Type': 'application/json' },
   });
-}
-
-export async function getLikedSongs(limit = 30, cursor?: string) {
-  const params = new URLSearchParams({ limit: String(limit) });
-  if (cursor) params.set('cursor', cursor);
-  return apiFetch<{ songs: DiscoverSong[]; nextCursor: string | null }>(
-    `/api/music/discover/liked?${params}`,
-  );
 }
 
 export async function recordListen(songId: string) {

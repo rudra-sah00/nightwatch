@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { MusicTrack } from '../api';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 import { showSongMenu } from './SongContextMenu';
 
 interface QueueOverlayProps {
@@ -21,8 +21,10 @@ export function QueueOverlay({
   displayTrackId,
   isRemoteControlling,
 }: QueueOverlayProps) {
-  const player = useMusicPlayerContext();
-  const { queue, currentTrack, removeFromQueue } = player;
+  const queue = useMusicStore((s) => s.queue);
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const removeFromQueue = useMusicStore((s) => s.removeFromQueue);
+  const play = useMusicStore((s) => s.play);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export function QueueOverlay({
         <div className="w-full overflow-y-auto max-h-[50vh] space-y-1">
           {displayQueue.map((track, i) => (
             <button
-              // biome-ignore lint/suspicious/noArrayIndexKey: queue allows duplicate track IDs, position is the identity
+              // biome-ignore lint/suspicious/noArrayIndexKey: queue has duplicate track IDs
               key={i}
               type="button"
               onClick={() => {
@@ -68,7 +70,7 @@ export function QueueOverlay({
                     }),
                   );
                 } else {
-                  player.play(track, queue);
+                  play(track, queue);
                 }
                 close();
               }}

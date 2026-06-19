@@ -1,5 +1,6 @@
 'use client';
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Camera,
   Globe,
@@ -12,14 +13,17 @@ import {
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { getSessions, revokeSession } from '@/features/auth/api';
 import { qrAuthorize, qrReject } from '@/features/auth/qr-api';
 import { checkIsMobile } from '@/lib/electron-bridge';
-import { apiFetch } from '@/lib/fetch';
 
 interface Session {
   sessionId: string;
   device: string;
-  createdAt: number;
+  browser: string;
+  os: string;
+  ip: string;
+  lastActive: string;
   isCurrent: boolean;
 }
 
@@ -65,9 +69,7 @@ function timeAgo(
 
 export function ActiveDevices() {
   const t = useTranslations('profile');
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [revoking, setRevoking] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [scanning, setScanning] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -77,44 +79,38 @@ export function ActiveDevices() {
     );
   }, []);
 
-  const fetchSessions = useCallback(async () => {
-    try {
-      const data = await apiFetch<{ sessions: Session[] }>(
-        '/api/auth/sessions',
+  const { data: sessions = [], isLoading: loading } = useQuery<Session[]>({
+    queryKey: ['profile', 'devices'],
+    queryFn: getSessions as () => Promise<Session[]>,
+    retry: 1,
+    retryDelay: 2000,
+  });
+
+  const revokeMutation = useMutation({
+    mutationFn: (sessionId: string) => revokeSession(sessionId),
+    onMutate: async (sessionId) => {
+      await queryClient.cancelQueries({ queryKey: ['profile', 'devices'] });
+      const prev = queryClient.getQueryData<Session[]>(['profile', 'devices']);
+      queryClient.setQueryData<Session[]>(['profile', 'devices'], (old) =>
+        old?.filter((s) => s.sessionId !== sessionId),
       );
-      setSessions(data.sessions);
-      setLoading(false);
-    } catch {
-      setTimeout(async () => {
-        try {
-          const data = await apiFetch<{ sessions: Session[] }>(
-            '/api/auth/sessions',
-          );
-          setSessions(data.sessions);
-        } catch {
-          // Give up
-        } finally {
-          setLoading(false);
-        }
-      }, 2000);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
-
-  const handleRevoke = async (sessionId: string) => {
-    setRevoking(sessionId);
-    try {
-      await apiFetch(`/api/auth/sessions/${sessionId}`, { method: 'DELETE' });
-      setSessions((prev) => prev.filter((s) => s.sessionId !== sessionId));
-      toast.success(t('devices.signedOutSuccess'));
-    } catch {
+      return { prev };
+    },
+    onSuccess: () => toast.success(t('devices.signedOutSuccess')),
+    onError: (_err, _id, context) => {
+      queryClient.setQueryData(['profile', 'devices'], context?.prev);
       toast.error(t('devices.signedOutFailed'));
-    } finally {
-      setRevoking(null);
-    }
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ['profile', 'devices'] }),
+  });
+
+  const revoking = revokeMutation.isPending
+    ? (revokeMutation.variables as string)
+    : null;
+
+  const handleRevoke = (sessionId: string) => {
+    revokeMutation.mutate(sessionId);
   };
 
   if (loading) {
@@ -153,7 +149,7 @@ export function ActiveDevices() {
           onClose={() => setScanning(false)}
           onSuccess={() => {
             setScanning(false);
-            fetchSessions();
+            queryClient.invalidateQueries({ queryKey: ['profile', 'devices'] });
           }}
         />
       )}
@@ -177,9 +173,12 @@ export function ActiveDevices() {
                   ) : null}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {session.createdAt
+                  {session.lastActive
                     ? t('devices.signedIn', {
-                        time: timeAgo(session.createdAt, t),
+                        time: timeAgo(
+                          new Date(session.lastActive).getTime(),
+                          t,
+                        ),
                       })
                     : t('devices.unknown')}
                 </p>
@@ -210,11 +209,11 @@ export function ActiveDevices() {
           onClick={async () => {
             const others = sessions.filter((s) => !s.isCurrent);
             for (const s of others) {
-              await apiFetch(`/api/auth/sessions/${s.sessionId}`, {
-                method: 'DELETE',
-              });
+              await revokeSession(s.sessionId);
             }
-            setSessions((prev) => prev.filter((s) => s.isCurrent));
+            queryClient.setQueryData<Session[]>(['profile', 'devices'], (old) =>
+              old?.filter((s) => s.isCurrent),
+            );
             toast.success(t('devices.allSignedOut'));
           }}
           className="mt-6 px-4 py-2 text-sm font-headline font-bold text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/10 active:scale-95 transition-all"

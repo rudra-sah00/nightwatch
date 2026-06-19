@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
-import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 import { getShowDetails } from '../api';
 import type { ShowDetails } from '../types';
 
@@ -13,51 +12,21 @@ interface UseShowDetailsReturn {
 }
 
 /**
- * Hook that fetches show/movie details by content ID on mount.
- *
- * Uses `useTransition` to keep the UI responsive during the fetch and
- * aborts the request on unmount or when `contentId` changes.
- *
- * @param contentId - The provider-prefixed content identifier (e.g. `s1:12345`).
- * @returns {@link UseShowDetailsReturn}
+ * Hook that fetches show/movie details by content ID using TanStack Query.
+ * Data is cached so re-opening the same modal is instant.
  */
 export function useShowDetails(contentId: string): UseShowDetailsReturn {
-  const [show, setShow] = useState<ShowDetails | null>(null);
-  const [isLoading, startTransition] = useTransition();
+  const { data, isLoading } = useQuery({
+    queryKey: ['show', contentId],
+    queryFn: () => getShowDetails(contentId),
+    enabled: !!contentId,
+  });
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchDetails = () => {
-      startTransition(async () => {
-        try {
-          const details = await getShowDetails(contentId, {
-            signal: controller.signal,
-          });
-
-          if (!controller.signal.aborted) {
-            setShow(details);
-          }
-        } catch (error: unknown) {
-          const isAborted =
-            (error instanceof Error && error.name === 'AbortError') ||
-            controller.signal.aborted;
-
-          if (isAborted) return;
-
-          toast.error(
-            'Failed to load show details. Please check your connection and try again.',
-          );
-        }
-      });
-    };
-
-    fetchDetails();
-
-    return () => {
-      controller.abort();
-    };
-  }, [contentId]);
-
-  return { show, isLoading, setShow };
+  return {
+    show: data ?? null,
+    isLoading,
+    // setShow is kept for API compatibility but is now a no-op
+    // (TanStack Query owns the data lifecycle)
+    setShow: () => {},
+  };
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
   Heart,
   ListMusic,
@@ -11,13 +12,9 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  addTrackToPlaylist,
-  getUserPlaylists,
-  type UserPlaylist,
-} from '@/features/music/api';
+import { addTrackToPlaylist, getUserPlaylists } from '@/features/music/api';
 import { trackEvent } from '@/lib/analytics';
 import { AnalyticsEvents } from '@/lib/analytics-events';
 import { hapticLight } from '@/lib/haptics';
@@ -42,19 +39,12 @@ export function DiscoverActions({
 }: DiscoverActionsProps) {
   const t = useTranslations('music');
   const [showPlaylists, setShowPlaylists] = useState(false);
-  const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
 
-  const loadPlaylists = useCallback(() => {
-    getUserPlaylists()
-      .then(setPlaylists)
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (showPlaylists && playlists.length === 0) {
-      loadPlaylists();
-    }
-  }, [showPlaylists, playlists.length, loadPlaylists]);
+  const { data: playlists = [] } = useQuery({
+    queryKey: ['music', 'playlists'],
+    queryFn: getUserPlaylists,
+    enabled: showPlaylists,
+  });
 
   const handleAddToPlaylist = useCallback(
     async (playlistId: string) => {

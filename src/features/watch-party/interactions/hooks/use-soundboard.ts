@@ -121,7 +121,7 @@ export function useSoundboard({
 
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const playSoundEffect = useCallback((soundUrl: string) => {
     if (currentAudioRef.current) {

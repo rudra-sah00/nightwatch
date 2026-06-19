@@ -1,12 +1,12 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { Music } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import ReactSkeleton from 'react-loading-skeleton';
 import { AppSkeletonTheme } from '@/components/ui/skeleton-theme';
-import { getUserPlaylists, type UserPlaylist } from '@/features/music/api';
+import { getUserPlaylists } from '@/features/music/api';
 import { ScrollRow, Section } from './MusicPrimitives';
 
 /**
@@ -24,15 +24,10 @@ import { ScrollRow, Section } from './MusicPrimitives';
  */
 export function UserPlaylists() {
   const t = useTranslations('music');
-  const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getUserPlaylists()
-      .then(setPlaylists)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: playlists = [], isLoading: loading } = useQuery({
+    queryKey: ['music', 'playlists'],
+    queryFn: getUserPlaylists,
+  });
 
   if (loading) {
     return (

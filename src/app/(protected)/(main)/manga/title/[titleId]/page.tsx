@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
   BookOpen,
@@ -12,8 +13,8 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import type { MangaDetail, MangaProgress } from '@/features/manga/api';
+import { useState } from 'react';
+import type { MangaProgress } from '@/features/manga/api';
 import {
   addMangaFavorite,
   checkMangaFavorite,
@@ -25,34 +26,34 @@ import {
 export default function MangaTitlePage() {
   const { titleId } = useParams<{ titleId: string }>();
   const router = useRouter();
-  const [detail, setDetail] = useState<MangaDetail | null>(null);
-  const [loading, setLoading] = useState(true);
   const [isFav, setIsFav] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
-  const [resumeProgress, setResumeProgress] = useState<MangaProgress | null>(
-    null,
-  );
 
-  useEffect(() => {
-    if (!titleId) return;
-    setLoading(true);
-    getMangaDetail(Number(titleId))
-      .then((d) => {
-        setDetail(d);
-        document.title = `${d.title.name} — Nightwatch`;
-      })
-      .catch(() => setDetail(null))
-      .finally(() => setLoading(false));
-    checkMangaFavorite(Number(titleId))
-      .then((r) => setIsFav(r.isFavorite))
-      .catch(() => {});
-    getMangaProgress()
-      .then((r) => {
-        const p = r.progress.find((x) => x.titleId === Number(titleId));
-        if (p) setResumeProgress(p);
-      })
-      .catch(() => {});
-  }, [titleId]);
+  const { data: detail = null, isLoading: loading } = useQuery({
+    queryKey: ['manga', 'detail', titleId],
+    queryFn: () => getMangaDetail(Number(titleId)),
+    enabled: !!titleId,
+  });
+
+  const { data: favData } = useQuery({
+    queryKey: ['manga', 'favorite', titleId],
+    queryFn: () => checkMangaFavorite(Number(titleId)),
+    enabled: !!titleId,
+  });
+
+  const derivedIsFav = favData?.isFavorite ?? false;
+  // Sync derived value into local state for optimistic toggle
+  if (favData && isFav !== derivedIsFav && !favLoading) {
+    setIsFav(derivedIsFav);
+  }
+
+  const { data: progressData } = useQuery({
+    queryKey: ['manga', 'progress'],
+    queryFn: () => getMangaProgress(),
+  });
+
+  const resumeProgress: MangaProgress | null =
+    progressData?.progress.find((x) => x.titleId === Number(titleId)) ?? null;
 
   const toggleFav = async () => {
     if (!detail || favLoading) return;

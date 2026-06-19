@@ -53,9 +53,6 @@ export interface ElectronAPI {
   /** Sets the app to run silently in the background when the user turns on their computer */
   setRunOnBoot: (isEnabled: boolean) => void;
 
-  /** Only used by the fallback offline error page */
-  retryConnection: () => void;
-
   /** Connects React hardware Media key events (Play, Pause, Next Track). Returns an unsubscribe function. */
   onMediaCommand: (
     callback: (
@@ -70,11 +67,6 @@ export interface ElectronAPI {
 
   /** Toggles native OS fullscreen on the main window */
   toggleFullscreen: () => void;
-
-  /** Tells React when Native OS Fullscreen state changes. */
-  onFullscreenChanged: (
-    callback: (isFullScreen: boolean) => void,
-  ) => () => void;
 
   /** Tells React when the window has lost focus */
   onWindowBlur: (callback: () => void) => () => void;
@@ -93,6 +85,21 @@ export interface ElectronAPI {
   clearCacheAndReload: () => void;
   /** Open a URL in the default OS browser */
   openExternal: (url: string) => void;
+
+  /** Clears the Discord Rich Presence status */
+  clearDiscordPresence: () => void;
+  /** Returns the current Electron app version */
+  getAppVersion: () => Promise<string>;
+  /** Notifies the main process whether a voice call is active */
+  setCallActive: (active: boolean) => void;
+  /** Minimize the main window */
+  windowMinimize: () => void;
+  /** Maximize/restore the main window */
+  windowMaximize: () => void;
+  /** Close the main window */
+  windowClose: () => void;
+  /** Listen for the global Escape key shortcut. Returns an unsubscribe function. */
+  onGlobalEscape: (callback: () => void) => () => void;
 }
 
 declare global {

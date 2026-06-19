@@ -1,10 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import {
-  useMusicPlaybackProgress,
-  useMusicPlayerContext,
-} from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 import { useMusicDevices } from './use-music-devices';
 
 /**
@@ -14,32 +11,30 @@ import { useMusicDevices } from './use-music-devices';
  * - Reclaim-playback event listener
  * - Forwards new local plays to active target
  * - Detects target going offline
- * - Syncs remote state to MusicPlayerContext
+ * - Syncs remote state to useMusicStore
  *
  * Returns only what the UI layer needs to render the device picker.
  */
 export function useMusicDeviceSync() {
   const t = useTranslations('music');
-  const player = useMusicPlayerContext();
-  const { progress, duration } = useMusicPlaybackProgress();
-  const {
-    currentTrack,
-    queue,
-    isPlaying,
-    play,
-    seek,
-    stop,
-    next,
-    prev,
-    togglePlay,
-    setVolume,
-    toggleShuffle,
-    cycleRepeat,
-    initEqualizer,
-    setEqBands,
-    setRemoteControlling,
-    remoteQueue,
-  } = player;
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const queue = useMusicStore((s) => s.queue);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const play = useMusicStore((s) => s.play);
+  const seek = useMusicStore((s) => s.seek);
+  const stop = useMusicStore((s) => s.stop);
+  const next = useMusicStore((s) => s.next);
+  const prev = useMusicStore((s) => s.prev);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+  const setVolume = useMusicStore((s) => s.setVolume);
+  const toggleShuffle = useMusicStore((s) => s.toggleShuffle);
+  const cycleRepeat = useMusicStore((s) => s.cycleRepeat);
+  const initEqualizer = useMusicStore((s) => s.initEqualizer);
+  const setEqBands = useMusicStore((s) => s.setEqBands);
+  const setRemoteControlling = useMusicStore((s) => s.setRemoteControlling);
+  const remoteQueue = useMusicStore((s) => s.remoteQueue);
+  const progress = useMusicStore((s) => s.progress);
+  const duration = useMusicStore((s) => s.duration);
 
   const {
     devices,
@@ -209,8 +204,7 @@ export function useMusicDeviceSync() {
 
   const isControlling = !!activeTarget;
 
-  // Sync remote state to context
-  // biome-ignore lint/correctness/useExhaustiveDependencies: progress/duration synced separately
+  // Sync remote state to context (excluding progress/duration — handled below)
   useEffect(() => {
     if (!isControlling) return;
     if (remoteState.track) {
@@ -218,8 +212,8 @@ export function useMusicDeviceSync() {
         true,
         remoteState.track,
         remoteState.isPlaying,
-        remoteState.progress,
-        remoteState.duration,
+        undefined,
+        undefined,
       );
     }
   }, [
@@ -229,7 +223,7 @@ export function useMusicDeviceSync() {
     setRemoteControlling,
   ]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: lightweight progress-only sync
+  // Lightweight progress-only sync (fires on high-frequency progress/duration updates)
   useEffect(() => {
     if (!isControlling || !remoteState.track) return;
     setRemoteControlling(
@@ -239,7 +233,14 @@ export function useMusicDeviceSync() {
       remoteState.progress,
       remoteState.duration,
     );
-  }, [remoteState.progress, remoteState.duration]);
+  }, [
+    isControlling,
+    remoteState.track,
+    remoteState.isPlaying,
+    remoteState.progress,
+    remoteState.duration,
+    setRemoteControlling,
+  ]);
 
   return {
     devices,

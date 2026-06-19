@@ -374,14 +374,8 @@ export function WatchPartySketch() {
 
             // Save to library via API
             try {
-              const { apiFetch } = await import('@/lib/fetch');
-              await apiFetch('/api/clips/screenshot', {
-                method: 'POST',
-                body: JSON.stringify({
-                  image: finalDataUrl,
-                  title: `Scene Capture`,
-                }),
-              });
+              const { saveScreenshot } = await import('@/features/clips/api');
+              await saveScreenshot(finalDataUrl, `Scene Capture`);
               const { toast } = await import('sonner');
               toast.success(t('sketch.captureSuccess'));
             } catch {

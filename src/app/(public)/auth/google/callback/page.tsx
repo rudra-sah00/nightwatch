@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { connectGoogle, googleLogin } from '@/features/auth/google-api';
-import { invalidateProfileCache } from '@/features/profile/api';
 import { trackEvent } from '@/lib/analytics';
 import { storeUser } from '@/lib/auth';
 import { setTokenExpiration } from '@/lib/fetch';
@@ -34,7 +33,6 @@ export default function GoogleCallbackPage() {
         if (state === 'connect') {
           const { user } = await connectGoogle({ code });
           useAuthStore.getState().updateUser(user);
-          invalidateProfileCache();
           toast.success('Google account connected');
           router.replace('/profile');
         } else {

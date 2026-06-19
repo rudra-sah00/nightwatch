@@ -1,6 +1,5 @@
-import { apiFetch } from '@/lib/fetch';
 import type { MusicTrack } from '../api';
-import { addToUserQueue } from '../api';
+import { addToUserQueue, persistUserQueue } from '../api';
 import type { EngineContext } from './types';
 
 export function getNextIndex(ctx: EngineContext): number | null {
@@ -126,8 +125,5 @@ export async function loadQueue(ctx: EngineContext): Promise<void> {
 }
 
 function persistQueue(queue: MusicTrack[]): void {
-  apiFetch('/api/music/queue', {
-    method: 'PUT',
-    body: JSON.stringify(queue),
-  }).catch(() => {});
+  persistUserQueue(queue).catch(() => {});
 }

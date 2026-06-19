@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useCallback, useRef } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useMusicStore } from '@/features/music/store/use-music-store';
 import { usePageTitle } from '@/hooks/use-page-title';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -50,7 +50,7 @@ function useLongPress(onLongPress: () => void, delay = 500) {
  */
 export function Navbar() {
   const { user } = useAuth();
-  const { expanded: musicExpanded } = useMusicPlayerContext();
+  const musicExpanded = useMusicStore((s) => s.expanded);
   const { title: pageTitle } = usePageTitle();
   const t = useTranslations('common.nav');
   const { setLeftOpen, setRightOpen } = useSidebar();

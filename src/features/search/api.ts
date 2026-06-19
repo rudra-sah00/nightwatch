@@ -1,23 +1,15 @@
 import { trackEvent } from '@/lib/analytics';
-import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { Episode, SearchResult, ShowDetails } from './types';
 
 /**
- * Content search with intelligent frontend caching.
+ * Content search — TanStack Query handles caching.
  */
-
-const searchResultsCache = createTTLCache<SearchResult[]>(5 * 60 * 1000, 100);
-
 export async function searchContent(
   query: string,
   options?: RequestInit,
 ): Promise<SearchResult[]> {
   const normalizedQuery = query.toLowerCase().trim();
-  const cacheKey = normalizedQuery;
-  const cached = searchResultsCache.get(cacheKey);
-  if (cached) return cached;
-
   trackEvent('search', { query: normalizedQuery });
 
   const { results } = await apiFetch<{ results: SearchResult[] }>(
@@ -27,102 +19,86 @@ export async function searchContent(
 
   if (results.length === 0)
     trackEvent('search_no_results', { query: normalizedQuery });
-  searchResultsCache.set(cacheKey, results);
   return results;
 }
 
 /**
- * Get search suggestions with frontend caching.
+ * Get search suggestions.
  */
-const searchSuggestionsCache = createTTLCache<string[]>(10 * 60 * 1000, 50);
-
 export async function getSearchSuggestions(
   query: string,
   options?: RequestInit,
 ): Promise<string[]> {
   if (!query || query.length < 2) return [];
 
-  const cacheKey = query.toLowerCase();
-  const cached = searchSuggestionsCache.get(cacheKey);
-  if (cached) return cached;
-
   const { suggestions } = await apiFetch<{ suggestions: string[] }>(
     `/api/video/search/suggest?q=${encodeURIComponent(query)}`,
     options,
   );
 
-  searchSuggestionsCache.set(cacheKey, suggestions);
   return suggestions;
 }
 
 /**
  * Metadata retrieval for movies and series.
  */
-
-const showDetailsCache = createTTLCache<ShowDetails>(5 * 60 * 1000, 50);
-
-// In-flight dedup: if the same content is requested while a fetch is pending,
-// reuse the existing promise instead of firing a second API call.
-const showDetailsInflight = new Map<string, Promise<ShowDetails>>();
-
 export async function getShowDetails(
   id: string,
   options?: RequestInit,
 ): Promise<ShowDetails> {
-  const cached = showDetailsCache.get(id);
-  if (cached) return cached;
-
-  const inflight = showDetailsInflight.get(id);
-  if (inflight) return inflight;
-
-  const promise = apiFetch<{ show: ShowDetails }>(
+  const { show } = await apiFetch<{ show: ShowDetails }>(
     `/api/video/show/${id}`,
     options,
-  )
-    .then(({ show }) => {
-      showDetailsCache.set(id, show);
-      showDetailsInflight.delete(id);
-      return show;
-    })
-    .catch((err) => {
-      showDetailsInflight.delete(id);
-      throw err;
-    });
-
-  showDetailsInflight.set(id, promise);
-  return promise;
+  );
+  return show;
 }
 
 /**
- * Episode listing for series, with caching to minimize large requests.
+ * Episode listing for series.
  */
-
-const episodesCache = createTTLCache<{
-  episodes: Episode[];
-  totalEpisodes: number;
-}>(10 * 60 * 1000, 30);
-
 export async function getSeriesEpisodes(
   seriesId: string,
   startSeasonId?: string,
   options?: RequestInit,
 ): Promise<{ episodes: Episode[]; totalEpisodes: number }> {
-  const cacheKey = startSeasonId
-    ? `${seriesId}:${startSeasonId}`
-    : `${seriesId}:all`;
-  const cached = episodesCache.get(cacheKey);
-  if (cached) return cached;
-
   const url = startSeasonId
     ? `/api/video/episodes/${seriesId}?start_season_id=${startSeasonId}`
     : `/api/video/episodes/${seriesId}`;
-  const result = await apiFetch<{ episodes: Episode[]; totalEpisodes: number }>(
-    url,
-    options,
-  );
-
-  episodesCache.set(cacheKey, result);
-  return result;
+  return apiFetch<{ episodes: Episode[]; totalEpisodes: number }>(url, options);
 }
 
-// Metadata retrieval for movies and series... (keeping getSeriesEpisodes)
+/**
+ * Fetch curated explore/home sections.
+ */
+export interface ExploreItem {
+  id: string;
+  title: string;
+  genre: string;
+  cover: string;
+  imdbRating: string | null;
+  releaseDate: string;
+  type: 'movie' | 'series';
+}
+
+export interface ExploreSection {
+  title: string;
+  items: ExploreItem[];
+}
+
+export interface ExploreData {
+  banner: {
+    title: string;
+    image: string;
+    detailPath: string;
+    subjectId: string;
+  }[];
+  sections: ExploreSection[];
+}
+
+export async function getExploreHome(): Promise<ExploreData | null> {
+  try {
+    return await apiFetch<ExploreData>('/api/video/explore/home');
+  } catch {
+    return null;
+  }
+}

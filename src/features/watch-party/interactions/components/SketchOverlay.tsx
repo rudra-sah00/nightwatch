@@ -326,7 +326,7 @@ export function SketchOverlay({
       };
       animFrameRef.current = requestAnimationFrame(update);
     }
-  }, [activeReactions.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeReactions.length]);
 
   useEffect(() => {
     return () => {

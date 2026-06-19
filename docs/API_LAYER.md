@@ -41,3 +41,36 @@ export async function apiFetch<T>(
 
 In Nightwatch, we prefer Next.js Server Actions for secure form mutations (e.g. Profile editing or Logins). When passing through a Server Action, we do not hit Next.js `/api/` folders. We execute `apiFetch` directly inside the Action bounds before returning the result down to the Client Component, minimizing client-side bandwidth and obscuring the upstream REST signatures.
 
+
+## Client-Side Caching (TanStack Query)
+
+All API responses are cached client-side via TanStack Query's `QueryClient`. This replaces the previous `src/lib/cache.ts` manual TTL cache system (`createTTLCache` / `clearAllCaches()`).
+
+### How It Works
+
+- **Instant cache hits**: Default `staleTime` of 5 minutes means data is served instantly from cache on re-mount — no loading spinners for recently fetched data.
+- **Background revalidation**: After serving cached data, TanStack Query silently refetches in the background and updates the UI if the response has changed.
+- **Automatic garbage collection**: Queries with no active observers are garbage-collected after 5 minutes (`gcTime`).
+
+### Cache Key Convention
+
+Cache keys follow a hierarchical array pattern for easy invalidation:
+
+```ts
+['music', 'album', id]
+['music', 'playlist', id]
+['search', query]
+['profile', 'devices']
+['watchlist']
+['friends', 'list']
+```
+
+Invalidating `['music']` busts all music-related caches. Invalidating `['music', 'album', id]` targets a single album.
+
+### Logout Cleanup
+
+On logout, `queryClient.clear()` wipes all cached data — no stale user data leaks between sessions.
+
+### DevTools
+
+In development mode, TanStack Query DevTools are available for inspecting cache state, active queries, and background refetch timings.

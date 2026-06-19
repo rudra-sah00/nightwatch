@@ -7,66 +7,17 @@ import type {
 } from './types';
 
 /**
- * Video metadata and stream URL retrieval.
+ * Video stream URL retrieval.
  */
-
-export async function getVideoDetails(id: string, options?: RequestInit) {
-  return apiFetch(`/api/video/${id}`, options);
-}
 
 export async function getStreamUrl(id: string, options?: RequestInit) {
   return apiFetch(`/api/stream/${id}`, options);
 }
 
 /**
- * User's "Continue Watching" list management, including optimistic caching
- * and Socket.IO data retrieval.
+ * User's "Continue Watching" list.
  */
 
-// Cache for continue watching items (30 seconds stale time, per server)
-interface ContinueWatchingCache {
-  data: WatchProgress[];
-  timestamp: number;
-}
-const continueWatchingCache: Record<string, ContinueWatchingCache> = {};
-const CONTINUE_WATCHING_STALE_TIME = 30 * 1000;
-
-// Invalidate continue watching cache (for real-time updates)
-export function invalidateContinueWatchingCache(): void {
-  for (const key of Object.keys(continueWatchingCache)) {
-    delete continueWatchingCache[key];
-  }
-}
-
-// Check if cache is fresh
-export function isContinueWatchingCacheFresh(): boolean {
-  const cache = continueWatchingCache.default;
-  if (!cache) return false;
-  return Date.now() - cache.timestamp < CONTINUE_WATCHING_STALE_TIME;
-}
-
-// Get cached continue watching data
-export function getCachedContinueWatching(): WatchProgress[] | null {
-  if (isContinueWatchingCacheFresh()) {
-    return continueWatchingCache.default.data;
-  }
-  return null;
-}
-
-// Update continue watching cache
-export function setContinueWatchingCache(data: WatchProgress[]): void {
-  continueWatchingCache.default = { data, timestamp: Date.now() };
-}
-
-// Remove item from cache (optimistic update)
-export function removeFromContinueWatchingCache(itemId: string): void {
-  const cache = continueWatchingCache.default;
-  if (cache) {
-    cache.data = cache.data.filter((i) => i.id !== itemId);
-  }
-}
-
-// Fetch continue watching via HTTP (for SSR or fallback)
 export async function getContinueWatching(
   limit = 10,
   options?: RequestInit,
@@ -76,23 +27,6 @@ export async function getContinueWatching(
     options,
   );
   return result.items;
-}
-
-// Fetch continue watching via HTTP
-export async function fetchContinueWatching(
-  limit = 10,
-  callback?: (items: WatchProgress[] | null, error?: string) => void,
-): Promise<WatchProgress[] | null> {
-  try {
-    const items = await getContinueWatching(limit);
-    setContinueWatchingCache(items);
-    callback?.(items);
-    return items;
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Failed to load';
-    callback?.(null, errorMsg);
-    return null;
-  }
 }
 
 // Delete progress via HTTP
@@ -107,7 +41,7 @@ export async function deleteWatchProgress(
     );
 
     if (result.success) {
-      removeFromContinueWatchingCache(progressId);
+      // TanStack Query handles cache invalidation via queryClient
     }
     callback?.(result.success);
     return result.success;

@@ -1,6 +1,7 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFormatter, useTranslations } from 'next-intl';
 import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/providers/auth-provider';
 import { getMusicActivity, getWatchActivity, uploadProfileImage } from '../api';
@@ -8,49 +9,28 @@ import type { ActivityData } from '../types';
 
 /**
  * Hook that powers the profile overview page.
- *
- * Fetches watch and music activity data on mount (and on window re-focus), handles
- * profile-image uploads with an optimistic local preview, and derives
- * display values such as the formatted join date.
- *
- * @returns User data, activity data, upload helpers, display image URL,
- *          file-input ref, formatted join date, and the `logout` action.
+ * Uses TanStack Query for activity data fetching.
  */
 export function useProfileOverview() {
   const { user, logout, updateUser } = useAuth();
   const t = useTranslations('profile.messages');
   const format = useFormatter();
-  const [activityData, setActivityData] = useState<ActivityData>({
-    watch: [],
-    music: [],
-  });
-  const [loadingActivity, setLoadingActivity] = useState(true);
+  const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchActivity = useCallback(async () => {
-    try {
-      const [watch, music] = await Promise.all([
-        getWatchActivity(),
-        getMusicActivity(),
-      ]);
-      setActivityData({ watch, music });
-    } catch {
-      toast.error(t('activityFailed'), { id: 'activity-load-failed' });
-    }
-  }, [t]);
+  const { data: watchActivity = [] } = useQuery({
+    queryKey: ['profile', 'activity', 'watch'],
+    queryFn: () => getWatchActivity(),
+  });
 
-  useEffect(() => {
-    setLoadingActivity(true);
-    fetchActivity().finally(() => setLoadingActivity(false));
+  const { data: musicActivity = [], isLoading: loadingActivity } = useQuery({
+    queryKey: ['profile', 'activity', 'music'],
+    queryFn: () => getMusicActivity(),
+  });
 
-    const handleFocus = () => {
-      fetchActivity();
-    };
-    window.addEventListener('focus', handleFocus, { passive: true });
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [fetchActivity]);
+  const activity: ActivityData = { watch: watchActivity, music: musicActivity };
 
   const handleFileClick = useCallback(() => {
     fileInputRef.current?.click();
@@ -69,6 +49,7 @@ export function useProfileOverview() {
         const { url } = await uploadProfileImage(file);
         updateUser({ profilePhoto: url });
         setPreviewImage(null);
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
         toast.success(t('imageUpdated'));
       } catch {
         setPreviewImage(null);
@@ -79,7 +60,7 @@ export function useProfileOverview() {
         URL.revokeObjectURL(localPreviewUrl);
       }
     },
-    [updateUser, t],
+    [updateUser, t, queryClient],
   );
 
   const displayImage = previewImage || user?.profilePhoto;
@@ -103,7 +84,7 @@ export function useProfileOverview() {
   return {
     user,
     logout,
-    activity: activityData,
+    activity,
     loadingActivity,
     isUploading,
     displayImage,

@@ -5,11 +5,8 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import {
-  useMusicPlaybackProgress,
-  useMusicPlayerContext,
-} from '../context/MusicPlayerContext';
 import { useMusicDeviceSync } from '../hooks/use-music-device-sync';
+import { useMusicStore } from '../store/use-music-store';
 import { getDeviceName } from '../utils';
 
 function ConnectIcon({ className }: { className?: string }) {
@@ -39,18 +36,17 @@ function DeviceIcon({ name }: { name: string }) {
  */
 export function MusicDevicePicker() {
   const t = useTranslations('music');
-  const player = useMusicPlayerContext();
-  const { progress } = useMusicPlaybackProgress();
-  const {
-    currentTrack,
-    queue,
-    isPlaying,
-    play,
-    stop,
-    setRemoteControlling,
-    remoteQueue,
-    isRemoteControlling,
-  } = player;
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const queue = useMusicStore((s) => s.queue);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const play = useMusicStore((s) => s.play);
+  const stop = useMusicStore((s) => s.stop);
+  const setRemoteControlling = useMusicStore((s) => s.setRemoteControlling);
+  const remoteQueue = useMusicStore((s) => s.remoteQueue);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
+  const remoteTrack = useMusicStore((s) => s.remoteTrack);
+  const remoteProgress = useMusicStore((s) => s.remoteProgress);
+  const progress = useMusicStore((s) => s.progress);
 
   const {
     devices,
@@ -79,10 +75,8 @@ export function MusicDevicePicker() {
   };
 
   const handleReclaim = () => {
-    const trackToPlay = isControlling ? remoteState.track : player.remoteTrack;
-    const prog = isControlling
-      ? remoteProgressRef.current
-      : player.remoteProgress;
+    const trackToPlay = isControlling ? remoteState.track : remoteTrack;
+    const prog = isControlling ? remoteProgressRef.current : remoteProgress;
     const q = isControlling
       ? remoteState.queue.length > 0
         ? remoteState.queue

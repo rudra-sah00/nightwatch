@@ -1,22 +1,27 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { BookOpen, Loader2, Search, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { MangaTitle } from '@/features/manga/api';
 import { searchManga } from '@/features/manga/api';
 
 export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<MangaTitle[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [visible, setVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = useTranslations('common.manga');
+
+  const { data: results = null, isLoading: loading } = useQuery({
+    queryKey: ['manga', 'search', debouncedQuery],
+    queryFn: async () => (await searchManga(debouncedQuery)).titles,
+    enabled: !!debouncedQuery && debouncedQuery.length >= 1,
+  });
 
   // Smooth entrance animation
   useEffect(() => {
@@ -49,18 +54,11 @@ export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
     setQuery(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!val.trim()) {
-      setResults(null);
+      setDebouncedQuery('');
       return;
     }
-    debounceRef.current = setTimeout(async () => {
-      setLoading(true);
-      try {
-        setResults((await searchManga(val)).titles);
-      } catch {
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
+    debounceRef.current = setTimeout(() => {
+      setDebouncedQuery(val);
     }, 400);
   }, []);
 
@@ -106,7 +104,7 @@ export function MangaSearchSpotlight({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={() => {
                 setQuery('');
-                setResults(null);
+                setDebouncedQuery('');
                 inputRef.current?.focus();
               }}
               className="text-white/40 hover:text-white"

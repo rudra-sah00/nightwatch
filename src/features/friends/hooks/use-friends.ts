@@ -9,7 +9,6 @@ import {
   getFriends,
   getPendingRequests,
   getSentRequests,
-  invalidateFriendsCache,
   rejectFriendRequest,
   unblockUser,
 } from '@/features/friends/api';
@@ -74,7 +73,6 @@ export function useFriends() {
   // Refetch after token refresh (covers tab-active expiry where socket stays connected)
   useEffect(() => {
     const onRefreshed = () => {
-      invalidateFriendsCache();
       fetchAll();
     };
     window.addEventListener('auth:refreshed', onRefreshed);
@@ -98,9 +96,6 @@ export function useFriends() {
       isOnline: boolean;
       activity?: FriendActivity | null;
     }) => {
-      // Invalidate cache so a navigation remount fetches fresh data instead of
-      // serving the pre-socket-update snapshot.
-      invalidateFriendsCache();
       setFriends((prev) =>
         prev.map((f) => {
           if (f.id !== data.userId) return f;
@@ -121,7 +116,6 @@ export function useFriends() {
       userId: string;
       activity: FriendActivity | null;
     }) => {
-      invalidateFriendsCache();
       setFriends((prev) =>
         prev.map((f) =>
           f.id === data.userId ? { ...f, activity: data.activity } : f,
@@ -130,7 +124,6 @@ export function useFriends() {
     };
 
     const onRefresh = () => {
-      invalidateFriendsCache();
       fetchAll();
     };
 
@@ -141,7 +134,6 @@ export function useFriends() {
 
     // Re-fetch on (re)connect to get fresh activity state
     const onConnect = () => {
-      invalidateFriendsCache();
       fetchAll();
     };
     socket.on('connect', onConnect);
@@ -162,7 +154,6 @@ export function useFriends() {
       } catch {
         // Request already processed or expired — just refresh the list
       }
-      invalidateFriendsCache();
       fetchAll();
     },
     [fetchAll],
@@ -175,7 +166,6 @@ export function useFriends() {
       } catch {
         // Request already processed or expired
       }
-      invalidateFriendsCache();
       fetchAll();
     },
     [fetchAll],
@@ -188,7 +178,6 @@ export function useFriends() {
       } catch {
         // Already cancelled or expired
       }
-      invalidateFriendsCache();
       fetchAll();
     },
     [fetchAll],
@@ -197,7 +186,6 @@ export function useFriends() {
   const unblock = useCallback(
     async (userId: string) => {
       await unblockUser(userId);
-      invalidateFriendsCache();
       fetchAll();
     },
     [fetchAll],

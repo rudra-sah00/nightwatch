@@ -1,10 +1,12 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { type ExploreData, type ExploreItem, getExploreHome } from '../api';
 
 const ContentDetailModal = dynamic(
   () =>
@@ -13,31 +15,6 @@ const ContentDetailModal = dynamic(
     ),
   { ssr: false },
 );
-
-interface ExploreItem {
-  id: string;
-  title: string;
-  genre: string;
-  cover: string;
-  imdbRating: string | null;
-  releaseDate: string;
-  type: 'movie' | 'series';
-}
-
-interface ExploreSection {
-  title: string;
-  items: ExploreItem[];
-}
-
-interface ExploreData {
-  banner: {
-    title: string;
-    image: string;
-    detailPath: string;
-    subjectId: string;
-  }[];
-  sections: ExploreSection[];
-}
 
 /**
  * Strips emoji characters from section titles.
@@ -59,7 +36,6 @@ function stripEmojis(text: string): string {
 export function ExploreHome() {
   const t = useTranslations('search');
   const router = useRouter();
-  const [data, setData] = useState<ExploreData | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContentId, setSelectedContentId] = useState<string | null>(
@@ -71,19 +47,11 @@ export function ExploreHome() {
     setEnabled(pref === 'true');
   }, []);
 
-  useEffect(() => {
-    if (!enabled) return;
-
-    fetch('/api/video/explore/home', { credentials: 'include' })
-      .then((response) => {
-        if (!response.ok) return null;
-        return response.json();
-      })
-      .then((result) => {
-        if (result) setData(result);
-      })
-      .catch(() => {});
-  }, [enabled]);
+  const { data } = useQuery<ExploreData | null>({
+    queryKey: ['explore', 'home'],
+    queryFn: () => getExploreHome(),
+    enabled,
+  });
 
   if (!enabled || !data?.sections?.length) return null;
 

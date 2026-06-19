@@ -21,14 +21,14 @@ describe('Haptics utility', () => {
   });
 
   it('should not fire haptics on non-native platform', async () => {
-    const { hapticLight, hapticMedium, hapticSuccess, hapticError } =
-      await import('@/lib/haptics');
+    const { hapticLight, hapticMedium, hapticSuccess } = await import(
+      '@/lib/haptics'
+    );
     const { Haptics } = await import('@capacitor/haptics');
 
     hapticLight();
     hapticMedium();
     hapticSuccess();
-    hapticError();
 
     expect(Haptics.impact).not.toHaveBeenCalled();
     expect(Haptics.notification).not.toHaveBeenCalled();
@@ -39,6 +39,5 @@ describe('Haptics utility', () => {
     expect(typeof mod.hapticLight).toBe('function');
     expect(typeof mod.hapticMedium).toBe('function');
     expect(typeof mod.hapticSuccess).toBe('function');
-    expect(typeof mod.hapticError).toBe('function');
   });
 });

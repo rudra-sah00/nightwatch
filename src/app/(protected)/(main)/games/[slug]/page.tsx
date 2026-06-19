@@ -1,13 +1,14 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
+import { getGames, getGameUrl } from '@/features/games/api';
 import { trackEvent } from '@/lib/analytics';
 import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
-import { apiFetch } from '@/lib/fetch';
 
 export default function GamePage() {
   const t = useTranslations('common.gamesPage');
@@ -15,24 +16,26 @@ export default function GamePage() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [gameUrl, setGameUrl] = useState<string | null>(null);
-  const [title, setTitle] = useState('');
 
+  const { data: gameUrl = null } = useQuery({
+    queryKey: ['games', slug, 'url'],
+    queryFn: () => getGameUrl(slug),
+    enabled: !!slug,
+  });
+
+  const { data: games = [] } = useQuery({
+    queryKey: ['games'],
+    queryFn: getGames,
+  });
+
+  const title = games.find((g) => g.slug === slug)?.title ?? '';
+
+  // Track game play event when URL loads
   useEffect(() => {
-    apiFetch<{ url: string }>(`/api/games/${slug}/url`)
-      .then((data) => {
-        setGameUrl(data.url);
-        trackEvent('game_play', { slug });
-      })
-      .catch(() => {});
-
-    apiFetch<{ games: { slug: string; title: string }[] }>('/api/games')
-      .then((data) => {
-        const game = data.games?.find((g) => g.slug === slug);
-        if (game) setTitle(game.title);
-      })
-      .catch(() => {});
-  }, [slug]);
+    if (gameUrl) {
+      trackEvent('game_play', { slug });
+    }
+  }, [gameUrl, slug]);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);

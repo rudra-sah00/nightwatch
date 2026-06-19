@@ -439,14 +439,6 @@ if (process.platform === 'win32') {
   app.setUserTasks([
     {
       program: process.execPath,
-      arguments: '--open-downloads',
-      iconPath: process.execPath,
-      iconIndex: 0,
-      title: 'Open Downloads',
-      description: 'View offline media',
-    },
-    {
-      program: process.execPath,
       arguments: '--play-pause',
       iconPath: process.execPath,
       iconIndex: 0,

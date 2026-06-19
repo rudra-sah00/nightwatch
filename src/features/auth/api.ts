@@ -108,3 +108,65 @@ export async function checkUsername(
 }
 
 // ── Desktop Auth (browser-to-app login) ─────────────────────────
+
+/**
+ * Revoke/sign out a specific session by ID.
+ */
+export async function revokeSession(sessionId: string): Promise<void> {
+  await apiFetch(`/api/auth/sessions/${sessionId}`, { method: 'DELETE' });
+}
+
+/**
+ * Unregister push notification token for a device.
+ */
+export async function unregisterPushToken(deviceId: string): Promise<void> {
+  await apiFetch('/api/notifications/unregister', {
+    method: 'POST',
+    body: JSON.stringify({ deviceId }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Register a push notification token for the current device.
+ */
+export async function registerPushToken(params: {
+  token: string;
+  platform: string;
+  deviceId: string;
+  sessionId?: string | null;
+}): Promise<void> {
+  await apiFetch('/api/notifications/register', {
+    method: 'POST',
+    body: JSON.stringify(params),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Fetch all active sessions for the current user.
+ */
+export async function getSessions(): Promise<
+  {
+    sessionId: string;
+    device: string;
+    browser: string;
+    os: string;
+    ip: string;
+    lastActive: string;
+    isCurrent: boolean;
+  }[]
+> {
+  const data = await apiFetch<{
+    sessions: {
+      sessionId: string;
+      device: string;
+      browser: string;
+      os: string;
+      ip: string;
+      lastActive: string;
+      isCurrent: boolean;
+    }[];
+  }>('/api/auth/sessions');
+  return data.sessions;
+}

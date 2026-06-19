@@ -1,38 +1,32 @@
 'use client';
 
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { getTopPodcasts } from '@/features/music/api';
 
 export default function PodcastsPage() {
   const router = useRouter();
   const t = useTranslations('music');
-  const [podcasts, setPodcasts] = useState<
-    { id: string; title: string; image: string }[]
-  >([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef<HTMLDivElement>(null);
 
-  const loadPage = useCallback(async (p: number) => {
-    try {
-      const data = await getTopPodcasts(p);
-      setPodcasts((prev) => (p === 1 ? data : [...prev, ...data]));
-      setHasMore(data.length >= 20);
-    } catch {
-      /* handled */
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const {
+    data,
+    isLoading: loading,
+    hasNextPage: hasMore,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['music', 'podcasts', 'all'],
+    queryFn: ({ pageParam = 1 }) => getTopPodcasts(pageParam),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length >= 20 ? allPages.length + 1 : undefined,
+    initialPageParam: 1,
+  });
 
-  useEffect(() => {
-    loadPage(1);
-  }, [loadPage]);
+  const podcasts = useMemo(() => data?.pages.flat() ?? [], [data]);
 
   // Infinite scroll
   useEffect(() => {
@@ -40,16 +34,14 @@ export default function PodcastsPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !loading) {
-          const next = page + 1;
-          setPage(next);
-          loadPage(next);
+          fetchNextPage();
         }
       },
       { threshold: 0.5 },
     );
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [page, hasMore, loading, loadPage]);
+  }, [hasMore, loading, fetchNextPage]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">

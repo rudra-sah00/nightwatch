@@ -710,10 +710,12 @@ export function useHls({
         // fires before HLS.js has set the duration, making currentTime assignment fail.
         const hls = hlsRef.current;
         if (hls) {
-          // biome-ignore lint/suspicious/noExplicitAny: HLS.js internal event not exported in types
-          const MANIFEST_PARSED = 'hlsManifestParsed' as any;
+          const MANIFEST_PARSED = 'hlsManifestParsed';
           const onParsed = () => {
-            hls.off(MANIFEST_PARSED, onParsed);
+            (hls as unknown as { off(e: string, fn: () => void): void }).off(
+              MANIFEST_PARSED,
+              onParsed,
+            );
             const v = videoRef.current;
             if (!v) return;
             if (savedTime > 0) {
@@ -723,7 +725,10 @@ export function useHls({
               v.play().catch(() => {});
             }
           };
-          hls.on(MANIFEST_PARSED, onParsed);
+          (hls as unknown as { on(e: string, fn: () => void): void }).on(
+            MANIFEST_PARSED,
+            onParsed,
+          );
         }
         return;
       }

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { refreshGameSession } from '@/features/games/api';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
-import { apiFetch } from '@/lib/fetch';
 import { useSocket } from '@/providers/socket-provider';
 
 export function GameFrame({
@@ -24,7 +24,7 @@ export function GameFrame({
   // Refresh game auth cookie every 45 minutes to prevent 403s during long sessions
   useEffect(() => {
     const refreshCookie = () => {
-      apiFetch(`/api/games/${slug}/url`).catch(() => {});
+      refreshGameSession(slug).catch(() => {});
     };
     const id = setInterval(refreshCookie, 45 * 60 * 1000);
     return () => clearInterval(id);

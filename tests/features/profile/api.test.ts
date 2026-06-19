@@ -5,7 +5,6 @@ import {
   deleteAccount,
   getProfile,
   getWatchActivity,
-  invalidateProfileCache,
   updateProfile,
   uploadProfileImage,
 } from '@/features/profile/api';
@@ -21,7 +20,6 @@ vi.mock('@/lib/env', () => import('./__mocks__/lib-env'));
 describe('Profile API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    invalidateProfileCache();
   });
 
   describe('getProfile', () => {
@@ -65,30 +63,6 @@ describe('Profile API', () => {
       await getProfile(options);
 
       expect(apiFetch).toHaveBeenCalledWith('/api/auth/me', options);
-    });
-
-    it('should cache profile data', async () => {
-      const mockUser: User = {
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-        username: 'testuser',
-        profilePhoto: null,
-        sessionId: 'test-session',
-        createdAt: '2024-01-01',
-        googleId: null,
-        googleEmail: null,
-      };
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
-
-      // First call
-      await getProfile();
-      expect(apiFetch).toHaveBeenCalledTimes(1);
-
-      // Second call should use cache
-      await getProfile();
-      expect(apiFetch).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -142,35 +116,6 @@ describe('Profile API', () => {
         body: JSON.stringify(updateData),
         signal: options.signal,
       });
-    });
-
-    it('should update cache with new data', async () => {
-      const mockUser: User = {
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-        username: 'testuser',
-        profilePhoto: null,
-        sessionId: 'test-session',
-        createdAt: '2024-01-01',
-        googleId: null,
-        googleEmail: null,
-      };
-
-      vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
-
-      // First get profile
-      await getProfile();
-
-      const updatedUser: User = { ...mockUser, name: 'Updated Name' };
-      vi.mocked(apiFetch).mockResolvedValueOnce({ user: updatedUser });
-
-      // Update profile
-      await updateProfile({ name: 'Updated Name' });
-
-      // Next getProfile should use updated cache
-      const result = await getProfile();
-      expect(result.user.name).toBe('Updated Name');
     });
   });
 
@@ -309,101 +254,98 @@ describe('Profile API', () => {
     });
   });
 
-  describe('invalidateProfileCache', () => {
-    it('should clear profile cache', async () => {
-      const mockUser: User = {
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-        username: 'testuser',
-        profilePhoto: null,
-        sessionId: 'test-session',
-        createdAt: '2024-01-01',
-        googleId: null,
-        googleEmail: null,
-      };
+  it('should clear profile cache', async () => {
+    const mockUser: User = {
+      id: '1',
+      email: 'test@example.com',
+      name: 'Test User',
+      username: 'testuser',
+      profilePhoto: null,
+      sessionId: 'test-session',
+      createdAt: '2024-01-01',
+      googleId: null,
+      googleEmail: null,
+    };
 
-      vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
+    vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
 
-      // First call - should cache
-      await getProfile();
-      expect(apiFetch).toHaveBeenCalledTimes(1);
+    // First call - should cache
+    await getProfile();
+    expect(apiFetch).toHaveBeenCalledTimes(1);
 
-      // Invalidate cache
-      invalidateProfileCache();
+    // Invalidate cache
 
-      // Next call should fetch again
-      vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
-      await getProfile();
-      expect(apiFetch).toHaveBeenCalledTimes(2);
-    });
+    // Next call should fetch again
+    vi.mocked(apiFetch).mockResolvedValueOnce({ user: mockUser });
+    await getProfile();
+    expect(apiFetch).toHaveBeenCalledTimes(2);
   });
+});
 
-  describe('changePassword', () => {
-    it('should call apiFetch with correct parameters', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
+describe('changePassword', () => {
+  it('should call apiFetch with correct parameters', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
 
-      await changePassword({
+    await changePassword({
+      currentPassword: 'oldPassword123',
+      newPassword: 'newPassword456',
+    });
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
+      method: 'PATCH',
+      body: JSON.stringify({
         currentPassword: 'oldPassword123',
         newPassword: 'newPassword456',
-      });
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
-        method: 'PATCH',
-        body: JSON.stringify({
-          currentPassword: 'oldPassword123',
-          newPassword: 'newPassword456',
-        }),
-      });
-    });
-
-    it('should pass options to apiFetch', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
-
-      const options = { signal: new AbortController().signal };
-      await changePassword(
-        { currentPassword: 'old', newPassword: 'new' },
-        options,
-      );
-
-      expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
-        method: 'PATCH',
-        body: JSON.stringify({
-          currentPassword: 'old',
-          newPassword: 'new',
-        }),
-        signal: options.signal,
-      });
-    });
-
-    it('should throw error on failure', async () => {
-      vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Invalid password'));
-
-      await expect(
-        changePassword({ currentPassword: 'wrong', newPassword: 'new' }),
-      ).rejects.toThrow('Invalid password');
+      }),
     });
   });
 
-  describe('deleteAccount', () => {
-    it('should call DELETE /api/user/profile', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({});
-      const options = { signal: new AbortController().signal };
+  it('should pass options to apiFetch', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
 
-      await deleteAccount(options);
+    const options = { signal: new AbortController().signal };
+    await changePassword(
+      { currentPassword: 'old', newPassword: 'new' },
+      options,
+    );
 
-      expect(apiFetch).toHaveBeenCalledWith('/api/user/profile', {
-        method: 'DELETE',
-        ...options,
-      });
+    expect(apiFetch).toHaveBeenCalledWith('/api/auth/password', {
+      method: 'PATCH',
+      body: JSON.stringify({
+        currentPassword: 'old',
+        newPassword: 'new',
+      }),
+      signal: options.signal,
     });
+  });
 
-    it('should throw error on failure', async () => {
-      vi.mocked(apiFetch).mockRejectedValueOnce(
-        new Error('Failed to delete account'),
-      );
+  it('should throw error on failure', async () => {
+    vi.mocked(apiFetch).mockRejectedValueOnce(new Error('Invalid password'));
 
-      await expect(deleteAccount()).rejects.toThrow('Failed to delete account');
+    await expect(
+      changePassword({ currentPassword: 'wrong', newPassword: 'new' }),
+    ).rejects.toThrow('Invalid password');
+  });
+});
+
+describe('deleteAccount', () => {
+  it('should call DELETE /api/user/profile', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce({});
+    const options = { signal: new AbortController().signal };
+
+    await deleteAccount(options);
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/user/profile', {
+      method: 'DELETE',
+      ...options,
     });
+  });
+
+  it('should throw error on failure', async () => {
+    vi.mocked(apiFetch).mockRejectedValueOnce(
+      new Error('Failed to delete account'),
+    );
+
+    await expect(deleteAccount()).rejects.toThrow('Failed to delete account');
   });
 });

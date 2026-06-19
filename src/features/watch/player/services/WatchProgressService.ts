@@ -2,10 +2,7 @@
  * WatchProgressService — Handles socket-based progress syncing and activity tracking.
  */
 
-import {
-  invalidateContinueWatchingCache,
-  invalidateProgressCache,
-} from '@/features/watch/api';
+import { invalidateProgressCache } from '@/features/watch/api';
 import type { VideoMetadata } from '../context/types';
 
 interface SocketResponse {
@@ -96,7 +93,6 @@ export function syncProgress(
     if (res?.success) {
       onSuccess(payload.progressSeconds);
       invalidateProgressCache(payload.contentId as string);
-      invalidateContinueWatchingCache();
     }
   });
 }

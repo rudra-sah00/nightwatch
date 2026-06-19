@@ -1,4 +1,4 @@
-import type { MusicTrack } from '../api';
+import type { MusicTrack } from '../types';
 
 export type RepeatMode = 'off' | 'all' | 'one';
 

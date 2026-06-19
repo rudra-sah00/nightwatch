@@ -2,15 +2,6 @@
 export type ClipStatus = 'recording' | 'processing' | 'ready' | 'failed';
 
 /** A single video segment within a clip recording. */
-export interface ClipSegment {
-  /** URL of the segment media file. */
-  url: string;
-  /** Start time offset in seconds from the beginning of the clip. */
-  startTime: number;
-  /** Duration of this segment in seconds. */
-  duration: number;
-}
-
 /** A recorded livestream clip. */
 export interface Clip {
   /** Unique clip identifier. */

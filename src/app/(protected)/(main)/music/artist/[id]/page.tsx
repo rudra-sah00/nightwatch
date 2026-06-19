@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Loader2, Pause, Play, Radio } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -14,7 +15,7 @@ import {
   type MusicTrack,
 } from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useMusicStore } from '@/features/music/store/use-music-store';
 
 type Tab = 'overview' | 'songs' | 'albums';
 
@@ -29,13 +30,21 @@ export default function MusicArtistPage() {
   const router = useRouter();
   const id = params.id as string;
   const t = useTranslations('music');
-  const player = useMusicPlayerContext();
-  const [songs, setSongs] = useState<MusicTrack[]>([]);
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const play = useMusicStore((s) => s.play);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+
+  const { data: artist, isLoading: loading } = useQuery({
+    queryKey: ['music', 'artist', id],
+    queryFn: () => getMusicArtist(id),
+    enabled: !!id,
+  });
+
+  const songs = artist?.songs ?? [];
+  const meta = artist ? { name: artist.name, image: artist.image } : null;
+
   const [albums, setAlbums] = useState<MusicArtistAlbum[]>([]);
-  const [meta, setMeta] = useState<{ name: string; image: string } | null>(
-    null,
-  );
-  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('overview');
   const [songsVisible, setSongsVisible] = useState(50);
   const [albumPage, setAlbumPage] = useState(1);
@@ -43,13 +52,19 @@ export default function MusicArtistPage() {
   const [albumsLoading, setAlbumsLoading] = useState(false);
   const [radioLoading, setRadioLoading] = useState(false);
 
+  useEffect(() => {
+    if (artist?.topAlbums) {
+      setAlbums(artist.topAlbums);
+    }
+  }, [artist?.topAlbums]);
+
   const playArtistRadio = () => {
     if (!meta || radioLoading) return;
     setRadioLoading(true);
     getArtistStation(meta.name)
       .then((radioSongs) => {
         if (radioSongs.length > 0) {
-          player.play(radioSongs[0], radioSongs);
+          play(radioSongs[0], radioSongs);
         }
       })
       .catch(() => {})
@@ -57,21 +72,7 @@ export default function MusicArtistPage() {
   };
 
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    getMusicArtist(id)
-      .then((data) => {
-        setSongs(data.songs);
-        setAlbums(data.topAlbums ?? []);
-        setMeta({ name: data.name, image: data.image });
-        document.title = `${data.name} — Nightwatch`;
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on tab change
-  useEffect(() => {
+    void tab; // trigger dependency
     setSongsVisible(50);
   }, [tab]);
 
@@ -197,7 +198,10 @@ export default function MusicArtistPage() {
                   song={song}
                   index={i}
                   songs={songs}
-                  player={player}
+                  currentTrack={currentTrack}
+                  isPlaying={isPlaying}
+                  play={play}
+                  togglePlay={togglePlay}
                 />
               ))}
             </div>
@@ -227,7 +231,10 @@ export default function MusicArtistPage() {
               song={song}
               index={i}
               songs={songs}
-              player={player}
+              currentTrack={currentTrack}
+              isPlaying={isPlaying}
+              play={play}
+              togglePlay={togglePlay}
             />
           ))}
           {songsVisible < songs.length && (
@@ -272,26 +279,30 @@ function SongRow({
   song,
   index,
   songs,
-  player,
+  currentTrack,
+  isPlaying,
+  play,
+  togglePlay,
 }: {
   song: MusicTrack;
   index: number;
   songs: MusicTrack[];
-  player: ReturnType<typeof useMusicPlayerContext>;
+  currentTrack: MusicTrack | null;
+  isPlaying: boolean;
+  play: (track: MusicTrack, queue?: MusicTrack[]) => void;
+  togglePlay: () => void;
 }) {
-  const isActive = player.currentTrack?.id === song.id;
+  const isActive = currentTrack?.id === song.id;
 
   return (
     <button
       type="button"
-      onClick={() =>
-        isActive ? player.togglePlay() : player.play(song, songs)
-      }
+      onClick={() => (isActive ? togglePlay() : play(song, songs))}
       onContextMenu={(e) => showSongMenu(e, song)}
       className="w-full flex items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-card"
     >
       <span className="w-6 text-foreground/20 text-xs font-mono text-right flex-shrink-0">
-        {isActive && player.isPlaying ? (
+        {isActive && isPlaying ? (
           <Pause className="w-3.5 h-3.5 text-neo-yellow fill-current inline" />
         ) : isActive ? (
           <Play className="w-3.5 h-3.5 text-neo-yellow fill-current inline ml-0.5" />

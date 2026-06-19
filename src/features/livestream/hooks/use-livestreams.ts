@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { reportError } from '@/lib/analytics';
 import { fetchLiveMatchDetail, fetchLivestreamSchedule } from '../api';
@@ -5,80 +6,36 @@ import type { LiveMatch } from '../types';
 
 /**
  * Fetches and manages the livestream schedule for a given sport type.
- *
- * Deduplicates matches by ID, sorts by start time, and cancels in-flight
- * requests when the sport type changes or the component unmounts.
- *
- * @param sportType - Sport category to filter by (default `"basketball"`).
- * @returns Schedule array, loading/error states, and a `refresh` function.
+ * Uses TanStack Query for caching.
  */
 export function useLivestreams(sportType = 'basketball') {
-  const [schedule, setSchedule] = useState<LiveMatch[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  // Cancels in-flight requests when sportType changes or the component unmounts
-  // so stale responses don't arrive after navigation to another page.
-  const abortRef = useRef<AbortController | null>(null);
-
-  const loadSchedule = useCallback(async () => {
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await fetchLivestreamSchedule(
-        sportType,
-        0,
-        3,
-        controller.signal,
-      );
-
-      if (controller.signal.aborted) return;
-      // Deduplicate by ID to prevent React "duplicate key" errors from inconsistent API responses
-      const uniqueData = Array.from(
+  const {
+    data: schedule = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['live', 'channels', sportType],
+    queryFn: async () => {
+      const data = await fetchLivestreamSchedule(sportType, 0, 3);
+      const unique = Array.from(
         new Map(data.map((item) => [item.id, item])).values(),
       );
-      // Sort by start time (ascending) without mutating the API response
-      const sortedData = uniqueData.toSorted(
-        (a, b) => a.startTime - b.startTime,
-      );
-      setSchedule(sortedData);
-    } catch (err: unknown) {
-      if (controller.signal.aborted) return;
-      reportError('[Livestream] Schedule fetch failed');
-      setError(err instanceof Error ? err : new Error(String(err)));
-    } finally {
-      if (!controller.signal.aborted) setIsLoading(false);
-    }
-  }, [sportType]);
-
-  useEffect(() => {
-    loadSchedule();
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, [loadSchedule]);
+      return unique.toSorted((a, b) => a.startTime - b.startTime);
+    },
+  });
 
   return {
     schedule,
     isLoading,
-    error,
-    refresh: loadSchedule,
+    error: error as Error | null,
+    refresh: refetch,
   };
 }
 
 /**
  * Fetches and polls a single live match by ID.
- *
- * Performs an initial fetch, then polls every 15 seconds while the match is
- * live or upcoming and no stream URL (`playPath`) is available yet. Uses
- * shallow equality checks during polls to avoid unnecessary re-renders that
- * would cause the video player to reinitialize.
- *
- * @param id - Match identifier, or `null` to skip fetching.
- * @returns The match data, loading state, and any error.
+ * Uses TanStack Query with a short refetchInterval for live matches.
  */
 export function useLiveMatch(id: string | null) {
   const [match, setMatch] = useState<LiveMatch | null>(null);
@@ -90,16 +47,11 @@ export function useLiveMatch(id: string | null) {
       if (!id) return;
 
       try {
-        // Don't flash a loading spinner on background polls
         if (!isPoll) setIsLoading(true);
         setError(null);
         const data = await fetchLiveMatchDetail(id);
         if (data !== null) {
           if (isPoll) {
-            // During background polls (which may include a 401→refresh cycle),
-            // only update state if player-critical fields actually changed.
-            // Updating with an identical-content but new object reference would
-            // cause the player to re-initialize and produce a visible blink.
             setMatch((prev) => {
               if (
                 prev &&
@@ -110,7 +62,7 @@ export function useLiveMatch(id: string | null) {
                 prev.team2.score === data.team2.score &&
                 prev.timeDesc === data.timeDesc
               ) {
-                return prev; // nothing meaningful changed — keep same reference
+                return prev;
               }
               return data;
             });
@@ -118,8 +70,6 @@ export function useLiveMatch(id: string | null) {
             setMatch(data);
           }
         } else if (!isPoll) {
-          // Only clear the match on an explicit (initial) load — never during a
-          // background poll, so a transient 404 never kills an active stream.
           setMatch(null);
         }
       } catch (err: unknown) {
@@ -127,7 +77,6 @@ export function useLiveMatch(id: string | null) {
           reportError('[Livestream] Match fetch failed');
           setError(err instanceof Error ? err : new Error(String(err)));
         }
-        // Swallow poll errors silently — keep the existing match alive
       } finally {
         if (!isPoll) setIsLoading(false);
       }
@@ -135,8 +84,6 @@ export function useLiveMatch(id: string | null) {
     [id],
   );
 
-  // Use a ref to read the latest match status inside setInterval without
-  // adding `match` to the effect deps (which would cause an infinite loop).
   const matchRef = useRef(match);
   useEffect(() => {
     matchRef.current = match;
@@ -145,9 +92,6 @@ export function useLiveMatch(id: string | null) {
   useEffect(() => {
     loadMatch();
 
-    // Poll to keep checking for a stream URL before the match starts.
-    // Once we have the stream URL (playPath), we can stop polling entirely
-    // since the player doesn't display live score updates anyway.
     const interval = setInterval(() => {
       const current = matchRef.current;
       if (
@@ -155,7 +99,7 @@ export function useLiveMatch(id: string | null) {
         !current.playPath &&
         (current.status === 'MatchIng' || current.status === 'MatchNotStart')
       ) {
-        loadMatch(true); // isPoll=true
+        loadMatch(true);
       }
     }, 15_000);
 

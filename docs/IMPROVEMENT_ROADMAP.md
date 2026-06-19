@@ -97,8 +97,8 @@
 
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
-| 5 | Create shared `createTTLCache<T>()` utility | `src/lib/cache.ts` (new) | Three separate manual cache implementations exist in `watch/api.ts`, `search/api.ts`, and `profile/api.ts`. All implement the same pattern: Map + expiry timestamp + TTL. Extract into one shared utility. |
-| 6 | Add cache invalidation on auth change | `src/lib/cache.ts` | When session expires or user logs out, all three caches serve stale data independently. Add a `clearAllCaches()` function called from the auth provider on logout. |
+| 5 | ~~Create shared `createTTLCache<T>()` utility~~ | ✅ COMPLETED — Replaced by TanStack Query | Migrated all manual caches to TanStack Query's built-in caching system. `src/lib/cache.ts` deleted. |
+| 6 | ~~Add cache invalidation on auth change~~ | ✅ COMPLETED — `queryClient.clear()` on logout | TanStack Query clears all cached data on logout via `queryClient.clear()` in the auth store. |
 | 7 | Evaluate TanStack Query adoption | All API hooks | The manual caching, deduplication, and retry logic could be replaced by TanStack Query. Evaluate migration cost vs. benefit. If adopted, migrate one feature (e.g., watchlist) as a pilot. |
 
 ### 3.3 State Management Consolidation

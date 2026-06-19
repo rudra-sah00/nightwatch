@@ -3,15 +3,16 @@
 import { Moon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 
 /**
  * Sleep timer — full-screen overlay with backdrop blur.
  */
 export function SleepTimer({ onClose }: { onClose: () => void }) {
   const t = useTranslations('music');
-  const { setSleepTimer, sleepTimerEnd, isRemoteControlling } =
-    useMusicPlayerContext();
+  const setSleepTimer = useMusicStore((s) => s.setSleepTimer);
+  const sleepTimerEnd = useMusicStore((s) => s.sleepTimerEnd);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
 
   const TIMER_OPTIONS = [
     { label: t('sleepTimer.15min'), value: 15 },

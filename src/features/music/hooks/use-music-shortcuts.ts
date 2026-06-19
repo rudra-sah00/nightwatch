@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 
 /**
  * Registers global keyboard shortcuts for music playback controls.
@@ -31,18 +31,16 @@ import { useMusicPlayerContext } from '../context/MusicPlayerContext';
  * ```
  */
 export function useMusicShortcuts() {
-  const {
-    currentTrack,
-    togglePlay,
-    next,
-    prev,
-    volume,
-    setVolume,
-    toggleShuffle,
-    cycleRepeat,
-    isRemoteControlling,
-    remoteTrack,
-  } = useMusicPlayerContext();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+  const next = useMusicStore((s) => s.next);
+  const prev = useMusicStore((s) => s.prev);
+  const volume = useMusicStore((s) => s.volume);
+  const setVolume = useMusicStore((s) => s.setVolume);
+  const toggleShuffle = useMusicStore((s) => s.toggleShuffle);
+  const cycleRepeat = useMusicStore((s) => s.cycleRepeat);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
+  const remoteTrack = useMusicStore((s) => s.remoteTrack);
 
   const volumeRef = useRef(volume);
   volumeRef.current = volume;

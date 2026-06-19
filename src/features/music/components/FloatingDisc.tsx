@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 
 /** Routes where the floating disc should be hidden (video playback stops music). */
 const VIDEO_ROUTES = ['/watch/', '/live/', '/watch-party/', '/clip/'];
@@ -14,14 +14,12 @@ const VIDEO_ROUTES = ['/watch/', '/live/', '/watch-party/', '/clip/'];
  * playback is local or remote — no badge, no indicator. Just the disc.
  */
 export function FloatingDisc() {
-  const {
-    currentTrack,
-    isPlaying,
-    setExpanded,
-    isRemoteControlling,
-    remoteTrack,
-    remoteIsPlaying,
-  } = useMusicPlayerContext();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const setExpanded = useMusicStore((s) => s.setExpanded);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
+  const remoteTrack = useMusicStore((s) => s.remoteTrack);
+  const remoteIsPlaying = useMusicStore((s) => s.remoteIsPlaying);
   const pathname = usePathname();
 
   const isMusic = pathname.startsWith('/music');

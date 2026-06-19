@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { registerPushToken } from '@/features/auth/api';
 import { getDeviceId } from '@/lib/device-id';
-import { apiFetch } from '@/lib/fetch';
 import { getFCMToken, onForegroundMessage } from '@/lib/firebase';
 import { useAuthStore } from '@/store/use-auth-store';
 
@@ -52,15 +52,11 @@ export function usePushNotifications() {
 
         sessionStorage.setItem('nightwatch:fcm-token', token);
 
-        await apiFetch('/api/notifications/register', {
-          method: 'POST',
-          body: JSON.stringify({
-            token,
-            platform: 'web',
-            deviceId: getDeviceId(),
-            sessionId,
-          }),
-          headers: { 'Content-Type': 'application/json' },
+        await registerPushToken({
+          token,
+          platform: 'web',
+          deviceId: getDeviceId(),
+          sessionId,
         });
       } catch {
         // Silent fail — notifications are non-critical

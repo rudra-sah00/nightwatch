@@ -1,27 +1,25 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { getPublicClip } from '@/features/clips/api';
-import type { Clip } from '@/features/clips/types';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 
 export default function PublicClipPage() {
   const params = useParams();
   const shareId = params.shareId as string;
-  const [clip, setClip] = useState<Clip | null>(null);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!shareId) return;
-    getPublicClip(shareId)
-      .then(setClip)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, [shareId]);
+  const {
+    data: clip,
+    isLoading: loading,
+    isError: error,
+  } = useQuery({
+    queryKey: ['clip', 'public', shareId],
+    queryFn: () => getPublicClip(shareId),
+    enabled: !!shareId,
+  });
 
   if (loading) {
     return (

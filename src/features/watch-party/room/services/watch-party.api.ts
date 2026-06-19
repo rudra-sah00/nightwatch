@@ -215,22 +215,6 @@ export async function leavePartyRoom(
 }
 
 /**
- * Request current playback state from server (for guests/reconnection)
- */
-export async function requestPartyState(
-  roomId: string,
-): Promise<{ state?: Record<string, unknown>; error?: string }> {
-  try {
-    const data = await apiFetch<Record<string, unknown>>(
-      `/api/rooms/${roomId}/state`,
-    );
-    return { state: data };
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Unknown error' };
-  }
-}
-
-/**
  * Sync playback state (host only)
  */
 export async function syncPartyState(
@@ -248,21 +232,6 @@ export async function syncPartyState(
       success: false,
       error: err instanceof Error ? err.message : 'Unknown error',
     };
-  }
-}
-
-/**
- * Get room info via REST
- */
-export async function getPartyRoom(
-  roomId: string,
-): Promise<{ room?: WatchPartyRoom; error?: string }> {
-  try {
-    const room = await getRoomDetails(roomId);
-    if (!room) return { error: 'Not found' };
-    return { room };
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
 }
 

@@ -46,7 +46,6 @@ export function useVideoElement({
         (ref as React.MutableRefObject<HTMLVideoElement | null>).current = el;
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ref],
   );
 

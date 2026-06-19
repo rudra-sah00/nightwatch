@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { fetchSports } from '../api';
 
 /** A sport category available for livestream filtering. */
@@ -13,39 +13,21 @@ export interface Sport {
  * Fetches the list of available sport categories from the API.
  *
  * Always includes a hardcoded "All Channels" entry as the first item.
- * Aborts the request on unmount.
  *
  * @returns Array of sports and a loading flag.
  */
 export function useSports() {
-  const [sports, setSports] = useState<Sport[]>([
-    { id: 'all_channels', label: 'All Channels' },
-  ]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    async function loadSports() {
-      try {
-        setIsLoading(true);
-        const dynamicSports = await fetchSports(controller.signal);
-        if (dynamicSports.length > 0) {
-          setSports([
-            { id: 'all_channels', label: 'All Channels' },
-            ...dynamicSports,
-          ]);
-        }
-      } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') return;
-        console.error('Failed to load sports', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadSports();
-
-    return () => controller.abort();
-  }, []);
-
+  const {
+    data: sports = [{ id: 'all_channels', label: 'All Channels' }],
+    isLoading,
+  } = useQuery({
+    queryKey: ['live', 'sports'],
+    queryFn: async () => {
+      const dynamic = await fetchSports();
+      return dynamic.length > 0
+        ? [{ id: 'all_channels', label: 'All Channels' }, ...dynamic]
+        : [{ id: 'all_channels', label: 'All Channels' }];
+    },
+  });
   return { sports, isLoading };
 }

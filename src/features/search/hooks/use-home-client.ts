@@ -1,11 +1,9 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState, useTransition } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useEffect, useState } from 'react';
 import { searchContent } from '@/features/search/api';
-import { searchQuerySchema } from '@/features/search/schema';
 import type { SearchResult } from '@/features/search/types';
 import { useAuth } from '@/providers/auth-provider';
 
@@ -17,37 +15,25 @@ interface UseHomeClientOptions {
 
 /**
  * Client-side hook for the home/search page.
- *
- * Reacts to the `q` URL search-param, validates it against
- * {@link searchQuerySchema}, fetches results via `searchContent`, and
- * manages content-detail modal selection (including continue-watching
- * entries). Lazily preloads the content-detail modal chunk when results
- * or continue-watching items are present.
- *
- * @param options - {@link UseHomeClientOptions}
- * @returns Query string, results, loading/transition flags, modal state,
- *          and selection handlers.
+ * Uses TanStack Query for search caching — results persist when navigating away and back.
  */
 export function useHomeClient({
   initialResults,
   initialQuery,
 }: UseHomeClientOptions) {
-  const t = useTranslations('common.toasts');
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || initialQuery;
 
-  const [results, setResults] = useState<SearchResult[]>(initialResults);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSearching, startTransition] = useTransition();
-  const [hasSearched, setHasSearched] = useState(!!initialQuery);
+  const { data: results = initialResults } = useQuery({
+    queryKey: ['search', query],
+    queryFn: () => searchContent(query),
+    enabled: !!query.trim(),
+    initialData: initialResults.length > 0 ? initialResults : undefined,
+    placeholderData: (prev) => prev,
+  });
 
-  // When server provides fresh results (page navigation), use them immediately
-  useEffect(() => {
-    if (initialResults.length > 0) {
-      setResults(initialResults);
-      setIsLoading(false);
-    }
-  }, [initialResults]);
+  const hasSearched = !!query.trim();
+
   const [selectedContent, setSelectedContent] = useState<SearchResult | null>(
     null,
   );
@@ -60,55 +46,6 @@ export function useHomeClient({
     useState(true);
 
   const { user } = useAuth();
-
-  useEffect(() => {
-    if (!query.trim()) {
-      startTransition(() => {
-        setResults([]);
-        setHasSearched(false);
-      });
-      return;
-    }
-
-    const validation = searchQuerySchema.safeParse({ q: query.trim() });
-    if (!validation.success) {
-      startTransition(() => setResults([]));
-      return;
-    }
-
-    // Skip fetch only if query matches AND we have results
-    if (query === initialQuery && initialResults.length > 0) {
-      return;
-    }
-
-    // Clear stale results immediately before fetching
-    setResults([]);
-    setIsLoading(true);
-
-    const controller = new AbortController();
-    const fetchResults = async () => {
-      setHasSearched(true);
-      try {
-        const data = await searchContent(query, {
-          signal: controller.signal,
-        });
-        if (!controller.signal.aborted) {
-          startTransition(() => setResults(data));
-        }
-      } catch (_error: unknown) {
-        if (!controller.signal.aborted) {
-          toast.error(t('searchFailed'));
-          startTransition(() => setResults([]));
-        }
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
-      }
-    };
-
-    fetchResults();
-    return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, initialQuery, t, initialResults.length]);
 
   useEffect(() => {
     setIsContinueWatchingLoading(true);
@@ -148,7 +85,7 @@ export function useHomeClient({
     query,
     user,
     results,
-    isTransitioning: isLoading || isSearching,
+    isTransitioning: false,
     hasSearched,
     selectedContent,
     selectedContentId,

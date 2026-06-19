@@ -1,9 +1,6 @@
 import { trackEvent } from '@/lib/analytics';
-import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { FriendProfile, FriendRequest, SentRequest } from './types';
-
-const friendsCache = createTTLCache<FriendProfile[]>(30_000, 1);
 
 /**
  * Fetches the authenticated user's friend list with a 30-second TTL cache.
@@ -14,14 +11,10 @@ const friendsCache = createTTLCache<FriendProfile[]>(30_000, 1);
 export async function getFriends(
   options?: RequestInit,
 ): Promise<FriendProfile[]> {
-  const cached = friendsCache.get('all');
-  if (cached) return cached;
-
   const { data } = await apiFetch<{ data: FriendProfile[] }>(
     '/api/friends',
     options,
   );
-  friendsCache.set('all', data);
   return data;
 }
 
@@ -67,7 +60,6 @@ export async function sendFriendRequest(username: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ username }),
   });
-  friendsCache.clear();
   trackEvent('friend_request_send', { username });
 }
 
@@ -81,7 +73,6 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ friendshipId }),
   });
-  friendsCache.clear();
   trackEvent('friend_request_accept');
 }
 
@@ -108,21 +99,6 @@ export async function cancelFriendRequest(friendshipId: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ friendshipId }),
   });
-  friendsCache.clear();
-}
-
-/**
- * Removes an existing friend from the user's friend list.
- *
- * @param friendUserId - The user ID of the friend to remove.
- */
-export async function removeFriend(friendUserId: string): Promise<void> {
-  await apiFetch('/api/friends/remove', {
-    method: 'DELETE',
-    body: JSON.stringify({ userId: friendUserId }),
-  });
-  friendsCache.clear();
-  trackEvent('friend_remove');
 }
 
 /**
@@ -135,7 +111,6 @@ export async function blockUser(userId: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ userId }),
   });
-  friendsCache.clear();
   trackEvent('friend_block');
 }
 
@@ -149,7 +124,6 @@ export async function unblockUser(userId: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ userId }),
   });
-  friendsCache.clear();
 }
 
 /** A user that has been blocked by the authenticated user. */
@@ -175,11 +149,6 @@ export async function getBlockedUsers(
     options,
   );
   return data;
-}
-
-/** Clears the in-memory friends TTL cache, forcing the next fetch to hit the API. */
-export function invalidateFriendsCache() {
-  friendsCache.clear();
 }
 
 /** A user returned from the friend search endpoint. */

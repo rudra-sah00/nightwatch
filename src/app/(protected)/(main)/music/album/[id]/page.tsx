@@ -1,17 +1,13 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Pause, Play } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
-import {
-  getAlbumRecommendations,
-  getMusicAlbum,
-  type MusicTrack,
-} from '@/features/music/api';
+import { getAlbumRecommendations, getMusicAlbum } from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useMusicStore } from '@/features/music/store/use-music-store';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -23,40 +19,33 @@ export default function MusicAlbumPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const player = useMusicPlayerContext();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const play = useMusicStore((s) => s.play);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
   const t = useTranslations('music');
-  const [songs, setSongs] = useState<MusicTrack[]>([]);
-  const [meta, setMeta] = useState<{
-    title: string;
-    image: string;
-    artist: string;
-    year: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [recoAlbums, setRecoAlbums] = useState<
-    { id: string; title: string; artist: string; image: string; year: number }[]
-  >([]);
 
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    getMusicAlbum(id)
-      .then((data) => {
-        setSongs(data.songs);
-        setMeta({
-          title: data.title,
-          image: data.image,
-          artist: data.artist,
-          year: data.year,
-        });
-        document.title = `${data.title} — Nightwatch`;
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-    getAlbumRecommendations(id)
-      .then(setRecoAlbums)
-      .catch(() => {});
-  }, [id]);
+  const { data: album, isLoading: loading } = useQuery({
+    queryKey: ['music', 'album', id],
+    queryFn: () => getMusicAlbum(id),
+    enabled: !!id,
+  });
+
+  const { data: recoAlbums = [] } = useQuery({
+    queryKey: ['music', 'album', id, 'recommendations'],
+    queryFn: () => getAlbumRecommendations(id),
+    enabled: !!id,
+  });
+
+  const songs = album?.songs ?? [];
+  const meta = album
+    ? {
+        title: album.title,
+        image: album.image,
+        artist: album.artist,
+        year: album.year,
+      }
+    : null;
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">
@@ -122,17 +111,15 @@ export default function MusicAlbumPage() {
               key={song.id}
               type="button"
               onClick={() =>
-                player.currentTrack?.id === song.id
-                  ? player.togglePlay()
-                  : player.play(song, songs)
+                currentTrack?.id === song.id ? togglePlay() : play(song, songs)
               }
               onContextMenu={(e) => showSongMenu(e, song)}
               className="w-full flex items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-card"
             >
               <span className="w-6 text-foreground/20 text-xs font-mono text-right flex-shrink-0">
-                {player.currentTrack?.id === song.id && player.isPlaying ? (
+                {currentTrack?.id === song.id && isPlaying ? (
                   <Pause className="w-3.5 h-3.5 text-neo-yellow fill-current inline" />
-                ) : player.currentTrack?.id === song.id ? (
+                ) : currentTrack?.id === song.id ? (
                   <Play className="w-3.5 h-3.5 text-neo-yellow fill-current inline ml-0.5" />
                 ) : (
                   i + 1
@@ -145,7 +132,7 @@ export default function MusicAlbumPage() {
               />
               <div className="flex-1 min-w-0">
                 <p
-                  className={`font-headline font-bold text-sm uppercase tracking-wider truncate ${player.currentTrack?.id === song.id ? 'text-neo-yellow' : ''}`}
+                  className={`font-headline font-bold text-sm uppercase tracking-wider truncate ${currentTrack?.id === song.id ? 'text-neo-yellow' : ''}`}
                 >
                   {song.title}
                 </p>

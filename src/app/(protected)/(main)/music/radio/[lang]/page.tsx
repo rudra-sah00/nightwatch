@@ -1,13 +1,14 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { getRadioSongs, getRadioStations } from '@/features/music/api';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useMusicStore } from '@/features/music/store/use-music-store';
 
 const LANGUAGES = [
   'hindi',
@@ -25,17 +26,24 @@ export default function MusicRadioLangPage() {
   const router = useRouter();
   const t = useTranslations('music');
   const lang = (params.lang as string) || 'hindi';
-  const [stations, setStations] = useState<RadioItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [playingStation, setPlayingStation] = useState<string | null>(null);
-  const player = useMusicPlayerContext();
+  const play = useMusicStore((s) => s.play);
+
+  const { data: stations = [], isLoading: loading } = useQuery({
+    queryKey: ['music', 'radio', lang],
+    queryFn: () =>
+      getRadioStations(lang).then((data) =>
+        data.filter((s) => s.language.toLowerCase() === lang.toLowerCase()),
+      ),
+    enabled: !!lang,
+  });
 
   const handlePlayStation = async (station: RadioItem) => {
     setPlayingStation(station.id);
     try {
       const songs = await getRadioSongs(station.title, lang);
       if (songs.length > 0) {
-        player.play(songs[0], songs);
+        play(songs[0], songs);
       } else {
         toast.error('No songs available');
       }
@@ -45,19 +53,6 @@ export default function MusicRadioLangPage() {
       setPlayingStation(null);
     }
   };
-
-  useEffect(() => {
-    document.title = `${lang.charAt(0).toUpperCase() + lang.slice(1)} Radio — Nightwatch`;
-    setLoading(true);
-    getRadioStations(lang)
-      .then((data) =>
-        setStations(
-          data.filter((s) => s.language.toLowerCase() === lang.toLowerCase()),
-        ),
-      )
-      .catch(() => setStations([]))
-      .finally(() => setLoading(false));
-  }, [lang]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">

@@ -27,7 +27,7 @@ All functions use `apiFetch` (cookie-authenticated HTTP client).
 | `removeFromWatchlist(contentId, providerId?)` | DELETE | `/api/user/watchlist` | Remove by content ID |
 | `checkInWatchlist(contentId, providerId?)` | GET | `/api/user/watchlist/status` | Check if content is in watchlist |
 
-The `checkInWatchlist` function auto-derives `providerId` from the content ID prefix (e.g. `s2:12345` → `'s2'`).
+The `checkInWatchlist` function auto-derives `providerId` from the content ID prefix (e.g. `s2:12345` → `'s2'`). Caching of watchlist status is handled by TanStack Query via query keys — no manual client-side TTL cache is needed.
 
 ## Types
 
@@ -37,23 +37,23 @@ The `checkInWatchlist` function auto-derives `providerId` from the content ID pr
 
 `hooks/use-watchlist.ts`
 
-Manages the watchlist page state:
+Manages the watchlist page state using `useQuery` + `useMutation` from TanStack Query:
 
 ```typescript
 function useWatchlist(): {
   watchlist: WatchlistItem[]; // Current items
-  loading: boolean;
+  isLoading: boolean;
   selectedId: string | null;  // Content ID for detail modal
   setSelectedId: (id: string | null) => void;
-  isEmpty: boolean;           // Derived: !loading && watchlist.length === 0
+  isEmpty: boolean;           // Derived: !isLoading && watchlist.length === 0
   removeItem: (contentId: string) => void; // Optimistic removal
 }
 ```
 
 Key behaviors:
-- **Server-aware fetching**: Re-fetches when `activeServer` changes via `useServer()` provider
-- **AbortController**: Cancels in-flight requests when server changes or component unmounts
-- **Optimistic removal**: `removeItem` immediately filters the item from local state
+- **Server-aware fetching**: Query key includes `activeServer` from `useServer()` — auto-refetches on server change
+- **TanStack Query caching**: Uses `useQuery` with stale-while-revalidate for watchlist data
+- **Optimistic removal**: `useMutation` with `onMutate` calls `queryClient.setQueryData` to immediately filter the item from the cached list before the API responds; `onError` rolls back via the snapshot saved in `onMutate`
 
 ## Component: WatchlistClient
 
@@ -80,9 +80,9 @@ Main watchlist view with:
 ### Optimistic UI Flow
 
 1. User clicks remove on a `ContinueWatching` or detail modal
-2. `removeItem(contentId)` immediately filters the item from `watchlist` state
-3. The API call to `removeFromWatchlist` happens in the calling component
-4. If the API fails, the item reappears on next fetch (no rollback needed since the page re-fetches on focus)
+2. `useMutation`'s `onMutate` saves a snapshot and calls `queryClient.setQueryData` to immediately filter the item
+3. The API call to `removeFromWatchlist` fires in the background
+4. On error, the `onError` callback restores the snapshot; on success, `onSettled` invalidates the query to ensure consistency
 
 ### Integration with ContentDetailModal
 

@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type {
-  Clip,
-  ClipSegment,
-  ClipStatus,
-  ClipsResponse,
-} from '@/features/clips/types';
+import type { Clip, ClipStatus, ClipsResponse } from '@/features/clips/types';
 
 describe('Clips Types', () => {
   it('ClipStatus has valid values', () => {
@@ -15,17 +10,6 @@ describe('Clips Types', () => {
       'failed',
     ];
     expect(statuses).toHaveLength(4);
-  });
-
-  it('ClipSegment has required fields', () => {
-    const seg: ClipSegment = {
-      url: 'https://cdn/seg.ts',
-      startTime: 0,
-      duration: 2.5,
-    };
-    expect(seg.url).toBe('https://cdn/seg.ts');
-    expect(seg.startTime).toBe(0);
-    expect(seg.duration).toBe(2.5);
   });
 
   it('Clip has required fields', () => {

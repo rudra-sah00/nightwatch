@@ -1,10 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import {
-  useMusicPlaybackProgress,
-  useMusicPlayerContext,
-} from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 
 /**
  * Syncs music metadata and playback controls to the OS Media Session.
@@ -15,19 +12,18 @@ import {
  * media key actions as remote commands.
  */
 export function MusicMediaSession() {
-  const {
-    currentTrack,
-    isPlaying,
-    togglePlay,
-    next,
-    prev,
-    isRemoteControlling,
-    remoteTrack,
-    remoteIsPlaying,
-    remoteProgress,
-    remoteDuration,
-  } = useMusicPlayerContext();
-  const { progress, duration } = useMusicPlaybackProgress();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+  const next = useMusicStore((s) => s.next);
+  const prev = useMusicStore((s) => s.prev);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
+  const remoteTrack = useMusicStore((s) => s.remoteTrack);
+  const remoteIsPlaying = useMusicStore((s) => s.remoteIsPlaying);
+  const remoteProgress = useMusicStore((s) => s.remoteProgress);
+  const remoteDuration = useMusicStore((s) => s.remoteDuration);
+  const progress = useMusicStore((s) => s.progress);
+  const duration = useMusicStore((s) => s.duration);
 
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;

@@ -7,6 +7,8 @@ Nightwatch is not a simple Next.js boilerplate; it's a massive, multi-environmen
 *   **Framework**: Next.js 15 (App Router fully utilizing RSC / Server Actions).
 *   **Language**: TypeScript (Strict typing for RPC channels, APIs, and React props).
 *   **Styling**: Tailwind CSS (Custom Neo-Brutalist Theme with variables in `tailwind.config`).
+*   **Server State**: TanStack Query (client-side caching, background revalidation, optimistic updates).
+*   **Client State**: Zustand (lightweight stores for player, music, UI state).
 *   **Real-time Infrastructure**: Agora RTM (Signaling / UI State), Agora RTC (WebRTC Video/Audio Calls), and Socket.io (`socket.ts` legacy fallbacks).
 *   **Video Engine**: Custom HLS abstractions over `hls.js` supporting dynamic manifest swapping.
 *   **Native Bridge**: Electron invoke/listen via `desktopBridge` (`src/lib/electron-bridge.ts`).
@@ -43,7 +45,7 @@ Instead of throwing every component into a global `src/components/` folder, Nigh
 ## 3. The `src/lib/` Utilities Layer
 
 *   **`fetch.ts`:** The `apiFetch` wrapper with automatic token refresh, CSRF handling, configurable retries with linear backoff, and proper abort signal handling (user abort vs timeout are distinguished).
-*   **`cache.ts`:** Shared `createTTLCache<T>()` utility used by search, profile, and watch APIs. All caches auto-register for bulk invalidation via `clearAllCaches()` on logout.
+*   **`query-provider.tsx`:** Initializes TanStack Query's `QueryClient` with a default `staleTime` of 5 minutes. Wraps the app to provide client-side caching, background revalidation, and automatic garbage collection of unused queries.
 *   **`errors.ts`:** Centralized error handling — `isApiError()` type guard, `handleApiError()` with toast, `mapErrorCode()` for user-friendly messages.
 *   **`socket.ts`:** A global singleton initialization for the Socket.io server connection. Keeps track of force logouts and active connections.
 *   **`storage-cache.ts`:** In-memory cache for `localStorage` reads. Event listeners initialized lazily via `initStorageCache()` to avoid SSR side effects.

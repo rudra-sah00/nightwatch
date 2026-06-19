@@ -6,6 +6,7 @@ vi.mock('@/lib/fetch', () => ({
 vi.mock('@/features/music/api', () => ({
   addToUserQueue: vi.fn().mockResolvedValue([]),
   getUserQueue: vi.fn().mockResolvedValue([]),
+  persistUserQueue: vi.fn().mockResolvedValue(undefined),
 }));
 
 import {

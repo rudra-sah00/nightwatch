@@ -1,10 +1,11 @@
 'use client';
 
+import { useQueries } from '@tanstack/react-query';
 import { Compass } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   getBrowseModules,
   getMusicHome,
@@ -13,7 +14,7 @@ import {
   getTopPodcasts,
   getTrending,
 } from '@/features/music/api';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useMusicStore } from '@/features/music/store/use-music-store';
 import { CreatePlaylistDialog } from './CreatePlaylistDialog';
 import { LanguagePickerDialog } from './LanguagePickerDialog';
 import { MusicHeader } from './MusicHeader';
@@ -21,50 +22,21 @@ import { MusicSearchSpotlight } from './MusicSearchSpotlight';
 import { MusicSections, type MusicSectionsData } from './MusicSections';
 import { MusicSkeleton } from './MusicSkeleton';
 
-/**
- * Top-level orchestrator for the `/music` home page.
- *
- * Coordinates data fetching, dialog state, and child component composition:
- * - Loads the music home feed (charts, featured playlists, artists, releases, radio),
- *   trending songs, and browse genres on mount via parallel API calls.
- * - Persists and restores the user's preferred music languages (cookie-backed).
- * - Supports deep-link auto-play via the `?play=<songId>` search parameter
- *   (used by the Ask AI feature to navigate users directly to a song).
- * - Manages open/close state for {@link MusicSearchSpotlight}, {@link CreatePlaylistDialog},
- *   and {@link LanguagePickerDialog}.
- * - Renders {@link MusicHeader} at the top, {@link MusicSkeleton} while loading,
- *   and {@link MusicSections} once data is ready.
- */
-
-// Module-level cache so navigating away and back doesn't refetch/flash skeleton
-const cachedData: MusicSectionsData | null = null;
-
 export function MusicView() {
   const searchParams = useSearchParams();
-  const player = useMusicPlayerContext();
+  const play = useMusicStore((s) => s.play);
   const t = useTranslations('music');
   const [showExplore, setShowExplore] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [data, setData] = useState<MusicSectionsData>({
-    charts: [],
-    featured: [],
-    artists: [],
-    releases: [],
-    radio: [],
-    trendingSongs: [],
-    genres: [],
-    podcasts: [],
-    forYou: [],
-  });
   const [showSearch, setShowSearch] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [playlistKey, setPlaylistKey] = useState(0);
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [selectedLangs, setSelectedLangs] = useState<Set<string>>(
     new Set(['hindi', 'english']),
   );
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Load saved language preference
   useEffect(() => {
@@ -75,38 +47,51 @@ export function MusicView() {
       .catch(() => {});
   }, []);
 
-  const loadData = useCallback(() => {
-    setLoading(true);
-    Promise.all([
-      getMusicHome(),
-      getTrending('song', 'hindi').catch(() => []),
-      getBrowseModules().catch(() => ({ genres: [] })),
-      getTopPodcasts().catch(() => []),
-    ])
-      .then(([home, trending, browse, podcasts]) => {
-        setData({
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ['music', 'home', reloadKey],
+        queryFn: () => getMusicHome(),
+      },
+      {
+        queryKey: ['music', 'trending', 'hindi', reloadKey],
+        queryFn: () => getTrending('song', 'hindi').catch(() => []),
+      },
+      {
+        queryKey: ['music', 'browse', reloadKey],
+        queryFn: () => getBrowseModules().catch(() => ({ genres: [] })),
+      },
+      {
+        queryKey: ['music', 'podcasts', reloadKey],
+        queryFn: () => getTopPodcasts().catch(() => []),
+      },
+    ],
+  });
+
+  const loading = results.some((r) => r.isLoading);
+  const home = results[0].data;
+  const trending = results[1].data;
+  const browse = results[2].data;
+  const podcasts = results[3].data;
+
+  const data: MusicSectionsData | null =
+    home && trending && browse && podcasts
+      ? {
           charts: home.charts,
           featured: home.featured,
           artists: home.artists,
           releases: home.releases,
           radio: home.radio,
-          trendingSongs: trending,
+          trendingSongs: trending as MusicSectionsData['trendingSongs'],
           genres: browse.genres,
           podcasts,
           forYou: home.forYou || [],
-        });
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+        }
+      : null;
 
   // Auto-play from AI navigation: /music?play=songId
-  const playRef = useRef(player.play);
-  playRef.current = player.play;
+  const playRef = useRef(play);
+  playRef.current = play;
   const playedIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -149,25 +134,20 @@ export function MusicView() {
           selectedLangs={selectedLangs}
           onChangeLangs={setSelectedLangs}
           onClose={() => setShowLangPicker(false)}
-          onApply={loadData}
+          onApply={() => setReloadKey((k) => k + 1)}
         />
       )}
 
-      {loading && <MusicSkeleton />}
+      {loading && !data && <MusicSkeleton />}
 
-      {!loading && (
-        <MusicSections
-          data={data}
-          playlistKey={playlistKey}
-          onPlay={player.play}
-        />
+      {data && (
+        <MusicSections data={data} playlistKey={playlistKey} onPlay={play} />
       )}
 
       {showSearch && (
         <MusicSearchSpotlight onClose={() => setShowSearch(false)} />
       )}
 
-      {/* Floating Explore button — bottom center, hides on scroll */}
       {showExplore && (
         <Link
           href="/music/discover"

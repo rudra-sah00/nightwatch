@@ -358,8 +358,8 @@ export function useAgora({
    * Uses room members as the authoritative list to ensure immediate visibility.
    */
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: speakerTick is an intentional trigger to rebuild participants when speaking state changes
   useEffect(() => {
+    void speakerTick; // trigger rebuild when speaking state changes
     // Build participant list from room members.
     // We use 'members' as the primary source of truth so everyone appears
     // immediately in the sidebar, even before Agora connects.

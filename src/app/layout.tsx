@@ -15,6 +15,7 @@ import { SplashScreen } from '@/components/ui/splash-screen';
 import { AuthProvider } from '@/providers/auth-provider';
 
 import { IntlProvider } from '@/providers/intl-provider';
+import { QueryProvider } from '@/providers/query-provider';
 import { SocketProvider } from '@/providers/socket-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 
@@ -80,32 +81,34 @@ export default async function RootLayout({
             {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
             <ElectronDragRegion />
 
-            <ThemeProvider>
-              <SocketProvider>
-                <AuthProvider>
-                  <div
-                    className="flex flex-col overflow-hidden h-[100dvh] box-border"
-                    style={{
-                      paddingTop:
-                        'max(var(--electron-titlebar-height, 0px), env(safe-area-inset-top, 0px))',
-                      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                      paddingLeft: 'env(safe-area-inset-left, 0px)',
-                      paddingRight: 'env(safe-area-inset-right, 0px)',
-                    }}
-                  >
-                    <ProgressBar />
-                    <DiscordPresenceSync />
-                    <MobileShell />
-                    <TvShell />
-                    <OfflineIndicator />
-                    <SplashScreen />
-                    {children}
-                    <Toaster />
-                    <SwRegister />
-                  </div>
-                </AuthProvider>
-              </SocketProvider>
-            </ThemeProvider>
+            <QueryProvider>
+              <ThemeProvider>
+                <SocketProvider>
+                  <AuthProvider>
+                    <div
+                      className="flex flex-col overflow-hidden h-[100dvh] box-border"
+                      style={{
+                        paddingTop:
+                          'max(var(--electron-titlebar-height, 0px), env(safe-area-inset-top, 0px))',
+                        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                        paddingLeft: 'env(safe-area-inset-left, 0px)',
+                        paddingRight: 'env(safe-area-inset-right, 0px)',
+                      }}
+                    >
+                      <ProgressBar />
+                      <DiscordPresenceSync />
+                      <MobileShell />
+                      <TvShell />
+                      <OfflineIndicator />
+                      <SplashScreen />
+                      {children}
+                      <Toaster />
+                      <SwRegister />
+                    </div>
+                  </AuthProvider>
+                </SocketProvider>
+              </ThemeProvider>
+            </QueryProvider>
           </IntlProvider>
         </Suspense>
       </body>

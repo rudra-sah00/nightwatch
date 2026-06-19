@@ -1,10 +1,10 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { MangaChapterViewer } from '@/features/manga/api';
 import {
   getMangaChapter,
   getMangaDetail,
@@ -15,74 +15,87 @@ import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 
 export default function ChapterReaderPage() {
   const { chapterId } = useParams<{ chapterId: string }>();
-  const [viewer, setViewer] = useState<MangaChapterViewer | null>(null);
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const coverUrl = useRef('');
-  const [prevChapterId, setPrevChapterId] = useState<number | null>(null);
-  const [nextChapterId, setNextChapterId] = useState<number | null>(null);
 
+  const { data: viewer = null, isLoading: loading } = useQuery({
+    queryKey: ['manga', 'chapter', chapterId],
+    queryFn: () => getMangaChapter(Number(chapterId)),
+    enabled: !!chapterId,
+  });
+
+  const { data: chapterDetail } = useQuery({
+    queryKey: ['manga', 'detail', viewer?.titleId],
+    queryFn: () => getMangaDetail(viewer!.titleId),
+    enabled: !!viewer?.titleId,
+  });
+
+  // Derive prev/next chapter IDs
+  const prevChapterId = (() => {
+    if (!chapterDetail) return null;
+    const idx = chapterDetail.chapters.findIndex(
+      (c) => c.chapterId === Number(chapterId),
+    );
+    return idx > 0 ? chapterDetail.chapters[idx - 1].chapterId : null;
+  })();
+
+  const nextChapterId = (() => {
+    if (!chapterDetail) return null;
+    const idx = chapterDetail.chapters.findIndex(
+      (c) => c.chapterId === Number(chapterId),
+    );
+    return idx >= 0 && idx < chapterDetail.chapters.length - 1
+      ? chapterDetail.chapters[idx + 1].chapterId
+      : null;
+  })();
+
+  // Store cover URL from detail
   useEffect(() => {
-    if (!chapterId) return;
-    setLoading(true);
+    if (chapterDetail) {
+      coverUrl.current = chapterDetail.title.portraitImageUrl;
+    }
+  }, [chapterDetail]);
+
+  // Reset page on chapter change
+  useEffect(() => {
+    void chapterId; // trigger dependency
     setCurrentPage(0);
-    getMangaChapter(Number(chapterId))
-      .then((v) => {
-        setViewer(v);
-        document.title = `${v.chapterName} — ${v.titleName} — Nightwatch`;
-        getMangaDetail(v.titleId)
-          .then((d) => {
-            coverUrl.current = d.title.portraitImageUrl;
-            const idx = d.chapters.findIndex(
-              (c) => c.chapterId === Number(chapterId),
-            );
-            setPrevChapterId(idx > 0 ? d.chapters[idx - 1].chapterId : null);
-            setNextChapterId(
-              idx >= 0 && idx < d.chapters.length - 1
-                ? d.chapters[idx + 1].chapterId
-                : null,
-            );
-          })
-          .catch(() => {});
-        // Restore reading position
-        getMangaProgress()
-          .then((res) => {
-            const saved = res.progress.find((p) => p.titleId === v.titleId);
-            if (
-              saved &&
-              saved.chapterId === Number(chapterId) &&
-              saved.pageIndex > 0
-            ) {
-              setCurrentPage(saved.pageIndex);
-              const scrollToSaved = () => {
-                const el = pageRefs.current[saved.pageIndex];
-                if (el) el.scrollIntoView({ behavior: 'instant' });
-              };
-              // Wait for the target image to have dimensions before scrolling
-              const waitForImage = () => {
-                const el = pageRefs.current[saved.pageIndex];
-                const img = el?.querySelector('img');
-                if (img && img.naturalHeight > 0) {
-                  scrollToSaved();
-                } else if (img) {
-                  img.addEventListener('load', scrollToSaved, { once: true });
-                  // Fallback if image takes too long
-                  setTimeout(scrollToSaved, 3000);
-                } else {
-                  setTimeout(scrollToSaved, 500);
-                }
-              };
-              setTimeout(waitForImage, 100);
-            }
-          })
-          .catch(() => {});
-      })
-      .catch(() => setViewer(null))
-      .finally(() => setLoading(false));
   }, [chapterId]);
 
-  // Track scroll position to determine current page
+  // Restore reading position
+  useEffect(() => {
+    if (!viewer) return;
+    getMangaProgress()
+      .then((res) => {
+        const saved = res.progress.find((p) => p.titleId === viewer.titleId);
+        if (
+          saved &&
+          saved.chapterId === Number(chapterId) &&
+          saved.pageIndex > 0
+        ) {
+          setCurrentPage(saved.pageIndex);
+          const scrollToSaved = () => {
+            const el = pageRefs.current[saved.pageIndex];
+            if (el) el.scrollIntoView({ behavior: 'instant' });
+          };
+          const waitForImage = () => {
+            const el = pageRefs.current[saved.pageIndex];
+            const img = el?.querySelector('img');
+            if (img && img.naturalHeight > 0) {
+              scrollToSaved();
+            } else if (img) {
+              img.addEventListener('load', scrollToSaved, { once: true });
+              setTimeout(scrollToSaved, 3000);
+            } else {
+              setTimeout(scrollToSaved, 500);
+            }
+          };
+          setTimeout(waitForImage, 100);
+        }
+      })
+      .catch(() => {});
+  }, [viewer, chapterId]);
 
   // Discord Rich Presence for manga reading
   useEffect(() => {
@@ -96,6 +109,8 @@ export default function ChapterReaderPage() {
     });
     return () => desktopBridge.clearDiscordPresence();
   }, [viewer]);
+
+  // Track scroll position to determine current page
   useEffect(() => {
     if (!viewer) return;
     const observer = new IntersectionObserver(

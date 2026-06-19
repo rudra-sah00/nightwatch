@@ -8,6 +8,7 @@ With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams
 For state that persists across page navigations and needs to survive refreshes:
 *   **`use-auth-store.ts`**: User authentication state with Zustand `persist` middleware. Uses a custom `StateStorage` adapter that syncs to both `localStorage` (web) and `electron-plugin-store` (desktop) via `desktopBridge.storeSet/storeGet`.
 *   **`use-navigation-store.ts`**: Navigation transition state for page loading indicators.
+*   **`use-music-store.ts`**: Music playback state with Zustand `persist` middleware. Stores volume, shuffle, repeat mode, crossfade duration, and gapless playback preferences. Non-persisted slices include current track, queue, playback position, and playing state for rapid UI updates without disk writes.
 
 ### React Context (Dependency Injection)
 For providing singleton instances and infrequently-changing values down the tree:
@@ -18,10 +19,13 @@ For providing singleton instances and infrequently-changing values down the tree
 ### Decision Tree
 | Need | Use |
 |------|-----|
-| Persists across refreshes, shared globally | Zustand store (`src/store/`) |
+| Server/API data that caches across navigations | TanStack Query (`useQuery`) |
+| Mutations with optimistic UI | TanStack Query (`useMutation`) |
+| Global persistent client state | Zustand store (`src/store/`) |
+| Music playback state (track, queue, volume, shuffle) | Zustand (`use-music-store`) |
 | Singleton instance injection (socket, theme) | React Context (`src/providers/`) |
-| Form state, UI toggles, component-local | `useState` / `useReducer` |
-| Rapidly mutating player state | `useReducer` via `PlayerContext` |
+| Form state, UI toggles, component-local | `useState` |
+| Rapid player mutations | `useReducer` via `PlayerContext` |
 
 ## 2. Highly Mutative Domain State (`useReducer`)
 
@@ -53,21 +57,47 @@ Instead of throwing `typeof window` and `desktopBridge` checks sporadically acro
 
 It exposes reactive booleans (`isDesktopApp`, `isBrowser`) and provides fallback DOM timeouts to gracefully error-trap if an OS custom protocol deep link (`nightwatch://`) fails to acquire focus.
 
-## 5. Server State (Next.js Data Fetching layer)
+## 5. Server State (TanStack Query)
 
-We do not use Apollo or React Query. Instead, we lean directly into Next.js App Router caching paradigms integrated through our custom `fetch.ts` and `storage-cache.ts` interceptors in `src/lib/`:
+All server/API data fetching and caching is managed by **TanStack Query (React Query v5)**.
 
-*   **Mutations (Server Actions)**: For forms and sensitive data updates (passwords, profiles, avatars).
-*   **Query-Level Locking**: Our `fetch.ts` implements a Mutex queue (`lockPromise`). If multiple components request a new Access Token refresh simultaneously, State is blocked globally across all components, waiting for the singular HTTP promise to resolve natively before retrying the render tree.
+### QueryProvider Setup
+The `QueryProvider` wraps the application in the root layout with the following defaults:
+```typescript
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,        // 5 minutes
+      gcTime: 30 * 60 * 1000,           // 30 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+```
 
-## 6. Shared TTL Cache (`src/lib/cache.ts`)
+### Data Fetching Patterns
 
-All client-side API caching uses a unified `createTTLCache<T>(ttlMs, maxSize)` utility:
-*   **Search API**: 4 caches (results 5min, suggestions 10min, show details 5min, episodes 10min)
-*   **Profile API**: Profile data cache (5min)
-*   **Watch API**: Continue-watching cache (30s), progress cache (2min)
+*   **`useQuery`**: Used for all cacheable API data — music (albums, artists, playlists, lyrics), search results, profile data, watchlist, clips, manga chapters, games, livestream metadata, and continue-watching state.
+*   **`useMutation`** with optimistic updates: Watchlist add/remove, manga favorites toggle, and clip deletion all use `onMutate` to optimistically update the cache before the server responds, with `onError` rollback.
+*   **`useInfiniteQuery`**: Paginated clips in the Library page use cursor-based infinite scrolling with `getNextPageParam`.
+*   **`useQueries`**: The MusicView home page fires parallel fetches (trending, new releases, top playlists, editorial picks) using `useQueries` for concurrent data loading.
 
-All caches auto-register in a global registry. `clearAllCaches()` is called on logout to prevent stale data across sessions.
+### Cache Invalidation
+*   Mutations invalidate related query keys on success (e.g., adding to watchlist invalidates `['watchlist']`).
+*   On logout, `queryClient.clear()` wipes all cached data to prevent stale sessions.
+
+### DevTools
+`ReactQueryDevtools` is mounted in development mode for inspecting query states, cache entries, and refetch behavior.
+
+### Mutation Locking
+Our `fetch.ts` implements a Mutex queue (`lockPromise`). If multiple components request a new Access Token refresh simultaneously, state is blocked globally across all components, waiting for the singular HTTP promise to resolve before retrying the request.
+
+## 6. Caching Strategy
+
+All client-side caching is handled by TanStack Query's built-in cache. The `staleTime` and `gcTime` defaults (5min / 30min) cover the majority of use cases. Individual queries override these when needed (e.g., continue-watching uses a shorter `staleTime: 30_000`).
+
+There is no separate TTL cache layer — TanStack Query's garbage collection, background refetching, and structural sharing replace the previous manual `createTTLCache` utility entirely.
 
 ## 7. Shared Utilities
 

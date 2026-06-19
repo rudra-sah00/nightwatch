@@ -1,33 +1,23 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
-import { apiFetch } from '@/lib/fetch';
-
-interface Game {
-  slug: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  video: string;
-}
+import { getGames } from '@/features/games/api';
 
 export default function GamesPage() {
   const t = useTranslations('common.gamesPage');
-  const [games, setGames] = useState<Game[]>([]);
+  const navT = useTranslations('common.nav');
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    apiFetch<{ games: Game[] }>('/api/games')
-      .then((data) => setGames(data.games ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: games = [], isLoading: loading } = useQuery({
+    queryKey: ['games'],
+    queryFn: getGames,
+  });
 
   const filtered = games.filter(
     (g) =>
@@ -37,7 +27,7 @@ export default function GamesPage() {
 
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
-      <PageTitle title="Games" />
+      <PageTitle title={navT('games')} />
       {/* Hero */}
       <div className="mb-8 bg-neo-green relative overflow-hidden rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />

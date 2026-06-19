@@ -1,13 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  deleteClip,
-  finalizeClip,
-  getClips,
-  pushSegment,
-  pushSegmentData,
-  renameClip,
-  startClip,
-} from '@/features/clips/api';
+import { deleteClip, getClips, renameClip } from '@/features/clips/api';
 import { apiFetch } from '@/lib/fetch';
 
 vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
@@ -15,73 +7,6 @@ vi.mock('@/lib/fetch', () => import('./__mocks__/lib-fetch'));
 describe('Clips API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('startClip', () => {
-    it('sends POST with matchId, title, streamUrl', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({ clipId: 'c1' });
-      const result = await startClip(
-        'match-1',
-        'My Clip',
-        'https://stream.url/live.m3u8',
-      );
-      expect(apiFetch).toHaveBeenCalledWith('/api/clips/start', {
-        method: 'POST',
-        body: JSON.stringify({
-          matchId: 'match-1',
-          title: 'My Clip',
-          streamUrl: 'https://stream.url/live.m3u8',
-        }),
-      });
-      expect(result).toEqual({ clipId: 'c1' });
-    });
-  });
-
-  describe('pushSegment', () => {
-    it('sends URL-based segment (Server 2)', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
-      await pushSegment('c1', {
-        url: 'https://cdn/seg1.ts',
-        startTime: 0,
-        duration: 2,
-      });
-      expect(apiFetch).toHaveBeenCalledWith('/api/clips/c1/segment', {
-        method: 'POST',
-        body: JSON.stringify({
-          url: 'https://cdn/seg1.ts',
-          startTime: 0,
-          duration: 2,
-        }),
-      });
-    });
-  });
-
-  describe('pushSegmentData', () => {
-    it('sends binary segment data (Server 1)', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce(undefined);
-      const data = new ArrayBuffer(100);
-      await pushSegmentData('c1', data, 5.0, 2.5);
-      expect(apiFetch).toHaveBeenCalledWith('/api/clips/c1/segment-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/octet-stream',
-          'x-segment-start': '5',
-          'x-segment-duration': '2.5',
-        },
-        body: data,
-      });
-    });
-  });
-
-  describe('finalizeClip', () => {
-    it('sends POST to finalize', async () => {
-      vi.mocked(apiFetch).mockResolvedValueOnce({ status: 'processing' });
-      const result = await finalizeClip('c1');
-      expect(apiFetch).toHaveBeenCalledWith('/api/clips/c1/finalize', {
-        method: 'POST',
-      });
-      expect(result).toEqual({ status: 'processing' });
-    });
   });
 
   describe('getClips', () => {

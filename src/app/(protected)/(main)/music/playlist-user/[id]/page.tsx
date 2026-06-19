@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Camera, Music, Pause, Play, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -14,7 +15,7 @@ import {
   uploadPlaylistCover,
 } from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useMusicStore } from '@/features/music/store/use-music-store';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -27,26 +28,24 @@ export default function UserPlaylistDetailPage() {
   const router = useRouter();
   const tm = useTranslations('music');
   const id = params.id as string;
-  const player = useMusicPlayerContext();
-  const [playlist, setPlaylist] = useState<UserPlaylistDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const play = useMusicStore((s) => s.play);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+
+  const { data: playlist = null, isLoading: loading } = useQuery({
+    queryKey: ['music', 'playlist-user', id],
+    queryFn: () => getUserPlaylistDetail(id),
+    enabled: !!id,
+  });
+
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    getUserPlaylistDetail(id)
-      .then((data) => {
-        setPlaylist(data);
-        document.title = `${data.name} — Nightwatch`;
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
 
   useEffect(() => {
     if (editing) nameInputRef.current?.focus();
@@ -56,22 +55,19 @@ export default function UserPlaylistDetailPage() {
     if (!playlist || !editName.trim() || editName.trim() === playlist.name)
       return setEditing(false);
     await updateUserPlaylist(id, { name: editName.trim() });
-    setPlaylist((p) => (p ? { ...p, name: editName.trim() } : p));
-    document.title = `${editName.trim()} — Nightwatch`;
+    queryClient.invalidateQueries({ queryKey: ['music', 'playlist-user', id] });
     setEditing(false);
   };
-
-  const [uploading, setUploading] = useState(false);
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
-      const updated = await uploadPlaylistCover(id, file);
-      setPlaylist((p) =>
-        p ? { ...p, coverUrl: `${updated.coverUrl}?t=${Date.now()}` } : p,
-      );
+      await uploadPlaylistCover(id, file);
+      queryClient.invalidateQueries({
+        queryKey: ['music', 'playlist-user', id],
+      });
     } finally {
       setUploading(false);
     }
@@ -79,15 +75,7 @@ export default function UserPlaylistDetailPage() {
 
   const handleRemoveTrack = async (trackEntryId: string) => {
     await removeTrackFromPlaylist(id, trackEntryId);
-    setPlaylist((p) =>
-      p
-        ? {
-            ...p,
-            tracks: p.tracks.filter((t) => t.id !== trackEntryId),
-            trackCount: p.trackCount - 1,
-          }
-        : p,
-    );
+    queryClient.invalidateQueries({ queryKey: ['music', 'playlist-user', id] });
   };
 
   const playTrack = (
@@ -108,7 +96,7 @@ export default function UserPlaylistDetailPage() {
         hasLyrics: false,
       };
     };
-    player.play(asMusicTrack(track), allTracks.map(asMusicTrack));
+    play(asMusicTrack(track), allTracks.map(asMusicTrack));
   };
 
   return (
@@ -223,15 +211,13 @@ export default function UserPlaylistDetailPage() {
 
           <div className="px-6">
             {playlist.tracks.map((track, i) => {
-              const isActive = player.currentTrack?.id === track.trackId;
+              const isActive = currentTrack?.id === track.trackId;
               return (
                 <button
                   type="button"
                   key={track.id}
                   onClick={() =>
-                    isActive
-                      ? player.togglePlay()
-                      : playTrack(track, playlist.tracks)
+                    isActive ? togglePlay() : playTrack(track, playlist.tracks)
                   }
                   onContextMenu={(e) =>
                     showSongMenu(
@@ -250,7 +236,7 @@ export default function UserPlaylistDetailPage() {
                   className="w-full flex items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-card"
                 >
                   <span className="w-6 text-foreground/20 text-xs font-mono text-right flex-shrink-0">
-                    {isActive && player.isPlaying ? (
+                    {isActive && isPlaying ? (
                       <Pause className="w-3.5 h-3.5 text-neo-yellow fill-current inline" />
                     ) : isActive ? (
                       <Play className="w-3.5 h-3.5 text-neo-yellow fill-current inline ml-0.5" />

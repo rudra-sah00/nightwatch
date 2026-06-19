@@ -159,7 +159,7 @@ const WatchProgressItem = React.memo(function WatchProgressItem({
   const t = useTranslations('search');
   const tw = useTranslations('watch');
   return (
-    // biome-ignore lint/a11y/useSemanticElements: outer wrapper contains a nested <button>, can't use <button> here
+    // biome-ignore lint/a11y/useSemanticElements: wrapper contains nested <button>, can't be <button> itself
     <div
       role="button"
       tabIndex={0}

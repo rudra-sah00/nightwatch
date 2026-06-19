@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -15,9 +16,12 @@ import { DiscoverCardStack } from './DiscoverCardStack';
 
 export function DiscoverView() {
   const t = useTranslations('music');
+  const { data: initialFeed = [], isLoading: loading } = useQuery({
+    queryKey: ['music', 'discover', 'feed'],
+    queryFn: () => getDiscoverFeed(20),
+  });
   const [feed, setFeed] = useState<DiscoverSong[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(false);
   const [swipeDir, setSwipeDir] = useState<'left' | 'right' | null>(null);
   const [dragX, setDragX] = useState(0);
@@ -43,18 +47,14 @@ export function DiscoverView() {
   } = useDiscoverPreview(feed, currentIndex, muted);
 
   useEffect(() => {
-    setLoading(true);
-    getDiscoverFeed(20)
-      .then((songs) => {
-        setFeed(songs);
-        setCurrentIndex(0);
-        trackEvent(AnalyticsEvents.DISCOVER_SESSION_START, {
-          count: songs.length,
-        });
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+    if (initialFeed.length > 0) {
+      setFeed(initialFeed);
+      setCurrentIndex(0);
+      trackEvent(AnalyticsEvents.DISCOVER_SESSION_START, {
+        count: initialFeed.length,
+      });
+    }
+  }, [initialFeed]);
 
   const currentSong = feed[currentIndex];
   const nextSong = feed[currentIndex + 1];

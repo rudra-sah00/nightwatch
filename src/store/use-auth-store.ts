@@ -9,7 +9,7 @@ import type { LoginInput, RegisterInput } from '@/features/auth/schema';
 import { trackEvent } from '@/lib/analytics';
 import { clearStoredUser, storeUser } from '@/lib/auth';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
-import { apiFetch, setTokenExpiration } from '@/lib/fetch';
+import { setTokenExpiration } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
 
 // Persistent Native Caching Wrapper that automatically synchronizes the user's
@@ -44,7 +44,14 @@ const customNativeStorage: StateStorage = {
   },
 };
 
-import { clearAllCaches } from '@/lib/cache';
+import type { QueryClient } from '@tanstack/react-query';
+import { useMusicStore } from '@/features/music/store/use-music-store';
+
+// Singleton reference to clear query cache on logout
+let _queryClient: QueryClient | null = null;
+export function setQueryClientRef(qc: QueryClient) {
+  _queryClient = qc;
+}
 
 function clearCookiesAndRedirect(message?: string) {
   if (message) {
@@ -52,7 +59,8 @@ function clearCookiesAndRedirect(message?: string) {
       sessionStorage.setItem('auth_flash', message);
     } catch {}
   }
-  clearAllCaches();
+  _queryClient?.clear();
+  useMusicStore.getState().reset();
   // Synchronously clear persisted auth state BEFORE the hard redirect.
   // The Zustand persist middleware writes asynchronously (customNativeStorage),
   // so setUser(null) may not flush to localStorage before navigation.
@@ -141,11 +149,8 @@ export const useAuthStore = create<AuthState>()(
         // Unregister push notification token before logging out
         try {
           const { getDeviceId } = await import('@/lib/device-id');
-          await apiFetch('/api/notifications/unregister', {
-            method: 'POST',
-            body: JSON.stringify({ deviceId: getDeviceId() }),
-            headers: { 'Content-Type': 'application/json' },
-          });
+          const { unregisterPushToken } = await import('@/features/auth/api');
+          await unregisterPushToken(getDeviceId());
         } catch {}
 
         try {

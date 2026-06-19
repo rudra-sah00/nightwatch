@@ -238,4 +238,4 @@ Minimal hook tracking image error state for a single episode card.
 
 - **Stale results on rapid navigation**: Fixed race condition where `AbortController` cleanup was not cancelling in-flight requests when the query changed rapidly, causing old results to overwrite newer ones.
 - **Escape key not closing modal**: Fixed event propagation issue where the content detail modal's Escape handler was being swallowed by the emoji picker when it was previously open in the same render cycle.
-- **Cache key mismatch**: Fixed TTL cache returning results for a different query when the cache key included stale URL params from a previous navigation.
+- **Cache key mismatch** (legacy, resolved by migration): Previously a manual TTL cache could return results for a different query when the cache key included stale URL params. Now TanStack Query handles all caching via query keys (`['search', query]`, `['show', contentId]`, `['episodes', seriesId, seasonId]`), eliminating this class of bug entirely.

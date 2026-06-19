@@ -22,7 +22,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Setup & Local Development](./docs/SETUP.md): Instructions for environment variables, dependencies, and local start.
 - [High-Level Architecture](./docs/ARCHITECTURE.md): The Next.js framework, real-time topologies, React state strategies, platform layers, and player compound components.
 - [API Layer & Communication](./docs/API_LAYER.md): Integration with Node.js backend, Agora RTM/RTC, and WebRTC protocols.
-- [State Management Strategy](./docs/STATE_MANAGEMENT.md): Multi-tiered state management using Provider Contexts, Server Actions, and React hooks.
+- [State Management Strategy](./docs/STATE_MANAGEMENT.md): Multi-tiered state management using TanStack Query, Zustand stores, Provider Contexts, and React hooks.
 - [Testing Methodology](./docs/TESTING.md): Unit, integration, and E2E testing strategies using Vitest and Playwright.
 - [UI & Styling Guidelines](./docs/UI_GUIDELINES.md): Neo-brutalist design rules, Tailwind utility constraints, and CVA component usage.
 - [Internationalization](./docs/I18N.md): 14 languages, 8 namespaces, cookie-based locale, RTL support, and next-intl integration.
@@ -53,6 +53,8 @@ Due to the scale of the application, our detailed technical documentation is spl
 - **Internationalization:** next-intl (14 languages, cookie-based)
 - **Real-Time Data:** Agora RTM, Socket.IO (friends, presence, voice calls)
 - **Real-Time Media:** Agora RTC (WebRTC — watch party, voice calls)
+- **Server State & Caching:** TanStack Query (useQuery, useMutation, stale-while-revalidate)
+- **Client State:** Zustand (auth state, music playback state)
 - **Quality Assurance:** Biome (Linting/Formatting), Vitest (Unit Testing), Playwright (E2E Testing)
 - **Package Manager:** pnpm
 

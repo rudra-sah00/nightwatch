@@ -8,7 +8,14 @@ Full-featured music streaming integrated into Nightwatch. Powered by JioSaavn on
 ┌─────────────────────────────────────────────────────────┐
 │  Frontend (Next.js)                                     │
 │                                                         │
-│  MusicPlayerProvider (React Context)                    │
+│  useMusicStore (Zustand Store)                          │
+│    ├── Playback state with selectors (granular rerenders)│
+│    ├── Persist middleware (volume/shuffle/repeat/        │
+│    │   crossfade/gapless preferences)                   │
+│    └── @tanstack/react-query (MusicView data fetching,  │
+│        lyrics, recommendations, playlists)              │
+│                                                         │
+│  MusicEngineInit (headless component)                   │
 │    └── AudioEngine (singleton HTMLAudioElement)         │
 │          ├── Playback (play, pause, seek, next, prev)   │
 │          ├── Queue (shuffle, repeat, Redis-synced)       │
@@ -18,6 +25,7 @@ Full-featured music streaming integrated into Nightwatch. Powered by JioSaavn on
 │          └── Sleep Timer (auto-stop after duration)     │
 │                                                         │
 │  Components:                                            │
+│    MusicEngineInit ── Headless engine bootstrap          │
 │    MusicView ─── Home page (charts, featured, artists)  │
 │    FullPlayer ── Expanded view with synced lyrics        │
 │    MiniPlayer ── Sticky bottom bar with controls         │
@@ -69,7 +77,7 @@ src/features/music/
 │   ├── equalizer.ts                # Web Audio API 5-band EQ chain
 │   └── sleep-timer.ts              # Timer set/clear/expiry check
 ├── context/
-│   └── MusicPlayerContext.tsx       # React Context wrapping AudioEngine
+│   └── use-music-store.ts           # Zustand store for all playback state
 ├── hooks/
 │   ├── use-music-shortcuts.ts       # Global keyboard shortcuts (Space, ←→, ↑↓, M, S, R)
 │   ├── use-music-progress.ts        # Listen time tracking (accumulate + flush to backend)
@@ -478,7 +486,7 @@ Cards display "Because you liked {seed song title}" when the backend provides a 
 
 ### Implicit Listen Tracking
 
-The `MusicPlayerContext` monitors playback progress. When a song reaches 60% completion:
+The `MusicEngineInit` component monitors playback progress. When a song reaches 60% completion:
 1. `recordListen(songId)` fires once per song per session (deduped via `useRef`)
 2. Backend stores in `music_listens` collection (skips if already explicitly swiped)
 3. Listen history songs are used as additional seeds in the discover feed algorithm
@@ -577,10 +585,10 @@ Music UI strings are translated across 14 languages via `next-intl`. Translation
 
 ### Split Progress Context
 
-The `MusicPlayerContext` separates high-frequency progress updates (every 250ms) from stable state (track, queue, controls) using two React contexts:
+The `useMusicStore` uses Zustand selectors to prevent unnecessary re-renders. Components subscribe only to the state slices they need:
 
 ```
-MusicPlayerContext (stable)          MusicProgressContext (250ms)
+useMusicStore(s => s.isPlaying)     useMusicStore(s => s.progress)
 ├── currentTrack                     ├── progress (0–100%)
 ├── queue                            └── duration (seconds)
 ├── isPlaying

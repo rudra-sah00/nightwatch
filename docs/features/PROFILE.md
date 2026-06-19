@@ -37,7 +37,7 @@ src/features/profile/
 | `getPublicProfile(id, options?)` | GET | `/api/user/public/:id` | Public profile by UUID |
 | `checkUsername` | — | Re-exported from `@/features/auth/api` | Username availability check |
 
-Profile data is cached with a 5-minute TTL via `createTTLCache`. `invalidateProfileCache()` clears the cache after mutations.
+Profile data is cached by TanStack Query with the key `['profile']`. Cache invalidation happens automatically via `queryClient.invalidateQueries` after mutations.
 
 ## Schemas
 

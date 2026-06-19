@@ -215,7 +215,7 @@ window.dispatchEvent(new CustomEvent('dm-call:end'));
 
 ### Music Player Integration
 
-`MusicPlayerContext.tsx` listens for these events:
+`MusicEngineInit.tsx` listens for these events:
 
 ```ts
 window.addEventListener('dm-call:start', handleCallStart);

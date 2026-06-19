@@ -28,7 +28,13 @@ export function DiscoverCardStack({
             zIndex: 1,
           }}
         >
-          <Image src={thirdSong.image} alt="" fill className="object-cover" />
+          <Image
+            src={thirdSong.image}
+            alt=""
+            fill
+            sizes="300px"
+            className="object-cover"
+          />
           <div className="absolute inset-0 bg-black/50" />
         </div>
       )}
@@ -45,7 +51,13 @@ export function DiscoverCardStack({
             zIndex: 2,
           }}
         >
-          <Image src={nextSong.image} alt="" fill className="object-cover" />
+          <Image
+            src={nextSong.image}
+            alt=""
+            fill
+            sizes="300px"
+            className="object-cover"
+          />
           <div className="absolute inset-0 bg-black/30" />
         </div>
       )}

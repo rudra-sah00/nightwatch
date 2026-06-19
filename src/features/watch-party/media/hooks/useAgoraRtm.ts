@@ -327,7 +327,6 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
       setIsConnected(false);
       fallbackCleanup();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, appId, channel, userId, tp]);
 
   return {

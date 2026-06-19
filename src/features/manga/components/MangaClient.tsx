@@ -1,5 +1,6 @@
 'use client';
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BookOpen,
   Heart,
@@ -11,7 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import type { MangaTitle } from '@/features/manga/api';
 import {
@@ -103,65 +104,76 @@ function SkeletonGrid() {
 
 export function MangaClient() {
   const [tab, setTab] = useState<Tab>('ranking');
-  const [titles, setTitles] = useState<MangaTitle[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
   const t = useTranslations('common.manga');
+  const queryClient = useQueryClient();
 
-  const fetchData = useCallback(async (t: Tab) => {
-    setLoading(true);
-    try {
-      if (t === 'saved') {
-        const res = await getMangaFavorites();
-        setTitles(
-          res.favorites.map((f) => ({
-            titleId: f.titleId,
-            name: f.title,
-            author: f.author,
-            portraitImageUrl: f.portraitImageUrl,
-            landscapeImageUrl: '',
-            viewCount: 0,
-            language: 'en',
-            updateStatus: 'none',
-          })),
-        );
-      } else if (t === 'continue') {
-        const res = await getMangaProgress();
-        setTitles(
-          res.progress.map((p) => ({
-            titleId: p.titleId,
-            name: p.titleName,
-            author: `${p.chapterName} · p.${p.pageIndex + 1}`,
-            portraitImageUrl: p.portraitImageUrl,
-            landscapeImageUrl: '',
-            viewCount: 0,
-            language: 'en',
-            updateStatus: 'none',
-          })),
-        );
-      } else {
-        const res =
-          t === 'ranking' ? await getMangaRanking() : await getMangaLatest();
-        setTitles(res.titles);
-      }
-    } catch {
-      setTitles([]);
-    } finally {
-      setLoading(false);
+  async function fetchMangaTab(tabKey: Tab): Promise<MangaTitle[]> {
+    if (tabKey === 'saved') {
+      const res = await getMangaFavorites();
+      return res.favorites.map((f) => ({
+        titleId: f.titleId,
+        name: f.title,
+        author: f.author,
+        portraitImageUrl: f.portraitImageUrl,
+        landscapeImageUrl: '',
+        viewCount: 0,
+        language: 'en',
+        updateStatus: 'none',
+      }));
     }
-  }, []);
+    if (tabKey === 'continue') {
+      const res = await getMangaProgress();
+      return res.progress.map((p) => ({
+        titleId: p.titleId,
+        name: p.titleName,
+        author: `${p.chapterName} · p.${p.pageIndex + 1}`,
+        portraitImageUrl: p.portraitImageUrl,
+        landscapeImageUrl: '',
+        viewCount: 0,
+        language: 'en',
+        updateStatus: 'none',
+      }));
+    }
+    const res =
+      tabKey === 'ranking' ? await getMangaRanking() : await getMangaLatest();
+    return res.titles;
+  }
 
-  useEffect(() => {
-    fetchData(tab);
-  }, [tab, fetchData]);
+  const { data: titles = [], isLoading: loading } = useQuery({
+    queryKey: ['manga', tab],
+    queryFn: () => fetchMangaTab(tab),
+  });
 
+  const removeMutation = useMutation({
+    mutationFn: async (titleId: number) => {
+      if (tab === 'saved') await removeMangaFavorite(titleId);
+      if (tab === 'continue') await removeMangaProgress(titleId);
+    },
+    onMutate: async (titleId) => {
+      await queryClient.cancelQueries({ queryKey: ['manga', tab] });
+      const previous = queryClient.getQueryData<MangaTitle[]>(['manga', tab]);
+      queryClient.setQueryData<MangaTitle[]>(['manga', tab], (old) =>
+        old?.filter((t) => t.titleId !== titleId),
+      );
+      return { previous };
+    },
+    onError: (_err, _titleId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['manga', tab], context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['manga', tab] });
+    },
+  });
   const PAGE_SIZE = 30;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   // Reset visible count when tab changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on tab switch
   useEffect(() => {
+    void tab; // trigger dependency
     setVisibleCount(PAGE_SIZE);
   }, [tab]);
 
@@ -183,18 +195,13 @@ export function MangaClient() {
 
   const visibleTitles = titles.slice(0, visibleCount);
 
-  const handleRemove = async (titleId: number) => {
-    setTitles((prev) => prev.filter((t) => t.titleId !== titleId));
-    setVisibleCount((prev) => Math.max(prev - 1, PAGE_SIZE));
-    try {
-      if (tab === 'saved') await removeMangaFavorite(titleId);
-      if (tab === 'continue') await removeMangaProgress(titleId);
-    } catch {}
+  const handleRemove = (titleId: number) => {
+    removeMutation.mutate(titleId);
   };
 
   return (
     <main className="pb-32 animate-in fade-in">
-      <PageTitle title="Manga" />
+      <PageTitle title={t('title')} />
       {/* Search Spotlight */}
       {showSearch && (
         <MangaSearchSpotlight onClose={() => setShowSearch(false)} />

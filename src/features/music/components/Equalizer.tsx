@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
 import { EQ_PRESETS, type EqualizerBand } from '../engine/audio-engine';
+import { useMusicStore } from '../store/use-music-store';
 
 const PRESET_NAMES = Object.keys(EQ_PRESETS);
 
@@ -13,8 +13,10 @@ const PRESET_NAMES = Object.keys(EQ_PRESETS);
  */
 export function Equalizer({ onClose }: { onClose: () => void }) {
   const t = useTranslations('music');
-  const { initEqualizer, setEqBands, getEqBands, isRemoteControlling } =
-    useMusicPlayerContext();
+  const initEqualizer = useMusicStore((s) => s.initEqualizer);
+  const setEqBands = useMusicStore((s) => s.setEqBands);
+  const getEqBands = useMusicStore((s) => s.getEqBands);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
   const [bands, setBands] = useState<EqualizerBand[]>(getEqBands);
   const [activePreset, setActivePreset] = useState('flat');
 

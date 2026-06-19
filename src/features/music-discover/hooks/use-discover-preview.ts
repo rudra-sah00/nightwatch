@@ -113,8 +113,8 @@ export function useDiscoverPreview(
     }, PREVIEW_DURATION * 1000);
   }, [currentSong, muted]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: currentSong triggers replay
   useEffect(() => {
+    void currentSong; // trigger dependency
     if (hasInteracted) playCurrentAudio();
   }, [currentSong, hasInteracted, playCurrentAudio]);
 

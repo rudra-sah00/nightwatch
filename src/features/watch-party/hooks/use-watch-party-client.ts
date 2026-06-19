@@ -102,7 +102,6 @@ export function useWatchPartyClient({
         disconnect();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectGuest, disconnect, user, isAuthLoading]);
 
   const isGuestSocketReady = !!user || isSocketConnected;

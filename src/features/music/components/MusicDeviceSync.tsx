@@ -3,11 +3,8 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { useSocket } from '@/providers/socket-provider';
-import {
-  useMusicPlaybackProgress,
-  useMusicPlayerContext,
-} from '../context/MusicPlayerContext';
 import type { MusicDevice } from '../hooks/use-music-devices';
+import { useMusicStore } from '../store/use-music-store';
 import { getDeviceId, getDeviceName } from '../utils';
 
 const BLOCKED_ROUTES = ['/watch/', '/live/', '/watch-party/'];
@@ -24,16 +21,15 @@ const BLOCKED_ROUTES = ['/watch/', '/live/', '/watch-party/'];
  */
 export function MusicDeviceSync() {
   const { socket } = useSocket();
-  const {
-    isPlaying,
-    currentTrack,
-    queue,
-    setRemoteControlling,
-    isRemoteControlling,
-    play,
-    togglePlay,
-  } = useMusicPlayerContext();
-  const { progress, duration } = useMusicPlaybackProgress();
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const queue = useMusicStore((s) => s.queue);
+  const setRemoteControlling = useMusicStore((s) => s.setRemoteControlling);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
+  const play = useMusicStore((s) => s.play);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+  const progress = useMusicStore((s) => s.progress);
+  const duration = useMusicStore((s) => s.duration);
   const pathname = usePathname();
 
   const deviceName = getDeviceName();
@@ -179,8 +175,8 @@ export function MusicDeviceSync() {
 
   // ─── 3. Broadcast playback_started on NEW track only ───────────
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: currentTrack?.id triggers re-run on track change (reads from ref inside)
   useEffect(() => {
+    void currentTrack?.id; // trigger on track change
     if (!socket?.connected) return;
     const track = currentTrackRef.current;
     if (!track || !isPlayingRef.current) {
@@ -200,7 +196,7 @@ export function MusicDeviceSync() {
       duration: durationRef.current,
     });
     setRemoteControlling(false);
-  }, [socket, deviceName, setRemoteControlling, currentTrack?.id]);
+  }, [socket, deviceId, deviceName, setRemoteControlling, currentTrack?.id]);
 
   // ─── 4. Throttled state_update broadcast (every 5s) ────────────
 

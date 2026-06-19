@@ -11,7 +11,6 @@ import {
   getGoogleOAuthUrl,
   nativeGoogleSignIn,
 } from '@/features/auth/google-api';
-import { invalidateProfileCache } from '@/features/profile/api';
 import { useAuth } from '@/providers/auth-provider';
 
 /**
@@ -34,7 +33,6 @@ export function GoogleAccountSection() {
         const idToken = await nativeGoogleSignIn();
         const { user: updated } = await connectGoogle({ idToken });
         updateUser(updated);
-        invalidateProfileCache();
         toast.success(t('google.connected'));
       } catch (err: unknown) {
         const msg =
@@ -53,7 +51,6 @@ export function GoogleAccountSection() {
     try {
       const { user: updated } = await disconnectGoogle();
       updateUser(updated);
-      invalidateProfileCache();
       toast.success(t('google.disconnected'));
     } catch (err: unknown) {
       const msg =

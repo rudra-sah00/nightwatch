@@ -1,4 +1,3 @@
-import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type {
   LiveMatch,
@@ -11,18 +10,8 @@ export type {
   LiveMatch,
 } from './types';
 
-// Short TTL cache (60s) for schedule — avoids redundant fetches when
-// navigating away from /live and back quickly.
-const scheduleCache = createTTLCache<LiveMatch[]>(60 * 1000, 10);
-
 /**
  * Fetches the livestream schedule for a given sport type.
- *
- * @param sportType - Sport category to filter by (default `"basketball"`).
- * @param daysBackward - Number of past days to include (default `0`).
- * @param daysForward - Number of future days to include (default `3`).
- * @param signal - Optional `AbortSignal` for request cancellation.
- * @returns Array of live matches within the date range.
  */
 export const fetchLivestreamSchedule = async (
   sportType = 'basketball',
@@ -30,17 +19,11 @@ export const fetchLivestreamSchedule = async (
   daysForward = 3,
   signal?: AbortSignal,
 ): Promise<LiveMatch[]> => {
-  const cacheKey = `${sportType}:${daysBackward}:${daysForward}`;
-  const cached = scheduleCache.get(cacheKey);
-  if (cached) return cached;
-
   const data = await apiFetch<LivestreamScheduleResponse>(
     `/api/livestream/schedule?sportType=${sportType}&daysBackward=${daysBackward}&daysForward=${daysForward}&server=server1`,
     { signal },
   );
-  const items = data?.items || [];
-  scheduleCache.set(cacheKey, items);
-  return items;
+  return data?.items || [];
 };
 
 /**
@@ -123,10 +106,10 @@ export const fetchChannels = async (
 };
 
 // Sports list is essentially static — cache for 30 minutes.
-const sportsCache = createTTLCache<{ id: string; label: string }[]>(
-  30 * 60 * 1000,
-  1,
-);
+let _sportsCache: {
+  data: { id: string; label: string }[];
+  expiry: number;
+} | null = null;
 
 /**
  * Fetches the list of available sport categories for the livestream schedule.
@@ -135,15 +118,15 @@ const sportsCache = createTTLCache<{ id: string; label: string }[]>(
  * @returns Array of sport objects with `id` and `label`.
  */
 export const fetchSports = async (signal?: AbortSignal) => {
-  const cached = sportsCache.get('sports');
-  if (cached) return cached;
+  if (_sportsCache && _sportsCache.expiry > Date.now())
+    return _sportsCache.data;
 
   const data = await apiFetch<{ data: { id: string; label: string }[] }>(
     `/api/livestream/sports`,
     { signal },
   );
   const sports = data?.data || [];
-  sportsCache.set('sports', sports);
+  _sportsCache = { data: sports, expiry: Date.now() + 30 * 60 * 1000 };
   return sports;
 };
 

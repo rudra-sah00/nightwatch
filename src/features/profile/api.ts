@@ -1,29 +1,16 @@
 import { trackEvent } from '@/lib/analytics';
-import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
 import type { User } from '@/types';
 import type { ChangePasswordInput, UpdateProfileInput } from './schema';
 import type { MusicActivity, WatchActivity } from './types';
 
 /**
- * User profile management and caching.
+ * User profile management — TanStack Query handles caching.
  */
-
-const profileCache = createTTLCache<{ user: User }>(5 * 60 * 1000, 1);
-
 export async function getProfile(
   options?: RequestInit,
 ): Promise<{ user: User }> {
-  const cached = profileCache.get('me');
-  if (cached) return cached;
-
-  const result = await apiFetch<{ user: User }>('/api/auth/me', options);
-  profileCache.set('me', result);
-  return result;
-}
-
-export function invalidateProfileCache(): void {
-  profileCache.clear();
+  return apiFetch<{ user: User }>('/api/auth/me', options);
 }
 
 export async function updateProfile(
@@ -35,7 +22,6 @@ export async function updateProfile(
     body: JSON.stringify(data),
     ...options,
   });
-  profileCache.set('me', result);
   trackEvent('profile_update');
   return result;
 }
@@ -43,7 +29,7 @@ export async function updateProfile(
 export { checkUsername } from '@/features/auth/api';
 
 /**
- * Get watch activity - always fresh from server (no client cache)
+ * Get watch activity - always fresh from server
  */
 export async function getWatchActivity(
   options?: RequestInit,
@@ -89,8 +75,6 @@ export async function uploadProfileImage(file: File): Promise<{ url: string }> {
     },
   );
 
-  // Invalidate profile cache so fresh data is fetched
-  invalidateProfileCache();
   return { url: result.user.profilePhoto };
 }
 
@@ -117,7 +101,7 @@ export async function deleteAccount(options?: RequestInit): Promise<void> {
 }
 
 /**
- * Get public profile data by ID (UUID compulsory)
+ * Get public profile data by ID
  */
 export async function getPublicProfile(
   id: string,

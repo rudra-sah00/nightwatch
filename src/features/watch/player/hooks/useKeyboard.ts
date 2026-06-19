@@ -298,7 +298,6 @@ export function useKeyboard({
       window.removeEventListener('keydown', handleKeyDown);
       if (unsubscribeDesktopMedia) unsubscribeDesktopMedia();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { togglePlay, toggleMute, toggleFullscreen, seek, adjustVolume };

@@ -5,8 +5,7 @@ importScripts(
 );
 
 const { registerRoute, NavigationRoute } = workbox.routing;
-const { CacheFirst, StaleWhileRevalidate, NetworkFirst, NetworkOnly } =
-  workbox.strategies;
+const { CacheFirst, NetworkFirst, NetworkOnly } = workbox.strategies;
 const { CacheableResponsePlugin } = workbox.cacheableResponse;
 const { ExpirationPlugin } = workbox.expiration;
 const { BackgroundSyncPlugin } = workbox.backgroundSync;

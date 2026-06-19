@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Pause, Play } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -9,9 +10,8 @@ import {
   getPodcastEpisodes,
   getPodcastShow,
   type PodcastEpisode,
-  type PodcastShow,
 } from '@/features/music/api';
-import { useMusicPlayerContext } from '@/features/music/context/MusicPlayerContext';
+import { useMusicStore } from '@/features/music/store/use-music-store';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -33,32 +33,31 @@ export default function PodcastPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const player = useMusicPlayerContext();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const play = useMusicStore((s) => s.play);
   const t = useTranslations('music');
-  const [show, setShow] = useState<PodcastShow | null>(null);
+
+  const { data: show = null, isLoading: loading } = useQuery({
+    queryKey: ['music', 'podcast', id],
+    queryFn: () => getPodcastShow(id),
+    enabled: !!id,
+  });
+
   const [episodes, setEpisodes] = useState<PodcastEpisode[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeSeason, setActiveSeason] = useState(1);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    getPodcastShow(id)
-      .then((data) => {
-        setShow(data);
-        setEpisodes(data.episodes);
-        setHasMore(data.episodes.length >= 10);
-        if (data.seasons.length > 0) {
-          const lastSeason = data.seasons.length;
-          setActiveSeason(lastSeason);
-        }
-        document.title = `${data.title} — Nightwatch`;
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
+    if (show) {
+      setEpisodes(show.episodes);
+      setHasMore(show.episodes.length >= 10);
+      if (show.seasons.length > 0) {
+        setActiveSeason(show.seasons.length);
+      }
+    }
+  }, [show]);
 
   const loadMore = useCallback(() => {
     const nextPage = page + 1;
@@ -76,14 +75,12 @@ export default function PodcastPage() {
       setActiveSeason(season);
       setPage(1);
       setEpisodes([]);
-      setLoading(true);
       getPodcastEpisodes(id, season, 1)
         .then((eps) => {
           setEpisodes(eps);
           setHasMore(eps.length >= 20);
         })
-        .catch(() => {})
-        .finally(() => setLoading(false));
+        .catch(() => {});
     },
     [id],
   );
@@ -108,9 +105,9 @@ export default function PodcastPage() {
     (episode: PodcastEpisode) => {
       const queue = episodes.map(episodeToTrack);
       const track = episodeToTrack(episode);
-      player.play(track, queue);
+      play(track, queue);
     },
-    [episodes, episodeToTrack, player],
+    [episodes, episodeToTrack, play],
   );
 
   return (
@@ -204,10 +201,9 @@ export default function PodcastPage() {
                   alt={ep.title}
                   className="w-full h-full object-cover"
                 />
-                {player.currentTrack?.id ===
-                  `podcast:${ep.encryptedMediaUrl}` && (
+                {currentTrack?.id === `podcast:${ep.encryptedMediaUrl}` && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    {player.isPlaying ? (
+                    {isPlaying ? (
                       <Pause className="w-3.5 h-3.5 text-neo-yellow fill-current" />
                     ) : (
                       <Play className="w-3.5 h-3.5 text-neo-yellow fill-current" />
@@ -217,7 +213,7 @@ export default function PodcastPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p
-                  className={`font-headline font-bold text-sm uppercase tracking-wider truncate ${player.currentTrack?.id === `podcast:${ep.encryptedMediaUrl}` ? 'text-neo-yellow' : ''}`}
+                  className={`font-headline font-bold text-sm uppercase tracking-wider truncate ${currentTrack?.id === `podcast:${ep.encryptedMediaUrl}` ? 'text-neo-yellow' : ''}`}
                 >
                   {ep.title}
                 </p>

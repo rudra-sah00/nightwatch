@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Calendar, Loader2, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -26,27 +27,11 @@ export default function LiveMatchPlayerPage() {
   const format = useFormatter();
 
   // IPTV resolve state (always declared, only used when isIptv)
-  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
-  const [resolving, setResolving] = useState(true);
-
-  useEffect(() => {
-    if (!isIptv) {
-      setResolving(false);
-      return;
-    }
-    const controller = new AbortController();
-    fetchIptvResolve(matchId, controller.signal)
-      .then((url) => {
-        if (!controller.signal.aborted) {
-          setResolvedUrl(url);
-          setResolving(false);
-        }
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setResolving(false);
-      });
-    return () => controller.abort();
-  }, [matchId, isIptv]);
+  const { data: resolvedUrl = null, isLoading: resolving } = useQuery({
+    queryKey: ['live', 'iptv-resolve', matchId],
+    queryFn: () => fetchIptvResolve(matchId),
+    enabled: isIptv,
+  });
 
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);

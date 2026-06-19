@@ -124,19 +124,6 @@ describe('Watch Party API Service (REST & RTM Bridge)', () => {
       expect(result.results).toEqual([]);
     });
 
-    it('requestPartyState should handle success and failure', async () => {
-      vi.mocked(global.fetch)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ isPlaying: true }),
-        } as Response)
-        .mockRejectedValueOnce(new Error('fail'));
-      const r1 = await api.requestPartyState('ABC');
-      expect(r1.state).toEqual({ isPlaying: true });
-      const r2 = await api.requestPartyState('ABC');
-      expect(r2.error).toBe('fail');
-    });
-
     it('syncPartyState should handle success and failure', async () => {
       vi.mocked(global.fetch)
         .mockResolvedValueOnce({
@@ -148,25 +135,6 @@ describe('Watch Party API Service (REST & RTM Bridge)', () => {
       expect(r1.success).toBe(true);
       const r2 = await api.syncPartyState('ABC', { currentTime: 1 });
       expect(r2.error).toBe('fail');
-    });
-
-    it('getPartyRoom should handle success and failure', async () => {
-      vi.mocked(global.fetch)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ id: 'ABC' }),
-        } as Response)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => null,
-        } as Response)
-        .mockRejectedValueOnce(new Error('fail'));
-      const r1 = await api.getPartyRoom('ABC');
-      expect(r1.room?.id).toBe('ABC');
-      const r2 = await api.getPartyRoom('ABC');
-      expect(r2.error).toBe('Not found');
-      const r3 = await api.getPartyRoom('ABC');
-      expect(r3.error).toBe('Not found'); // Network errors become "Not found"
     });
 
     it('updatePartyContent should handle success and failure', async () => {

@@ -1,55 +1,28 @@
 import { trackEvent } from '@/lib/analytics';
-import { createTTLCache } from '@/lib/cache';
 import { apiFetch } from '@/lib/fetch';
+import type {
+  MusicAlbum,
+  MusicArtistAlbum,
+  MusicSearchResult,
+  MusicTrack,
+  PodcastEpisode,
+  PodcastShow,
+  SyncedLyricLine,
+  UserPlaylist,
+  UserPlaylistDetail,
+} from './types';
 
-/** A single music track (song) with metadata from JioSaavn. */
-export interface MusicTrack {
-  /** Unique JioSaavn song identifier. */
-  id: string;
-  /** Song title. */
-  title: string;
-  /** Primary artist name(s). */
-  artist: string;
-  /** Album name the track belongs to. */
-  album: string;
-  /** Unique identifier of the parent album. */
-  albumId: string;
-  /** Track duration in seconds. */
-  duration: number;
-  /** URL to the album/track artwork image. */
-  image: string;
-  /** Primary language of the track (e.g. `"hindi"`, `"english"`). */
-  language: string;
-  /** Release year. */
-  year: number;
-  /** Whether synced or plain lyrics are available for this track. */
-  hasLyrics: boolean;
-}
-
-/** Combined search results across songs, albums, and playlists. */
-export interface MusicSearchResult {
-  songs: MusicTrack[];
-  albums: {
-    id: string;
-    title: string;
-    artist: string;
-    image: string;
-    year: number;
-  }[];
-  playlists: { id: string; title: string; image: string; songCount: number }[];
-}
-
-/** Full album details including its track listing. */
-export interface MusicAlbum {
-  id: string;
-  title: string;
-  artist: string;
-  image: string;
-  year: number;
-  songCount: number;
-  language: string;
-  songs: MusicTrack[];
-}
+export type {
+  MusicAlbum,
+  MusicArtistAlbum,
+  MusicSearchResult,
+  MusicTrack,
+  PodcastEpisode,
+  PodcastShow,
+  SyncedLyricLine,
+  UserPlaylist,
+  UserPlaylistDetail,
+} from './types';
 
 /**
  * Search for songs, albums, and playlists matching a query string.
@@ -152,67 +125,13 @@ interface MusicHomeData {
   }[];
 }
 
-// Client-side cache for music home data (10 min TTL).
-// Backend already caches in Redis for 6h — this avoids redundant fetches
-// when navigating away from /music and back.
-const musicHomeCache = createTTLCache<MusicHomeData>(10 * 60 * 1000, 1);
-
 /**
  * Fetch the music home page data (charts, featured, artists, releases, trending, radio).
  *
  * @returns Aggregated home page sections.
  */
 export async function getMusicHome(): Promise<MusicHomeData> {
-  const cached = musicHomeCache.get('home');
-  if (cached) return cached;
-
-  const data = await apiFetch<MusicHomeData>('/api/music/home');
-  musicHomeCache.set('home', data);
-  return data;
-}
-
-/**
- * Fetch curated chart playlists.
- *
- * @returns Array of chart entries.
- */
-export async function getCharts() {
-  return apiFetch<{ id: string; title: string; image: string }[]>(
-    '/api/music/charts',
-  );
-}
-
-/**
- * Fetch editorially featured playlists.
- *
- * @returns Array of featured playlist entries.
- */
-export async function getFeaturedPlaylists() {
-  return apiFetch<{ id: string; title: string; image: string }[]>(
-    '/api/music/featured',
-  );
-}
-
-/**
- * Fetch popular/top artists.
- *
- * @returns Array of artist entries.
- */
-export async function getTopArtists() {
-  return apiFetch<{ id: string; name: string; image: string }[]>(
-    '/api/music/artists',
-  );
-}
-
-/**
- * Fetch new album and single releases.
- *
- * @returns Array of new release entries.
- */
-export async function getNewReleases() {
-  return apiFetch<
-    { id: string; title: string; artist: string; image: string }[]
-  >('/api/music/new-releases');
+  return apiFetch<MusicHomeData>('/api/music/home');
 }
 
 /**
@@ -236,16 +155,6 @@ export async function getLyrics(
   if (duration) params.set('duration', String(Math.round(duration)));
   const qs = params.toString();
   return apiFetch(`/api/music/lyrics/${songId}${qs ? `?${qs}` : ''}`);
-}
-
-/** Album summary as returned within an artist's profile. */
-export interface MusicArtistAlbum {
-  id: string;
-  title: string;
-  artist: string;
-  image: string;
-  year: number;
-  songCount: number;
 }
 
 /**
@@ -287,28 +196,6 @@ export async function getTopPodcasts(page = 1) {
   return apiFetch<{ id: string; title: string; image: string }[]>(
     `/api/music/podcasts?page=${page}`,
   );
-}
-
-export interface PodcastEpisode {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  duration: number;
-  releaseDate: string;
-  seasonNo: number;
-  episodeNumber: number;
-  encryptedMediaUrl: string;
-}
-
-export interface PodcastShow {
-  id: string;
-  title: string;
-  image: string;
-  description: string;
-  seasons: { id: string; title: string }[];
-  episodes: PodcastEpisode[];
 }
 
 export async function getPodcastShow(showId: string) {
@@ -397,19 +284,11 @@ export async function setMusicLanguages(languages: string): Promise<void> {
  * @param language - Language filter (default `"hindi"`).
  * @returns Array of trending items.
  */
-const trendingCache = createTTLCache<
-  { id: string; title: string; type: string; image: string; subtitle: string }[]
->(10 * 60 * 1000, 5);
-
 export async function getTrending(
   type: 'song' | 'album' | 'playlist' = 'song',
   language = 'hindi',
 ) {
-  const key = `${type}:${language}`;
-  const cached = trendingCache.get(key);
-  if (cached) return cached;
-
-  const data = await apiFetch<
+  return apiFetch<
     {
       id: string;
       title: string;
@@ -420,8 +299,6 @@ export async function getTrending(
   >(
     `/api/music/trending?type=${type}&language=${encodeURIComponent(language)}`,
   );
-  trendingCache.set(key, data);
-  return data;
 }
 
 /**
@@ -527,19 +404,10 @@ export async function getArtistStation(name: string): Promise<MusicTrack[]> {
  *
  * @returns Object containing genre categories.
  */
-const browseCache = createTTLCache<{
-  genres: { id: string; title: string; image: string; type: string }[];
-}>(10 * 60 * 1000, 1);
-
 export async function getBrowseModules() {
-  const cached = browseCache.get('browse');
-  if (cached) return cached;
-
-  const data = await apiFetch<{
+  return apiFetch<{
     genres: { id: string; title: string; image: string; type: string }[];
   }>('/api/music/browse');
-  browseCache.set('browse', data);
-  return data;
 }
 
 /**
@@ -561,30 +429,6 @@ export async function addToUserQueue(track: {
     body: JSON.stringify(track),
     headers: { 'Content-Type': 'application/json' },
   });
-}
-
-/** Summary of a user-created playlist. */
-export interface UserPlaylist {
-  id: string;
-  name: string;
-  coverUrl: string | null;
-  isPublic: boolean;
-  trackCount: number;
-  createdAt: string;
-}
-
-/** Full user playlist including its ordered track entries. */
-export interface UserPlaylistDetail extends UserPlaylist {
-  tracks: {
-    id: string;
-    trackId: string;
-    title: string;
-    artist: string;
-    album: string;
-    image: string;
-    duration: number;
-    position: number;
-  }[];
 }
 
 /**
@@ -714,14 +558,6 @@ export async function removeTrackFromPlaylist(
   trackEvent('music_remove_from_playlist', { playlist_id: playlistId });
 }
 
-/** A single line of time-synced (LRC) lyrics. */
-export interface SyncedLyricLine {
-  /** Timestamp in seconds when this line should be displayed. */
-  time: number;
-  /** Lyric text for this line. */
-  text: string;
-}
-
 /**
  * Fetch and parse time-synced (LRC) lyrics for a song.
  *
@@ -827,4 +663,14 @@ export async function getAlbumRecommendations(albumId: string) {
   return apiFetch<
     { id: string; title: string; artist: string; image: string; year: number }[]
   >(`/api/music/album/${albumId}/recommendations`);
+}
+
+/**
+ * Persist the full queue to the backend (Redis). Fire-and-forget.
+ */
+export async function persistUserQueue(queue: MusicTrack[]): Promise<void> {
+  await apiFetch('/api/music/queue', {
+    method: 'PUT',
+    body: JSON.stringify(queue),
+  });
 }

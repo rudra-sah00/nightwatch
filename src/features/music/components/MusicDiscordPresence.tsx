@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { musicPresenceLock } from '@/lib/music-presence-lock';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 
 /**
  * Headless component that syncs the current music track to Discord Rich Presence
@@ -22,7 +22,8 @@ import { useMusicPlayerContext } from '../context/MusicPlayerContext';
  * Renders `null` — this is a side-effect-only component.
  */
 export function MusicDiscordPresence() {
-  const { currentTrack, isPlaying } = useMusicPlayerContext();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
 
   useEffect(() => {
     if (!checkIsDesktop()) return;

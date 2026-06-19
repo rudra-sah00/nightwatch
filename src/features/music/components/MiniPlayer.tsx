@@ -12,11 +12,8 @@ import {
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import {
-  useMusicPlaybackProgress,
-  useMusicPlayerContext,
-} from '../context/MusicPlayerContext';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
+import { useMusicStore } from '../store/use-music-store';
 import { MusicDevicePicker } from './MusicDevicePicker';
 import { showSongMenu } from './SongContextMenu';
 
@@ -37,29 +34,25 @@ import { showSongMenu } from './SongContextMenu';
  * Renders `null` when no track is loaded.
  */
 export function MiniPlayer() {
-  const player = useMusicPlayerContext();
-  const { progress } = useMusicPlaybackProgress();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+  const next = useMusicStore((s) => s.next);
+  const prev = useMusicStore((s) => s.prev);
+  const seek = useMusicStore((s) => s.seek);
+  const stop = useMusicStore((s) => s.stop);
+  const setExpanded = useMusicStore((s) => s.setExpanded);
+  const volume = useMusicStore((s) => s.volume);
+  const setVolume = useMusicStore((s) => s.setVolume);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
+  const remoteTrack = useMusicStore((s) => s.remoteTrack);
+  const remoteIsPlaying = useMusicStore((s) => s.remoteIsPlaying);
+  const remoteProgress = useMusicStore((s) => s.remoteProgress);
+  const remoteDuration = useMusicStore((s) => s.remoteDuration);
+  const progress = useMusicStore((s) => s.progress);
   const _t = useTranslations('music');
   const mobile = useIsMobile();
   useMusicShortcuts();
-
-  const {
-    currentTrack,
-    isPlaying,
-    togglePlay,
-    next,
-    prev,
-    seek,
-    stop,
-    setExpanded,
-    volume,
-    setVolume,
-    isRemoteControlling,
-    remoteTrack,
-    remoteIsPlaying,
-    remoteProgress,
-    remoteDuration,
-  } = player;
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);

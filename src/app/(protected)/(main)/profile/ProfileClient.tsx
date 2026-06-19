@@ -16,6 +16,7 @@ const sections = [
 
 export default function ProfileClient() {
   const t = useTranslations('profile');
+  const navT = useTranslations('common.nav');
   const { user, activity, loadingActivity } = useProfileOverview();
 
   const userCreatedAtDate = user?.createdAt
@@ -26,7 +27,7 @@ export default function ProfileClient() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-8 animate-in fade-in duration-200 w-full">
-      <PageTitle title="Profile" />
+      <PageTitle title={navT('profile')} />
       <UpdateProfileForm />
 
       <nav className="flex flex-col gap-2">

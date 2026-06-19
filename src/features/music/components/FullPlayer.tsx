@@ -1,18 +1,11 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import {
-  getSongRecommendations,
-  getSyncedLyrics,
-  type MusicTrack,
-  type SyncedLyricLine,
-} from '../api';
-import {
-  useMusicPlaybackProgress,
-  useMusicPlayerContext,
-} from '../context/MusicPlayerContext';
+import { getSongRecommendations, getSyncedLyrics } from '../api';
 import { useNativeVolume } from '../hooks/use-native-volume';
+import { useMusicStore } from '../store/use-music-store';
 import { DesktopFullPlayer } from './DesktopFullPlayer';
 import { MobileFullPlayer } from './MobileFullPlayer';
 
@@ -33,37 +26,34 @@ import { MobileFullPlayer } from './MobileFullPlayer';
  * Renders `null` when the player is not expanded or no track is loaded.
  */
 export function FullPlayer() {
-  const {
-    currentTrack,
-    isPlaying,
-    shuffle,
-    repeat,
-    expanded,
-    togglePlay,
-    next,
-    prev,
-    seek,
-    toggleShuffle,
-    cycleRepeat,
-    setExpanded,
-    volume,
-    setVolume,
-    play,
-    queue,
-    isRemoteControlling,
-    remoteTrack,
-    remoteIsPlaying,
-    remoteProgress,
-    remoteDuration,
-    remoteQueue,
-  } = useMusicPlayerContext();
-  const { progress, duration } = useMusicPlaybackProgress();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const shuffle = useMusicStore((s) => s.shuffle);
+  const repeat = useMusicStore((s) => s.repeat);
+  const expanded = useMusicStore((s) => s.expanded);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+  const next = useMusicStore((s) => s.next);
+  const prev = useMusicStore((s) => s.prev);
+  const seek = useMusicStore((s) => s.seek);
+  const toggleShuffle = useMusicStore((s) => s.toggleShuffle);
+  const cycleRepeat = useMusicStore((s) => s.cycleRepeat);
+  const setExpanded = useMusicStore((s) => s.setExpanded);
+  const volume = useMusicStore((s) => s.volume);
+  const setVolume = useMusicStore((s) => s.setVolume);
+  const play = useMusicStore((s) => s.play);
+  const queue = useMusicStore((s) => s.queue);
+  const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
+  const remoteTrack = useMusicStore((s) => s.remoteTrack);
+  const remoteIsPlaying = useMusicStore((s) => s.remoteIsPlaying);
+  const remoteProgress = useMusicStore((s) => s.remoteProgress);
+  const remoteDuration = useMusicStore((s) => s.remoteDuration);
+  const remoteQueue = useMusicStore((s) => s.remoteQueue);
+  const progress = useMusicStore((s) => s.progress);
+  const duration = useMusicStore((s) => s.duration);
 
   const mobile = useIsMobile();
   const nativeVol = useNativeVolume(mobile && !!expanded);
   const [closing, setClosing] = useState(false);
-  const [lyrics, setLyrics] = useState<SyncedLyricLine[] | null>(null);
-  const [recommendations, setRecommendations] = useState<MusicTrack[]>([]);
   const [showLyrics, setShowLyrics] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
@@ -109,47 +99,24 @@ export function FullPlayer() {
   const displayDuration = isRemoteControlling ? remoteDuration : duration;
 
   const trackId = displayTrack?.id;
-  const lyricsLoadedWithDuration = useRef(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on track change
-  useEffect(() => {
-    setLyrics(null);
-    setRecommendations([]);
-    setShowLyrics(false);
-    setShowQueue(false);
-    lyricsLoadedWithDuration.current = false;
-    if (!displayTrack) return;
-    getSyncedLyrics(
-      displayTrack.id,
-      displayTrack.title,
-      displayTrack.artist,
-      displayDuration,
-    ).then((result) => {
-      if (displayDuration > 0) lyricsLoadedWithDuration.current = true;
-      setLyrics(result);
-    });
-    getSongRecommendations(displayTrack.id)
-      .then(setRecommendations)
-      .catch(() => {});
-  }, [trackId]);
+  const { data: lyrics = null } = useQuery({
+    queryKey: ['music', 'lyrics', trackId, displayDuration],
+    queryFn: () =>
+      getSyncedLyrics(
+        displayTrack!.id,
+        displayTrack!.title,
+        displayTrack!.artist,
+        displayDuration,
+      ),
+    enabled: !!displayTrack && displayDuration > 0,
+  });
 
-  // Re-fetch lyrics once duration is available (initial fetch may have used duration=0)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional re-fetch when duration loads
-  useEffect(() => {
-    if (
-      !displayTrack ||
-      displayDuration <= 0 ||
-      lyricsLoadedWithDuration.current
-    )
-      return;
-    lyricsLoadedWithDuration.current = true;
-    getSyncedLyrics(
-      displayTrack.id,
-      displayTrack.title,
-      displayTrack.artist,
-      displayDuration,
-    ).then(setLyrics);
-  }, [displayDuration]);
+  const { data: recommendations = [] } = useQuery({
+    queryKey: ['music', 'recommendations', trackId],
+    queryFn: () => getSongRecommendations(displayTrack!.id),
+    enabled: !!displayTrack,
+  });
 
   // Interpolate remote progress locally for smooth lyrics sync.
   // state_update arrives every 5s — between updates, tick progress forward 1s/s.
@@ -192,8 +159,9 @@ export function FullPlayer() {
   const scrollTargetRef = useRef(0);
   const rafRef = useRef<number>(0);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on expand/lyrics toggle
   useEffect(() => {
+    void expanded;
+    void showLyrics; // trigger dependencies
     if (currentLineIndex < 0 || !lyricsRef.current) return;
     const container = lyricsRef.current;
     const el = container.children[currentLineIndex + 1] as HTMLElement;
@@ -216,13 +184,6 @@ export function FullPlayer() {
   }, [currentLineIndex, expanded, showLyrics]);
 
   if (!expanded || !displayTrack) {
-    if (expanded) {
-      console.warn('[FullPlayer] expanded=true but displayTrack is null', {
-        isRemoteControlling,
-        remoteTrack: !!remoteTrack,
-        currentTrack: !!currentTrack,
-      });
-    }
     return null;
   }
 

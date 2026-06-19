@@ -1,16 +1,12 @@
+import { registerPushToken } from '@/features/auth/api';
 import { trackEvent } from '@/lib/analytics';
 import { getDeviceId } from '@/lib/device-id';
-import { apiFetch } from '@/lib/fetch';
 
 async function sendTokenToBackend(token: string, sessionId?: string | null) {
   const platform =
     window.Capacitor?.getPlatform?.() === 'ios' ? 'ios' : 'android';
   const deviceId = getDeviceId();
-  await apiFetch('/api/notifications/register', {
-    method: 'POST',
-    body: JSON.stringify({ token, platform, deviceId, sessionId }),
-    headers: { 'Content-Type': 'application/json' },
-  });
+  await registerPushToken({ token, platform, deviceId, sessionId });
 }
 
 interface CapacitorPushPlugin {

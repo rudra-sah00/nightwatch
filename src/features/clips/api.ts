@@ -1,16 +1,5 @@
 import { apiFetch } from '@/lib/fetch';
-import type { Clip, ClipSegment, ClipsResponse } from './types';
-
-export async function startClip(
-  matchId: string,
-  title: string,
-  streamUrl: string,
-): Promise<{ clipId: string }> {
-  return apiFetch('/api/clips/start', {
-    method: 'POST',
-    body: JSON.stringify({ matchId, title, streamUrl }),
-  });
-}
+import type { Clip, ClipsResponse } from './types';
 
 export async function startServerClip(
   streamToken: string | null,
@@ -33,42 +22,6 @@ export async function stopServerClip(
     method: 'POST',
     body: JSON.stringify({ endTime }),
   });
-}
-
-export async function pushSegment(
-  clipId: string,
-  segment: ClipSegment,
-): Promise<void> {
-  await apiFetch(`/api/clips/${clipId}/segment`, {
-    method: 'POST',
-    body: JSON.stringify(segment),
-  });
-}
-
-/**
- * Upload raw TS segment bytes (Electron fetches locally and uploads).
- */
-export async function pushSegmentData(
-  clipId: string,
-  data: ArrayBuffer,
-  startTime: number,
-  duration: number,
-): Promise<void> {
-  await apiFetch(`/api/clips/${clipId}/segment-data`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      'x-segment-start': String(startTime),
-      'x-segment-duration': String(duration),
-    },
-    body: data,
-  });
-}
-
-export async function finalizeClip(
-  clipId: string,
-): Promise<{ status: string }> {
-  return apiFetch(`/api/clips/${clipId}/finalize`, { method: 'POST' });
 }
 
 export interface ClipFilters {
@@ -115,4 +68,17 @@ export async function toggleClipPublic(
 
 export async function getPublicClip(shareId: string): Promise<Clip> {
   return apiFetch<Clip>(`/api/clips/public/${shareId}`);
+}
+
+/**
+ * Save a scene capture screenshot to the clips library.
+ */
+export async function saveScreenshot(
+  image: string,
+  title: string,
+): Promise<void> {
+  await apiFetch('/api/clips/screenshot', {
+    method: 'POST',
+    body: JSON.stringify({ image, title }),
+  });
 }

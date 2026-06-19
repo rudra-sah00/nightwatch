@@ -33,7 +33,6 @@ vi.mock('@/features/profile/api', () => {
     getProfile: vi
       .fn()
       .mockResolvedValue({ user: { id: 'user-1', name: 'Test User' } }),
-    invalidateProfileCache: vi.fn(),
   };
 });
 

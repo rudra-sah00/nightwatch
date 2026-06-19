@@ -51,6 +51,7 @@ export function DiscoverCard({
         src={song.image}
         alt={song.title}
         fill
+        sizes="300px"
         className="object-cover"
         priority
       />

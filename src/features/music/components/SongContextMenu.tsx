@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
   Check,
   ListMusic,
@@ -18,9 +19,8 @@ import {
   createUserPlaylist,
   getUserPlaylists,
   type MusicTrack,
-  type UserPlaylist,
 } from '../api';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 
 interface Track {
   id: string;
@@ -47,11 +47,18 @@ export function showSongMenu(
 
 export function SongContextMenu() {
   const t = useTranslations('music');
-  const { currentTrack, addToQueue, playNext, play } = useMusicPlayerContext();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const addToQueue = useMusicStore((s) => s.addToQueue);
+  const playNext = useMusicStore((s) => s.playNext);
+  const play = useMusicStore((s) => s.play);
   const [menu, setMenu] = useState<MenuEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [panel, setPanel] = useState<'actions' | 'playlists'>('actions');
-  const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
+  const { data: playlists = [] } = useQuery({
+    queryKey: ['music', 'playlists'],
+    queryFn: getUserPlaylists,
+    enabled: panel === 'playlists',
+  });
   const [addedTo, setAddedTo] = useState<Set<string>>(new Set());
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
@@ -106,14 +113,8 @@ export function SongContextMenu() {
     }
   }, [menu, t, play, close]);
 
-  const handleShowPlaylists = useCallback(async () => {
+  const handleShowPlaylists = useCallback(() => {
     setPanel('playlists');
-    try {
-      const data = await getUserPlaylists();
-      setPlaylists(data);
-    } catch {
-      setPlaylists([]);
-    }
   }, []);
 
   const handleAddToPlaylist = useCallback(

@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-import { useMusicPlayerContext } from '../context/MusicPlayerContext';
+import { useMusicStore } from '../store/use-music-store';
 
 /** Routes that trigger automatic music stop (video playback pages). */
 const STOP_ROUTES = ['/watch/', '/live/', '/watch-party/', '/clip/'];
@@ -19,7 +19,8 @@ const STOP_ROUTES = ['/watch/', '/live/', '/watch-party/', '/clip/'];
  * Renders `null` — this is a side-effect-only component.
  */
 export function MusicAutoStop() {
-  const { currentTrack, stop } = useMusicPlayerContext();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const stop = useMusicStore((s) => s.stop);
   const pathname = usePathname();
   const prevPathRef = useRef(pathname);
 
