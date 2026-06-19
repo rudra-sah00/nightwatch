@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
 import { useMusicStore } from '../store/use-music-store';
+import { dispatchRemoteVolume } from '../utils';
 import { MusicDevicePicker } from './MusicDevicePicker';
 import { showSongMenu } from './SongContextMenu';
 
@@ -305,11 +306,7 @@ export function MiniPlayer() {
                   const v = Number(e.target.value);
                   setVolume(v);
                   if (isRemoteControlling) {
-                    window.dispatchEvent(
-                      new CustomEvent('music:remote-command', {
-                        detail: { command: 'volume', value: v },
-                      }),
-                    );
+                    dispatchRemoteVolume(v);
                   }
                 }}
                 className="w-16 h-1 accent-neo-yellow cursor-pointer"

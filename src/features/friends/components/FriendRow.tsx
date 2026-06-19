@@ -1,6 +1,7 @@
 'use client';
 
 import { Phone } from 'lucide-react';
+import { memo } from 'react';
 import { formatActivity } from '@/features/friends/format-activity';
 import { useCall } from '@/features/friends/hooks/use-call';
 import type { FriendActivity } from '@/features/friends/types';
@@ -24,7 +25,7 @@ interface FriendRowProps {
  * A single row in the friends list showing avatar, online indicator, activity
  * text, and a call button.
  */
-export function FriendRow({
+export const FriendRow = memo(function FriendRow({
   id,
   name,
   photo,
@@ -68,4 +69,4 @@ export function FriendRow({
       )}
     </div>
   );
-}
+});

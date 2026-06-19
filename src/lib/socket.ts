@@ -1,20 +1,27 @@
-import { io, type Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import type { ForceLogoutPayload } from '@/types';
 import { WS_EVENTS } from './constants';
 import { env } from './env';
+
+let ioModule: typeof import('socket.io-client') | null = null;
+
+async function getIo() {
+  if (!ioModule) ioModule = await import('socket.io-client');
+  return ioModule.io;
+}
 
 let socket: Socket | null = null;
 
 /**
  * Initialize Socket.IO connection with user credentials or as guest
  */
-export function initSocket(
+export async function initSocket(
   userId?: string,
   sessionId?: string,
   isGuest = false,
   userName?: string,
   profilePhoto?: string,
-): Socket {
+): Promise<Socket> {
   if (socket?.connected) {
     socket.disconnect();
   }
@@ -33,6 +40,7 @@ export function initSocket(
     }
   }
 
+  const io = await getIo();
   socket = io(env.WS_URL, {
     query,
     transports: ['websocket'],

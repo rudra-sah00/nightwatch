@@ -242,6 +242,7 @@ export function useMusicDevices(
   ) => {
     if (!socket || !currentTrack) return;
     trackEvent('music_device_transfer');
+    sessionStorage.setItem('nightwatch:last-transfer-out', String(Date.now()));
     socket.emit(
       EVENTS.TRANSFER_PLAYBACK,
       { targetSocketId, track: currentTrack, queue: [], progress, isPlaying },
@@ -266,6 +267,7 @@ export function useMusicDevices(
     deviceId?: string,
   ) => {
     if (!socket) return;
+    sessionStorage.setItem('nightwatch:last-transfer-out', String(Date.now()));
     socket.emit(
       EVENTS.TRANSFER_PLAYBACK,
       { targetSocketId, track, queue: q, progress: prog, isPlaying: playing },

@@ -26,7 +26,7 @@ describe('SocketProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(socketLib.getSocket).mockReturnValue(null);
-    vi.mocked(socketLib.initSocket).mockReturnValue(mockSocket);
+    vi.mocked(socketLib.initSocket).mockResolvedValue(mockSocket);
   });
 
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -39,10 +39,10 @@ describe('SocketProvider', () => {
     expect(result.current.isConnected).toBe(false);
   });
 
-  it('should connect regular user', () => {
+  it('should connect regular user', async () => {
     const { result } = renderHook(() => useSocket(), { wrapper });
 
-    act(() => {
+    await act(async () => {
       result.current.connect('user1', 'session1', 'User', 'photo');
     });
 
@@ -56,10 +56,10 @@ describe('SocketProvider', () => {
     expect(result.current.socket).toBe(mockSocket);
   });
 
-  it('should connect guest', () => {
+  it('should connect guest', async () => {
     const { result } = renderHook(() => useSocket(), { wrapper });
 
-    act(() => {
+    await act(async () => {
       result.current.connectGuest();
     });
 
@@ -71,10 +71,10 @@ describe('SocketProvider', () => {
     expect(result.current.socket).toBe(mockSocket);
   });
 
-  it('should track connection status', () => {
+  it('should track connection status', async () => {
     const { result } = renderHook(() => useSocket(), { wrapper });
 
-    act(() => {
+    await act(async () => {
       result.current.connectGuest();
     });
 
@@ -146,15 +146,15 @@ describe('SocketProvider', () => {
     });
   });
 
-  it('should not reconnect if already connected', () => {
+  it('should not reconnect if already connected', async () => {
     const { result } = renderHook(() => useSocket(), { wrapper });
-    act(() => {
+    await act(async () => {
       result.current.connectGuest();
     });
 
     vi.mocked(socketLib.getSocket).mockReturnValue(mockSocket);
 
-    act(() => {
+    await act(async () => {
       result.current.connectGuest(); // Second call
     });
     expect(socketLib.initSocket).toHaveBeenCalledTimes(1);

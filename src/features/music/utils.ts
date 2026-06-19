@@ -18,6 +18,29 @@ export function formatTime(seconds: number): string {
 
 import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 
+let _volumeThrottleTimer: ReturnType<typeof setTimeout> | null = null;
+let _pendingVolume: number | null = null;
+
+/**
+ * Dispatch a remote volume command, throttled to at most once per 100ms.
+ * Ensures the final value is always sent.
+ */
+export function dispatchRemoteVolume(v: number): void {
+  _pendingVolume = v;
+  if (_volumeThrottleTimer) return;
+  _volumeThrottleTimer = setTimeout(() => {
+    _volumeThrottleTimer = null;
+    if (_pendingVolume !== null) {
+      window.dispatchEvent(
+        new CustomEvent('music:remote-command', {
+          detail: { command: 'volume', value: _pendingVolume },
+        }),
+      );
+      _pendingVolume = null;
+    }
+  }, 100);
+}
+
 const DEVICE_ID_KEY = 'nightwatch:device-id';
 
 /**

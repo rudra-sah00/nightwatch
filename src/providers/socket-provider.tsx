@@ -31,9 +31,9 @@ interface SocketContextType {
     sessionId: string,
     userName?: string,
     profilePhoto?: string,
-  ) => void;
+  ) => Promise<void>;
   /** Connect socket as guest (for watch party) */
-  connectGuest: () => void;
+  connectGuest: () => Promise<void>;
   /** Disconnect and clean up */
   disconnect: () => void;
 }
@@ -84,26 +84,32 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [socket]);
 
   const connect = useCallback(
-    (
+    async (
       userId: string,
       sessionId: string,
       userName?: string,
       profilePhoto?: string,
     ) => {
-      const s = initSocket(userId, sessionId, false, userName, profilePhoto);
+      const s = await initSocket(
+        userId,
+        sessionId,
+        false,
+        userName,
+        profilePhoto,
+      );
       setSocket(s);
     },
     [],
   );
 
-  const connectGuest = useCallback(() => {
+  const connectGuest = useCallback(async () => {
     // Prevent re-creating socket if one already exists (avoids infinite loop)
     const existing = getSocket();
     if (existing) {
       setSocket(existing);
       return;
     }
-    const s = initSocket(undefined, undefined, true);
+    const s = await initSocket(undefined, undefined, true);
     setSocket(s);
   }, []);
 

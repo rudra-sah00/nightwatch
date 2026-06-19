@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   getTopSearches,
   type MusicSearchResult,
@@ -67,9 +67,13 @@ export function MusicSearchSpotlight({ onClose }: { onClose: () => void }) {
     enabled: !!debouncedQuery && debouncedQuery.length >= 2,
   });
 
-  const results: MusicSearchResult | null = searchData
-    ? { ...searchData, songs: [...searchData.songs, ...extraSongs] }
-    : null;
+  const results: MusicSearchResult | null = useMemo(
+    () =>
+      searchData
+        ? { ...searchData, songs: [...searchData.songs, ...extraSongs] }
+        : null,
+    [searchData, extraSongs],
+  );
 
   // Update hasMoreRef when searchData changes
   useEffect(() => {

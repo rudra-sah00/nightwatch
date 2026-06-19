@@ -1,13 +1,20 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { getSongRecommendations, getSyncedLyrics } from '../api';
 import { useNativeVolume } from '../hooks/use-native-volume';
 import { useMusicStore } from '../store/use-music-store';
-import { DesktopFullPlayer } from './DesktopFullPlayer';
-import { MobileFullPlayer } from './MobileFullPlayer';
+import { dispatchRemoteVolume } from '../utils';
+
+const DesktopFullPlayer = dynamic(() =>
+  import('./DesktopFullPlayer').then((m) => m.DesktopFullPlayer),
+);
+const MobileFullPlayer = dynamic(() =>
+  import('./MobileFullPlayer').then((m) => m.MobileFullPlayer),
+);
 
 /**
  * Orchestrator component for the full-screen music player experience.
@@ -231,11 +238,7 @@ export function FullPlayer() {
       setVolume(v);
     }
     if (isRemoteControlling) {
-      window.dispatchEvent(
-        new CustomEvent('music:remote-command', {
-          detail: { command: 'volume', value: v },
-        }),
-      );
+      dispatchRemoteVolume(v);
     }
   };
 

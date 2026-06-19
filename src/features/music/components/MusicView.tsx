@@ -2,10 +2,11 @@
 
 import { useQueries } from '@tanstack/react-query';
 import { Compass } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   getBrowseModules,
   getMusicHome,
@@ -18,7 +19,11 @@ import { useMusicStore } from '@/features/music/store/use-music-store';
 import { CreatePlaylistDialog } from './CreatePlaylistDialog';
 import { LanguagePickerDialog } from './LanguagePickerDialog';
 import { MusicHeader } from './MusicHeader';
-import { MusicSearchSpotlight } from './MusicSearchSpotlight';
+
+const MusicSearchSpotlight = dynamic(() =>
+  import('./MusicSearchSpotlight').then((m) => m.MusicSearchSpotlight),
+);
+
 import { MusicSections, type MusicSectionsData } from './MusicSections';
 import { MusicSkeleton } from './MusicSkeleton';
 
@@ -74,20 +79,20 @@ export function MusicView() {
   const browse = results[2].data;
   const podcasts = results[3].data;
 
-  const data: MusicSectionsData | null =
-    home && trending && browse && podcasts
-      ? {
-          charts: home.charts,
-          featured: home.featured,
-          artists: home.artists,
-          releases: home.releases,
-          radio: home.radio,
-          trendingSongs: trending as MusicSectionsData['trendingSongs'],
-          genres: browse.genres,
-          podcasts,
-          forYou: home.forYou || [],
-        }
-      : null;
+  const data: MusicSectionsData | null = useMemo(() => {
+    if (!home || !trending || !browse || !podcasts) return null;
+    return {
+      charts: home.charts,
+      featured: home.featured,
+      artists: home.artists,
+      releases: home.releases,
+      radio: home.radio,
+      trendingSongs: trending as MusicSectionsData['trendingSongs'],
+      genres: browse.genres,
+      podcasts,
+      forYou: home.forYou || [],
+    };
+  }, [home, trending, browse, podcasts]);
 
   // Auto-play from AI navigation: /music?play=songId
   const playRef = useRef(play);

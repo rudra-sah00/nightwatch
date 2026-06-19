@@ -258,6 +258,14 @@ On socket reconnect:
 - If no `state_update` arrives within 10s, remote state is cleared (device gone)
 - `useMusicDevices` auto-reconnects to target by stable `deviceId` when socket ID changes
 
+### Edge Cases
+
+**Mutual Transfer Deadlock Guard:**
+If two devices attempt to transfer playback to each other simultaneously, both would stop local playback and neither would accept the incoming transfer — causing silence on both sides. To prevent this, outbound transfers stamp `sessionStorage('nightwatch:last-transfer-out')` with `Date.now()`. Incoming transfers in `MusicDeviceSync` check this timestamp and silently reject if < 2 seconds have elapsed. The initiating device wins; the other device's transfer is discarded.
+
+**Stop() Race on Transfer Ack:**
+When transferring to another device, the success callback calls `stop()` to halt local playback. If the user changes tracks locally between initiating the transfer and receiving the server acknowledgment, `stop()` would incorrectly kill the new track. `MusicDevicePicker` captures `transferredTrackId` at transfer time and only calls `stop()` if `useMusicStore.getState().currentTrack?.id` still matches.
+
 ## Synced Lyrics
 
 Lyrics are fetched through the backend `GET /api/music/lyrics/:id` endpoint which:

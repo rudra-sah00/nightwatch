@@ -40,7 +40,9 @@ export default function ProtectedLayout({
             <MusicDiscordPresence />
             <MusicMediaSession />
           </FeatureErrorBoundary>
-          <RemoteDisc />
+          <FeatureErrorBoundary feature="Remote Control" silent>
+            <RemoteDisc />
+          </FeatureErrorBoundary>
           <MobileAppLifecycle />
           <PushNotifications />
           <FirebaseIdentity />

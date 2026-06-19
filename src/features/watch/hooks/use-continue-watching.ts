@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { deleteWatchProgress, getContinueWatching } from '../api';
 import type { WatchProgress } from '../types';
@@ -28,6 +28,7 @@ export function useContinueWatching({
     queryKey: ['continue-watching'],
     queryFn: () => getContinueWatching(10),
     staleTime: 30 * 1000, // 30s — matches old TTL behavior
+    refetchOnMount: 'always',
   });
 
   const [optimisticItems, addOptimisticItem] = React.useOptimistic(
@@ -37,11 +38,11 @@ export function useContinueWatching({
   );
 
   // Report item count when data loads
+  const onLoadCompleteRef = useRef(onLoadComplete);
+  onLoadCompleteRef.current = onLoadComplete;
   useEffect(() => {
-    if (!isLoading) {
-      onLoadComplete?.(items.length);
-    }
-  }, [isLoading, items.length, onLoadComplete]);
+    if (!isLoading) onLoadCompleteRef.current?.(items.length);
+  }, [isLoading, items.length]);
 
   const removeMutation = useMutation({
     mutationFn: deleteWatchProgress,

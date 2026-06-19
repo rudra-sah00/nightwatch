@@ -1,6 +1,9 @@
+import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
+
+import { getMusicAlbum, getMusicArtist } from '../api';
 
 /**
  * Layout primitive: a titled section wrapper used on the music home page.
@@ -74,6 +77,26 @@ export const Card = memo(function Card({
   onClick?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
 }) {
+  const queryClient = useQueryClient();
+  const handleMouseEnter = useCallback(() => {
+    if (!href) return;
+    const segments = href.split('/');
+    const id = segments[segments.length - 1];
+    if (href.includes('/album/')) {
+      queryClient.prefetchQuery({
+        queryKey: ['music', 'album', id],
+        queryFn: () => getMusicAlbum(id),
+        staleTime: 60_000,
+      });
+    } else if (href.includes('/artist/')) {
+      queryClient.prefetchQuery({
+        queryKey: ['music', 'artist', id],
+        queryFn: () => getMusicArtist(id),
+        staleTime: 60_000,
+      });
+    }
+  }, [href, queryClient]);
+
   const inner = (
     <div className="flex-shrink-0 w-36 md:w-40 cursor-pointer">
       <div className="aspect-square bg-card border-[3px] border-border overflow-hidden relative">
@@ -99,7 +122,11 @@ export const Card = memo(function Card({
   );
   if (href) {
     return (
-      <Link href={href} onContextMenu={onContextMenu}>
+      <Link
+        href={href}
+        onMouseEnter={handleMouseEnter}
+        onContextMenu={onContextMenu}
+      >
         {inner}
       </Link>
     );

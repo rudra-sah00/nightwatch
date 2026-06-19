@@ -23,11 +23,13 @@ export function useProfileOverview() {
   const { data: watchActivity = [] } = useQuery({
     queryKey: ['profile', 'activity', 'watch'],
     queryFn: () => getWatchActivity(),
+    staleTime: 60_000,
   });
 
   const { data: musicActivity = [], isLoading: loadingActivity } = useQuery({
     queryKey: ['profile', 'activity', 'music'],
     queryFn: () => getMusicActivity(),
+    staleTime: 60_000,
   });
 
   const activity: ActivityData = { watch: watchActivity, music: musicActivity };

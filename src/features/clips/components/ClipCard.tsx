@@ -3,7 +3,7 @@
 import { Check, Loader2, Pencil, Play, Share2, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Clip } from '../types';
 
@@ -50,7 +50,7 @@ interface ClipCardProps {
  * Displays a single clip as a card with thumbnail, duration badge, status indicators,
  * and inline-editable title. Provides play, share, rename, and delete actions.
  */
-export function ClipCard({
+export const ClipCard = memo(function ClipCard({
   clip,
   onDelete,
   onRename,
@@ -215,4 +215,4 @@ export function ClipCard({
       </CardContent>
     </Card>
   );
-}
+});

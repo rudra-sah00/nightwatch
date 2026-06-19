@@ -1,10 +1,48 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { MusicTrack } from '../api';
 import { useMusicStore } from '../store/use-music-store';
 import { showSongMenu } from './SongContextMenu';
+
+const QueueItem = memo(function QueueItem({
+  track,
+  index,
+  isActive,
+  onPlay,
+  onContextMenu,
+}: {
+  track: MusicTrack;
+  index: number;
+  isActive: boolean;
+  onPlay: () => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onPlay}
+      onContextMenu={onContextMenu}
+      className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:text-white ${isActive ? 'text-neo-yellow' : 'text-white/80'}`}
+    >
+      <span className="w-4 text-white/20 text-[9px] font-mono text-right shrink-0">
+        {index + 1}
+      </span>
+      <img
+        src={track.image}
+        alt=""
+        className="w-6 h-6 rounded object-cover shrink-0"
+      />
+      <span className="font-headline font-bold text-[10px] uppercase tracking-wider truncate flex-1">
+        {track.title}
+      </span>
+      <span className="text-white/30 text-[9px] font-mono shrink-0">
+        {track.artist}
+      </span>
+    </button>
+  );
+});
 
 interface QueueOverlayProps {
   open: boolean;
@@ -58,11 +96,13 @@ export function QueueOverlay({
         </p>
         <div className="w-full overflow-y-auto max-h-[50vh] space-y-1">
           {displayQueue.map((track, i) => (
-            <button
+            <QueueItem
               // biome-ignore lint/suspicious/noArrayIndexKey: queue has duplicate track IDs
               key={i}
-              type="button"
-              onClick={() => {
+              track={track}
+              index={i}
+              isActive={displayTrackId === track.id}
+              onPlay={() => {
                 if (isRemoteControlling) {
                   window.dispatchEvent(
                     new CustomEvent('music:remote-command', {
@@ -83,23 +123,7 @@ export function QueueOverlay({
                     : undefined,
                 )
               }
-              className={`w-full flex items-center gap-2 py-1.5 text-left transition-colors hover:text-white ${displayTrackId === track.id ? 'text-neo-yellow' : 'text-white/80'}`}
-            >
-              <span className="w-4 text-white/20 text-[9px] font-mono text-right shrink-0">
-                {i + 1}
-              </span>
-              <img
-                src={track.image}
-                alt=""
-                className="w-6 h-6 rounded object-cover shrink-0"
-              />
-              <span className="font-headline font-bold text-[10px] uppercase tracking-wider truncate flex-1">
-                {track.title}
-              </span>
-              <span className="text-white/30 text-[9px] font-mono shrink-0">
-                {track.artist}
-              </span>
-            </button>
+            />
           ))}
         </div>
         <button

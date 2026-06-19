@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import type { MangaTitle } from '@/features/manga/api';
 import {
@@ -28,7 +28,7 @@ import { MangaSearchSpotlight } from './MangaSearchSpotlight';
 
 type Tab = 'ranking' | 'latest' | 'saved' | 'continue';
 
-function MangaCard({
+const MangaCard = memo(function MangaCard({
   title,
   onRemove,
   t,
@@ -84,7 +84,7 @@ function MangaCard({
       </p>
     </Link>
   );
-}
+});
 
 function SkeletonGrid() {
   return (
@@ -195,9 +195,12 @@ export function MangaClient() {
 
   const visibleTitles = titles.slice(0, visibleCount);
 
-  const handleRemove = (titleId: number) => {
-    removeMutation.mutate(titleId);
-  };
+  const handleRemove = useCallback(
+    (titleId: number) => {
+      removeMutation.mutate(titleId);
+    },
+    [removeMutation],
+  );
 
   return (
     <main className="pb-32 animate-in fade-in">

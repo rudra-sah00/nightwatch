@@ -2,7 +2,7 @@
 
 import { Check, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { Avatar } from '@/features/friends/components/Avatar';
 import { FriendRow } from '@/features/friends/components/FriendRow';
@@ -59,11 +59,19 @@ export function RightSidebar() {
   const [showSpotlight, setShowSpotlight] = useState(false);
 
   const fq = filterQuery.toLowerCase();
-  const matchesFilter = (name: string) =>
-    !fq || name.toLowerCase().includes(fq);
-  const filteredOnline = onlineFriends.filter((f) => matchesFilter(f.name));
-  const filteredOffline = offlineFriends.filter((f) => matchesFilter(f.name));
-  const filteredBlocked = blockedUsers.filter((b) => matchesFilter(b.name));
+  const filteredOnline = useMemo(
+    () => onlineFriends.filter((f) => !fq || f.name.toLowerCase().includes(fq)),
+    [onlineFriends, fq],
+  );
+  const filteredOffline = useMemo(
+    () =>
+      offlineFriends.filter((f) => !fq || f.name.toLowerCase().includes(fq)),
+    [offlineFriends, fq],
+  );
+  const filteredBlocked = useMemo(
+    () => blockedUsers.filter((b) => !fq || b.name.toLowerCase().includes(fq)),
+    [blockedUsers, fq],
+  );
 
   const sidebarContent = (
     <>

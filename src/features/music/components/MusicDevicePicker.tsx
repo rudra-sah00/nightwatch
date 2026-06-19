@@ -102,6 +102,7 @@ export function MusicDevicePicker() {
     deviceNameLabel: string,
   ) => {
     if (currentTrack) {
+      const transferredTrackId = currentTrack.id;
       setRemoteControlling(true, currentTrack, isPlaying);
       transferToWithData(
         socketId,
@@ -116,7 +117,12 @@ export function MusicDevicePicker() {
           );
         },
         () => {
-          stop();
+          // Only stop if the track hasn't changed during flight
+          if (
+            useMusicStore.getState().currentTrack?.id === transferredTrackId
+          ) {
+            stop();
+          }
           toast.success(
             t('devicePicker.playingOn', { device: deviceNameLabel }),
           );

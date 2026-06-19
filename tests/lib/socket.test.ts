@@ -21,43 +21,43 @@ describe('Socket.IO Utils', () => {
   });
 
   describe('initSocket', () => {
-    it('should initialize socket with user credentials', () => {
-      const socket = initSocket('user123', 'session456');
+    it('should initialize socket with user credentials', async () => {
+      const socket = await initSocket('user123', 'session456');
 
       expect(socket).toBeDefined();
       expect(socket.on).toBeDefined();
     });
 
-    it('should initialize socket as guest', () => {
-      const socket = initSocket(undefined, undefined, true);
+    it('should initialize socket as guest', async () => {
+      const socket = await initSocket(undefined, undefined, true);
 
       expect(socket).toBeDefined();
     });
 
-    it('should disconnect existing socket before creating new one', () => {
-      const socket1 = initSocket('user1', 'session1');
+    it('should disconnect existing socket before creating new one', async () => {
+      const socket1 = await initSocket('user1', 'session1');
       const disconnectSpy = vi.spyOn(socket1, 'disconnect');
 
       // Mock connected state
       Object.defineProperty(socket1, 'connected', { value: true });
 
-      initSocket('user2', 'session2');
+      await initSocket('user2', 'session2');
 
       expect(disconnectSpy).toHaveBeenCalled();
     });
 
-    it('should return socket instance', () => {
-      const socket = initSocket('user123', 'session456');
+    it('should return socket instance', async () => {
+      const socket = await initSocket('user123', 'session456');
 
       expect(socket).toHaveProperty('on');
       expect(socket).toHaveProperty('disconnect');
     });
 
-    it('should register connect, disconnect, and connect_error handlers', () => {
+    it('should register connect, disconnect, and connect_error handlers', async () => {
       // The io mock returns an object with on as vi.fn()
       // initSocket does NOT call .on() itself — socket.io handles that internally
       // Instead verify the socket has the expected interface
-      const socket = initSocket('user123', 'session456');
+      const socket = await initSocket('user123', 'session456');
 
       expect(socket.on).toBeDefined();
       expect(typeof socket.on).toBe('function');
@@ -66,13 +66,13 @@ describe('Socket.IO Utils', () => {
   });
 
   describe('getSocket', () => {
-    it('should return null when no socket initialized', () => {
+    it('should return null when no socket initialized', async () => {
       const socket = getSocket();
       expect(socket).toBeNull();
     });
 
-    it('should return socket instance after initialization', () => {
-      initSocket('user123', 'session456');
+    it('should return socket instance after initialization', async () => {
+      await initSocket('user123', 'session456');
       const socket = getSocket();
 
       expect(socket).not.toBeNull();
@@ -81,8 +81,8 @@ describe('Socket.IO Utils', () => {
   });
 
   describe('disconnectSocket', () => {
-    it('should disconnect and clear socket', () => {
-      const socket = initSocket('user123', 'session456');
+    it('should disconnect and clear socket', async () => {
+      const socket = await initSocket('user123', 'session456');
       const disconnectSpy = vi.spyOn(socket, 'disconnect');
 
       disconnectSocket();
@@ -91,12 +91,12 @@ describe('Socket.IO Utils', () => {
       expect(getSocket()).toBeNull();
     });
 
-    it('should not throw if no socket exists', () => {
+    it('should not throw if no socket exists', async () => {
       expect(() => disconnectSocket()).not.toThrow();
     });
 
-    it('should handle multiple disconnect calls', () => {
-      initSocket('user123', 'session456');
+    it('should handle multiple disconnect calls', async () => {
+      await initSocket('user123', 'session456');
 
       disconnectSocket();
       disconnectSocket();
@@ -106,8 +106,8 @@ describe('Socket.IO Utils', () => {
   });
 
   describe('onForceLogout and offForceLogout', () => {
-    it('should register force logout handler', () => {
-      const socket = initSocket('user123');
+    it('should register force logout handler', async () => {
+      const socket = await initSocket('user123');
       const onSpy = vi.spyOn(socket, 'on');
 
       const callback = vi.fn();
@@ -116,23 +116,23 @@ describe('Socket.IO Utils', () => {
       expect(onSpy).toHaveBeenCalledWith('force_logout', callback);
     });
 
-    it('should not throw when registering handler without socket', () => {
+    it('should not throw when registering handler without socket', async () => {
       expect(() => onForceLogout(vi.fn())).not.toThrow();
     });
 
-    it('should handle SSR environment in initSocket', () => {
+    it('should handle SSR environment in initSocket', async () => {
       const originalWindow = global.window;
       // @ts-expect-error
       delete global.window;
 
-      const socket = initSocket(undefined, undefined, true);
+      const socket = await initSocket(undefined, undefined, true);
       expect(socket).toBeDefined();
 
       global.window = originalWindow;
     });
 
-    it('should remove specific force logout handler', () => {
-      const socket = initSocket('user123');
+    it('should remove specific force logout handler', async () => {
+      const socket = await initSocket('user123');
       const offSpy = vi.spyOn(socket, 'off');
 
       const callback = vi.fn();
@@ -141,8 +141,8 @@ describe('Socket.IO Utils', () => {
       expect(offSpy).toHaveBeenCalledWith('force_logout', callback);
     });
 
-    it('should remove all force logout handlers when no callback', () => {
-      const socket = initSocket('user123');
+    it('should remove all force logout handlers when no callback', async () => {
+      const socket = await initSocket('user123');
       const offSpy = vi.spyOn(socket, 'off');
 
       offForceLogout();
@@ -150,14 +150,14 @@ describe('Socket.IO Utils', () => {
       expect(offSpy).toHaveBeenCalledWith('force_logout');
     });
 
-    it('should not throw when removing handler without socket', () => {
+    it('should not throw when removing handler without socket', async () => {
       expect(() => offForceLogout()).not.toThrow();
       expect(() => offForceLogout(vi.fn())).not.toThrow();
     });
   });
 
   describe('initSocket with guest token', () => {
-    it('should include guest token from sessionStorage', () => {
+    it('should include guest token from sessionStorage', async () => {
       // Mock sessionStorage
       const sessionStorageMock = {
         getItem: vi.fn(() => 'guest-token-123'),
@@ -173,7 +173,7 @@ describe('Socket.IO Utils', () => {
 
       vi.mocked(io).mockClear();
 
-      initSocket(undefined, undefined, true);
+      await initSocket(undefined, undefined, true);
 
       expect(sessionStorageMock.getItem).toHaveBeenCalledWith('guest_token');
       expect(io).toHaveBeenCalledWith(
@@ -187,7 +187,7 @@ describe('Socket.IO Utils', () => {
       );
     });
 
-    it('should handle guest mode without token', () => {
+    it('should handle guest mode without token', async () => {
       const sessionStorageMock = {
         getItem: vi.fn(() => null),
         setItem: vi.fn(),
@@ -200,7 +200,7 @@ describe('Socket.IO Utils', () => {
         writable: true,
       });
 
-      const socket = initSocket(undefined, undefined, true);
+      const socket = await initSocket(undefined, undefined, true);
 
       expect(socket).toBeDefined();
       expect(sessionStorageMock.getItem).toHaveBeenCalledWith('guest_token');
@@ -208,10 +208,10 @@ describe('Socket.IO Utils', () => {
   });
 
   describe('initSocket with optional parameters', () => {
-    it('should include userName when provided', () => {
+    it('should include userName when provided', async () => {
       vi.mocked(io).mockClear();
 
-      initSocket('user123', 'session456', false, 'John Doe');
+      await initSocket('user123', 'session456', false, 'John Doe');
 
       expect(io).toHaveBeenCalledWith(
         'ws://localhost:4000',
@@ -225,10 +225,10 @@ describe('Socket.IO Utils', () => {
       );
     });
 
-    it('should include profilePhoto when provided', () => {
+    it('should include profilePhoto when provided', async () => {
       vi.mocked(io).mockClear();
 
-      initSocket(
+      await initSocket(
         'user123',
         'session456',
         false,
@@ -249,10 +249,10 @@ describe('Socket.IO Utils', () => {
       );
     });
 
-    it('should handle all parameters', () => {
+    it('should handle all parameters', async () => {
       vi.mocked(io).mockClear();
 
-      initSocket(
+      await initSocket(
         'user123',
         'session456',
         false,

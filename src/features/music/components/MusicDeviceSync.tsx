@@ -28,8 +28,6 @@ export function MusicDeviceSync() {
   const isRemoteControlling = useMusicStore((s) => s.isRemoteControlling);
   const play = useMusicStore((s) => s.play);
   const togglePlay = useMusicStore((s) => s.togglePlay);
-  const progress = useMusicStore((s) => s.progress);
-  const duration = useMusicStore((s) => s.duration);
   const pathname = usePathname();
 
   const deviceName = getDeviceName();
@@ -43,17 +41,25 @@ export function MusicDeviceSync() {
   const availableRef = useRef(available);
   const prevTrackIdRef = useRef<string | null>(null);
   const currentTrackRef = useRef(currentTrack);
-  const progressRef = useRef(progress);
-  const durationRef = useRef(duration);
+  const progressRef = useRef(useMusicStore.getState().progress);
+  const durationRef = useRef(useMusicStore.getState().duration);
   const queueRef = useRef(queue);
 
   // Keep refs in sync
   isPlayingRef.current = isPlaying;
   availableRef.current = available;
   currentTrackRef.current = currentTrack;
-  progressRef.current = progress;
-  durationRef.current = duration;
   queueRef.current = queue;
+
+  // Subscribe to progress/duration without re-renders
+  useEffect(
+    () =>
+      useMusicStore.subscribe((s) => {
+        progressRef.current = s.progress;
+        durationRef.current = s.duration;
+      }),
+    [],
+  );
 
   // ─── 1. Advertise this device (heartbeat 60s) ──────────────────
 
@@ -373,6 +379,11 @@ export function MusicDeviceSync() {
       isPlaying: boolean;
     }) => {
       if (!availableRef.current) return;
+      // Deadlock guard: reject if we just transferred OUT within 2s
+      const lastOut = Number(
+        sessionStorage.getItem('nightwatch:last-transfer-out') || '0',
+      );
+      if (Date.now() - lastOut < 2000) return;
       window.dispatchEvent(new CustomEvent('music:transfer-received'));
       setRemoteControlling(false);
       reclaimingRef.current = true;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useMusicStore } from '../store/use-music-store';
 
 /**
@@ -22,13 +22,21 @@ export function MusicMediaSession() {
   const remoteIsPlaying = useMusicStore((s) => s.remoteIsPlaying);
   const remoteProgress = useMusicStore((s) => s.remoteProgress);
   const remoteDuration = useMusicStore((s) => s.remoteDuration);
-  const progress = useMusicStore((s) => s.progress);
-  const duration = useMusicStore((s) => s.duration);
+
+  const progressRef = useRef(useMusicStore.getState().progress);
+  const durationRef = useRef(useMusicStore.getState().duration);
+
+  useEffect(
+    () =>
+      useMusicStore.subscribe((s) => {
+        progressRef.current = s.progress;
+        durationRef.current = s.duration;
+      }),
+    [],
+  );
 
   const displayTrack = isRemoteControlling ? remoteTrack : currentTrack;
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
-  const displayProgress = isRemoteControlling ? remoteProgress : progress;
-  const displayDuration = isRemoteControlling ? remoteDuration : duration;
 
   // Start/stop Android foreground service for background playback
   useEffect(() => {
@@ -93,18 +101,30 @@ export function MusicMediaSession() {
 
   // Sync position state for the progress bar on lock screen
   useEffect(() => {
-    if (!('mediaSession' in navigator) || !displayTrack || !displayDuration)
-      return;
-    try {
-      navigator.mediaSession.setPositionState({
-        duration: displayDuration,
-        position: (displayProgress / 100) * displayDuration,
-        playbackRate: 1,
-      });
-    } catch {
-      // Some browsers don't support setPositionState
-    }
-  }, [displayProgress, displayDuration, displayTrack]);
+    if (!('mediaSession' in navigator)) return;
+
+    const updatePosition = () => {
+      const track = isRemoteControlling
+        ? remoteTrack
+        : useMusicStore.getState().currentTrack;
+      const dur = isRemoteControlling ? remoteDuration : durationRef.current;
+      const prog = isRemoteControlling ? remoteProgress : progressRef.current;
+      if (!track || !dur) return;
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: dur,
+          position: (prog / 100) * dur,
+          playbackRate: 1,
+        });
+      } catch {
+        // Some browsers don't support setPositionState
+      }
+    };
+
+    updatePosition();
+    const interval = setInterval(updatePosition, 1000);
+    return () => clearInterval(interval);
+  }, [isRemoteControlling, remoteTrack, remoteDuration, remoteProgress]);
 
   // Register action handlers — forward to remote when remote controlling
   useEffect(() => {
