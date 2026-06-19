@@ -100,6 +100,7 @@ export default function LiveMatchPlayerPage() {
 
     return (
       <div className="min-h-screen bg-background">
+        <title>{`${titleFromRoute || 'Live TV'} — Nightwatch`}</title>
         <WatchLivePlayer
           streamUrl={resolvedUrl}
           metadata={metadata}
@@ -324,6 +325,7 @@ export default function LiveMatchPlayerPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <title>{`${displayTitle} — Nightwatch`}</title>
       <WatchLivePlayer
         streamUrl={sessionUrl}
         metadata={metadata}

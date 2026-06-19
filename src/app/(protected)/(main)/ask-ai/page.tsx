@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { AskAiView } from '@/features/ask-ai/components/AskAiView';
 
 export const metadata: Metadata = {
-  title: 'Ask AI | Nightwatch',
+  title: 'Ask AI',
 };
 
 export default function AskAiPage() {

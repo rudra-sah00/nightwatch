@@ -187,6 +187,7 @@ export default function ChapterReaderPage() {
 
   return (
     <main className="pb-32 animate-in fade-in">
+      <title>{`${viewer.titleName} - ${viewer.chapterName} — Nightwatch`}</title>
       {/* Sticky header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b-[3px] border-border">
         <div className="container mx-auto px-4 md:px-10 py-3 flex items-center gap-4">
