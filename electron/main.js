@@ -24,25 +24,6 @@ const _path = require('node:path');
   } catch (_e) {}
 })();
 const Store = require('electron-store');
-const { protocol } = require('electron');
-
-// --- PROTOCOL PRIVILEGES ---
-// Ensure offline-media is treated securely like https (fixes CORS + Video tags)
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: 'offline-media',
-    privileges: {
-      standard: true,
-      secure: true,
-      bypassCSP: true,
-      allowServiceWorkers: false, // DO NOT let SW intercept (breaks fetch)
-      supportFetchAPI: true,
-      corsEnabled: true,
-      stream: true,
-    },
-  },
-]);
-
 // --- 0.1. LOCAL SETTINGS STORAGE ---
 // Allows the React app to read/write native JSON config bypassing localStorage limits
 const store = new Store();
@@ -209,9 +190,9 @@ const startElectronApp = async () => {
           "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://nightwatch.in https://*.nightwatch.in https://challenges.cloudflare.com",
           "style-src 'self' 'unsafe-inline' https://nightwatch.in https://*.nightwatch.in https://fonts.googleapis.com",
           "font-src 'self' https://fonts.gstatic.com",
-          "img-src 'self' data: blob: https: offline-media:",
-          "media-src 'self' blob: https: offline-media:",
-          "connect-src 'self' https: wss: ws: http://localhost:* offline-media:",
+          "img-src 'self' data: blob: https:",
+          "media-src 'self' blob: https:",
+          "connect-src 'self' https: wss: ws: http://localhost:*",
           "frame-src 'self' https://challenges.cloudflare.com http://localhost:9000 https://*.nightwatch.in",
           "worker-src 'self' blob:",
         ].join('; '),
@@ -238,7 +219,7 @@ const startElectronApp = async () => {
           ...cleanedHeaders,
           // 1. Backend API Requests:
           // Match the backend's exact CORS implementation. Dynamically echo the origin
-          // so `withCredentials=true` works everywhere, including offline-media:// or localhost:3004.
+          // so `withCredentials=true` works everywhere, including localhost:3004.
           'Access-Control-Allow-Origin': [requestOrigin],
           'Access-Control-Allow-Credentials': ['true'],
           'Access-Control-Allow-Headers': [

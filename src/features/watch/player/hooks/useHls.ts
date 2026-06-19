@@ -184,10 +184,7 @@ export function useHls({
         const finalConfig = {
           ...hlsConfig,
           xhrSetup: (xhr: XMLHttpRequest, url: string) => {
-            if (
-              url.includes('/api/stream/') &&
-              !url.startsWith('offline-media://')
-            ) {
+            if (url.includes('/api/stream/')) {
               // Don't send credentials on Capacitor for CDN URLs
               if (
                 !(
@@ -199,18 +196,7 @@ export function useHls({
               }
             }
           },
-          // HLS.js switches to FetchLoader (progressive streaming) when fetch is available.
-          // For offline-media:// URLs, the default mode:'cors' causes fetch to fail because
-          // Electron's custom protocol handler is treated as cross-origin. Override to use
-          // mode:'cors' only for real network URLs; offline-media:// gets no-cors.
           fetchSetup: (context: { url: string }, initParams: RequestInit) => {
-            if (context.url.startsWith('offline-media://')) {
-              return new Request(context.url, {
-                ...initParams,
-                mode: 'cors',
-                credentials: 'omit',
-              });
-            }
             // Capacitor WebView: don't send credentials to CDN URLs
             // (avoids CORS preflight failures on third-party CDNs)
             if (

@@ -45,8 +45,7 @@ export function getOptimizedImageUrl(url: string | null | undefined): string {
   if (
     url.startsWith('/') ||
     url.startsWith('data:') ||
-    url.startsWith('blob:') ||
-    url.startsWith('offline-media://')
+    url.startsWith('blob:')
   ) {
     return url;
   }
