@@ -96,7 +96,6 @@ if (checkIsDesktop()) {
 | Keep Awake | `setKeepAwake(keep)` | Prevent sleep during playback |
 | Unread Badge | `setUnreadBadge(count)` | macOS Dock badge |
 | Run on Boot | `setRunOnBoot(enabled)` | Auto-start on login |
-| Offline Downloads | `startDownload()` / `getDownloads()` / `onDownloadProgress()` | Full HLS/MP4 download manager |
 | Key-Value Store | `storeGet()` / `storeSet()` / `storeDelete()` | Persistent preferences |
 | Call State | `setCallActive(active)` | OS-level audio ducking during calls |
 
@@ -134,7 +133,6 @@ if (isMobileNative) {
 | Status Bar | `@capacitor/status-bar` | Theme-synced dark/light style |
 | CallKit (iOS) | `@capgo/capacitor-incoming-call-kit` | Native incoming call UI |
 | Phone Notification (Android) | `@anuradev/capacitor-phone-call-notification` | Call-in-progress notification |
-| Offline Downloads | `@capacitor/filesystem` + `@capacitor/preferences` | HLS/MP4 download to device |
 | Native Share | `@capacitor/share` | OS share sheet |
 | Screen Orientation | `@capacitor/screen-orientation` | Lock landscape for video |
 | Keep Awake | `@capacitor-community/keep-awake` | Prevent sleep during playback |

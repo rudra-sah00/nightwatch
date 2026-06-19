@@ -118,8 +118,6 @@ Application preferences panel:
 - **Keyboard shortcuts** — opens `KeyboardShortcuts` dialog
 - **Desktop-only settings** (shown only in Electron):
   - Launch on startup toggle (`desktopBridge.setRunOnBoot`)
-  - Concurrent downloads limit (1–10, custom input)
-  - Download speed limit (0 = unlimited, presets + custom)
   - All persisted via `desktopBridge.storeSet`
 
 ### KeyboardShortcuts

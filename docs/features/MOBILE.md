@@ -2,7 +2,7 @@
 
 ## Overview
 
-Nightwatch ships a native iOS and Android app built with [Capacitor](https://capacitorjs.com/). The deployed Next.js web app (`https://nightwatch.in`) is loaded inside a native WebView, with 16 native plugins providing access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, offline downloads, and swipe-based navigation.
+Nightwatch ships a native iOS and Android app built with [Capacitor](https://capacitorjs.com/). The deployed Next.js web app (`https://nightwatch.in`) is loaded inside a native WebView, with 16 native plugins providing access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, and swipe-based navigation.
 
 ## Capacitor Configuration
 
@@ -54,7 +54,6 @@ Key decisions:
 | 10 | Keyboard | `@capacitor/keyboard` | Show/hide events, programmatic dismiss |
 | 11 | App Lifecycle | `@capacitor/app` | Foreground/background state, back button |
 | 12 | Preferences | `@capacitor/preferences` | Native key-value store (like `electron-store`) |
-| 13 | Filesystem | `@capacitor/filesystem` | Read/write files for offline downloads |
 | 14 | Phone Call Notification | `@anuradev/capacitor-phone-call-notification` | Android "call in progress" notification |
 | 15 | CallKit | `@capgo/capacitor-incoming-call-kit` | iOS incoming call UI (green pill, lock screen) |
 
@@ -217,10 +216,6 @@ Capacitor's keyboard resize is set to `None` — the app handles insets manually
 3. Adds/removes `keyboard-open` class for conditional styling
 4. Tapping outside an input/textarea automatically dismisses the keyboard
 
-## Downloads on Mobile
-
-See [DOWNLOADS.md](./DOWNLOADS.md) for the full offline download system. The mobile-specific implementation lives in `src/capacitor/downloads/` and uses the Capacitor Filesystem plugin to store content in an `OfflineVault` directory.
-
 ## Development Workflow
 
 ### Prerequisites
@@ -282,14 +277,4 @@ src/
 │   ├── MobileShell.tsx                # Global lifecycle (status bar, back button, keyboard, network)
 │   └── MobileAppLifecycle.tsx         # Background/foreground state listener
 ├── capacitor/
-│   └── downloads/                     # Mobile download manager (see DOWNLOADS.md)
-│       ├── index.ts                   # Entry point, routes to providers
-│       ├── state.ts                   # Persistence via Preferences
-│       ├── network.ts                 # File download + Filesystem write
-│       ├── processors/
-│       │   ├── hls.ts                 # HLS segment-by-segment download
-│       │   └── mp4.ts                 # Direct MP4 download
-│       └── providers/
-│           ├── s1.ts                  # Server 1 (HLS)
-│           └── s2.ts                  # Server 1 (MP4 or HLS)
 ```

@@ -41,7 +41,6 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Friends & Voice Calls](./docs/features/FRIENDS.md): Friend system, voice calls, media ducking, and online presence.
 - [Music](./docs/features/MUSIC.md): JioSaavn streaming, AudioEngine, synced lyrics, playlists, Redis queue, gapless playback, crossfade, equalizer, sleep timer, and Spotify Connect-like device transfer.
 - [Remote Control](./docs/features/REMOTE_CONTROL.md): Mobile-to-desktop video remote control via Socket.IO.
-- [Offline Downloads](./docs/features/DOWNLOADS.md): Cross-platform HLS/MP4 downloads, offline library, and quality selection.
 - [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 16 native plugins, mobile bridge API, and dev workflow.
 
 ## Technology Stack
@@ -64,7 +63,7 @@ The `src` directory governs all application code, rigidly separated by domain lo
 ```bash
 src/
 ├── app/               # Next.js App Router (Pages, Layouts, Server forms)
-├── capacitor/         # Capacitor mobile-specific modules (downloads, providers)
+├── capacitor/         # Capacitor mobile-specific modules (native plugins, providers)
 ├── components/        # Global, reusable UI primitives (Buttons, Inputs, Dialogs)
 ├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream, friends)
 ├── hooks/             # Global generic hooks
@@ -92,7 +91,7 @@ pnpm validate
 
 ## Desktop Application (macOS, Windows, Linux)
 
-This repository also contains a native OS desktop wrapper using Electron (Node.js). It adds system tray icons, Discord Rich Presence, media key controls, offline downloads, and macOS Dock unread badging.
+This repository also contains a native OS desktop wrapper using Electron (Node.js). It adds system tray icons, Discord Rich Presence, media key controls, and macOS Dock unread badging.
 
 To develop the desktop app locally:
 ```bash
@@ -116,7 +115,7 @@ As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action 
 
 ## Mobile Application (iOS, Android)
 
-The application includes a native mobile wrapper using Capacitor. It wraps the deployed Next.js app in a native WebView with access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, offline downloads, and swipe-based navigation.
+The application includes a native mobile wrapper using Capacitor. It wraps the deployed Next.js app in a native WebView with access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, and swipe-based navigation.
 
 ### Native Plugins (15)
 

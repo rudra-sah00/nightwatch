@@ -1,6 +1,6 @@
 # Desktop Application
 
-Nightwatch provides a native desktop experience for macOS, Windows, and Linux via **Electron**. The desktop app wraps the production Next.js frontend in a lightweight native webview while providing OS-level capabilities like Discord Rich Presence, offline media downloads, system tray controls, and media key integration.
+Nightwatch provides a native desktop experience for macOS, Windows, and Linux via **Electron**. The desktop app wraps the production Next.js frontend in a lightweight native webview while providing OS-level capabilities like Discord Rich Presence, system tray controls, and media key integration.
 
 ## Installation & Troubleshooting
 
@@ -35,9 +35,7 @@ src-electron/
         ├── window.js        # Badge, keep-awake, theme, autostart, clipboard, notifications
         ├── tray.js          # System tray menu (Show, Play/Pause, Toggle Mic, About, Updates, Quit)
         ├── discord.js       # Discord Rich Presence via local IPC socket
-        ├── downloads.js     # Secure offline download manager (HLS/MP4, pause/resume, crash recovery)
-        ├── live_bridge.js   # Live stream relay bridge
-        └── protocol.js      # Custom `offline-media://` protocol for offline playback
+        └── live_bridge.js   # Live stream relay bridge
 ```
 
 ### Key Design Decisions
@@ -45,47 +43,6 @@ src-electron/
 - **Remote URL loading**: The main window loads `https://nightwatch.in` directly (not a local build). This means the desktop app always serves the latest deployed version without requiring app updates for frontend changes.
 - **Electron plugins**: Store, Notification, Clipboard, Global Shortcut, Deep Link, Updater, Autostart, Shell — all registered as Electron plugins.
 - **JS injection**: On window load, Rust injects a script that adds a drag region at the top of the page and attaches drag handlers to the nav element, with MutationObserver re-attachment for SPA navigation.
-
-### Secure Offline Downloads
-
-The Rust download manager (`commands/downloads.js`) handles:
-
-1. **HLS stream downloading**: Parses `.m3u8` playlists, downloads all `.ts` segments concurrently, and rewrites the playlist to reference local files.
-2. **MP4 direct downloads**: Streams large files with progress tracking and pause/resume support.
-3. **Crash recovery**: Download state is persisted to disk. On app restart, incomplete downloads are automatically resumed.
-4. **Custom protocol**: The `offline-media://` protocol (registered in `commands/protocol.js`) serves downloaded content directly from the local filesystem to the webview, enabling offline playback without a local HTTP server.
-5. **Encryption**: Downloaded media segments are encrypted at rest using AES-CTR with a per-installation random key stored in the app data directory.
-
-### Offline Mode / PWA Service Worker
-
-The desktop app supports full offline startup via a PWA Service Worker powered by **[@serwist/next](https://serwist.pages.dev/docs/next)** in **configurator mode** (Turbopack-compatible).
-
-**How it works:**
-
-1. On the first online launch, the Service Worker (`/sw.js`) installs and precaches all JS chunks, CSS, and statically prerendered pages.
-2. On subsequent offline launches, the webview attempts to load the production URL. The Service Worker intercepts the navigation and returns the cached app shell.
-3. If the cache is empty (first-ever launch without internet), the page displays an offline error state.
-
-> **Note:** The service worker is disabled on the staging environment to avoid caching issues during QA testing.
-
-**Vercel Firewall Configuration (production):**
-
-The production deployment requires a Firewall bypass rule so the Service Worker file and Next.js static chunks are served without being challenged by Vercel's Attack Challenge Mode:
-
-- **Vercel Dashboard → `nightwatch` project → Firewall → Rules → Custom Rules → Add Rule**
-  - Name: `Allow SW & Static Assets`
-  - If: `Request Path` starts with `/_next/` → **Bypass**
-  - **OR** If: `Request Path` equals `/sw.js` → **Bypass**
-
-**How the service worker is built:**
-
-We use `@serwist/cli` in configurator mode (not `withSerwistInit`) because Next.js 16 uses Turbopack which is incompatible with the old webpack-based approach:
-
-```
-next build && serwist build
-```
-
-The `serwist.config.js` file in the project root configures the CLI.
 
 ## Auto-Updating
 
@@ -138,7 +95,6 @@ pnpm electron:build
 | **Clipboard** | Native clipboard write via `electron-plugin-clipboard-manager` |
 | **Notifications** | Native OS notifications via `electron-plugin-notification` |
 | **Persistent Store** | Key-value store via `electron-plugin-store` (replaces localStorage for desktop-specific prefs) |
-| **Offline Downloads** | HLS/MP4 download with AES encryption, pause/resume, crash recovery |
 | **Live Bridge** | Relay bridge for livestream data |
 | **Window Dragging** | Injected drag region at top + nav element drag support |
 | **Fullscreen Events** | Emits `window-fullscreen-changed`, `window-focus`, `window-blur` to frontend |
@@ -154,7 +110,7 @@ The bridge detects the Electron environment via `window.electronAPI` or `window.
 Key exports:
 - `isDesktop` / `isElectron` — Boolean detection flags
 - `checkIsDesktop()` — Function for use in useState initializers (hydration-safe)
-- `desktopBridge` — Object with all native methods (Discord, clipboard, store, badge, downloads, etc.)
+- `desktopBridge` — Object with all native methods (Discord, clipboard, store, badge, etc.)
 
 ### `src/hooks/use-desktop-app.ts`
 
@@ -163,7 +119,7 @@ A React hook that wraps the bridge for component use:
 - `isDesktopApp` — Whether running inside Electron
 - `isBrowser` — Inverse of above
 - `isMacOS` / `isWindows` — OS detection
-- `openInDesktopApp()` — Deep-link fallback: tries `nightwatch://` protocol, shows download prompt if app not installed
+- `openInDesktopApp()` — Deep-link fallback: tries `nightwatch://` protocol, shows install prompt if app not installed
 - `getDesktopTopPaddingClass(isFullscreen)` — Returns `pt-8` for the titlebar overlay region (collapses in fullscreen)
 - `copyToClipboard(text)` — Uses native clipboard in desktop, `navigator.clipboard` in browser
 - `dragStyle` / `noDragStyle` — CSS properties for `-webkit-app-region`

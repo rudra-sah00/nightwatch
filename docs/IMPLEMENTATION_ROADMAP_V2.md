@@ -37,7 +37,6 @@
 |---|------|---------|---------|
 | 4 | Remove 2500ms delay from home page | `src/app/(protected)/(main)/home/page.tsx` | `await new Promise(resolve => setTimeout(resolve, 2500))` — users wait 2.5s for no reason. Remove entirely. |
 | 5 | Remove 1000ms delay from profile page | `src/app/(protected)/(main)/profile/page.tsx` | Same pattern. Remove. |
-| 6 | Remove 1000ms delay from downloads page | `src/app/(protected)/(main)/downloads/page.tsx` | Same pattern. Remove. |
 | 7 | Remove 1000ms delay from live page | `src/app/(protected)/(main)/live/page.tsx` | Same pattern. Remove. |
 | 8 | Remove 1000ms delay from continue watching page | `src/app/(protected)/(main)/continue-watching/page.tsx` | Same pattern. Remove. |
 
@@ -163,7 +162,6 @@
 | 1 | Add proper `<label>` elements to password fields | `src/features/profile/components/profile-overview.tsx` | Password inputs use `<span>` as visual labels, not associated via `htmlFor`/`id`. |
 | 2 | Add password visibility toggle to profile | `src/features/profile/components/profile-overview.tsx` | Login/signup have it now, but the change-password form in profile doesn't. |
 | 3 | Add `role="radiogroup"` to server selection | `src/features/profile/components/update-profile-form.tsx` | Server selection buttons lack radio semantics. |
-| 4 | Add `role="radiogroup"` to preference buttons | `src/features/profile/components/app-preferences.tsx` | Concurrent downloads and speed limit button groups lack radio semantics. |
 | 5 | Add "System" theme option | `src/features/profile/components/app-preferences.tsx` | Only light/dark — no "follow system preference" option. |
 | 6 | Add activity graph text alternative | `src/features/profile/components/activity-graph.tsx` | The heatmap is purely visual — add a summary like "X hours watched this year" and `aria-label` on the grid. |
 | 7 | Fix ghost input pattern in update-profile-form | `src/features/profile/components/update-profile-form.tsx` | The invisible-input-over-span pattern confuses screen readers. Use a single visible input with styling. |
@@ -192,10 +190,6 @@
 |---|------|---------|---------|
 | 1 | Replace custom AlertDialog with Radix | `src/components/ui/alert-dialog.tsx` | Custom implementation missing: `role="alertdialog"`, focus trap, `aria-labelledby`, auto-focus, focus restoration. Radix AlertDialog (already a dependency) handles all of this. API is already compatible. |
 | 2 | Create shared FocusTrap utility | `src/components/ui/focus-trap.tsx` (new) | Multiple modals need focus trapping. Create a reusable `<FocusTrap>` wrapper or use `@radix-ui/react-focus-scope`. |
-| 3 | Deduplicate content-detail-modal and offline variant | `src/features/search/components/content-detail-modal.tsx`, `src/features/downloads/components/offline-content-detail-modal.tsx` | ~80% identical code. Extract a shared base component with an `isOffline` prop. |
-| 4 | Add `role="progressbar"` to download progress bars | `src/features/downloads/components/OfflineLibrary.tsx` | Progress bars lack ARIA attributes (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`). |
-| 5 | Replace `title` with `aria-label` on download action buttons | `src/features/downloads/components/OfflineLibrary.tsx` | `title` is not reliably announced by screen readers. |
-| 6 | Extract `formatBytes` to shared utility | `src/features/downloads/components/OfflineLibrary.tsx` | Utility function should be in `src/lib/utils.ts`. |
 
 ---
 
@@ -221,10 +215,8 @@
 |---|------|---------|---------|
 | 1 | Migrate Electron commands to TypeScript bridge | `src-electron/src/commands/*.js` → `src/lib/electron-bridge.ts` | All Electron command files need typed bridge definitions. Start with `main.js`, Electron invoke/listen type definitions, then modules. |
 | 2 | Add "Check for Updates" menu item | `src-electron/src/commands/tray.js`, `src-electron/src/platform/macos.js` | No manual update check option. Add to tray menu and macOS app menu. |
-| 3 | Add Windows taskbar download progress | `src-electron/src/commands/download-manager.js` | Use Electron webview window `set_progress_bar()` to show download progress in the Windows taskbar. |
 | 4 | Fix Windows taskbar thumbnail icons | `src-electron/src/main.js` | Buttons use empty icons — no visible icons. Create proper icon assets. |
 | 5 | Defer macOS permission requests | `src-electron/src/platform/macos.js` | Camera/mic permissions requested at startup. Defer to when the feature is actually needed. |
-| 6 | Add configurable download location | `src-electron/src/commands/download-manager.js` | All platforms use `OfflineVault` in app data. Let users choose a custom directory. |
 | 7 | Optimize live-bridge racer memory | `src-electron/src/commands/live-bridge.js` | 6 concurrent hidden Electron webview windows consume ~600MB. Extract cookies from winner and destroy it. |
 
 ---

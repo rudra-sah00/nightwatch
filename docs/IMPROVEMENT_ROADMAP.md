@@ -28,7 +28,6 @@
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
 | 1 | Remove `nodeIntegration: true` from splash window | `src-electron/src/commands/splash.js` | Splash uses `nodeIntegration: true`, `contextIsolation: false`, `webSecurity: false`. Rewrite splash to use `contextIsolation: true` and communicate via Electron invoke/listen. |
-| 2 | Fix path traversal in `offline-media://` protocol | `src-electron/src/commands/download-manager.js` | The protocol handler joins user-supplied URL paths with `VAULT_PATH` without sanitizing `..` sequences. Add `path.resolve()` + verify the resolved path starts with `VAULT_PATH`. |
 | 3 | Add URL allowlist to deep link handler | `src-electron/src/commands/deep-link.js` | `handleDeepLink` blindly transforms `nightwatch://` to `https://` with no validation. Add an allowlist of permitted hostnames and path patterns. |
 | 4 | Secure the live-bridge proxy server | `src-electron/src/commands/live-bridge.js` | The local HTTP proxy at `127.0.0.1:{port}/proxy?url=...` has no authentication and no URL allowlist. Any local process can use it as an open SSRF proxy. Add: (a) a per-session random token required in requests, (b) URL allowlist restricting to known streaming CDN domains. |
 | 5 | Replace XOR cipher with AES-256-GCM | `src-electron/src/commands/cipher.js` | XOR encryption is trivially breakable. Replace with Rust `aes-gcm` crate. Remove the hardcoded fallback key — if `safeStorage` is unavailable, warn the user and store unencrypted with a clear disclaimer. |
@@ -77,7 +76,7 @@
 |---|------|---------|
 | 9 | Add error boundary tests | No tests exist for `error.tsx`, `global-error.tsx`, or `not-found.tsx`. Add tests verifying they render correctly and report to Sentry. |
 | 10 | Add provider integration tests | `AuthProvider`, `SocketProvider`, and `ThemeProvider` need tests for error states, reconnection, and edge cases. |
-| 11 | Add Electron command tests | Zero test coverage for the Electron layer. Add unit tests for Electron command handlers, download manager state, and cipher module using mock-based testing. |
+| 11 | Add Electron command tests | Zero test coverage for the Electron layer. Add unit tests for Electron command handlers and cipher module using mock-based testing. |
 
 ---
 
@@ -92,7 +91,7 @@
 | 1 | Create `ApiError` type guard | `src/lib/fetch.ts` | Replace all `err as ApiError` unsafe casts with a runtime type guard: `function isApiError(err: unknown): err is ApiError`. Currently 8+ hooks use unsafe casts that silently produce `undefined` fields. |
 | 2 | Create `handleApiError()` utility | `src/lib/errors.ts` (new) | Extract the duplicated `try/catch → toast.error()` pattern into a shared utility. Every hook currently does its own error-to-toast mapping. |
 | 3 | Add centralized error code mapper | `src/lib/errors.ts` (new) | `use-signup-form.ts` has 6+ `if (apiError?.code === ...)` branches. Create a `mapApiErrorToMessage(code: string): string` function. |
-| 4 | Add React Error Boundaries per feature | `src/app/(protected)/(main)/layout.tsx` | Currently one error boundary wraps everything. A crash in watchlist takes down the navbar. Add error boundaries around: content-detail-modal, OfflineLibrary, watch-party sidebar, profile form. |
+| 4 | Add React Error Boundaries per feature | `src/app/(protected)/(main)/layout.tsx` | Currently one error boundary wraps everything. A crash in watchlist takes down the navbar. Add error boundaries around: content-detail-modal, watch-party sidebar, profile form. |
 
 ### 3.2 Unified Caching Layer
 
@@ -142,7 +141,7 @@
 |---|------|---------|---------|
 | 1 | Set up TypeScript for Electron commands | `src-electron/src/commands/` | All Electron command files need proper type safety. Ensure typed command signatures and response types are defined in `src/lib/electron-bridge.ts`. |
 | 2 | Migrate `main.js` types | `src-electron/src/main.js` | Start with the entry point. Define typed Electron invoke/listen channel names and handler signatures in the bridge. |
-| 3 | Migrate all modules to typed commands | `src-electron/src/commands/*.js` | Define interfaces for download state, bridge config, window options, etc. in `src/lib/electron-bridge.ts`. |
+| 3 | Migrate all modules to typed commands | `src-electron/src/commands/*.js` | Define interfaces for bridge config, window options, etc. in `src/lib/electron-bridge.ts`. |
 | 4 | Migrate platform files to typed commands | `src-electron/src/platform/*.js` | Convert platform-specific files. |
 | 5 | Add typed Electron invoke/listen channel definitions | `src/lib/electron-bridge.ts` | Create a shared type file defining all Electron invoke/listen channel names and their payload types. Use in both Rust backend and frontend bridge. |
 
@@ -151,7 +150,6 @@
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
 | 6 | Split monolithic `main.js` | `src-electron/src/main.js` | Extract into: `commands/ipc_handlers.js` (command registration), `commands/cors.js` (CORS overrides), `commands/media_controls.js` (Windows taskbar, media keys), `commands/lifecycle.js` (app events, power monitor). Target: `main.js` under 100 lines. |
-| 7 | Separate protocol handler from download manager | `src-electron/src/commands/download-manager.js` | `setupOfflineMediaProtocol` and `setupDownloadManager` are separate concerns sharing a vault path. Extract protocol handler to its own module. |
 | 8 | Consolidate electron-plugin-store instances | `src-electron/src/commands/state.js`, `src-electron/src/main.js` | Two separate `electron-plugin-store` instances write to the same JSON file. Create a single shared store instance exported from a `store.js` module. |
 | 9 | Merge duplicate platform files | `src-electron/src/platform/windows.js`, `linux.js` | These files are nearly identical. Extract shared logic into a `platform/common.js` and keep only platform-specific overrides. |
 | 10 | Extract version reading utility | Multiple files | `getAsarVersion()` / package.json version reading is duplicated in 3 places. Create a shared `getAppVersion()` utility. |
@@ -161,13 +159,8 @@
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
 | 11 | Fix `discord.js` missing `destroy()` method | `src-electron/src/commands/discord.js` | `main.js` calls `discordLogic.destroy()` on quit, but the method doesn't exist. RPC connection is never cleaned up, leaving Discord presence stuck. |
-| 12 | Add `isDestroyed()` checks before event sends | `src-electron/src/commands/state.js`, `download-manager.js` | `sendSafeProgress` and download progress handlers don't check if the webview is destroyed before calling `.emit()`. Causes unhandled exceptions when window closes during downloads. |
-| 13 | Fix redirect loop in `downloadFile` | `src-electron/src/commands/network.js` | Recursive redirect following has no depth limit. Add a max redirect count (5). |
 | 14 | Clear `capturedKeys` Map on bridge stop | `src-electron/src/commands/live-bridge.js` | The Map is populated but never cleared except on new `start-live-bridge` calls. Add cleanup on `stop-live-bridge`. |
 | 15 | Fix stale `_lastEventSender` reference | `src-electron/src/commands/live-bridge.js` | Holds a reference to a `WebContents` object that prevents GC after window destruction. Null out on window close. |
-| 16 | Clean up `activeDownloadsMap` on completion | `src-electron/src/commands/state.js` | Download entries including HTTP request objects are only cleaned up on cancel, not on successful completion. |
-| 17 | Debounce `syncDbState` writes | `src-electron/src/commands/state.js` | Currently writes the entire download database to disk on every progress chunk. Debounce to every 2-5 seconds. |
-| 18 | Add disk space check before downloads | `src-electron/src/commands/download-manager.js` | Downloads fail mid-way if disk is full. Check available space before starting and warn the user. |
 
 ### 4.4 Missing Electron Features
 
@@ -177,8 +170,6 @@
 | 20 | Add update failure UI | Currently if both native and ASAR updaters fail, the user sees "Starting Nightwatch..." forever. Show a clear error with retry option. |
 | 21 | Add Sentry to webview process | `src-electron/src/main.js` | Sentry is initialized for Rust backend only. Webview JS errors aren't captured. |
 | 22 | Fix Windows taskbar thumbnail buttons | `src-electron/src/main.js` | Buttons use empty icons — no visible icons. Create proper icon assets. |
-| 23 | Process Jump List arguments | `src-electron/src/main.js` | `--open-downloads` and `--play-pause` args are registered in Jump List but never processed on app launch. |
-| 24 | Add Windows download progress bar | Use Electron webview window `set_progress_bar()` to show download progress in the Windows taskbar. |
 | 25 | Defer macOS permission requests | `src-electron/src/platform/macos.js` | Camera/mic permissions are requested at startup. Defer to when the feature is actually needed (livestream, watch party). |
 | 26 | Optimize racer window memory | `src-electron/src/commands/live-bridge.js` | 6 concurrent hidden Electron webview windows consume ~600MB. Extract cookies from the winning window and destroy it, keeping only the proxy server. |
 | 27 | Add `backgroundThrottling` toggle | `src-electron/src/commands/window.js` | Currently always `false`. Enable throttling when not playing media to save CPU. |
@@ -200,8 +191,6 @@
 | 5 | Add `aria-hidden="true"` to skeleton components | `src/components/ui/skeletons.tsx` | Screen readers attempt to read empty skeleton divs. |
 | 6 | Add focus trap to content-detail-modal | `src/features/search/components/content-detail-modal.tsx` | Modal has `role="dialog"` but no focus trap. Users can Tab into background content. |
 | 7 | Add `aria-live` regions for form errors | `src/features/auth/components/login-form.tsx`, `signup-form.tsx` | Error messages are only shown via ephemeral toasts. Add inline `aria-live="polite"` error regions. |
-| 8 | Add `aria-pressed`/`aria-selected` to download quality buttons | `src/features/search/components/download-menu.tsx` | Quality options have no programmatic selected state. "Saved" status is communicated only via color. |
-| 9 | Fix `OfflineLibrary` keyboard handling | `src/features/downloads/components/OfflineLibrary.tsx` | Uses `role="button"` on `div` elements. `onKeyDown` doesn't prevent default scroll on Space. Replace with `<button>` elements. |
 | 10 | Add visible focus indicators to Dialog close button | `src/components/ui/dialog.tsx` | Close button has no explicit `focus-visible` ring style. |
 
 ### 5.2 UI Improvements
@@ -231,7 +220,6 @@
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
 | 1 | Add `React.memo` to heavy child components | `content-detail-modal.tsx` children | The entire modal re-renders when any state changes. Memoize `EpisodeList`, `SeasonSelector`, `ContentActions`. |
-| 2 | Add list virtualization for downloads | `src/features/downloads/components/OfflineLibrary.tsx` | The download list re-renders entirely on every progress update. Add virtualization (e.g., `react-window`) for long lists. |
 | 3 | Fix `useCallback` dependency cascades | `src/features/watch/hooks/use-watch-content.ts` | `refetchStream` has 8 dependencies. Any change cascades to `handleStreamExpired` and the initial fetch effect. Stabilize with refs for values that don't need to trigger re-creation. |
 | 4 | Remove dynamic imports in signup form | `src/features/auth/hooks/use-signup-form.ts` | Dynamic `import('@/features/auth/api')` inside `useEffect` for username checking creates new module evaluation on every keystroke timer. Use static imports. |
 | 5 | Fix double-fetching in search suggestions | `src/features/search/hooks/use-search-input.ts` | `fetchSuggestions` is called on focus without debouncing, while keystroke suggestions use 200ms debounce. Can cause duplicate requests. |
@@ -243,10 +231,6 @@
 | # | Task | File(s) | Details |
 |---|------|---------|---------|
 | 8 | Add web app manifest | `src/app/layout.tsx`, `public/manifest.json` (new) | No `manifest.json` exists. PWA installability requires a manifest with `name`, `icons`, `start_url`, `display`, `theme_color`. |
-| 9 | Create dedicated offline fallback page | `public/offline.html` (new), `src/app/sw.ts` | Currently offline navigation falls back to `/` which may show wrong content. Create a proper "You're offline" page with cached content links. |
-| 10 | Add API response caching to service worker | `src/app/sw.ts` | Only static assets are cached. Add a `StaleWhileRevalidate` strategy for API responses (watchlist, profile, continue-watching) so the app is functional offline. |
-| 11 | Enable navigation preload | `src/app/sw.ts` | `navigationPreload: false` means offline navigation relies entirely on cache. Enable it for faster online navigation. |
-| 12 | Add SW update prompt | `src/app/serwist.ts` | Verify the service worker registration handles update prompts gracefully. Show a "New version available — refresh" toast when a new SW is waiting. |
 
 ### 6.3 Electron Startup Performance
 
@@ -270,8 +254,6 @@
 | 1 | Integrate `useNetworkStatus` across all features | `use-network-status.ts` exists but no feature uses it. Show "You're offline" inline messages when API calls would fail, instead of letting them fail silently. |
 | 2 | Add form state persistence for signup | If user navigates away during multi-step signup (e.g., to check email for OTP), all form data is lost. Persist to `sessionStorage`. |
 | 3 | Add optimistic UI rollback for watchlist | `use-watchlist.ts` removes items optimistically but has no rollback if the API call fails. Add rollback with error toast. |
-| 4 | Add download queue management | Downloads can be paused/resumed individually but there's no queue priority, bandwidth limiting, or "download all episodes" batch action. |
-| 5 | Add download integrity verification | No checksum validation after download completes. Add hash verification against server-provided checksums. |
 
 ### 8.2 Watch Experience
 
@@ -291,7 +273,6 @@
 | 12 | Add Windows toast notifications | Replace generic Electron notifications with native Windows toast notifications with Action Center support. |
 | 13 | Add Linux XDG integration | Improve `.desktop` file generation and XDG compliance for better Linux DE integration. |
 | 14 | Add macOS Touch Bar enhancements | Currently only Play/Pause and Toggle Mic. Add track info, seek bar, volume control. |
-| 15 | Add configurable download location | All platforms use `app.getPath('userData')/OfflineVault`. Let users choose a custom download directory. |
 
 ### 8.4 Provider & Lib Improvements
 
@@ -315,10 +296,8 @@
 |---|------|---------|---------|
 | 1 | Update `TESTING.md` to reflect CI reality | `docs/TESTING.md` | Currently describes test commands but doesn't mention that CI pipelines skip tests. After Phase 2, update to document the full CI test pipeline. |
 | 2 | Complete `STATE_MANAGEMENT.md` | `docs/STATE_MANAGEMENT.md` | Referenced in README but may be incomplete. Document the Zustand vs Context vs local state decision tree established in Phase 3. |
-| 3 | Add status labels to `OFFLINE_DOWNLOADS_ROADMAP.md` | `docs/OFFLINE_DOWNLOADS_ROADMAP.md` | Mixes implemented features with future plans. Add `[DONE]` / `[IN PROGRESS]` / `[PLANNED]` labels. |
 | 4 | Add missing env vars to `SETUP.md` | `docs/SETUP.md` | Missing `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and other env vars referenced in code but not in the setup guide. |
 | 5 | Fix `CONTRIBUTING.md` rule references | `docs/CONTRIBUTING.md` | References "rule 5.1" and "rule 5.4" from an internal style guide that isn't included. Either include the guide or remove the references. |
-| 6 | Split `DESKTOP.md` into sub-documents | `docs/DESKTOP.md` | At ~200 lines, consider splitting into: `DESKTOP_ARCHITECTURE.md`, `DESKTOP_OFFLINE.md`, `DESKTOP_AUTO_UPDATE.md`, `DESKTOP_CI.md`. |
 | 7 | Add API surface documentation | `docs/API_LAYER.md` | Document all backend endpoints used by the frontend, their request/response shapes, and error codes. |
 | 8 | Add architecture decision records (ADRs) | `docs/adr/` (new) | Document key decisions: why Zustand over Redux, why manual caching over TanStack Query, why XOR cipher was chosen, etc. |
 
@@ -326,7 +305,6 @@
 
 | # | Task | Details |
 |---|------|---------|
-| 9 | Remove `.DS_Store` files from repo | `.DS_Store` files exist in `src-electron/` and `src/features/downloads/components/`. Add to `.gitignore` and remove from tracking. |
 | 10 | Remove dead `_CardHeader` etc. from Card component | `src/components/ui/card.tsx` defines internal components with underscore prefixes that are never exported. Remove or export them. |
 | 11 | Clean up `frontend.log` from repo | `frontend.log` is committed to the repo. Add to `.gitignore`. |
 | 12 | Audit and pin dependency versions | `package.json` uses `^` ranges for all dependencies. Pin exact versions for production dependencies to prevent unexpected breaking changes. |
@@ -345,7 +323,7 @@
 | 3. Core Refactors | 7–12 | 20 | Error handling, caching, state, API layer |
 | 4. Electron Overhaul | 13–20 | 27 | TypeScript migration, architecture, stability |
 | 5. UI/UX & A11y | 21–28 | 21 | Accessibility compliance, UI polish |
-| 6. Performance & PWA | 29–34 | 16 | React perf, service worker, startup time |
+| 6. Performance & PWA | 29–34 | 16 | React perf, startup time |
 | 7. New Features | 35–42 | 20 | Offline resilience, watch UX, Electron features |
 | 8. Docs & Polish | 43–48 | 15 | Documentation, code cleanup, dependency audit |
 | **Total** | **48** | **144** | |

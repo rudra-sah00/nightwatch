@@ -234,7 +234,6 @@ Features:
 - Dynamic `import('hls.js')` (code-split)
 - Capacitor iOS detection → falls back to native HLS (WKWebView MediaSource is unreliable)
 - `xhrSetup` with `withCredentials` for authenticated streams
-- `fetchSetup` with `offline-media://` protocol support for Electron offline playback
 - 401 error handling → calls `onStreamExpired` for token refresh
 - Manual quality options from backend merged with HLS manifest levels
 - Native `audioTracks` fallback for Safari

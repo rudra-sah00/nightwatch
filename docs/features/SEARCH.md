@@ -1,6 +1,6 @@
 # Search Engine
 
-URL-parameter driven search with debounced typeahead suggestions, content-detail modals, episode browsing, download management, and continue-watching integration.
+URL-parameter driven search with debounced typeahead suggestions, content-detail modals, episode browsing, and continue-watching integration.
 
 ## Directory Structure
 
@@ -15,7 +15,6 @@ src/features/search/
 │   ├── search-results.tsx          # Results grid
 │   ├── content-detail-modal.tsx    # Full-screen content detail overlay
 │   ├── content-info.tsx            # Content metadata display
-│   ├── download-menu.tsx           # Quality picker for downloads
 │   ├── season-selector.tsx         # Season dropdown
 │   ├── episode-card.tsx            # Single episode card
 │   ├── episode-list.tsx            # Episode list container
@@ -32,10 +31,7 @@ src/features/search/
 │   ├── use-season-episodes.ts      # Season/episode management
 │   ├── use-season-selector.ts      # Dropdown click-outside
 │   ├── use-show-details.ts         # Show detail fetcher
-│   ├── use-download-menu.ts        # Download quality picker
 │   └── use-episode-card.ts         # Image error state
-└── utils/
-    └── download.ts                 # Download helpers (quality sort, offline ID, fetch links)
 ```
 
 ## Schema
@@ -99,21 +95,9 @@ Full-screen overlay for content details. Features:
 - **Watchlist toggle** — optimistic add/remove with `useOptimistic`
 - **Season selector** dropdown for series
 - **Episode list** with thumbnails, duration, play buttons
-- **Download menu** for offline content
 - **Trailer auto-play** when available
 - **Countdown overlay** before playback starts
 - Escape key dismissal, body scroll lock, sidebar disable
-
-### download-menu
-
-`components/download-menu.tsx`
-
-Quality picker for downloading content:
-- Lazy-loads available qualities from the API
-- Shows existing download status
-- Desktop: triggers Electron bridge download
-- Mobile: triggers Capacitor filesystem download
-- Quality labels sorted by resolution (1080p → 360p)
 
 ### season-selector
 
@@ -127,7 +111,7 @@ Dropdown for selecting a season in series content. Click-outside dismissal via `
 
 `components/episode-list.tsx` — Container rendering episode cards with loading skeletons.
 
-## Hooks (13 total)
+## Hooks (12 total)
 
 ### use-search-input
 
@@ -235,36 +219,11 @@ Click-outside dismissal for the season dropdown. Delays the click listener regis
 
 Fetches show/movie details by content ID with `useTransition` and `AbortController`. Aborts on unmount or content ID change.
 
-### use-download-menu
-
-`hooks/use-download-menu.ts`
-
-Download quality picker state:
-- Lazy-fetches qualities from API (Server 1 only)
-- Tracks existing offline downloads via `useDownloads`
-- `handleDesktopClick` triggers Electron bridge download with quality label
-- Computes `offlineIdentifier` for deduplication
-
 ### use-episode-card
 
 `hooks/use-episode-card.ts`
 
 Minimal hook tracking image error state for a single episode card.
-
-## Utils
-
-### download.ts
-
-`utils/download.ts`
-
-| Function | Purpose |
-|----------|---------|
-| `sortQualities(qualities)` | Sorts by resolution (1080p → 360p), unknowns appended alphabetically |
-| `getOfflineIdentifier(params)` | Builds deterministic storage key for offline content |
-| `fetchDownloadLinks(id, type, season?, episode?)` | Fetches quality options from backend API |
-| `startDesktopDownload(params)` | Initiates download via Electron bridge |
-
-`QUALITY_ORDER`: `['1080p', '720p', '480p', '360p']`
 
 ## Data Flow: Search → Play
 

@@ -50,7 +50,6 @@ Double-submit cookie pattern:
 | `/search` | Search |
 | `/library` | Clips library |
 | `/continue-watching` | Continue watching |
-| `/downloads` | Offline downloads |
 | `/ask-ai` | Voice AI assistant |
 
 ### Public Routes (no auth required)
