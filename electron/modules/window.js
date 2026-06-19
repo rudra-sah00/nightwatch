@@ -140,9 +140,7 @@ class AppWindow {
         }
       });
     } else {
-      // Production: load the remote app. On first visit (online) the Serwist
-      // service worker installs and caches the full app shell. On subsequent
-      // launches — even offline — the SW serves every route from cache.
+      // Production: load the remote app.
       this.mainWindow.loadURL(effectiveProdUrl);
     }
 
@@ -164,16 +162,10 @@ class AppWindow {
     });
 
     this.mainWindow.webContents.on('will-navigate', (event, url) => {
-      // Prevent drag-and-drop local file exploits, but explicitly ALLOW our
-      // internal offline bridge so it can actually load when disconnected.
+      // Prevent drag-and-drop local file exploits
       if (url.startsWith('file://')) {
-        if (
-          !url.endsWith('offline-bridge.html') &&
-          !url.endsWith('offline.html')
-        ) {
-          event.preventDefault();
-        }
-        return; // Allow the bridge file to load, skip external browser check
+        event.preventDefault();
+        return;
       }
 
       if (!isInternalUrl(url)) {
@@ -183,10 +175,9 @@ class AppWindow {
     });
 
     // --- ESCALATING RECOVERY LADDER ---
-    // Level 0: did-finish-load → start health check timer
-    // Level 1: first load failure → simple retry
-    // Level 2: second failure → clear SW + cache, reload from PROD_URL
-    // Level 3: third failure → load local offline bridge (stop retrying)
+    // Level 1: first load failure → simple retry after delay
+    // Level 2: second failure → clear cache, reload from PROD_URL
+    // Level 3+: stop retrying
     let loadFailures = 0;
 
     this.mainWindow.webContents.on(
@@ -213,43 +204,26 @@ class AppWindow {
           `[window] Load failed (attempt ${loadFailures}, code ${errorCode})`,
         );
 
-        if (loadFailures === 1) {
-          // Level 1: Try the offline bridge (triggers SW fetch handler)
-          const bridgePath = require('node:path').join(
-            __dirname,
-            '../build/offline-bridge.html',
-          );
-          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-            this.mainWindow.loadFile(bridgePath, {
-              search: `url=${encodeURIComponent(effectiveProdUrl)}`,
-            });
-          }
-        } else if (loadFailures === 2) {
-          // Level 2: SW is broken — nuke it and retry from network
-          log.info('[window] Clearing SW + cache for recovery');
+        if (loadFailures <= 2) {
+          // Retry after a short delay
+          setTimeout(() => {
+            if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+              this.mainWindow.loadURL(effectiveProdUrl);
+            }
+          }, 2000);
+        } else if (loadFailures === 3) {
+          // Clear cache and retry
+          log.info('[window] Clearing cache for recovery');
           const ses = require('electron').session.defaultSession;
           try {
-            await ses.clearStorageData({
-              storages: ['serviceworkers', 'cachestorage'],
-            });
             await ses.clearCodeCaches({ urls: [] });
             await ses.clearCache();
           } catch (_e) {}
           if (this.mainWindow && !this.mainWindow.isDestroyed()) {
             this.mainWindow.loadURL(effectiveProdUrl);
           }
-        } else {
-          // Level 3: Nothing works — show local fallback, stop retrying
-          const bridgePath = require('node:path').join(
-            __dirname,
-            '../build/offline-bridge.html',
-          );
-          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-            this.mainWindow.loadFile(bridgePath, {
-              search: `url=${encodeURIComponent(effectiveProdUrl)}&failed=1`,
-            });
-          }
         }
+        // Level 4+: stop retrying
       },
     );
 

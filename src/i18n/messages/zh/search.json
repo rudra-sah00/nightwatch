@@ -66,24 +66,6 @@
     "toWatchlist": "加入列表",
     "removeFromList": "从列表移除"
   },
-  "download": {
-    "download": "下载",
-    "viewInVault": "在保险库中查看",
-    "cancel": "取消",
-    "language": "语言",
-    "original": "原始",
-    "selectQuality": "选择画质",
-    "selectEpisode": "选择剧集",
-    "gatheringSources": "正在收集资源...",
-    "noFormatsAvailable": "无可用格式",
-    "noEpisodesAvailable": "无可用剧集",
-    "saved": "已保存",
-    "securelyStarting": "正在安全启动下载...",
-    "untitled": "无标题",
-    "downloadingToast": "正在下载{epText}！请查看离线库。",
-    "downloadingEpisodeText": "第{episode}集",
-    "episodePrefix": "第集"
-  },
   "episodeCard": {
     "loading": "加载中...",
     "epPrefix": "EP {number}",

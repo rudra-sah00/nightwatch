@@ -188,15 +188,6 @@ function buildMobileSteps(
       },
     },
     {
-      element: 'a[href="/downloads"]',
-      popover: {
-        title: title(t('downloads.title')),
-        description: desc(t('downloads.description')),
-        side: 'right',
-        align: 'center',
-      },
-    },
-    {
       popover: {
         title: title(t('mobileFriends.title')),
         description: desc(t('mobileFriends.description')),
@@ -334,19 +325,6 @@ function buildDesktopSteps(
         align: 'center',
       },
     },
-    ...(isDesktopApp
-      ? [
-          {
-            element: 'a[href="/downloads"]',
-            popover: {
-              title: title(t('downloads.title')),
-              description: desc(t('downloads.description')),
-              side: 'right' as const,
-              align: 'center' as const,
-            },
-          },
-        ]
-      : []),
     {
       element: 'aside:last-of-type',
       popover: {

@@ -8,53 +8,6 @@
  * @module electron-bridge
  */
 
-/**
- * Represents a single offline download managed by the Electron main process.
- */
-export interface DownloadItem {
-  /** Unique identifier for the content being downloaded. */
-  contentId: string;
-  /** Human-readable title of the download. */
-  title: string;
-  /** Optional poster/thumbnail URL for display. */
-  posterUrl?: string;
-  /** Total file size in bytes, if known. */
-  filesize?: number;
-  /** Number of bytes downloaded so far. */
-  downloadedBytes: number;
-  /** Download progress as a 0–1 fraction. */
-  progress: number;
-  /** Selected quality label (e.g. "1080p"). */
-  quality?: string;
-  /** Current download speed as a human-readable string. */
-  speed?: string;
-  /** Whether the download is a single MP4 file rather than HLS segments. */
-  isMp4?: boolean;
-  /** Current lifecycle status of the download. */
-  status:
-    | 'QUEUED'
-    | 'DOWNLOADING'
-    | 'COMPLETED'
-    | 'PAUSED'
-    | 'FAILED'
-    | 'CANCELLED';
-  /** Error message when status is `FAILED`. */
-  error?: string;
-  /** Arbitrary show/series metadata attached to the download. */
-  showData?: unknown;
-  /** Local filesystem path to the downloaded HLS playlist. */
-  localPlaylistPath?: string;
-  /** Subtitle tracks associated with this download. */
-  subtitleTracks?: {
-    label: string;
-    language: string;
-    url: string;
-    localPath?: string;
-  }[];
-  /** Unix timestamp (ms) when the download was created. */
-  createdAt: number;
-}
-
 /** Callback returned by event listeners to unsubscribe. */
 type UnlistenFn = () => void;
 
@@ -167,17 +120,6 @@ function createBridge() {
       onWindowFullscreenChanged: noopListen as (
         cb: (fs: boolean) => void,
       ) => UnlistenFn,
-      startDownload: noop as (p: Record<string, unknown>) => void,
-      cancelDownload: noop as (id: string) => void,
-      pauseDownload: noop as (id: string) => void,
-      resumeDownload: noop as (id: string) => void,
-      getDownloads: async (): Promise<DownloadItem[]> => [],
-      onDownloadProgress: noopListen as (
-        cb: (item: DownloadItem) => void,
-      ) => UnlistenFn,
-      readOfflineFile: async (_path: string): Promise<Uint8Array> =>
-        new Uint8Array(),
-      getOfflineMediaBase: async (): Promise<string> => '',
       signalReady: noop,
     };
   }
@@ -222,16 +164,6 @@ function createBridge() {
     onWindowFocus: (cb: () => void) => e.onWindowFocus(cb) as UnlistenFn,
     onWindowFullscreenChanged: (cb: (fs: boolean) => void) =>
       e.onWindowFullscreenChanged(cb) as UnlistenFn,
-    startDownload: (p: Record<string, unknown>) => e.startDownload(p),
-    cancelDownload: (id: string) => e.cancelDownload(id),
-    pauseDownload: (id: string) => e.pauseDownload(id),
-    resumeDownload: (id: string) => e.resumeDownload(id),
-    getDownloads: () => e.getDownloads() as Promise<DownloadItem[]>,
-    onDownloadProgress: (cb: (item: DownloadItem) => void) =>
-      e.onDownloadProgress(cb) as UnlistenFn,
-    readOfflineFile: async (_path: string): Promise<Uint8Array> =>
-      new Uint8Array(),
-    getOfflineMediaBase: async (): Promise<string> => '',
     signalReady: () => e.signalReady(),
   };
 }

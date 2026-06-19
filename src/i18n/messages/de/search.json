@@ -66,24 +66,6 @@
     "toWatchlist": "Zur Merkliste",
     "removeFromList": "Von Liste entfernen"
   },
-  "download": {
-    "download": "Herunterladen",
-    "viewInVault": "Im Tresor ansehen",
-    "cancel": "Abbrechen",
-    "language": "Sprache",
-    "original": "Original",
-    "selectQuality": "Qualität auswählen",
-    "selectEpisode": "Episode auswählen",
-    "gatheringSources": "Quellen werden gesammelt...",
-    "noFormatsAvailable": "Keine Formate verfügbar",
-    "noEpisodesAvailable": "Keine Episoden verfügbar",
-    "saved": "Gespeichert",
-    "securelyStarting": "Sicherer Download wird gestartet...",
-    "untitled": "Ohne Titel",
-    "downloadingToast": "Download{epText} läuft! Überprüfe deine Offline-Bibliothek.",
-    "downloadingEpisodeText": " für Ep {episode}",
-    "episodePrefix": "Episode"
-  },
   "episodeCard": {
     "loading": "LADEN...",
     "epPrefix": "EP {number}",

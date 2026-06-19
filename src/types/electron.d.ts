@@ -1,35 +1,6 @@
 // Type definitions for the Desktop App (ElectronIPC bridge)
 // These types allow safe auto-completion when programming React in Next.js
 
-export interface DownloadItem {
-  contentId: string;
-  title: string;
-  posterUrl?: string;
-  filesize?: number;
-  downloadedBytes: number;
-  progress: number;
-  quality?: string; // e.g. "high", "medium", "low"
-  speed?: string; // e.g. "2.4 MB/s"
-  isMp4?: boolean;
-  status:
-    | 'QUEUED'
-    | 'DOWNLOADING'
-    | 'COMPLETED'
-    | 'PAUSED'
-    | 'FAILED'
-    | 'CANCELLED';
-  error?: string;
-  showData?: unknown;
-  localPlaylistPath?: string;
-  subtitleTracks?: {
-    label: string;
-    language: string;
-    url: string;
-    localPath?: string;
-  }[];
-  createdAt: number;
-}
-
 export interface ElectronAPI {
   /** Updates the user's playing status directly in Discord */
   updateDiscordPresence: (presence: {
@@ -115,28 +86,6 @@ export interface ElectronAPI {
   onWindowFullscreenChanged: (
     callback: (isFullscreen: boolean) => void,
   ) => () => void;
-
-  /** Start native desktop download process for videos */
-  startDownload: (params: {
-    contentId: string;
-    title: string;
-    m3u8Url: string;
-    posterUrl?: string;
-    subtitleTracks?: { label: string; language: string; url: string }[];
-    quality?: 'low' | 'medium' | 'high';
-    metadata?: unknown;
-  }) => void;
-
-  /** Cancel an ongoing download */
-  cancelDownload: (contentId: string) => void;
-  /** Pause an ongoing download */
-  pauseDownload: (contentId: string) => void;
-  /** Resume a paused download */
-  resumeDownload: (contentId: string) => void;
-  getDownloads: () => Promise<DownloadItem[]>;
-
-  /** Subscriber to listen for download progression updates payload */
-  onDownloadProgress: (callback: (item: DownloadItem) => void) => () => void;
 
   /** Signal that the React app has successfully booted */
   signalReady: () => void;

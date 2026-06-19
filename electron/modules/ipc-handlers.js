@@ -199,8 +199,6 @@ function registerIpcHandlers({ store, AppWindow, discordLogic }) {
   // --- LOCAL CONFIG STORE ---
   const ALLOWED_STORE_KEYS = new Set([
     'runOnBoot',
-    'concurrentDownloads',
-    'downloadSpeedLimit',
     'nightwatch_auth',
     'disable-gpu',
   ]);

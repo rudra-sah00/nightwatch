@@ -13,7 +13,6 @@ import { useStreamUrls } from '@/features/watch/player/hooks/useStreamUrls';
 import { extractTokenFromUrl } from '@/features/watch/utils';
 import { reportError, trackEvent } from '@/lib/analytics';
 import { WS_EVENTS } from '@/lib/constants';
-import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import type { PlayResponse } from '@/types/content';
 
@@ -110,69 +109,6 @@ export function useWatchContent() {
 
       try {
         const decodedTitle = decodeURIComponent(title);
-
-        if (checkIsDesktop()) {
-          const fetchedDownloads = await desktopBridge.getDownloads();
-          // 1. Resolve base ID by stripping any existing episode suffixes or provider prefixes
-          const rawId = overrideMovieId || movieId || '';
-          const baseIdFromRaw = rawId.replace(/(_S\d+E\d+|-ep\d+)$/, '');
-          const currentSeriesId = overrideMovieId || seriesId || baseIdFromRaw;
-          const cleanSeriesId = currentSeriesId.replace(/^s1:/, '');
-
-          let offlineContentId1 = rawId;
-          let offlineContentId2 = rawId;
-
-          if (type === 'series' && (season || episode)) {
-            // Re-construct IDs from clean base to avoid double-suffixing (e.g. _S1E1_S1E1)
-            offlineContentId1 = `${currentSeriesId}_S${season || 1}E${episode || 1}`;
-            offlineContentId2 = `${currentSeriesId}-ep${episode || 1}`;
-          }
-
-          // Build a comprehensive search set covering possible stored ID formats.
-          const searchIds = new Set([
-            rawId,
-            offlineContentId1,
-            offlineContentId2,
-            `${cleanSeriesId}_S${season || 1}E${episode || 1}`,
-            `${cleanSeriesId}-ep${episode || 1}`,
-            `s1:${offlineContentId1.replace(/^s1:/, '')}`,
-            `s1:${offlineContentId2.replace(/^s1:/, '')}`,
-          ]);
-
-          const downloadedItem = fetchedDownloads.find(
-            (d) => searchIds.has(d.contentId) && d.status === 'COMPLETED',
-          );
-
-          if (downloadedItem?.localPlaylistPath) {
-            applyResponse({
-              success: true,
-              masterPlaylistUrl: downloadedItem.localPlaylistPath,
-              title: decodedTitle,
-              type,
-              movieId: overrideMovieId || movieId || '',
-              subtitleTracks: downloadedItem.subtitleTracks?.map((t) => ({
-                label: t.label,
-                language: t.language,
-                url: t.localPath || t.url,
-              })),
-              ...(type === 'series' && season && episode
-                ? {
-                    season: parseInt(season, 10),
-                    episode: parseInt(episode, 10),
-                  }
-                : {}),
-            });
-            setIsRefetching(false);
-            if (replacingSessionTimerRef.current) {
-              clearTimeout(replacingSessionTimerRef.current);
-            }
-            replacingSessionTimerRef.current = setTimeout(() => {
-              setIsReplacingSession(false);
-              replacingSessionTimerRef.current = null;
-            }, 2000);
-            return;
-          }
-        }
 
         let response: PlayResponse;
 

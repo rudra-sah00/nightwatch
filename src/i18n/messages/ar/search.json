@@ -66,24 +66,6 @@
     "toWatchlist": "إلى القائمة",
     "removeFromList": "إزالة من القائمة"
   },
-  "download": {
-    "download": "تنزيل",
-    "viewInVault": "عرض في الخزنة",
-    "cancel": "إلغاء",
-    "language": "اللغة",
-    "original": "أصلي",
-    "selectQuality": "اختر الجودة",
-    "selectEpisode": "اختر الحلقة",
-    "gatheringSources": "جارٍ جمع المصادر...",
-    "noFormatsAvailable": "لا توجد صيغ متاحة",
-    "noEpisodesAvailable": "لا توجد حلقات متاحة",
-    "saved": "تم الحفظ",
-    "securelyStarting": "جارٍ بدء التنزيل الآمن...",
-    "untitled": "بدون عنوان",
-    "downloadingToast": "جارٍ التحميل{epText}! تحقق من مكتبتك بدون اتصال.",
-    "downloadingEpisodeText": " للحلقة {episode}",
-    "episodePrefix": "الحلقة"
-  },
   "episodeCard": {
     "loading": "جارٍ التحميل...",
     "epPrefix": "ح {number}",

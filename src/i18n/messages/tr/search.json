@@ -66,24 +66,6 @@
     "toWatchlist": "Listeye Ekle",
     "removeFromList": "Listeden Kaldır"
   },
-  "download": {
-    "download": "İndir",
-    "viewInVault": "Kasada Görüntüle",
-    "cancel": "İptal",
-    "language": "Dil",
-    "original": "Orijinal",
-    "selectQuality": "Kalite Seçin",
-    "selectEpisode": "Bölüm Seçin",
-    "gatheringSources": "Kaynaklar toplanıyor...",
-    "noFormatsAvailable": "Format mevcut değil",
-    "noEpisodesAvailable": "Bölüm mevcut değil",
-    "saved": "Kaydedildi",
-    "securelyStarting": "Güvenli İndirme Başlatılıyor...",
-    "untitled": "Başlıksız",
-    "downloadingToast": "İndiriliyor{epText}! Çevrimdışı Kütüphanenizi kontrol edin.",
-    "downloadingEpisodeText": " Böl {episode} için",
-    "episodePrefix": "Bölüm"
-  },
   "episodeCard": {
     "loading": "YÜKLENİYOR...",
     "epPrefix": "BÖL {number}",

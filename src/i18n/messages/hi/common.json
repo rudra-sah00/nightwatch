@@ -4,7 +4,6 @@
     "continue": "जारी रखें",
     "live": "लाइव",
     "watchlist": "वॉचलिस्ट",
-    "downloads": "डाउनलोड",
     "profile": "प्रोफ़ाइल",
     "logoAlt": "Nightwatch लोगो",
     "music": "Music",
@@ -81,10 +80,6 @@
       "title": "आपकी कतार",
       "description": "बाद में देखने के लिए फिल्में और एपिसोड यहाँ सहेजें।"
     },
-    "downloads": {
-      "title": "ऑफ़लाइन वॉल्ट",
-      "description": "कहीं भी, कभी भी फिल्में देखें। अपने ऑफ़लाइन डाउनलोड यहाँ एक्सेस करें।"
-    },
     "library": {
       "title": "आपकी लाइब्रेरी",
       "description": "अपने सहेजे गए क्लिप, रिकॉर्डिंग और एकत्रित सामग्री को एक ही जगह ब्राउज़ करें।"
@@ -158,14 +153,8 @@
   "offline": {
     "title": "आप ऑफ़लाइन हैं",
     "description": "Nightwatch को एक्सप्लोर करने के लिए कनेक्शन आवश्यक है। डाउनलोड किए गए शीर्षक देखने के लिए अपना वॉल्ट खोलें।",
-    "openVault": "ऑफ़लाइन वॉल्ट खोलें",
     "toastOffline": "आप ऑफ़लाइन हैं",
     "toastOnline": "वापस ऑनलाइन!"
-  },
-  "swUpdate": {
-    "title": "नया संस्करण उपलब्ध",
-    "description": "नवीनतम अपडेट पाने के लिए रिफ्रेश करें।",
-    "refresh": "रिफ्रेश"
   },
   "discord": {
     "readyToStream": "स्ट्रीम के लिए तैयार",
@@ -191,8 +180,6 @@
     "profileDescription": "अपनी प्रोफ़ाइल और देखने का इतिहास प्रबंधित करें।",
     "liveTitle": "लाइव मैच | Nightwatch",
     "liveDescription": "अपने दोस्तों के साथ रियल-टाइम में लाइव खेल मैच और चैनल देखें।",
-    "downloadsTitle": "डाउनलोड | Nightwatch",
-    "downloadsDescription": "ऑफ़लाइन देखने के लिए अपनी डाउनलोड की गई फिल्मों और टीवी शो तक पहुँचें।",
     "watchlistTitle": "मेरी वॉचलिस्ट | Nightwatch",
     "watchlistDescription": "बाद में देखने के लिए फिल्मों और टीवी शो का ट्रैक रखें।",
     "userNotFoundTitle": "उपयोगकर्ता नहीं मिला | Nightwatch",
@@ -205,10 +192,6 @@
     "notInstalledDesc": "हम Nightwatch डेस्कटॉप ऐप नहीं खोल सके। क्या यह इंस्टॉल है?",
     "downloadApp": "ऐप डाउनलोड करें",
     "downloadFor": "{os} के लिए डाउनलोड करें"
-  },
-  "downloads": {
-    "experienceStarting": "अनुभव शुरू हो रहा है",
-    "preparingContent": "\"{title}\" तैयार कर रहे हैं..."
   },
   "errors": {
     "sessionExpired": "सत्र समाप्त हो गया। कृपया फिर से लॉगिन करें।",
@@ -247,10 +230,6 @@
         "title": "Messaging",
         "desc": "DMs, voice calls, and online presence."
       },
-      "offline": {
-        "title": "Offline Mode",
-        "desc": "Download and watch anywhere, anytime."
-      },
       "secure": {
         "title": "Private & Secure",
         "desc": "Encrypted sessions with invite-only access."
@@ -273,14 +252,8 @@
       "music": {
         "title": "Music Streaming",
         "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
-      },
-      "downloads": {
-        "title": "Offline Downloads",
-        "desc": "Download content to your device. Watch anywhere — no internet required."
       }
     },
-    "downloadTitle": "Get the Desktop App",
-    "downloadDesc": "Picture-in-Picture, media keys, offline downloads, and Discord Rich Presence — available on all platforms.",
     "ctaTitle": "Ready to Watch?",
     "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
     "footer": {

@@ -55,14 +55,7 @@ const { setupUpdater } = require('./modules/updater.js');
 const { createSplash } = require('./modules/splash.js');
 const { getAppVersion } = require('./modules/version.js');
 const { PROD_URL } = require('./modules/constants.js');
-const {
-  setupOfflineMediaProtocol,
-  setupDownloadManager,
-} = require('./modules/download-manager.js');
 const { registerIpcHandlers } = require('./modules/ipc-handlers.js');
-
-// Share the single electron-store instance with the download state module
-require('./modules/downloads/state').setStore(store);
 
 // Import platform specific logic cleanly decoupled
 const macOS = require('./platform/macos.js');
@@ -125,10 +118,6 @@ const startElectronApp = async () => {
       }
     }
   }
-
-  // Register offline-media:// protocol handler FIRST — before splash or main window.
-  // This ensures downloaded HLS/MP4 content is playable the instant the React app loads.
-  setupOfflineMediaProtocol();
 
   // --- CLI ESCAPE HATCH: --clear-cache ---
   // Allows users to nuke all cached data if the app is stuck.
@@ -354,18 +343,10 @@ const startElectronApp = async () => {
       AppWindow.setQuitting(quitState),
     );
 
-    // Setup Offline Download Manager for HLS segments
-    setupDownloadManager();
-
-    // Process Windows Jump List arguments (--open-downloads, --play-pause)
+    // Process Windows Jump List arguments (--play-pause)
     if (process.platform === 'win32') {
       const win = AppWindow.getInstance();
       if (win) {
-        if (process.argv.includes('--open-downloads')) {
-          win.webContents.once('did-finish-load', () => {
-            win.webContents.send('navigate', '/downloads');
-          });
-        }
         if (process.argv.includes('--play-pause')) {
           win.webContents.once('did-finish-load', () => {
             win.webContents.send('media-command', 'MediaPlayPause');

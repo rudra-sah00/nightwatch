@@ -4,7 +4,6 @@
     "continue": "Продолжить",
     "live": "Прямой эфир",
     "watchlist": "Список просмотра",
-    "downloads": "Загрузки",
     "profile": "Профиль",
     "logoAlt": "Логотип Nightwatch",
     "music": "Music",
@@ -81,10 +80,6 @@
       "title": "Ваша очередь",
       "description": "Сохраняйте фильмы и эпизоды здесь для просмотра позже."
     },
-    "downloads": {
-      "title": "Офлайн-хранилище",
-      "description": "Смотрите фильмы где угодно и когда угодно. Доступ к офлайн-загрузкам здесь."
-    },
     "library": {
       "title": "Ваша Библиотека",
       "description": "Просматривайте сохранённые клипы, записи и собранный контент в одном месте."
@@ -158,14 +153,8 @@
   "offline": {
     "title": "Вы Офлайн",
     "description": "Nightwatch требует подключения для просмотра. Откройте хранилище для загруженных фильмов.",
-    "openVault": "Открыть Офлайн Хранилище",
     "toastOffline": "Вы офлайн",
     "toastOnline": "Снова онлайн!"
-  },
-  "swUpdate": {
-    "title": "Доступна новая версия",
-    "description": "Обновите для получения последних обновлений.",
-    "refresh": "Обновить"
   },
   "discord": {
     "readyToStream": "Готов к трансляции",
@@ -191,8 +180,6 @@
     "profileDescription": "Управляйте профилем и историей просмотров.",
     "liveTitle": "Прямые Трансляции | Nightwatch",
     "liveDescription": "Смотрите спортивные матчи и каналы в прямом эфире с друзьями в реальном времени.",
-    "downloadsTitle": "Загрузки | Nightwatch",
-    "downloadsDescription": "Доступ к загруженным фильмам и сериалам для офлайн-просмотра.",
     "watchlistTitle": "Мой Список | Nightwatch",
     "watchlistDescription": "Отслеживайте фильмы и сериалы, которые хотите посмотреть позже.",
     "userNotFoundTitle": "Пользователь не найден | Nightwatch",
@@ -205,10 +192,6 @@
     "notInstalledDesc": "Не удалось открыть приложение Nightwatch. Оно установлено?",
     "downloadApp": "Скачать Приложение",
     "downloadFor": "Скачать для {os}"
-  },
-  "downloads": {
-    "experienceStarting": "Запуск Впечатления",
-    "preparingContent": "Подготовка \"{title}\"..."
   },
   "errors": {
     "sessionExpired": "Сессия истекла. Пожалуйста, войдите снова.",
@@ -247,10 +230,6 @@
         "title": "Messaging",
         "desc": "DMs, voice calls, and online presence."
       },
-      "offline": {
-        "title": "Offline Mode",
-        "desc": "Download and watch anywhere, anytime."
-      },
       "secure": {
         "title": "Private & Secure",
         "desc": "Encrypted sessions with invite-only access."
@@ -273,14 +252,8 @@
       "music": {
         "title": "Music Streaming",
         "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
-      },
-      "downloads": {
-        "title": "Offline Downloads",
-        "desc": "Download content to your device. Watch anywhere — no internet required."
       }
     },
-    "downloadTitle": "Get the Desktop App",
-    "downloadDesc": "Picture-in-Picture, media keys, offline downloads, and Discord Rich Presence — available on all platforms.",
     "ctaTitle": "Ready to Watch?",
     "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
     "footer": {

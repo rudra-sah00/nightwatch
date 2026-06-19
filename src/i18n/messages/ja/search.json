@@ -66,24 +66,6 @@
     "toWatchlist": "ウォッチリストに追加",
     "removeFromList": "リストから削除"
   },
-  "download": {
-    "download": "ダウンロード",
-    "viewInVault": "ボールトで表示",
-    "cancel": "キャンセル",
-    "language": "言語",
-    "original": "オリジナル",
-    "selectQuality": "画質を選択",
-    "selectEpisode": "エピソードを選択",
-    "gatheringSources": "ソースを収集中...",
-    "noFormatsAvailable": "利用可能なフォーマットがありません",
-    "noEpisodesAvailable": "利用可能なエピソードがありません",
-    "saved": "保存済み",
-    "securelyStarting": "安全にダウンロードを開始中...",
-    "untitled": "無題",
-    "downloadingToast": "ダウンロード中{epText}！オフラインライブラリを確認してください。",
-    "downloadingEpisodeText": " Ep {episode}の",
-    "episodePrefix": "エピソード"
-  },
   "episodeCard": {
     "loading": "読み込み中...",
     "epPrefix": "EP {number}",

@@ -66,24 +66,6 @@
     "toWatchlist": "เพิ่มในรายการ",
     "removeFromList": "ลบออกจากรายการ"
   },
-  "download": {
-    "download": "ดาวน์โหลด",
-    "viewInVault": "ดูในตู้เซฟ",
-    "cancel": "ยกเลิก",
-    "language": "ภาษา",
-    "original": "ต้นฉบับ",
-    "selectQuality": "เลือกคุณภาพ",
-    "selectEpisode": "เลือกตอน",
-    "gatheringSources": "กำลังรวบรวมแหล่งข้อมูล...",
-    "noFormatsAvailable": "ไม่มีรูปแบบที่ใช้ได้",
-    "noEpisodesAvailable": "ไม่มีตอนที่ใช้ได้",
-    "saved": "บันทึกแล้ว",
-    "securelyStarting": "กำลังเริ่มดาวน์โหลดอย่างปลอดภัย...",
-    "untitled": "ไม่มีชื่อ",
-    "downloadingToast": "กำลังดาวน์โหลด{epText}! ตรวจสอบคลังออฟไลน์ของคุณ",
-    "downloadingEpisodeText": " ตอนที่ {episode}",
-    "episodePrefix": "ตอนที่"
-  },
   "episodeCard": {
     "loading": "กำลังโหลด...",
     "epPrefix": "ตอน {number}",

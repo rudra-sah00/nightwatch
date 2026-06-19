@@ -157,12 +157,6 @@ Object.defineProperty(window, 'electronAPI', {
     startLiveBridge: vi.fn(),
     stopLiveBridge: vi.fn(),
     onLiveBridgeResolved: vi.fn().mockReturnValue(vi.fn()),
-    startDownload: vi.fn(),
-    cancelDownload: vi.fn(),
-    pauseDownload: vi.fn(),
-    resumeDownload: vi.fn(),
-    getDownloads: vi.fn().mockResolvedValue([]),
-    onDownloadProgress: vi.fn().mockReturnValue(vi.fn()),
   },
   writable: true,
 });

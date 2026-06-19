@@ -66,24 +66,6 @@
     "toWatchlist": "वॉचलिस्ट में जोड़ें",
     "removeFromList": "सूची से हटाएं"
   },
-  "download": {
-    "download": "डाउनलोड",
-    "viewInVault": "वॉल्ट में देखें",
-    "cancel": "रद्द करें",
-    "language": "भाषा",
-    "original": "मूल",
-    "selectQuality": "गुणवत्ता चुनें",
-    "selectEpisode": "एपिसोड चुनें",
-    "gatheringSources": "स्रोत एकत्र हो रहे हैं...",
-    "noFormatsAvailable": "कोई प्रारूप उपलब्ध नहीं",
-    "noEpisodesAvailable": "कोई एपिसोड उपलब्ध नहीं",
-    "saved": "सहेजा गया",
-    "securelyStarting": "सुरक्षित रूप से डाउनलोड शुरू हो रहा है...",
-    "untitled": "शीर्षकहीन",
-    "downloadingToast": "डाउनलोड हो रहा है{epText}! अपनी ऑफ़लाइन लाइब्रेरी देखें।",
-    "downloadingEpisodeText": " एपिसोड {episode} के लिए",
-    "episodePrefix": "एपिसोड"
-  },
   "episodeCard": {
     "loading": "लोड हो रहा है...",
     "epPrefix": "EP {number}",

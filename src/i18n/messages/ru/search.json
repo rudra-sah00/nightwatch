@@ -66,24 +66,6 @@
     "toWatchlist": "В список",
     "removeFromList": "Удалить из списка"
   },
-  "download": {
-    "download": "Скачать",
-    "viewInVault": "Открыть в хранилище",
-    "cancel": "Отмена",
-    "language": "Язык",
-    "original": "Оригинал",
-    "selectQuality": "Выбрать качество",
-    "selectEpisode": "Выбрать эпизод",
-    "gatheringSources": "Сбор источников...",
-    "noFormatsAvailable": "Нет доступных форматов",
-    "noEpisodesAvailable": "Нет доступных эпизодов",
-    "saved": "Сохранено",
-    "securelyStarting": "Безопасная загрузка начинается...",
-    "untitled": "Без названия",
-    "downloadingToast": "Скачивание{epText}! Проверьте вашу Офлайн Библиотеку.",
-    "downloadingEpisodeText": " эп. {episode}",
-    "episodePrefix": "Эпизод"
-  },
   "episodeCard": {
     "loading": "ЗАГРУЗКА...",
     "epPrefix": "ЭП {number}",

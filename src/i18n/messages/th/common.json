@@ -4,7 +4,6 @@
     "continue": "ดูต่อ",
     "live": "สด",
     "watchlist": "รายการดู",
-    "downloads": "ดาวน์โหลด",
     "profile": "โปรไฟล์",
     "logoAlt": "โลโก้ Nightwatch",
     "music": "Music",
@@ -81,10 +80,6 @@
       "title": "คิวของคุณ",
       "description": "บันทึกภาพยนตร์และตอนที่นี่เพื่อดูทีหลัง"
     },
-    "downloads": {
-      "title": "ห้องนิรภัยออฟไลน์",
-      "description": "ดูภาพยนตร์ได้ทุกที่ทุกเวลา เข้าถึงดาวน์โหลดออฟไลน์ที่นี่"
-    },
     "library": {
       "title": "ไลบรารีของคุณ",
       "description": "เรียกดูคลิปที่บันทึก การบันทึก และเนื้อหาที่รวบรวมไว้ในที่เดียว"
@@ -158,14 +153,8 @@
   "offline": {
     "title": "คุณออฟไลน์อยู่",
     "description": "Nightwatch ต้องการการเชื่อมต่อเพื่อสำรวจ เปิดห้องนิรภัยเพื่อดูเนื้อหาที่ดาวน์โหลดไว้",
-    "openVault": "เปิดห้องนิรภัยออฟไลน์",
     "toastOffline": "คุณออฟไลน์อยู่",
     "toastOnline": "กลับมาออนไลน์แล้ว!"
-  },
-  "swUpdate": {
-    "title": "มีเวอร์ชันใหม่",
-    "description": "รีเฟรชเพื่อรับการอัปเดตล่าสุด",
-    "refresh": "รีเฟรช"
   },
   "discord": {
     "readyToStream": "พร้อมสตรีม",
@@ -191,8 +180,6 @@
     "profileDescription": "จัดการโปรไฟล์และประวัติการรับชม",
     "liveTitle": "แมตช์สด | Nightwatch",
     "liveDescription": "ดูการแข่งขันกีฬาสดและช่องต่างๆ กับเพื่อนแบบเรียลไทม์",
-    "downloadsTitle": "ดาวน์โหลด | Nightwatch",
-    "downloadsDescription": "เข้าถึงภาพยนตร์และซีรีส์ที่ดาวน์โหลดไว้สำหรับดูแบบออฟไลน์",
     "watchlistTitle": "รายการดูของฉัน | Nightwatch",
     "watchlistDescription": "ติดตามภาพยนตร์และซีรีส์ที่คุณต้องการดูทีหลัง",
     "userNotFoundTitle": "ไม่พบผู้ใช้ | Nightwatch",
@@ -205,10 +192,6 @@
     "notInstalledDesc": "ไม่สามารถเปิดแอป Nightwatch ได้ ติดตั้งแล้วหรือยัง?",
     "downloadApp": "ดาวน์โหลดแอป",
     "downloadFor": "ดาวน์โหลดสำหรับ {os}"
-  },
-  "downloads": {
-    "experienceStarting": "กำลังเริ่มประสบการณ์",
-    "preparingContent": "กำลังเตรียม \"{title}\"..."
   },
   "errors": {
     "sessionExpired": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง",
@@ -247,10 +230,6 @@
         "title": "Messaging",
         "desc": "DMs, voice calls, and online presence."
       },
-      "offline": {
-        "title": "Offline Mode",
-        "desc": "Download and watch anywhere, anytime."
-      },
       "secure": {
         "title": "Private & Secure",
         "desc": "Encrypted sessions with invite-only access."
@@ -273,14 +252,8 @@
       "music": {
         "title": "Music Streaming",
         "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
-      },
-      "downloads": {
-        "title": "Offline Downloads",
-        "desc": "Download content to your device. Watch anywhere — no internet required."
       }
     },
-    "downloadTitle": "Get the Desktop App",
-    "downloadDesc": "Picture-in-Picture, media keys, offline downloads, and Discord Rich Presence — available on all platforms.",
     "ctaTitle": "Ready to Watch?",
     "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
     "footer": {

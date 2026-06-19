@@ -4,7 +4,6 @@
     "continue": "继续",
     "live": "直播",
     "watchlist": "观看列表",
-    "downloads": "下载",
     "profile": "个人资料",
     "logoAlt": "Nightwatch 标志",
     "music": "Music",
@@ -81,10 +80,6 @@
       "title": "您的队列",
       "description": "在这里保存电影和剧集以便稍后观看。"
     },
-    "downloads": {
-      "title": "离线保险库",
-      "description": "随时随地观看电影。在这里访问您的离线下载。"
-    },
     "library": {
       "title": "你的资料库",
       "description": "在一个地方浏览你保存的剪辑、录制和收集的内容。"
@@ -158,14 +153,8 @@
   "offline": {
     "title": "您已离线",
     "description": "Nightwatch需要网络连接才能浏览。请打开保险库查看已下载的内容。",
-    "openVault": "打开离线保险库",
     "toastOffline": "您已离线",
     "toastOnline": "已恢复在线！"
-  },
-  "swUpdate": {
-    "title": "新版本可用",
-    "description": "刷新以获取最新更新。",
-    "refresh": "刷新"
   },
   "discord": {
     "readyToStream": "准备就绪",
@@ -191,8 +180,6 @@
     "profileDescription": "管理您的个人资料和观看历史。",
     "liveTitle": "直播赛事 | Nightwatch",
     "liveDescription": "与朋友实时观看体育直播赛事和频道。",
-    "downloadsTitle": "下载 | Nightwatch",
-    "downloadsDescription": "访问已下载的电影和电视节目以供离线观看。",
     "watchlistTitle": "我的观看列表 | Nightwatch",
     "watchlistDescription": "跟踪您想稍后观看的电影和电视节目。",
     "userNotFoundTitle": "未找到用户 | Nightwatch",
@@ -205,10 +192,6 @@
     "notInstalledDesc": "无法打开Nightwatch桌面应用。是否已安装？",
     "downloadApp": "下载应用",
     "downloadFor": "下载 {os} 版"
-  },
-  "downloads": {
-    "experienceStarting": "体验启动中",
-    "preparingContent": "正在准备\"{title}\"..."
   },
   "errors": {
     "sessionExpired": "会话已过期。请重新登录。",
@@ -247,10 +230,6 @@
         "title": "Messaging",
         "desc": "DMs, voice calls, and online presence."
       },
-      "offline": {
-        "title": "Offline Mode",
-        "desc": "Download and watch anywhere, anytime."
-      },
       "secure": {
         "title": "Private & Secure",
         "desc": "Encrypted sessions with invite-only access."
@@ -273,14 +252,8 @@
       "music": {
         "title": "Music Streaming",
         "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
-      },
-      "downloads": {
-        "title": "Offline Downloads",
-        "desc": "Download content to your device. Watch anywhere — no internet required."
       }
     },
-    "downloadTitle": "Get the Desktop App",
-    "downloadDesc": "Picture-in-Picture, media keys, offline downloads, and Discord Rich Presence — available on all platforms.",
     "ctaTitle": "Ready to Watch?",
     "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
     "footer": {

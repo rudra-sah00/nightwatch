@@ -4,7 +4,6 @@
     "continue": "Continuar",
     "live": "Ao Vivo",
     "watchlist": "Lista",
-    "downloads": "Downloads",
     "profile": "Perfil",
     "logoAlt": "Logo Nightwatch",
     "music": "Music",
@@ -81,10 +80,6 @@
       "title": "Sua fila",
       "description": "Salve filmes e episódios aqui para assistir depois."
     },
-    "downloads": {
-      "title": "Cofre offline",
-      "description": "Assista filmes em qualquer lugar, a qualquer hora. Acesse seus downloads offline aqui."
-    },
     "library": {
       "title": "Sua Biblioteca",
       "description": "Navegue por seus clipes salvos, gravações e conteúdo coletado em um só lugar."
@@ -158,14 +153,8 @@
   "offline": {
     "title": "Você está Offline",
     "description": "Nightwatch requer conexão para explorar. Acesse seu cofre para assistir títulos baixados.",
-    "openVault": "Abrir Cofre Offline",
     "toastOffline": "Você está offline",
     "toastOnline": "De volta online!"
-  },
-  "swUpdate": {
-    "title": "Nova versão disponível",
-    "description": "Atualize para obter as últimas novidades.",
-    "refresh": "Atualizar"
   },
   "discord": {
     "readyToStream": "Pronto para transmitir",
@@ -191,8 +180,6 @@
     "profileDescription": "Gerencie seu perfil e histórico de visualização.",
     "liveTitle": "Jogos ao Vivo | Nightwatch",
     "liveDescription": "Assista jogos esportivos ao vivo e canais com seus amigos em tempo real.",
-    "downloadsTitle": "Downloads | Nightwatch",
-    "downloadsDescription": "Acesse seus filmes e séries baixados para assistir offline.",
     "watchlistTitle": "Minha Lista | Nightwatch",
     "watchlistDescription": "Acompanhe os filmes e séries que você quer assistir depois.",
     "userNotFoundTitle": "Usuário não encontrado | Nightwatch",
@@ -205,10 +192,6 @@
     "notInstalledDesc": "Não foi possível abrir o app Nightwatch. Está instalado?",
     "downloadApp": "Baixar App",
     "downloadFor": "Baixar para {os}"
-  },
-  "downloads": {
-    "experienceStarting": "Iniciando Experiência",
-    "preparingContent": "Preparando \"{title}\"..."
   },
   "errors": {
     "sessionExpired": "Sessão expirada. Faça login novamente.",
@@ -247,10 +230,6 @@
         "title": "Messaging",
         "desc": "DMs, voice calls, and online presence."
       },
-      "offline": {
-        "title": "Offline Mode",
-        "desc": "Download and watch anywhere, anytime."
-      },
       "secure": {
         "title": "Private & Secure",
         "desc": "Encrypted sessions with invite-only access."
@@ -273,14 +252,8 @@
       "music": {
         "title": "Music Streaming",
         "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
-      },
-      "downloads": {
-        "title": "Offline Downloads",
-        "desc": "Download content to your device. Watch anywhere — no internet required."
       }
     },
-    "downloadTitle": "Get the Desktop App",
-    "downloadDesc": "Picture-in-Picture, media keys, offline downloads, and Discord Rich Presence — available on all platforms.",
     "ctaTitle": "Ready to Watch?",
     "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
     "footer": {

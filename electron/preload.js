@@ -101,19 +101,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.removeListener('global-escape-pressed', subscription);
   },
 
-  // --- OFFLINE HLS DOWNLOADER ---
-  startDownload: (config) => ipcRenderer.send('start-download', config),
-  cancelDownload: (contentId) => ipcRenderer.send('cancel-download', contentId),
-  pauseDownload: (contentId) => ipcRenderer.send('pause-download', contentId),
-  resumeDownload: (contentId) => ipcRenderer.send('resume-download', contentId),
-  getDownloads: () => ipcRenderer.invoke('get-downloads'),
-  onDownloadProgress: (callback) => {
-    ipcRenderer.removeAllListeners('download-progress');
-    const sub = (_event, state) => callback(state);
-    ipcRenderer.on('download-progress', sub);
-    return () => ipcRenderer.removeListener('download-progress', sub);
-  },
-
   // --- HEALTH & RECOVERY ---
   // React app calls this after hydration to confirm successful boot.
   signalReady: () => ipcRenderer.send('app-ready'),

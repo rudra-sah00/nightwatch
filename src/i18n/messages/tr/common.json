@@ -4,7 +4,6 @@
     "continue": "Devam",
     "live": "Canlı",
     "watchlist": "İzleme Listesi",
-    "downloads": "İndirmeler",
     "profile": "Profil",
     "logoAlt": "Nightwatch Logosu",
     "music": "Music",
@@ -81,10 +80,6 @@
       "title": "Sıranız",
       "description": "Daha sonra izlemek için film ve bölümleri buraya kaydedin."
     },
-    "downloads": {
-      "title": "Çevrimdışı Kasa",
-      "description": "Her yerde, her zaman film izleyin. Çevrimdışı indirmelerinize buradan erişin."
-    },
     "library": {
       "title": "Kütüphanen",
       "description": "Kayıtlı kliplerini, kayıtlarını ve topladığın içerikleri tek bir yerde gözat."
@@ -158,14 +153,8 @@
   "offline": {
     "title": "Çevrimdışısınız",
     "description": "Nightwatch keşfetmek için bağlantı gerektirir. İndirilen içerikleri izlemek için kasanızı açın.",
-    "openVault": "Çevrimdışı Kasayı Aç",
     "toastOffline": "Çevrimdışısınız",
     "toastOnline": "Tekrar çevrimiçi!"
-  },
-  "swUpdate": {
-    "title": "Yeni sürüm mevcut",
-    "description": "En son güncellemeleri almak için yenileyin.",
-    "refresh": "Yenile"
   },
   "discord": {
     "readyToStream": "Yayına hazır",
@@ -191,8 +180,6 @@
     "profileDescription": "Profilinizi ve izleme geçmişinizi yönetin.",
     "liveTitle": "Canlı Maçlar | Nightwatch",
     "liveDescription": "Arkadaşlarınızla gerçek zamanlı olarak canlı spor maçları ve kanalları izleyin.",
-    "downloadsTitle": "İndirmeler | Nightwatch",
-    "downloadsDescription": "Çevrimdışı izleme için indirdiğiniz film ve dizilere erişin.",
     "watchlistTitle": "İzleme Listem | Nightwatch",
     "watchlistDescription": "Daha sonra izlemek istediğiniz film ve dizileri takip edin.",
     "userNotFoundTitle": "Kullanıcı bulunamadı | Nightwatch",
@@ -205,10 +192,6 @@
     "notInstalledDesc": "Nightwatch masaüstü uygulaması açılamadı. Yüklü mü?",
     "downloadApp": "Uygulamayı İndir",
     "downloadFor": "{os} için İndir"
-  },
-  "downloads": {
-    "experienceStarting": "Deneyim Başlıyor",
-    "preparingContent": "\"{title}\" hazırlanıyor..."
   },
   "errors": {
     "sessionExpired": "Oturum süresi doldu. Lütfen tekrar giriş yapın.",
@@ -247,10 +230,6 @@
         "title": "Messaging",
         "desc": "DMs, voice calls, and online presence."
       },
-      "offline": {
-        "title": "Offline Mode",
-        "desc": "Download and watch anywhere, anytime."
-      },
       "secure": {
         "title": "Private & Secure",
         "desc": "Encrypted sessions with invite-only access."
@@ -273,14 +252,8 @@
       "music": {
         "title": "Music Streaming",
         "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
-      },
-      "downloads": {
-        "title": "Offline Downloads",
-        "desc": "Download content to your device. Watch anywhere — no internet required."
       }
     },
-    "downloadTitle": "Get the Desktop App",
-    "downloadDesc": "Picture-in-Picture, media keys, offline downloads, and Discord Rich Presence — available on all platforms.",
     "ctaTitle": "Ready to Watch?",
     "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
     "footer": {

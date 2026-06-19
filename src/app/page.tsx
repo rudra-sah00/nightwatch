@@ -2,7 +2,6 @@
 
 import {
   ArrowRight,
-  Download,
   MonitorPlay,
   Music,
   Radio,
@@ -14,96 +13,16 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useDownloadLinks } from '@/hooks/use-download-links';
 import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
-const FEATURE_ICONS = [MonitorPlay, Users, Radio, Download, Shield] as const;
+const FEATURE_ICONS = [MonitorPlay, Users, Radio, Shield] as const;
 const FEATURE_KEYS = [
   'watchTogether',
   'watchParties',
   'goLive',
-  'offline',
   'secure',
 ] as const;
-
-const PLATFORM_BUTTONS = [
-  {
-    key: 'windows' as const,
-    label: 'Windows',
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="w-5 h-5 shrink-0"
-        role="img"
-        aria-label="Windows"
-      >
-        <path d="M3 12V6.5l8-1.1V12H3zm0 5.5V12h8v6.6l-8-1.1zm9-12.9L22 3v9h-10V5.1zM22 12v9l-10 2V12h10z" />
-      </svg>
-    ),
-  },
-  {
-    key: 'mac' as const,
-    label: 'macOS',
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="w-5 h-5 shrink-0"
-        role="img"
-        aria-label="macOS"
-      >
-        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-      </svg>
-    ),
-  },
-  {
-    key: 'linux' as const,
-    label: 'Linux',
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="w-5 h-5 shrink-0"
-        role="img"
-        aria-label="Linux"
-      >
-        <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.368 1.884 1.43.868.07 1.723-.26 2.456-.594.733-.34 1.455-.678 2.186-.78.292-.042.594-.04.857.058a.32.32 0 00.286 0c.166-.09.296-.267.406-.466.109-.198.195-.467.305-.642.087-.174.183-.349.245-.516.06-.17.1-.334.1-.501 0-.21-.05-.39-.192-.536-.112-.12-.266-.19-.422-.23a.86.86 0 00.012-.045c.4-.88.127-1.632-.24-2.268-.376-.631-.862-1.2-1.205-1.774-.345-.576-.58-1.21-.689-2.04-.122-.93-.08-1.56-.079-2.14 0-.58.032-1.12-.18-1.68-.37-.97-1.15-1.86-2.05-2.46-.9-.6-1.94-.93-2.88-.93z" />
-      </svg>
-    ),
-  },
-  {
-    key: 'android' as const,
-    label: 'Android',
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="w-5 h-5 shrink-0"
-        role="img"
-        aria-label="Android"
-      >
-        <path d="M17.523 15.341a1 1 0 01-.998-1.002 1 1 0 011.002-.998 1 1 0 01.998 1.002 1 1 0 01-1.002.998m-11.046 0a1 1 0 01-.998-1.002 1 1 0 011.002-.998 1 1 0 01.998 1.002 1 1 0 01-1.002.998m11.405-6.02l1.997-3.46a.416.416 0 00-.152-.567.416.416 0 00-.567.152L17.14 8.95a12.26 12.26 0 00-5.14-1.1 12.26 12.26 0 00-5.14 1.1L4.84 5.446a.416.416 0 00-.567-.152.416.416 0 00-.152.567l1.997 3.46C2.688 11.186.343 14.658 0 18.76h24c-.344-4.102-2.69-7.574-6.118-9.44" />
-      </svg>
-    ),
-  },
-  {
-    key: 'tv' as const,
-    label: 'TV',
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="w-5 h-5 shrink-0"
-        role="img"
-        aria-label="Android TV"
-      >
-        <path d="M21 17H3V5h18m0-2H3a2 2 0 00-2 2v12a2 2 0 002 2h7v2H8v2h8v-2h-2v-2h7a2 2 0 002-2V5a2 2 0 00-2-2z" />
-      </svg>
-    ),
-  },
-];
 
 const BENTO_CONFIG = [
   {
@@ -142,21 +61,11 @@ const BENTO_CONFIG = [
     descColor: 'text-foreground/50',
     large: false,
   },
-  {
-    key: 'downloads',
-    icon: Download,
-    color: 'text-neo-green',
-    span: 'md:col-span-2 lg:col-span-1',
-    bg: 'bg-secondary text-foreground',
-    descColor: 'text-foreground/70',
-    large: false,
-  },
 ] as const;
 
 export default function LandingPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const downloads = useDownloadLinks();
   const t = useTranslations('common.landing');
 
   useEffect(() => {
@@ -268,30 +177,6 @@ export default function LandingPage() {
             );
           })}
         </div>
-      </section>
-
-      {/* Download Desktop App */}
-      <section className="relative z-10 px-4 md:px-8 pb-24 max-w-4xl mx-auto text-center">
-        <h2 className="font-headline font-black text-3xl md:text-4xl uppercase tracking-tighter mb-3">
-          {t('downloadTitle')}
-        </h2>
-        <p className="text-sm text-foreground/50 mb-10 max-w-md mx-auto">
-          {t('downloadDesc')}
-        </p>
-        {downloads && (
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            {PLATFORM_BUTTONS.map((p) => (
-              <a
-                key={p.key}
-                href={downloads[p.key]}
-                className="flex items-center gap-3 border-4 border-border bg-card px-6 py-4 font-headline font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-primary-foreground transition-colors w-full sm:w-auto justify-center"
-              >
-                {p.icon}
-                {p.label}
-              </a>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* Bottom CTA */}

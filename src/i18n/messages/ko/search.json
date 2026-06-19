@@ -66,24 +66,6 @@
     "toWatchlist": "관심목록에 추가",
     "removeFromList": "목록에서 제거"
   },
-  "download": {
-    "download": "다운로드",
-    "viewInVault": "보관함에서 보기",
-    "cancel": "취소",
-    "language": "언어",
-    "original": "원본",
-    "selectQuality": "화질 선택",
-    "selectEpisode": "에피소드 선택",
-    "gatheringSources": "소스 수집 중...",
-    "noFormatsAvailable": "사용 가능한 형식이 없습니다",
-    "noEpisodesAvailable": "사용 가능한 에피소드가 없습니다",
-    "saved": "저장됨",
-    "securelyStarting": "안전하게 다운로드 시작 중...",
-    "untitled": "제목 없음",
-    "downloadingToast": "다운로드 중{epText}! 오프라인 라이브러리를 확인하세요.",
-    "downloadingEpisodeText": " Ep {episode}",
-    "episodePrefix": "에피소드"
-  },
   "episodeCard": {
     "loading": "로딩 중...",
     "epPrefix": "EP {number}",

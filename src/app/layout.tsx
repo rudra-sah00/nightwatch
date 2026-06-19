@@ -8,7 +8,6 @@ import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
 import { MobileShell } from '@/components/layout/MobileShell';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
-import { SwUpdatePrompt } from '@/components/layout/sw-update-prompt';
 import { TvShell } from '@/components/layout/TvShell';
 import { Toaster } from '@/components/ui/sonner';
 import { SplashScreen } from '@/components/ui/splash-screen';
@@ -17,7 +16,6 @@ import { AuthProvider } from '@/providers/auth-provider';
 import { IntlProvider } from '@/providers/intl-provider';
 import { SocketProvider } from '@/providers/socket-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
-import { SerwistProvider } from './serwist';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -76,41 +74,38 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased bg-background text-foreground select-none`}
       >
-        <SerwistProvider swUrl="/sw.js">
-          <Suspense fallback={<div className="min-h-screen" />}>
-            <IntlProvider>
-              {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
-              <ElectronDragRegion />
+        <Suspense fallback={<div className="min-h-screen" />}>
+          <IntlProvider>
+            {/* Electron Window Drag Region (top edge where macOS/Windows controls sit) */}
+            <ElectronDragRegion />
 
-              <ThemeProvider>
-                <SocketProvider>
-                  <AuthProvider>
-                    <div
-                      className="flex flex-col overflow-hidden h-[100dvh] box-border"
-                      style={{
-                        paddingTop:
-                          'max(var(--electron-titlebar-height, 0px), env(safe-area-inset-top, 0px))',
-                        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-                        paddingLeft: 'env(safe-area-inset-left, 0px)',
-                        paddingRight: 'env(safe-area-inset-right, 0px)',
-                      }}
-                    >
-                      <ProgressBar />
-                      <DiscordPresenceSync />
-                      <MobileShell />
-                      <TvShell />
-                      <OfflineIndicator />
-                      <SwUpdatePrompt />
-                      <SplashScreen />
-                      {children}
-                      <Toaster />
-                    </div>
-                  </AuthProvider>
-                </SocketProvider>
-              </ThemeProvider>
-            </IntlProvider>
-          </Suspense>
-        </SerwistProvider>
+            <ThemeProvider>
+              <SocketProvider>
+                <AuthProvider>
+                  <div
+                    className="flex flex-col overflow-hidden h-[100dvh] box-border"
+                    style={{
+                      paddingTop:
+                        'max(var(--electron-titlebar-height, 0px), env(safe-area-inset-top, 0px))',
+                      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                      paddingLeft: 'env(safe-area-inset-left, 0px)',
+                      paddingRight: 'env(safe-area-inset-right, 0px)',
+                    }}
+                  >
+                    <ProgressBar />
+                    <DiscordPresenceSync />
+                    <MobileShell />
+                    <TvShell />
+                    <OfflineIndicator />
+                    <SplashScreen />
+                    {children}
+                    <Toaster />
+                  </div>
+                </AuthProvider>
+              </SocketProvider>
+            </ThemeProvider>
+          </IntlProvider>
+        </Suspense>
       </body>
     </html>
   );

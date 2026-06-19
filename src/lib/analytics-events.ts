@@ -123,11 +123,6 @@ export const AnalyticsEvents = {
   MANGA_FAVORITE_ADD: 'manga_favorite_add',
   MANGA_FAVORITE_REMOVE: 'manga_favorite_remove',
 
-  // Downloads
-  DOWNLOAD_START: 'download_start',
-  DOWNLOAD_COMPLETE: 'download_complete',
-  DOWNLOAD_CANCEL: 'download_cancel',
-
   // Notifications & App
   NOTIFICATION_OPEN: 'notification_open',
   SHARE_CONTENT: 'share_content',

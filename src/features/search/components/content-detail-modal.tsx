@@ -13,7 +13,6 @@ import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
 import { ContentType } from '../types';
 import { ContentActions, ContentInfo } from './content-info';
-import { DownloadMenu } from './download-menu';
 import { EpisodeList } from './episode-list';
 import { SeasonSelector } from './season-selector';
 
@@ -291,15 +290,6 @@ export function ContentDetailModal({
               }}
               isInWatchlist={inWatchlist}
               isWatchlistLoading={isWatchlistLoading}
-              extraActions={
-                isDesktopApp || checkIsMobile() ? (
-                  <DownloadMenu
-                    show={show}
-                    selectedSeason={selectedSeason}
-                    episodes={episodes}
-                  />
-                ) : undefined
-              }
             />
           </div>
 

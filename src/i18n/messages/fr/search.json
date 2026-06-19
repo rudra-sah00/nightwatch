@@ -66,24 +66,6 @@
     "toWatchlist": "À la liste",
     "removeFromList": "Retirer de la liste"
   },
-  "download": {
-    "download": "Télécharger",
-    "viewInVault": "Voir dans le coffre",
-    "cancel": "Annuler",
-    "language": "Langue",
-    "original": "Original",
-    "selectQuality": "Sélectionner la qualité",
-    "selectEpisode": "Sélectionner l'épisode",
-    "gatheringSources": "Collecte des sources...",
-    "noFormatsAvailable": "Aucun format disponible",
-    "noEpisodesAvailable": "Aucun épisode disponible",
-    "saved": "Enregistré",
-    "securelyStarting": "Démarrage sécurisé du téléchargement...",
-    "untitled": "Sans titre",
-    "downloadingToast": "Téléchargement{epText} en cours ! Consultez votre Bibliothèque Hors Ligne.",
-    "downloadingEpisodeText": " de l'Ép {episode}",
-    "episodePrefix": "Épisode"
-  },
   "episodeCard": {
     "loading": "CHARGEMENT...",
     "epPrefix": "ÉP {number}",
