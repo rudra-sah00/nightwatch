@@ -37,7 +37,7 @@ import { MusicSkeleton } from './MusicSkeleton';
  */
 
 // Module-level cache so navigating away and back doesn't refetch/flash skeleton
-let cachedData: MusicSectionsData | null = null;
+const cachedData: MusicSectionsData | null = null;
 
 export function MusicView() {
   const searchParams = useSearchParams();
@@ -46,22 +46,20 @@ export function MusicView() {
   const [showExplore, setShowExplore] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [data, setData] = useState<MusicSectionsData>(
-    cachedData || {
-      charts: [],
-      featured: [],
-      artists: [],
-      releases: [],
-      radio: [],
-      trendingSongs: [],
-      genres: [],
-      podcasts: [],
-      forYou: [],
-    },
-  );
+  const [data, setData] = useState<MusicSectionsData>({
+    charts: [],
+    featured: [],
+    artists: [],
+    releases: [],
+    radio: [],
+    trendingSongs: [],
+    genres: [],
+    podcasts: [],
+    forYou: [],
+  });
   const [showSearch, setShowSearch] = useState(false);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
-  const [loading, setLoading] = useState(!cachedData);
+  const [loading, setLoading] = useState(true);
   const [playlistKey, setPlaylistKey] = useState(0);
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [selectedLangs, setSelectedLangs] = useState<Set<string>>(
@@ -77,8 +75,8 @@ export function MusicView() {
       .catch(() => {});
   }, []);
 
-  const loadData = useCallback((force = false) => {
-    if (!cachedData || force) setLoading(true);
+  const loadData = useCallback(() => {
+    setLoading(true);
     Promise.all([
       getMusicHome(),
       getTrending('song', 'hindi').catch(() => []),
@@ -86,7 +84,7 @@ export function MusicView() {
       getTopPodcasts().catch(() => []),
     ])
       .then(([home, trending, browse, podcasts]) => {
-        const result: MusicSectionsData = {
+        setData({
           charts: home.charts,
           featured: home.featured,
           artists: home.artists,
@@ -96,9 +94,7 @@ export function MusicView() {
           genres: browse.genres,
           podcasts,
           forYou: home.forYou || [],
-        };
-        cachedData = result;
-        setData(result);
+        });
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -153,7 +149,7 @@ export function MusicView() {
           selectedLangs={selectedLangs}
           onChangeLangs={setSelectedLangs}
           onClose={() => setShowLangPicker(false)}
-          onApply={() => loadData(true)}
+          onApply={loadData}
         />
       )}
 
