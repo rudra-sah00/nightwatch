@@ -17,7 +17,6 @@ import { useEffect, useState } from 'react';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,

@@ -95,7 +95,6 @@ export default function UserPlaylistDetailPage() {
     allTracks: UserPlaylistDetail['tracks'],
   ) => {
     const asMusicTrack = (t: UserPlaylistDetail['tracks'][number]) => {
-      console.log('[Playlist] Playing track:', t.trackId, t.title);
       return {
         id: t.trackId,
         title: t.title,

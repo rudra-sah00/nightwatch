@@ -299,12 +299,12 @@ class AppWindow {
     // --- NATIVE FULLSCREEN STATE TRACKING ---
     // macOS fires 'blur' on the BrowserWindow during the OS fullscreen animation.
     // Track fullscreen state so blur/focus handlers can guard against spurious events.
-    let isNativeFullscreen = false;
+    let _isNativeFullscreen = false;
     // A small grace period after leaving fullscreen to absorb any trailing blur.
     let fullscreenExitGraceTimer = null;
 
     this.mainWindow.on('enter-full-screen', () => {
-      isNativeFullscreen = true;
+      _isNativeFullscreen = true;
       if (fullscreenExitGraceTimer) {
         clearTimeout(fullscreenExitGraceTimer);
         fullscreenExitGraceTimer = null;
@@ -316,7 +316,7 @@ class AppWindow {
       // Keep the flag set for a short grace period — the 'blur' from the OS
       // fullscreen exit animation may arrive up to ~200 ms after this event.
       fullscreenExitGraceTimer = setTimeout(() => {
-        isNativeFullscreen = false;
+        _isNativeFullscreen = false;
         fullscreenExitGraceTimer = null;
       }, 300);
       this.mainWindow.webContents.send('window-fullscreen-changed', false);

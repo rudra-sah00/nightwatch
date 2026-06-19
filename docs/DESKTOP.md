@@ -44,6 +44,10 @@ src-electron/
 - **Electron plugins**: Store, Notification, Clipboard, Global Shortcut, Deep Link, Updater, Autostart, Shell — all registered as Electron plugins.
 - **JS injection**: On window load, Rust injects a script that adds a drag region at the top of the page and attaches drag handlers to the nav element, with MutationObserver re-attachment for SPA navigation.
 
+## Service Worker
+
+The desktop app benefits from the same Workbox service worker (`public/sw.js`) used in the browser. It caches `/_next/static/` JS/CSS chunks via CacheFirst, preventing hard reloads when the webview needs to re-fetch evicted chunks during long sessions. This keeps music playback and real-time connections alive across navigations.
+
 ## Auto-Updating
 
 The desktop app uses `electron-plugin-updater` for seamless OTA updates:

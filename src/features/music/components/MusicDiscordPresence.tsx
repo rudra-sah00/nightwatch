@@ -28,12 +28,6 @@ export function MusicDiscordPresence() {
     if (!checkIsDesktop()) return;
 
     if (currentTrack && isPlaying) {
-      console.log(
-        '[MusicDiscordPresence] acquiring lock, sending presence:',
-        currentTrack.title,
-        'by',
-        currentTrack.artist,
-      );
       musicPresenceLock.acquire();
       desktopBridge.updateDiscordPresence({
         details: currentTrack.title,
@@ -45,12 +39,6 @@ export function MusicDiscordPresence() {
         startTimestamp: Date.now(),
       });
     } else {
-      console.log(
-        '[MusicDiscordPresence] releasing lock — track:',
-        currentTrack?.title ?? 'none',
-        'isPlaying:',
-        isPlaying,
-      );
       musicPresenceLock.release();
       desktopBridge.clearDiscordPresence();
     }

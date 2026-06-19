@@ -6,9 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlaybackCountdown } from '@/features/watch/components/PlaybackCountdown';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { useIsMobile } from '@/hooks/use-is-mobile';
-import { checkIsMobile } from '@/lib/electron-bridge';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContentDetailModal } from '../hooks/use-content-detail-modal';
 import { ContentType } from '../types';
@@ -56,7 +54,6 @@ export function ContentDetailModal({
   autoPlay = false,
   isOfflineMode = false,
 }: ContentDetailModalProps) {
-  const { isDesktopApp } = useDesktopApp();
   const {
     show,
     episodes,

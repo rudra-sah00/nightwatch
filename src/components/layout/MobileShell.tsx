@@ -49,8 +49,13 @@ export function MobileShell() {
 
     // --- ANDROID BACK BUTTON ---
     const unlistenBack = mobileBridge.onBackButton(() => {
-      if ((window as any).__musicFullPlayerHandledBack) {
-        (window as any).__musicFullPlayerHandledBack = false;
+      if (
+        (window as unknown as Record<string, boolean>)
+          .__musicFullPlayerHandledBack
+      ) {
+        (
+          window as unknown as Record<string, boolean>
+        ).__musicFullPlayerHandledBack = false;
         return;
       }
       if (pathnameRef.current === '/home' || pathnameRef.current === '/') {

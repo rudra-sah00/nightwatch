@@ -97,18 +97,6 @@ export function useHls({
     // Capture native HLS handler so the cleanup closure can remove it
     let nativeLoadedMetadataHandler: (() => void) | null = null;
 
-    console.log(
-      '[NW-HLS] Initializing with stream URL:',
-      streamUrl?.slice(0, 80),
-    );
-    console.log('[NW-HLS] Video element state:', {
-      readyState: video.readyState,
-      networkState: video.networkState,
-      currentTime: video.currentTime,
-      videoWidth: video.videoWidth,
-      videoHeight: video.videoHeight,
-    });
-
     // Clear any previous errors when loading new stream
     dispatch({ type: 'SET_ERROR', error: null });
     dispatch({ type: 'SET_LOADING', isLoading: true });
@@ -664,11 +652,6 @@ export function useHls({
 
     return () => {
       cancelled = true;
-      console.log('[NW-HLS] Cleanup: destroying HLS instance', {
-        hadHls: !!hlsRef.current,
-        videoReadyState: video.readyState,
-        videoTime: video.currentTime,
-      });
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;

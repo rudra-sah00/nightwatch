@@ -40,7 +40,7 @@ const OUTPUT_DIR =
       const urlObj = new URL(url);
       const parts = urlObj.pathname.split('/');
       // Skip the first part (version ID) and join the rest
-      const versionId = parts[1];
+      const _versionId = parts[1];
       const relativePath = parts.slice(2).join('/') || 'index.html';
       const dest = path.join(OUTPUT_DIR, relativePath);
 

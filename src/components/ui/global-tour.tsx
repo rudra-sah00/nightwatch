@@ -223,7 +223,7 @@ function buildDesktopSteps(
   title: (t: string) => string,
   desc: (t: string) => string,
   t: (key: string) => string,
-  isDesktopApp: boolean,
+  _isDesktopApp: boolean,
   setLeftOpen: (v: boolean) => void,
   setRightOpen: (v: boolean) => void,
 ): DriveStep[] {

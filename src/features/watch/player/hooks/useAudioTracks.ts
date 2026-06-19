@@ -181,19 +181,9 @@ export function useAudioTracks({
 
       if (track.streamUrl.startsWith('s1:')) {
         // Dub stored as a separate content entry → full refetch needed.
-        console.log('[NW-Audio] Language switch (refetch):', {
-          trackId,
-          label: track.label,
-          streamUrl: track.streamUrl,
-        });
         onRefetch(track.streamUrl);
       } else {
         // Direct MP4 URL → swap in place.
-        console.log('[NW-Audio] Language switch (direct URL swap):', {
-          trackId,
-          label: track.label,
-          url: track.streamUrl?.slice(0, 80),
-        });
         onStreamChange(track.streamUrl);
       }
     },

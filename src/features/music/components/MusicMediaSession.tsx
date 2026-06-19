@@ -40,16 +40,27 @@ export function MusicMediaSession() {
       typeof window !== 'undefined' &&
       window.Capacitor?.getPlatform?.() === 'android';
     if (!isAndroid) return;
-    const plugin = (window as { Capacitor?: { Plugins?: Record<string, any> } })
-      .Capacitor?.Plugins?.NWMusicService;
+    const plugin = (
+      window as {
+        Capacitor?: {
+          Plugins?: Record<
+            string,
+            {
+              start?: (p: Record<string, string>) => Promise<void>;
+              stop?: () => Promise<void>;
+            }
+          >;
+        };
+      }
+    ).Capacitor?.Plugins?.NWMusicService;
     if (!plugin) return;
 
     if (displayPlaying && displayTrack) {
       plugin
-        .start({ title: displayTrack.title, artist: displayTrack.artist })
-        .catch(() => {});
+        .start?.({ title: displayTrack.title, artist: displayTrack.artist })
+        ?.catch(() => {});
     } else {
-      plugin.stop().catch(() => {});
+      plugin.stop?.()?.catch(() => {});
     }
   }, [displayPlaying, displayTrack]);
 

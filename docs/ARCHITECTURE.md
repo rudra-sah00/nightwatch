@@ -245,3 +245,44 @@ Each child component consumes `PlayerContext` and renders a single concern:
 - `SubtitleOverlay` — parses WebVTT and renders cues positioned over the video
 
 This pattern allows `WatchVODPlayer` and `WatchLivePlayer` to compose different control layouts from the same building blocks while sharing all core player logic.
+
+---
+
+## 9. Service Worker (Workbox)
+
+The app uses a runtime-caching service worker (`public/sw.js`) powered by **Google Workbox via CDN** (`importScripts`). No build step or npm dependency is required for the SW itself — modules are loaded on-demand from Google's CDN.
+
+### Purpose
+
+Prevents full page hard reloads during client-side navigations under memory pressure. Without the SW, the browser can garbage-collect cached JS chunks from memory during long sessions (e.g., music playback), causing Next.js App Router to fall back to MPA navigation which destroys the AudioContext.
+
+### Caching Strategies
+
+| Cache Name | Strategy | What |
+|------------|----------|------|
+| `nw-next-static` | CacheFirst | `/_next/static/` JS/CSS chunks (immutable, content-hashed) |
+| `nw-static-assets` | CacheFirst (30d, 100 max) | Images and `.woff2` fonts |
+| `google-fonts-stylesheets` | StaleWhileRevalidate | Google Fonts CSS |
+| `google-fonts-webfonts` | CacheFirst (1yr, 30 max) | Google Fonts `.woff2` files |
+| `nw-pages` | NetworkFirst (3s timeout) | HTML navigation requests |
+| `nw-retry-queue` | BackgroundSync | Failed mutations to safe endpoints |
+
+### Background Sync (Retry Queue)
+
+Safe-to-retry mutations are queued when offline and replayed when connectivity returns:
+- `/api/user/watchlist` (add/remove)
+- `/api/video/play`, `/api/video/stop`
+- `/api/notifications/register`, `/api/notifications/unregister`
+- `/api/manga/progress`
+- `/api/music/discover/listen`
+- `/api/music/queue`, `/api/music/languages`
+
+### Registration
+
+Client-side registration via `workbox-window` in `src/components/layout/sw-register.tsx`. Disabled on staging (`dev.nightwatch.in`). Update detection shows a sonner toast prompting refresh when a new SW version is waiting.
+
+### Key Files
+
+- `public/sw.js` — Workbox service worker (CDN importScripts, ~100 lines)
+- `src/components/layout/sw-register.tsx` — Registration + update toast
+- `public/firebase-messaging-sw.js` — Separate SW for push notifications (different scope)

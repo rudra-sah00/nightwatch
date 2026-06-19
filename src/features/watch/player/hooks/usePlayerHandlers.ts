@@ -259,17 +259,6 @@ export function usePlayerHandlers({
   // Handle audio track change
   const handleAudioChange = useCallback(
     (trackId: string) => {
-      console.log('[NW-Player] Audio track change requested:', trackId);
-      const video = videoRef.current;
-      if (video) {
-        console.log('[NW-Player] Video state before audio change:', {
-          readyState: video.readyState,
-          networkState: video.networkState,
-          currentTime: video.currentTime,
-          paused: video.paused,
-          src: video.src?.slice(0, 80),
-        });
-      }
       setAudioTrack(trackId);
       dispatch({ type: 'SET_CURRENT_AUDIO_TRACK', trackId });
       // For language dubs the parent swaps the top-level streamUrl
@@ -277,28 +266,16 @@ export function usePlayerHandlers({
       onExternalAudioChange?.(trackId);
       showControls();
     },
-    [setAudioTrack, dispatch, showControls, onExternalAudioChange, videoRef],
+    [setAudioTrack, dispatch, showControls, onExternalAudioChange],
   );
 
   // Handle subtitle track change
   const handleSubtitleChange = useCallback(
     (trackId: string | null) => {
-      console.log('[NW-Player] Subtitle track change requested:', trackId);
-      const video = videoRef.current;
-      if (video) {
-        console.log('[NW-Player] Video state before subtitle change:', {
-          readyState: video.readyState,
-          networkState: video.networkState,
-          currentTime: video.currentTime,
-          paused: video.paused,
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-        });
-      }
       dispatch({ type: 'SET_CURRENT_SUBTITLE_TRACK', trackId });
       showControls();
     },
-    [dispatch, showControls, videoRef],
+    [dispatch, showControls],
   );
 
   // Handle retry on error

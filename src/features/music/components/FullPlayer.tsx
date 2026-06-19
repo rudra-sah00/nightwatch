@@ -88,7 +88,9 @@ export function FullPlayer() {
     import('@capacitor/app').then(({ App }) => {
       if (removed) return;
       const handle = App.addListener('backButton', () => {
-        (window as any).__musicFullPlayerHandledBack = true;
+        (
+          window as unknown as Record<string, boolean>
+        ).__musicFullPlayerHandledBack = true;
         handleClose();
       });
       removeListener = () => {

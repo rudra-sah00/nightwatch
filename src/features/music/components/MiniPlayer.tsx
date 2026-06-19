@@ -39,7 +39,7 @@ import { showSongMenu } from './SongContextMenu';
 export function MiniPlayer() {
   const player = useMusicPlayerContext();
   const { progress } = useMusicPlaybackProgress();
-  const t = useTranslations('music');
+  const _t = useTranslations('music');
   const mobile = useIsMobile();
   useMusicShortcuts();
 

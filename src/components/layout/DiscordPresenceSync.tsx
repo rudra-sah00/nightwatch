@@ -42,12 +42,6 @@ export function DiscordPresenceSync() {
       /^\/live\/[^/]+/.test(pathname) ||
       musicPresenceLock.isLocked()
     ) {
-      console.log(
-        '[DiscordPresenceSync] skipped — musicLock:',
-        musicPresenceLock.isLocked(),
-        'path:',
-        pathname,
-      );
       return;
     }
 
@@ -70,12 +64,6 @@ export function DiscordPresenceSync() {
       state = 'Nightwatch';
     }
 
-    console.log(
-      '[DiscordPresenceSync] sending browsing presence:',
-      details,
-      '|',
-      state,
-    );
     desktopBridge.updateDiscordPresence({
       details,
       state,
