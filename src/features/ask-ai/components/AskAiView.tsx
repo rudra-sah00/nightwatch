@@ -2,6 +2,7 @@
 
 import { Play, Square } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { PageTitle } from '@/components/layout/page-title';
 import { useAskAi } from '@/features/ask-ai/hooks/use-ask-ai';
 
 /**
@@ -18,6 +19,7 @@ export function AskAiView() {
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-8 px-4 py-12">
+      <PageTitle title="Ask AI" />
       {/* Orb button */}
       <div className="relative">
         {/* Pulse rings when listening */}

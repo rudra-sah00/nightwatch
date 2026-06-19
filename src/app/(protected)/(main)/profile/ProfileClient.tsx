@@ -3,6 +3,7 @@
 import { ChevronRight, Monitor, Palette, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { PageTitle } from '@/components/layout/page-title';
 import { ActivityGraph } from '@/features/profile/components/activity-graph';
 import { UpdateProfileForm } from '@/features/profile/components/update-profile-form';
 import { useProfileOverview } from '@/features/profile/hooks/use-profile-overview';
@@ -25,6 +26,7 @@ export default function ProfileClient() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-8 animate-in fade-in duration-200 w-full">
+      <PageTitle title="Profile" />
       <UpdateProfileForm />
 
       <nav className="flex flex-col gap-2">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { PageTitle } from '@/components/layout/page-title';
 import { ClipsGrid } from './ClipsGrid';
 
 export default function LibraryPage() {
@@ -8,6 +9,7 @@ export default function LibraryPage() {
 
   return (
     <main className="pb-32 animate-in fade-in">
+      <PageTitle title={t('nav.library')} />
       {/* Hero Header */}
       <div className="mb-12 bg-neo-orange relative overflow-hidden rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-20" />

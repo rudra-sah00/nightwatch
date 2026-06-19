@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { PageTitle } from '@/components/layout/page-title';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { apiFetch } from '@/lib/fetch';
@@ -36,6 +37,7 @@ export default function GamesPage() {
 
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
+      <PageTitle title="Games" />
       {/* Hero */}
       <div className="mb-8 bg-neo-green relative overflow-hidden rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />

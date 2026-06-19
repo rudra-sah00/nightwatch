@@ -3,6 +3,7 @@
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { PageTitle } from '@/components/layout/page-title';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { ProfileBackButton } from '@/features/profile/components/profile-back-button';
 import { useChangePasswordForm } from '@/features/profile/hooks/use-change-password-form';
@@ -14,6 +15,7 @@ export default function SecurityPage() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200 w-full">
+      <PageTitle title="Security" />
       <ProfileBackButton label="Profile" />
       <form
         action={passwordForm.action}

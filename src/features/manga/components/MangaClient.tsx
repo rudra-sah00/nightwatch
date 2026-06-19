@@ -12,6 +12,7 @@ import {
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { PageTitle } from '@/components/layout/page-title';
 import type { MangaTitle } from '@/features/manga/api';
 import {
   getMangaFavorites,
@@ -193,6 +194,7 @@ export function MangaClient() {
 
   return (
     <main className="pb-32 animate-in fade-in">
+      <PageTitle title="Manga" />
       {/* Search Spotlight */}
       {showSearch && (
         <MangaSearchSpotlight onClose={() => setShowSearch(false)} />
