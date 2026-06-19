@@ -39,6 +39,7 @@ export function MusicMediaSession() {
   const displayPlaying = isRemoteControlling ? remoteIsPlaying : isPlaying;
 
   // Start/stop Android foreground service for background playback
+  const androidServiceStartedRef = useRef(false);
   useEffect(() => {
     const isAndroid =
       typeof window !== 'undefined' &&
@@ -50,8 +51,13 @@ export function MusicMediaSession() {
           Plugins?: Record<
             string,
             {
-              start?: (p: Record<string, string>) => Promise<void>;
+              start?: (p: Record<string, unknown>) => Promise<void>;
+              update?: (p: Record<string, unknown>) => Promise<void>;
               stop?: () => Promise<void>;
+              addListener?: (
+                event: string,
+                cb: (data: { command: string }) => void,
+              ) => { remove: () => void };
             }
           >;
         };
@@ -59,14 +65,74 @@ export function MusicMediaSession() {
     ).Capacitor?.Plugins?.NWMusicService;
     if (!plugin) return;
 
-    if (displayPlaying && displayTrack) {
-      plugin
-        .start?.({ title: displayTrack.title, artist: displayTrack.artist })
-        ?.catch(() => {});
+    if (displayTrack) {
+      const payload = {
+        title: displayTrack.title,
+        artist: displayTrack.artist,
+        imageUrl: displayTrack.image || '',
+        isPlaying: displayPlaying,
+      };
+      if (!androidServiceStartedRef.current) {
+        plugin.start?.(payload)?.catch(() => {});
+        androidServiceStartedRef.current = true;
+      } else {
+        plugin.update?.(payload)?.catch(() => {});
+      }
     } else {
       plugin.stop?.()?.catch(() => {});
+      androidServiceStartedRef.current = false;
     }
   }, [displayPlaying, displayTrack]);
+
+  // Listen for commands from Android notification buttons
+  useEffect(() => {
+    const isAndroid =
+      typeof window !== 'undefined' &&
+      window.Capacitor?.getPlatform?.() === 'android';
+    if (!isAndroid) return;
+    const plugin = (
+      window as {
+        Capacitor?: {
+          Plugins?: Record<
+            string,
+            {
+              addListener?: (
+                event: string,
+                cb: (data: { command: string }) => void,
+              ) => Promise<{ remove: () => void }>;
+            }
+          >;
+        };
+      }
+    ).Capacitor?.Plugins?.NWMusicService;
+    if (!plugin?.addListener) return;
+
+    let handle: { remove: () => void } | null = null;
+    plugin
+      .addListener('musicCommand', (data) => {
+        switch (data.command) {
+          case 'toggle_play':
+            togglePlay();
+            break;
+          case 'next':
+            next();
+            break;
+          case 'prev':
+            prev();
+            break;
+          case 'stop':
+            useMusicStore.getState().stop();
+            break;
+        }
+      })
+      .then((h) => {
+        handle = h;
+      });
+
+    return () => {
+      handle?.remove();
+    };
+  }, [togglePlay, next, prev]);
 
   // Sync metadata when track changes
   useEffect(() => {

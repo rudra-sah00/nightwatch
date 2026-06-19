@@ -35,7 +35,9 @@ export function useDiscoverPreview(
       ) {
         const song = feed[i];
         if (!song || preloadCache.current.has(song.id)) continue;
-        const entry: PreloadedAudio = { songId: song.id, audio: new Audio() };
+        const audio = new Audio();
+        audio.disableRemotePlayback = true;
+        const entry: PreloadedAudio = { songId: song.id, audio };
         preloadCache.current.set(song.id, entry);
         getStreamUrl(song.id, 96)
           .then((url) => {
@@ -70,11 +72,17 @@ export function useDiscoverPreview(
 
     const cached = preloadCache.current.get(currentSong.id);
     const audio = cached?.audio || new Audio();
+    audio.disableRemotePlayback = true;
     activeAudio.current = audio;
     audio.volume = muted ? 0 : 0.8;
 
     const startPlay = () => {
       audio.currentTime = Math.floor(currentSong.duration * 0.33);
+      // Prevent iOS from showing this in Now Playing / lock screen
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+      }
       audio
         .play()
         .then(() => {
@@ -128,6 +136,22 @@ export function useDiscoverPreview(
   useEffect(() => {
     if (activeAudio.current) activeAudio.current.volume = muted ? 0 : 0.8;
   }, [muted]);
+
+  // Pause preview when app loses focus (background/tab switch)
+  useEffect(() => {
+    const onVisibility = () => {
+      if (
+        document.hidden &&
+        activeAudio.current &&
+        !activeAudio.current.paused
+      ) {
+        activeAudio.current.pause();
+        setIsPlaying(false);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
 
   useEffect(
     () => () => {
