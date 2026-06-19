@@ -3,6 +3,7 @@
 import { User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useRef } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
@@ -51,20 +52,26 @@ function useLongPress(onLongPress: () => void, delay = 500) {
 export function Navbar() {
   const { user } = useAuth();
   const musicExpanded = useMusicStore((s) => s.expanded);
-  const { title: pageTitle } = usePageTitle();
+  const { title: pageTitle, href: pageTitleHref } = usePageTitle();
+  const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations('common.nav');
   const { setLeftOpen, setRightOpen } = useSidebar();
 
   const logoLongPress = useLongPress(() => setLeftOpen(true));
   const profileLongPress = useLongPress(() => setRightOpen(true));
 
-  const scrollToTop = useCallback(() => {
+  const handleTitleClick = useCallback(() => {
+    if (pageTitleHref && pathname !== pageTitleHref) {
+      router.push(pageTitleHref);
+      return;
+    }
     const main = document.getElementById('main-content');
     const scrollable = main?.querySelector('.overflow-y-auto');
     if (scrollable) {
       scrollable.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, []);
+  }, [pageTitleHref, pathname, router]);
 
   return (
     <nav
@@ -105,7 +112,7 @@ export function Navbar() {
         {pageTitle && (
           <button
             type="button"
-            onClick={scrollToTop}
+            onClick={handleTitleClick}
             className="absolute left-1/2 -translate-x-1/2 [-webkit-app-region:no-drag] cursor-pointer hover:opacity-70 transition-opacity"
           >
             <span className="font-headline font-black uppercase text-sm md:text-base tracking-widest text-foreground">

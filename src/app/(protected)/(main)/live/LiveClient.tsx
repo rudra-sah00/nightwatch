@@ -29,7 +29,7 @@ export default function LiveClient() {
   const { setTitle } = usePageTitle();
 
   useEffect(() => {
-    setTitle(t('heroTitle'));
+    setTitle(t('heroTitle'), '/live');
     return () => setTitle('');
   }, [setTitle, t]);
 

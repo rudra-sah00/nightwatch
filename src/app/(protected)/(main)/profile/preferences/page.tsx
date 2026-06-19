@@ -9,7 +9,7 @@ export default function PreferencesPage() {
   const t = useTranslations('profile.nav');
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200 w-full">
-      <PageTitle title={t('preferences')} />
+      <PageTitle title={t('preferences')} href="/profile" />
       <ProfileBackButton label="Profile" />
       <AppPreferences />
     </main>

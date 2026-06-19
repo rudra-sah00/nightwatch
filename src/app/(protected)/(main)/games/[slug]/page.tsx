@@ -6,12 +6,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameFrame } from '@/components/game-frame';
+import { PageTitle } from '@/components/layout/page-title';
 import { getGames, getGameUrl } from '@/features/games/api';
 import { trackEvent } from '@/lib/analytics';
 import { checkIsDesktop, isMobile } from '@/lib/electron-bridge';
 
 export default function GamePage() {
   const t = useTranslations('common.gamesPage');
+  const navT = useTranslations('common.nav');
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -142,6 +144,7 @@ export default function GamePage() {
   return (
     <>
       {title && <title>{`${title} — Nightwatch`}</title>}
+      <PageTitle title={navT('games')} href="/games" />
       <div className="flex flex-col items-center justify-center min-h-[80vh] max-md:min-h-0 max-md:h-full p-4 gap-4">
         <div className="w-full max-w-4xl flex items-center justify-between">
           <button

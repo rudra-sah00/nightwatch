@@ -15,7 +15,7 @@ export default function SecurityPage() {
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200 w-full">
-      <PageTitle title={t('nav.security')} />
+      <PageTitle title={t('nav.security')} href="/profile" />
       <ProfileBackButton label="Profile" />
       <form
         action={passwordForm.action}

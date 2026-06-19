@@ -27,7 +27,7 @@ export default function GamesPage() {
 
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
-      <PageTitle title={navT('games')} />
+      <PageTitle title={navT('games')} href="/games" />
       {/* Hero */}
       <div className="mb-8 bg-neo-green relative overflow-hidden rounded-2xl">
         <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />

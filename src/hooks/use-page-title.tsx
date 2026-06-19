@@ -4,20 +4,26 @@ import { createContext, useCallback, useContext, useState } from 'react';
 
 interface PageTitleContextType {
   title: string;
-  setTitle: (title: string) => void;
+  href: string;
+  setTitle: (title: string, href?: string) => void;
 }
 
 const PageTitleContext = createContext<PageTitleContextType>({
   title: '',
+  href: '',
   setTitle: () => {},
 });
 
 export function PageTitleProvider({ children }: { children: React.ReactNode }) {
   const [title, setTitleState] = useState('');
-  const setTitle = useCallback((t: string) => setTitleState(t), []);
+  const [href, setHref] = useState('');
+  const setTitle = useCallback((t: string, h?: string) => {
+    setTitleState(t);
+    setHref(h ?? '');
+  }, []);
 
   return (
-    <PageTitleContext.Provider value={{ title, setTitle }}>
+    <PageTitleContext.Provider value={{ title, href, setTitle }}>
       {children}
     </PageTitleContext.Provider>
   );

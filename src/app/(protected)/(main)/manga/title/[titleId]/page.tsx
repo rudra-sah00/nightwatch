@@ -14,6 +14,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { PageTitle } from '@/components/layout/page-title';
 import type { MangaProgress } from '@/features/manga/api';
 import {
   addMangaFavorite,
@@ -115,6 +116,7 @@ export default function MangaTitlePage() {
   return (
     <main className="pb-32 animate-in fade-in">
       <title>{`${title.name} — Nightwatch`}</title>
+      <PageTitle title="Manga" href="/manga" />
       <div className="container mx-auto px-6 md:px-10 pt-4">
         {/* Back */}
         <Link

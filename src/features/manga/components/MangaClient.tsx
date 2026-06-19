@@ -204,21 +204,18 @@ export function MangaClient() {
 
   return (
     <main className="pb-32 animate-in fade-in">
-      <PageTitle title={t('title')} />
+      <PageTitle title={t('title')} href="/manga" />
       {/* Search Spotlight */}
       {showSearch && (
         <MangaSearchSpotlight onClose={() => setShowSearch(false)} />
       )}
 
-      {/* Header — like music */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-2 gap-3">
-        <h1 className="font-headline text-2xl md:text-3xl font-black uppercase tracking-tighter shrink-0">
-          {t('title')}
-        </h1>
+      {/* Header */}
+      <div className="flex items-center justify-center px-6 pt-6 pb-2">
         <button
           type="button"
           onClick={() => setShowSearch(true)}
-          className="flex-1 max-w-md min-w-0 h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-cyan hover:bg-neo-cyan/10 transition-colors cursor-pointer"
+          className="w-full max-w-md min-w-0 h-10 flex items-center gap-2 px-4 rounded-full bg-card border-[2px] border-border hover:border-neo-cyan hover:bg-neo-cyan/10 transition-colors cursor-pointer"
           aria-label={t('searchAriaLabel')}
         >
           <Search className="w-4 h-4 text-foreground/40 shrink-0" />

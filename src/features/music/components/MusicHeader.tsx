@@ -2,8 +2,6 @@
 
 import { Globe, Plus, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
-import { usePageTitle } from '@/hooks/use-page-title';
 
 /**
  * Props for the {@link MusicHeader} component.
@@ -38,12 +36,6 @@ export function MusicHeader({
   onOpenSearch,
 }: MusicHeaderProps) {
   const t = useTranslations('music');
-  const { setTitle } = usePageTitle();
-
-  useEffect(() => {
-    setTitle(t('title'));
-    return () => setTitle('');
-  }, [setTitle, t]);
 
   return (
     <div className="flex items-center justify-between px-6 pt-6 pb-2 gap-3">
