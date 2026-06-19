@@ -8,6 +8,7 @@ import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
 import { MobileShell } from '@/components/layout/MobileShell';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
+import { SwRegister } from '@/components/layout/sw-register';
 import { TvShell } from '@/components/layout/TvShell';
 import { Toaster } from '@/components/ui/sonner';
 import { SplashScreen } from '@/components/ui/splash-screen';
@@ -100,6 +101,7 @@ export default async function RootLayout({
                     <SplashScreen />
                     {children}
                     <Toaster />
+                    <SwRegister />
                   </div>
                 </AuthProvider>
               </SocketProvider>
