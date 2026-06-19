@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { toast } from 'sonner';
-import { Workbox } from 'workbox-window';
 
+/**
+ * Registers the Workbox service worker.
+ * Since sw.js uses skipWaiting() + clientsClaim(), updates apply automatically
+ * without requiring user interaction or page reload.
+ */
 export function SwRegister() {
   useEffect(() => {
     if (
@@ -13,22 +16,7 @@ export function SwRegister() {
     )
       return;
 
-    const wb = new Workbox('/sw.js');
-
-    wb.addEventListener('waiting', () => {
-      toast('New version available', {
-        duration: Infinity,
-        action: {
-          label: 'Refresh',
-          onClick: () => {
-            wb.messageSkipWaiting();
-            window.location.reload();
-          },
-        },
-      });
-    });
-
-    wb.register();
+    navigator.serviceWorker.register('/sw.js');
   }, []);
 
   return null;
