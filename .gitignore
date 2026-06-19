@@ -62,13 +62,12 @@ next-env.d.ts
 .agent/
 .github/skills/
 
-# Serwist / PWA — generated at build time, do not commit
-public/sw.js
+# Serwist / PWA — legacy generated files
 public/swe-worker-*.js
+public/sw.js.map
 
 node_modules_electron/
 desktop-build/
-public/sw.js.map
 logs/
 
 # Capacitor native projects
