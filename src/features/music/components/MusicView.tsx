@@ -77,8 +77,8 @@ export function MusicView() {
       .catch(() => {});
   }, []);
 
-  const loadData = useCallback(() => {
-    setLoading(true);
+  const loadData = useCallback((force = false) => {
+    if (!cachedData || force) setLoading(true);
     Promise.all([
       getMusicHome(),
       getTrending('song', 'hindi').catch(() => []),
@@ -153,7 +153,7 @@ export function MusicView() {
           selectedLangs={selectedLangs}
           onChangeLangs={setSelectedLangs}
           onClose={() => setShowLangPicker(false)}
-          onApply={loadData}
+          onApply={() => loadData(true)}
         />
       )}
 
