@@ -19,30 +19,42 @@ export default function GoogleCallbackPage() {
     processed.current = true;
 
     const code = searchParams.get('code');
-    const state = searchParams.get('state') as 'login' | 'connect' | null;
+    const state = searchParams.get('state') as
+      | 'login'
+      | 'connect'
+      | 'desktop_login'
+      | 'desktop_connect'
+      | null;
     const error = searchParams.get('error');
 
-    // If opened in a browser (not inside Electron), redirect back to the
-    // desktop app via deep link so the app handles the OAuth code itself.
+    // Only redirect to deep link if OAuth was initiated from the desktop app
+    const isDesktopFlow = state?.startsWith('desktop_');
     const isInsideElectron = 'electronAPI' in window;
-    if (!isInsideElectron) {
+    if (isDesktopFlow && !isInsideElectron) {
       const params = new URLSearchParams();
       if (code) params.set('code', code);
-      if (state) params.set('state', state);
+      // Map desktop_login → login, desktop_connect → connect
+      const cleanState = state!.replace('desktop_', '');
+      params.set('state', cleanState);
       if (error) params.set('error', error);
       window.location.href = `nightwatch://auth/google/callback?${params.toString()}`;
       return;
     }
 
+    // Normalize state for the rest of the flow
+    const normalizedState = (state?.replace('desktop_', '') || 'login') as
+      | 'login'
+      | 'connect';
+
     if (error || !code) {
       toast.error(error || 'Google sign-in was cancelled');
-      router.replace(state === 'connect' ? '/profile' : '/login');
+      router.replace(normalizedState === 'connect' ? '/profile' : '/login');
       return;
     }
 
     const handleCallback = async () => {
       try {
-        if (state === 'connect') {
+        if (normalizedState === 'connect') {
           const { user } = await connectGoogle({ code });
           useAuthStore.getState().updateUser(user);
           toast.success('Google account connected');
@@ -61,7 +73,7 @@ export default function GoogleCallbackPage() {
         const msg =
           err instanceof Error ? err.message : 'Google sign-in failed';
         toast.error(msg);
-        router.replace(state === 'connect' ? '/profile' : '/login');
+        router.replace(normalizedState === 'connect' ? '/profile' : '/login');
       }
     };
 

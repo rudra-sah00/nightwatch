@@ -10,6 +10,8 @@ const GOOGLE_IOS_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '';
  */
 export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
   const redirectUri = `${window.location.origin}/auth/google/callback`;
+  const isDesktop = 'electronAPI' in window;
+  const state = isDesktop ? `desktop_${mode}` : mode;
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: redirectUri,
@@ -17,7 +19,7 @@ export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
     scope: 'openid email profile',
     access_type: 'offline',
     prompt: 'consent',
-    state: mode,
+    state,
   });
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
