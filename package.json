@@ -176,6 +176,12 @@
     "appId": "com.nightwatch.app",
     "productName": "Nightwatch",
     "copyright": "© 2026 Nightwatch Labs",
+    "protocols": {
+      "name": "Nightwatch",
+      "schemes": [
+        "nightwatch"
+      ]
+    },
     "directories": {
       "output": "desktop-build"
     },

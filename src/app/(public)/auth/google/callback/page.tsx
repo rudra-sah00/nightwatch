@@ -22,6 +22,18 @@ export default function GoogleCallbackPage() {
     const state = searchParams.get('state') as 'login' | 'connect' | null;
     const error = searchParams.get('error');
 
+    // If opened in a browser (not inside Electron), redirect back to the
+    // desktop app via deep link so the app handles the OAuth code itself.
+    const isInsideElectron = 'electronAPI' in window;
+    if (!isInsideElectron) {
+      const params = new URLSearchParams();
+      if (code) params.set('code', code);
+      if (state) params.set('state', state);
+      if (error) params.set('error', error);
+      window.location.href = `nightwatch://auth/google/callback?${params.toString()}`;
+      return;
+    }
+
     if (error || !code) {
       toast.error(error || 'Google sign-in was cancelled');
       router.replace(state === 'connect' ? '/profile' : '/login');
