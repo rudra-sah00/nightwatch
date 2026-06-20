@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 import { getProfile } from '@/features/profile/api';
+import { initDeviceInfo } from '@/lib/device-id';
 import {
   getTokenExpiresAt,
   revalidateTokenOnResume,
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // This resets the crash counter in main.js so the app knows it's healthy.
   // Only fires once per session — subsequent navigations don't re-signal.
   useEffect(() => {
+    initDeviceInfo();
     if (typeof window !== 'undefined' && 'electronAPI' in window) {
       if (!(window as unknown as Record<string, boolean>).__nw_ready) {
         (window as unknown as Record<string, boolean>).__nw_ready = true;
