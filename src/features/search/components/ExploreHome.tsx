@@ -59,7 +59,7 @@ export function ExploreHome() {
   const trendingItems = data.trending?.length
     ? data.trending
     : data.sections?.[0]?.items || [];
-  const hasHeroData = hasBanner && trendingItems.length > 0;
+  const hasHeroData = trendingItems.length > 0;
 
   return (
     <>

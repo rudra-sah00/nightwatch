@@ -20,7 +20,9 @@ export function HeroCarousel({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Use banner for background images, trending for metadata
-  const items = trending.slice(0, Math.min(banner.length, 8));
+  const items = banner.length
+    ? trending.slice(0, Math.min(banner.length, 8))
+    : trending.slice(0, 8);
 
   const next = useCallback(() => {
     setActiveIndex((i) => (i + 1) % items.length);
