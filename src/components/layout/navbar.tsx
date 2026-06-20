@@ -108,14 +108,14 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Center: Page Title */}
+        {/* Center: Page Title (mobile only) */}
         {pageTitle && (
           <button
             type="button"
             onClick={handleTitleClick}
-            className="absolute left-1/2 -translate-x-1/2 [-webkit-app-region:no-drag] cursor-pointer hover:opacity-70 transition-opacity"
+            className="absolute left-1/2 -translate-x-1/2 [-webkit-app-region:no-drag] cursor-pointer hover:opacity-70 transition-opacity md:hidden"
           >
-            <span className="font-headline font-black uppercase text-sm md:text-base tracking-widest text-foreground">
+            <span className="font-headline font-black uppercase text-sm tracking-widest text-foreground">
               {pageTitle}
             </span>
           </button>
