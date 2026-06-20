@@ -23,6 +23,7 @@ interface Session {
   sessionId: string;
   device: string;
   createdAt: number;
+  lastActive: number;
   isCurrent: boolean;
 }
 
@@ -174,9 +175,9 @@ export function ActiveDevices() {
                   ) : null}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {session.createdAt
+                  {session.lastActive
                     ? t('devices.signedIn', {
-                        time: timeAgo(session.createdAt, t),
+                        time: timeAgo(session.lastActive, t),
                       })
                     : null}
                 </p>
