@@ -31,7 +31,8 @@
     "removeAriaLabel": "Удалить из списка",
     "sectionAriaLabel": "Недавно просмотренный контент",
     "searchPlaceholder": "Search continue watching...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "contentDetail": {
     "series": "Сериал",

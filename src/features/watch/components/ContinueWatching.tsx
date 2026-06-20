@@ -3,7 +3,8 @@
 import { Clock, Film, Trash2, Tv } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { RemoveConfirmPopup } from '@/components/ui/remove-confirm-popup';
 import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import { useContinueWatching } from '../hooks/use-continue-watching';
 import type { WatchProgress } from '../types';
@@ -45,6 +46,10 @@ export function ContinueWatching({
   const { optimisticItems, isLoading, handleSelect, handleRemove } =
     useContinueWatching({ onSelectContent, onLoadComplete });
   const t = useTranslations('search');
+  const [pendingRemove, setPendingRemove] = useState<{
+    item: WatchProgress;
+    event: React.MouseEvent;
+  } | null>(null);
 
   const filtered = useMemo(() => {
     if (!searchQuery?.trim()) return optimisticItems;
@@ -135,10 +140,20 @@ export function ContinueWatching({
             item={item}
             index={index}
             onSelect={handleSelect}
-            onRemove={handleRemove}
+            onRemove={(i, e) => setPendingRemove({ item: i, event: e })}
           />
         ))}
       </section>
+      <RemoveConfirmPopup
+        open={!!pendingRemove}
+        message={t('continueWatching.confirmRemove')}
+        onConfirm={() => {
+          if (pendingRemove)
+            handleRemove(pendingRemove.item, pendingRemove.event);
+          setPendingRemove(null);
+        }}
+        onCancel={() => setPendingRemove(null)}
+      />
     </div>
   );
 }

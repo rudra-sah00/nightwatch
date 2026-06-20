@@ -118,7 +118,9 @@
     "emptyDescription": "बाद में देखने के लिए फ़िल्में और शो सहेजें",
     "viewDetails": "{title} के विवरण देखें",
     "searchPlaceholder": "Search watchlist...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "remove": "Remove from watchlist",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "continueWatching": {
     "failedToRemove": "सूची से हटाने में विफल",

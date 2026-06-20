@@ -118,7 +118,9 @@
     "emptyDescription": "Сохраняйте фильмы и сериалы для просмотра позже",
     "viewDetails": "Подробнее о {title}",
     "searchPlaceholder": "Search watchlist...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "remove": "Remove from watchlist",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "continueWatching": {
     "failedToRemove": "Не удалось удалить из списка",

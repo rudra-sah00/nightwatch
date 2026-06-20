@@ -118,7 +118,9 @@
     "emptyDescription": "Speichere Filme und Serien zum späteren Anschauen",
     "viewDetails": "Details anzeigen für {title}",
     "searchPlaceholder": "Search watchlist...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "remove": "Remove from watchlist",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "continueWatching": {
     "failedToRemove": "Konnte nicht aus der Liste entfernt werden",

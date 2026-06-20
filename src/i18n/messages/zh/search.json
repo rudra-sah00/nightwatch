@@ -31,7 +31,8 @@
     "removeAriaLabel": "从列表中移除",
     "sectionAriaLabel": "最近观看的内容",
     "searchPlaceholder": "Search continue watching...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "contentDetail": {
     "series": "剧集",

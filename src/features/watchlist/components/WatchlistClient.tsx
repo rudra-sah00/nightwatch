@@ -1,11 +1,12 @@
 'use client';
 
-import { Film, Plus, Tv } from 'lucide-react';
+import { Film, Plus, Trash2, Tv } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import React, { useMemo, useState } from 'react';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
+import { RemoveConfirmPopup } from '@/components/ui/remove-confirm-popup';
 import type { WatchlistItem } from '@/features/watchlist/types';
 import { getOptimizedImageUrl } from '@/lib/utils';
 import { useWatchlist } from '../hooks/use-watchlist';
@@ -30,6 +31,7 @@ export function WatchlistClient() {
     useWatchlist();
   const t = useTranslations('watch.watchlist');
   const [search, setSearch] = useState('');
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return watchlist;
@@ -106,6 +108,7 @@ export function WatchlistClient() {
                     key={item.id}
                     item={item}
                     onClick={() => setSelectedId(item.contentId)}
+                    onRemove={() => setPendingRemoveId(item.contentId)}
                   />
                 ))}
               </div>
@@ -123,6 +126,16 @@ export function WatchlistClient() {
           }}
         />
       ) : null}
+
+      <RemoveConfirmPopup
+        open={!!pendingRemoveId}
+        message={t('confirmRemove')}
+        onConfirm={() => {
+          if (pendingRemoveId) removeItem(pendingRemoveId);
+          setPendingRemoveId(null);
+        }}
+        onCancel={() => setPendingRemoveId(null)}
+      />
     </>
   );
 }
@@ -132,36 +145,46 @@ export function WatchlistClient() {
 const WatchlistItemCard = React.memo(function WatchlistItemCard({
   item,
   onClick,
+  onRemove,
 }: {
   item: WatchlistItem;
   onClick: () => void;
+  onRemove: () => void;
 }) {
   const t = useTranslations('watch.watchlist');
 
   return (
-    <button
-      type="button"
+    // biome-ignore lint/a11y/useSemanticElements: wrapper contains nested <button>, can't be <button> itself
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className="flex flex-col w-full sm:flex-row bg-card border-[3px] border-border overflow-hidden group hover:border-foreground/30 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       aria-label={t('viewDetails', { title: item.title })}
     >
       {/* Poster */}
-      <div className="w-24 sm:w-28 shrink-0 bg-secondary relative border-r-[3px] border-border hidden sm:block">
+      <div className="h-32 sm:h-auto w-full sm:w-28 shrink-0 bg-secondary relative sm:border-r-[3px] border-b-[3px] sm:border-b-0 border-border">
         {item.posterUrl ? (
           <Image
             src={getOptimizedImageUrl(item.posterUrl)}
             alt={item.title}
             fill
-            sizes="112px"
+            sizes="(max-width: 640px) 100vw, 112px"
             className="object-cover"
             unoptimized={item.posterUrl.includes('/api/stream/')}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-foreground/20">
             {item.contentType === 'Series' ? (
-              <Tv className="w-8 h-8 stroke-[2px]" />
+              <Tv className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2px]" />
             ) : (
-              <Film className="w-8 h-8 stroke-[2px]" />
+              <Film className="w-6 h-6 sm:w-8 sm:h-8 stroke-[2px]" />
             )}
           </div>
         )}
@@ -176,15 +199,29 @@ const WatchlistItemCard = React.memo(function WatchlistItemCard({
               {item.title}
             </h3>
 
-            {/* Status Text & Speed */}
             <div className="flex flex-wrap items-center gap-2 text-xs uppercase font-bold text-foreground/60 tracking-wider">
               <span className="text-foreground/80 font-black">
                 {item.contentType}
               </span>
             </div>
           </div>
+
+          {/* Actions Column */}
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              className="p-3 border-[3px] border-border bg-background hover:bg-neo-red hover:text-white transition-colors z-20"
+              title={t('remove')}
+            >
+              <Trash2 className="w-4 h-4 stroke-[3px]" />
+            </button>
+          </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 });

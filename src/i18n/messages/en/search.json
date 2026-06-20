@@ -31,7 +31,8 @@
     "removeAriaLabel": "Remove from list",
     "sectionAriaLabel": "Recently viewed content",
     "searchPlaceholder": "Search continue watching...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "contentDetail": {
     "series": "Series",

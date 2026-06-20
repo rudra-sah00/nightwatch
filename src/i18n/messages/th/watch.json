@@ -118,7 +118,9 @@
     "emptyDescription": "บันทึกภาพยนตร์และซีรีส์เพื่อดูภายหลัง",
     "viewDetails": "ดูรายละเอียดของ {title}",
     "searchPlaceholder": "Search watchlist...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "remove": "Remove from watchlist",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "continueWatching": {
     "failedToRemove": "ลบออกจากรายการไม่สำเร็จ",

@@ -118,7 +118,9 @@
     "emptyDescription": "保存电影和剧集以便稍后观看",
     "viewDetails": "查看 {title} 的详情",
     "searchPlaceholder": "Search watchlist...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "remove": "Remove from watchlist",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "continueWatching": {
     "failedToRemove": "从列表中移除失败",

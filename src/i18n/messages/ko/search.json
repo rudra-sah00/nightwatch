@@ -31,7 +31,8 @@
     "removeAriaLabel": "목록에서 제거",
     "sectionAriaLabel": "최근 시청한 콘텐츠",
     "searchPlaceholder": "Search continue watching...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "contentDetail": {
     "series": "시리즈",

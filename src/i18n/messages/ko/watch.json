@@ -118,7 +118,9 @@
     "emptyDescription": "나중에 볼 영화와 시리즈를 저장하세요",
     "viewDetails": "{title} 상세 보기",
     "searchPlaceholder": "Search watchlist...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "remove": "Remove from watchlist",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "continueWatching": {
     "failedToRemove": "목록에서 제거하지 못했습니다",

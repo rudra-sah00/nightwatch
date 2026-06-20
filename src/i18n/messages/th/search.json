@@ -31,7 +31,8 @@
     "removeAriaLabel": "ลบออกจากรายการ",
     "sectionAriaLabel": "เนื้อหาที่ดูล่าสุด",
     "searchPlaceholder": "Search continue watching...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "contentDetail": {
     "series": "ซีรีส์",

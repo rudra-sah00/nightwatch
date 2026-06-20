@@ -31,7 +31,8 @@
     "removeAriaLabel": "सूची से हटाएं",
     "sectionAriaLabel": "हाल ही में देखी गई सामग्री",
     "searchPlaceholder": "Search continue watching...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "confirmRemove": "Are you sure you want to remove this?"
   },
   "contentDetail": {
     "series": "सीरीज़",
