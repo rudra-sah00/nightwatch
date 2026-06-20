@@ -69,7 +69,7 @@ function registerIpcHandlers({ store, AppWindow, discordLogic }) {
 
   // --- CLIPBOARD ---
   ipcMain.on('copy-to-clipboard', (_event, text) => {
-    clipboard.writeText(text);
+    if (typeof text === 'string') clipboard.writeText(text);
   });
 
   // --- KEEP AWAKE + BACKGROUND THROTTLING ---

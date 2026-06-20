@@ -1,6 +1,24 @@
 // Suppress EPIPE errors from electron-log when stdout pipe is closed
 process.stdout?.on?.('error', () => {});
 process.stderr?.on?.('error', () => {});
+
+// --- GLOBAL CRASH HANDLERS ---
+// Log fatal errors that would otherwise crash silently or show an unhelpful dialog
+process.on('uncaughtException', (err) => {
+  try {
+    require('electron-log').error('[fatal] Uncaught exception:', err);
+  } catch {
+    /* ignore */
+  }
+});
+process.on('unhandledRejection', (reason) => {
+  try {
+    require('electron-log').error('[fatal] Unhandled rejection:', reason);
+  } catch {
+    /* ignore */
+  }
+});
+
 const { app, globalShortcut, BrowserWindow } = require('electron');
 const _path = require('node:path');
 
@@ -210,7 +228,7 @@ const startElectronApp = async () => {
       cleanedHeaders['Content-Security-Policy'] = [
         [
           "default-src 'self' https://nightwatch.in https://*.nightwatch.in",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://nightwatch.in https://*.nightwatch.in https://challenges.cloudflare.com",
+          "script-src 'self' 'unsafe-inline' https://nightwatch.in https://*.nightwatch.in https://challenges.cloudflare.com",
           "style-src 'self' 'unsafe-inline' https://nightwatch.in https://*.nightwatch.in https://fonts.googleapis.com",
           "font-src 'self' https://fonts.gstatic.com",
           "img-src 'self' data: blob: https:",
@@ -262,15 +280,34 @@ const startElectronApp = async () => {
       });
     }
 
-    // 2. Third-Party CDNs (TMDB images, DaddyLive TS fragments, etc.):
-    // We force `*` so that the desktop Player and Image tags don't throw CORS failures
-    // when hitting arbitrary CDNs that lack native CORS headers.
-    callback({
-      responseHeaders: {
-        ...cleanedHeaders,
-        'Access-Control-Allow-Origin': ['*'],
-      },
-    });
+    // 2. Third-Party CDNs (TMDB images, streaming segments, etc.):
+    // Only force CORS for known media/image CDNs that lack native CORS headers.
+    // Other third-party resources keep their original headers to preserve same-origin security.
+    const CORS_ALLOWED_HOSTS = [
+      'image.tmdb.org',
+      'i.imgur.com',
+      'img.youtube.com',
+      '.akamaized.net',
+      '.cloudfront.net',
+      '.googlevideo.com',
+      'cdn.nightwatch.in',
+    ];
+    const needsCorsOverride = CORS_ALLOWED_HOSTS.some((host) =>
+      host.startsWith('.')
+        ? details.url.includes(host)
+        : details.url.includes(`//${host}`),
+    );
+
+    if (needsCorsOverride) {
+      callback({
+        responseHeaders: {
+          ...cleanedHeaders,
+          'Access-Control-Allow-Origin': ['*'],
+        },
+      });
+    } else {
+      callback({ responseHeaders: cleanedHeaders });
+    }
   });
 
   await macOS.setupMacOS();

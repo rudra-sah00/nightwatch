@@ -76,6 +76,7 @@ class AppWindow {
         sandbox: true, // Enables OS-level Chromium sandboxing
         nodeIntegration: false,
         contextIsolation: true,
+        webSecurity: true,
         spellcheck: true,
         backgroundThrottling: true, // Enabled by default; disabled via IPC when media is playing
         devTools: !require('electron').app.isPackaged,
@@ -239,10 +240,12 @@ class AppWindow {
 
       let opacity = 0;
       const fadeInterval = setInterval(() => {
-        opacity += 0.1;
-        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-          this.mainWindow.setOpacity(opacity);
+        if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+          clearInterval(fadeInterval);
+          return;
         }
+        opacity += 0.1;
+        this.mainWindow.setOpacity(opacity);
         if (opacity >= 1) clearInterval(fadeInterval);
       }, 30);
 

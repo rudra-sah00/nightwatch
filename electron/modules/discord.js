@@ -26,6 +26,10 @@ class DiscordIntegration {
 
   async init() {
     this.connect();
+    // Retry connection every 60s if Discord was launched after the app
+    this._retryInterval = setInterval(() => {
+      if (!this.connected && !this.isConnecting) this.connect();
+    }, 60_000);
   }
 
   async connect() {
@@ -96,6 +100,7 @@ class DiscordIntegration {
   }
 
   destroy() {
+    if (this._retryInterval) clearInterval(this._retryInterval);
     if (this.rpc) {
       this.rpc.clearActivity().catch(() => {});
       this.rpc.destroy().catch(() => {});

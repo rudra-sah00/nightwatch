@@ -218,10 +218,13 @@ function setupUpdater(splashWindow, onComplete) {
           });
           if (csRes.ok) {
             const expectedHash = (await csRes.text()).trim().split(/\s/)[0];
-            const fileHash = crypto
-              .createHash('sha256')
-              .update(fs.readFileSync(tempPath))
-              .digest('hex');
+            const fileHash = await new Promise((resolve, reject) => {
+              const hash = crypto.createHash('sha256');
+              const stream = fs.createReadStream(tempPath);
+              stream.on('data', (chunk) => hash.update(chunk));
+              stream.on('end', () => resolve(hash.digest('hex')));
+              stream.on('error', reject);
+            });
             if (fileHash !== expectedHash) {
               throw new Error(
                 `Checksum mismatch: expected ${expectedHash}, got ${fileHash}`,
