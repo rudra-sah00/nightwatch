@@ -122,6 +122,11 @@ export function MusicMediaSession() {
         case 'prev':
           prev();
           break;
+        case 'seek':
+          if ('value' in data) {
+            useMusicStore.getState().seek(data.value as number);
+          }
+          break;
         case 'stop':
           useMusicStore.getState().stop();
           break;

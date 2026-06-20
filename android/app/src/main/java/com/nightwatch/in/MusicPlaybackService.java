@@ -97,7 +97,16 @@ public class MusicPlaybackService extends Service {
 
             @Override
             public void onSeekTo(long pos) {
-                // Not used — seek is handled in WebView
+                position = pos;
+                updatePlaybackState();
+                // Send seek as percentage to WebView
+                if (duration > 0) {
+                    Intent intent = new Intent("com.nightwatch.in.MUSIC_COMMAND");
+                    intent.putExtra("command", "seek");
+                    intent.putExtra("value", (double) pos / (double) duration * 100.0);
+                    intent.setPackage(getPackageName());
+                    sendBroadcast(intent);
+                }
             }
         });
     }

@@ -20,7 +20,7 @@ interface NWMusicServicePlugin {
   stop(): Promise<void>;
   addListener(
     event: 'musicCommand',
-    cb: (data: { command: string }) => void,
+    cb: (data: { command: string; value?: number }) => void,
   ): Promise<{ remove: () => void }>;
 }
 

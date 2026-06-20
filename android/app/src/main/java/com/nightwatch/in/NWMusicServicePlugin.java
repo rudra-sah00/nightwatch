@@ -37,6 +37,9 @@ public class NWMusicServicePlugin extends Plugin {
                 if (command != null) {
                     JSObject data = new JSObject();
                     data.put("command", command);
+                    if (intent.hasExtra("value")) {
+                        data.put("value", intent.getDoubleExtra("value", 0));
+                    }
                     notifyListeners("musicCommand", data);
                 }
             }
