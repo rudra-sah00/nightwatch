@@ -55,15 +55,19 @@ export function ExploreHome() {
   };
 
   const hasBanner = data.banner?.length > 0;
-  const hasTrending = data.trending?.length > 0;
+  // Use dedicated trending field, fallback to first section items
+  const trendingItems = data.trending?.length
+    ? data.trending
+    : data.sections?.[0]?.items || [];
+  const hasHeroData = hasBanner && trendingItems.length > 0;
 
   return (
     <>
       {/* Hero Carousel */}
-      {hasBanner && hasTrending && (
+      {hasHeroData && (
         <HeroCarousel
           banner={data.banner}
-          trending={data.trending}
+          trending={trendingItems}
           onItemClick={handleItemClick}
         />
       )}
