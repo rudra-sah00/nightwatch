@@ -1,6 +1,8 @@
 'use client';
 
+import { Capacitor } from '@capacitor/core';
 import { useEffect, useRef } from 'react';
+import { NWMusicService } from '@/capacitor/music-service';
 import { useMusicStore } from '../store/use-music-store';
 
 /**
@@ -41,29 +43,8 @@ export function MusicMediaSession() {
   // Start/stop Android foreground service for background playback
   const androidServiceStartedRef = useRef(false);
   useEffect(() => {
-    const isAndroid =
-      typeof window !== 'undefined' &&
-      window.Capacitor?.getPlatform?.() === 'android';
-    if (!isAndroid) return;
-    const plugin = (
-      window as {
-        Capacitor?: {
-          Plugins?: Record<
-            string,
-            {
-              start?: (p: Record<string, unknown>) => Promise<void>;
-              update?: (p: Record<string, unknown>) => Promise<void>;
-              stop?: () => Promise<void>;
-              addListener?: (
-                event: string,
-                cb: (data: { command: string }) => void,
-              ) => { remove: () => void };
-            }
-          >;
-        };
-      }
-    ).Capacitor?.Plugins?.NWMusicService;
-    if (!plugin) return;
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android')
+      return;
 
     if (displayTrack) {
       const payload = {
@@ -73,61 +54,41 @@ export function MusicMediaSession() {
         isPlaying: displayPlaying,
       };
       if (!androidServiceStartedRef.current) {
-        plugin.start?.(payload)?.catch(() => {});
+        NWMusicService.start(payload).catch(() => {});
         androidServiceStartedRef.current = true;
       } else {
-        plugin.update?.(payload)?.catch(() => {});
+        NWMusicService.update(payload).catch(() => {});
       }
     } else {
-      plugin.stop?.()?.catch(() => {});
+      NWMusicService.stop().catch(() => {});
       androidServiceStartedRef.current = false;
     }
   }, [displayPlaying, displayTrack]);
 
   // Listen for commands from Android notification buttons
   useEffect(() => {
-    const isAndroid =
-      typeof window !== 'undefined' &&
-      window.Capacitor?.getPlatform?.() === 'android';
-    if (!isAndroid) return;
-    const plugin = (
-      window as {
-        Capacitor?: {
-          Plugins?: Record<
-            string,
-            {
-              addListener?: (
-                event: string,
-                cb: (data: { command: string }) => void,
-              ) => Promise<{ remove: () => void }>;
-            }
-          >;
-        };
-      }
-    ).Capacitor?.Plugins?.NWMusicService;
-    if (!plugin?.addListener) return;
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android')
+      return;
 
     let handle: { remove: () => void } | null = null;
-    plugin
-      .addListener('musicCommand', (data) => {
-        switch (data.command) {
-          case 'toggle_play':
-            togglePlay();
-            break;
-          case 'next':
-            next();
-            break;
-          case 'prev':
-            prev();
-            break;
-          case 'stop':
-            useMusicStore.getState().stop();
-            break;
-        }
-      })
-      .then((h) => {
-        handle = h;
-      });
+    NWMusicService.addListener('musicCommand', (data) => {
+      switch (data.command) {
+        case 'toggle_play':
+          togglePlay();
+          break;
+        case 'next':
+          next();
+          break;
+        case 'prev':
+          prev();
+          break;
+        case 'stop':
+          useMusicStore.getState().stop();
+          break;
+      }
+    }).then((h) => {
+      handle = h;
+    });
 
     return () => {
       handle?.remove();
