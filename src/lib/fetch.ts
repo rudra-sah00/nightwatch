@@ -1,6 +1,7 @@
 import type { ApiError } from '@/types';
 import { reportError } from './analytics';
 import { getCookie } from './cookies';
+import { getDeviceInfo } from './device-id';
 import { env } from './env';
 
 interface FetchOptions extends RequestInit {
@@ -220,6 +221,9 @@ export async function apiFetch<T>(
         ...(fetchOptions.body instanceof FormData
           ? {}
           : { 'Content-Type': 'application/json' }),
+        ...(typeof window !== 'undefined'
+          ? { 'x-device-info': getDeviceInfo() }
+          : {}),
         ...(typeof window !== 'undefined' &&
         sessionStorage.getItem('guest_token') &&
         !getCookie('accessToken')

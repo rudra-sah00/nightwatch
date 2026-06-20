@@ -51,6 +51,8 @@ public class MusicPlaybackService extends Service {
     private String currentArtist = "Playing music";
     private String currentImageUrl = null;
     private boolean isPlaying = true;
+    private long duration = 0;
+    private long position = 0;
     private Bitmap currentArt = null;
     private final ExecutorService artLoader = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -137,10 +139,14 @@ public class MusicPlaybackService extends Service {
         String artist = intent.getStringExtra("artist");
         String imageUrl = intent.getStringExtra("imageUrl");
         boolean playing = intent.getBooleanExtra("isPlaying", true);
+        long dur = intent.getLongExtra("duration", 0);
+        long pos = intent.getLongExtra("position", 0);
 
         if (title != null) currentTitle = title;
         if (artist != null) currentArtist = artist;
         isPlaying = playing;
+        if (dur > 0) duration = dur;
+        if (pos >= 0) position = pos;
 
         // Load art if URL changed
         if (imageUrl != null && !imageUrl.equals(currentImageUrl)) {
@@ -237,7 +243,8 @@ public class MusicPlaybackService extends Service {
         MediaMetadataCompat.Builder meta = new MediaMetadataCompat.Builder()
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentTitle)
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, currentArtist)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, currentArtist);
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, currentArtist)
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration);
         if (currentArt != null) {
             meta.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, currentArt);
         }
@@ -255,8 +262,9 @@ public class MusicPlaybackService extends Service {
                         PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
                         PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
                         PlaybackStateCompat.ACTION_STOP |
+                        PlaybackStateCompat.ACTION_SEEK_TO |
                         PlaybackStateCompat.ACTION_PLAY_PAUSE)
-                .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+                .setState(state, position, 1.0f)
                 .build();
         mediaSession.setPlaybackState(playbackState);
     }

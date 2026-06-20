@@ -30,7 +30,7 @@ include ':capacitor-haptics'
 project(':capacitor-haptics').projectDir = new File('../node_modules/.pnpm/@capacitor+haptics@8.0.2_@capacitor+core@8.3.1/node_modules/@capacitor/haptics/android')
 
 include ':capacitor-keyboard'
-project(':capacitor-keyboard').projectDir = new File('../node_modules/.pnpm/@capacitor+keyboard@8.0.3_@capacitor+core@8.3.1/node_modules/@capacitor/keyboard/android')
+project(':capacitor-keyboard').projectDir = new File('../node_modules/.pnpm/@capacitor+keyboard@8.0.5_@capacitor+core@8.3.1/node_modules/@capacitor/keyboard/android')
 
 include ':capacitor-network'
 project(':capacitor-network').projectDir = new File('../node_modules/.pnpm/@capacitor+network@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/network/android')
@@ -57,10 +57,10 @@ include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-badge@8.0.2_@capacitor+core@8.3.1/node_modules/@capawesome/capacitor-badge/android')
 
 include ':capgo-capacitor-incoming-call-kit'
-project(':capgo-capacitor-incoming-call-kit').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit/android')
+project(':capgo-capacitor-incoming-call-kit').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-incoming-call-kit/android')
 
 include ':capgo-capacitor-social-login'
-project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-social-login@8.3.22_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-social-login/android')
+project(':capgo-capacitor-social-login').projectDir = new File('../node_modules/.pnpm/@capgo+capacitor-social-login@8.3.29_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-social-login/android')
 
 include ':ottimis-capacitor-volumes'
 project(':ottimis-capacitor-volumes').projectDir = new File('../node_modules/.pnpm/@ottimis+capacitor-volumes@7.0.0_patch_hash=20cf109379666ad07d8aa3339c13738362e67c67581_c9519b3a286eb6032157adacd1b05239/node_modules/@ottimis/capacitor-volumes/android')

@@ -47,11 +47,16 @@ export function MusicMediaSession() {
       return;
 
     if (displayTrack) {
+      const dur = isRemoteControlling ? remoteDuration : durationRef.current;
+      const prog = isRemoteControlling ? remoteProgress : progressRef.current;
+      const pos = dur ? (prog / 100) * dur : 0;
       const payload = {
         title: displayTrack.title,
         artist: displayTrack.artist,
         imageUrl: displayTrack.image || '',
         isPlaying: displayPlaying,
+        duration: dur || 0,
+        position: pos,
       };
       if (!androidServiceStartedRef.current) {
         NWMusicService.start(payload).catch(() => {});
@@ -63,7 +68,42 @@ export function MusicMediaSession() {
       NWMusicService.stop().catch(() => {});
       androidServiceStartedRef.current = false;
     }
-  }, [displayPlaying, displayTrack]);
+  }, [
+    displayPlaying,
+    displayTrack,
+    isRemoteControlling,
+    remoteDuration,
+    remoteProgress,
+  ]);
+
+  // Periodically update position for Android notification seekbar
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android')
+      return;
+    if (!displayTrack || !androidServiceStartedRef.current) return;
+
+    const interval = setInterval(() => {
+      const dur = isRemoteControlling ? remoteDuration : durationRef.current;
+      const prog = isRemoteControlling ? remoteProgress : progressRef.current;
+      if (!dur) return;
+      NWMusicService.update({
+        title: displayTrack.title,
+        artist: displayTrack.artist,
+        imageUrl: displayTrack.image || '',
+        isPlaying: displayPlaying,
+        duration: dur,
+        position: (prog / 100) * dur,
+      }).catch(() => {});
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [
+    displayTrack,
+    displayPlaying,
+    isRemoteControlling,
+    remoteDuration,
+    remoteProgress,
+  ]);
 
   // Listen for commands from Android notification buttons
   useEffect(() => {

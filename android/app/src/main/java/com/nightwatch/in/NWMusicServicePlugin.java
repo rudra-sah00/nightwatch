@@ -55,6 +55,8 @@ public class NWMusicServicePlugin extends Plugin {
         String artist = call.getString("artist");
         String imageUrl = call.getString("imageUrl");
         Boolean isPlaying = call.getBoolean("isPlaying", true);
+        long duration = (long) (call.getDouble("duration", 0.0) * 1000);
+        long position = (long) (call.getDouble("position", 0.0) * 1000);
 
         getActivity().runOnUiThread(() -> {
             try {
@@ -63,6 +65,8 @@ public class NWMusicServicePlugin extends Plugin {
                 if (artist != null) intent.putExtra("artist", artist);
                 if (imageUrl != null) intent.putExtra("imageUrl", imageUrl);
                 intent.putExtra("isPlaying", isPlaying);
+                intent.putExtra("duration", duration);
+                intent.putExtra("position", position);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     getContext().startForegroundService(intent);
                 } else {
@@ -81,6 +85,8 @@ public class NWMusicServicePlugin extends Plugin {
         String artist = call.getString("artist");
         String imageUrl = call.getString("imageUrl");
         Boolean isPlaying = call.getBoolean("isPlaying", true);
+        long duration = (long) (call.getDouble("duration", 0.0) * 1000);
+        long position = (long) (call.getDouble("position", 0.0) * 1000);
 
         getActivity().runOnUiThread(() -> {
             try {
@@ -90,6 +96,8 @@ public class NWMusicServicePlugin extends Plugin {
                 if (artist != null) intent.putExtra("artist", artist);
                 if (imageUrl != null) intent.putExtra("imageUrl", imageUrl);
                 intent.putExtra("isPlaying", isPlaying);
+                intent.putExtra("duration", duration);
+                intent.putExtra("position", position);
                 getContext().startService(intent);
             } catch (Exception e) {
                 // silent fail

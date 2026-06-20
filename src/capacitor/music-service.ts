@@ -6,12 +6,16 @@ interface NWMusicServicePlugin {
     artist: string;
     imageUrl: string;
     isPlaying: boolean;
+    duration: number;
+    position: number;
   }): Promise<void>;
   update(options: {
     title: string;
     artist: string;
     imageUrl: string;
     isPlaying: boolean;
+    duration: number;
+    position: number;
   }): Promise<void>;
   stop(): Promise<void>;
   addListener(
