@@ -35,23 +35,25 @@ function parseDevice(ua: string): {
   color: string;
 } {
   const lower = ua.toLowerCase();
-  if (lower === 'desktop app')
-    return { icon: Monitor, label: 'Desktop App', color: 'text-neo-blue' };
+  if (lower === 'desktop app' || lower.includes('desktop app'))
+    return { icon: Monitor, label: ua, color: 'text-neo-blue' };
   if (
-    lower.includes('mobile') ||
     lower.includes('android') ||
-    lower.includes('iphone')
+    lower.includes('iphone') ||
+    lower.includes('ios')
   )
-    return { icon: Smartphone, label: 'Mobile', color: 'text-neo-green' };
+    return { icon: Smartphone, label: ua, color: 'text-neo-green' };
   if (lower.includes('electron'))
-    return { icon: Monitor, label: 'Desktop App', color: 'text-neo-blue' };
+    return { icon: Monitor, label: ua, color: 'text-neo-blue' };
+  if (lower === 'web browser')
+    return { icon: Globe, label: 'Web Browser', color: 'text-neo-yellow' };
   if (lower.includes('chrome'))
     return { icon: Globe, label: 'Chrome', color: 'text-neo-yellow' };
   if (lower.includes('firefox'))
     return { icon: Globe, label: 'Firefox', color: 'text-neo-yellow' };
   if (lower.includes('safari'))
     return { icon: Globe, label: 'Safari', color: 'text-neo-yellow' };
-  return { icon: Globe, label: 'Browser', color: 'text-neo-yellow' };
+  return { icon: Globe, label: ua || 'Unknown', color: 'text-neo-yellow' };
 }
 
 function timeAgo(
