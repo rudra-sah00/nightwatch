@@ -22,10 +22,6 @@ import { checkIsMobile } from '@/lib/electron-bridge';
 interface Session {
   sessionId: string;
   device: string;
-  browser: string;
-  os: string;
-  ip: string;
-  lastActive: string;
   createdAt: number;
   isCurrent: boolean;
 }
@@ -178,14 +174,9 @@ export function ActiveDevices() {
                   ) : null}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {session.lastActive || session.createdAt
+                  {session.createdAt
                     ? t('devices.signedIn', {
-                        time: timeAgo(
-                          new Date(
-                            session.lastActive || session.createdAt,
-                          ).getTime(),
-                          t,
-                        ),
+                        time: timeAgo(session.createdAt, t),
                       })
                     : null}
                 </p>

@@ -150,10 +150,7 @@ export async function getSessions(): Promise<
   {
     sessionId: string;
     device: string;
-    browser: string;
-    os: string;
-    ip: string;
-    lastActive: string;
+    createdAt: number;
     isCurrent: boolean;
   }[]
 > {
@@ -161,10 +158,7 @@ export async function getSessions(): Promise<
     sessions: {
       sessionId: string;
       device: string;
-      browser: string;
-      os: string;
-      ip: string;
-      lastActive: string;
+      createdAt: number;
       isCurrent: boolean;
     }[];
   }>('/api/auth/sessions');
