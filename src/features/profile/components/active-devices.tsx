@@ -3,12 +3,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Camera,
+  Check,
   Globe,
   Loader2,
   LogOut,
   Monitor,
   Plus,
   Smartphone,
+  X,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -384,16 +386,28 @@ function QrScanner({
       </div>
 
       {scannedCode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[10050] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div
-            className="absolute inset-0 bg-background/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             aria-hidden="true"
           />
-          <div className="relative bg-card border-2 border-border rounded-xl p-6 w-full max-w-sm shadow-lg animate-in zoom-in-95 duration-200">
-            <p className="text-base font-headline font-bold text-center mb-6">
+          <div className="relative flex flex-col items-center gap-6 p-8 animate-in zoom-in-95 duration-200">
+            <p className="font-headline font-black text-lg sm:text-2xl uppercase tracking-wider text-white text-center max-w-xs">
               {t('devices.authorizePrompt')}
             </p>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-8">
+              <button
+                type="button"
+                onClick={handleConfirm}
+                disabled={authorizing}
+                className="w-16 h-16 rounded-full bg-neo-green flex items-center justify-center hover:scale-110 transition-transform disabled:opacity-50"
+              >
+                {authorizing ? (
+                  <Loader2 className="w-8 h-8 stroke-[3px] text-white animate-spin" />
+                ) : (
+                  <Check className="w-8 h-8 stroke-[3px] text-white" />
+                )}
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -401,17 +415,9 @@ function QrScanner({
                   setScannedCode(null);
                   onClose();
                 }}
-                className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider border-2 border-border rounded-lg hover:bg-secondary active:scale-95 transition-all"
+                className="w-16 h-16 rounded-full bg-neo-red flex items-center justify-center hover:scale-110 transition-transform"
               >
-                {t('devices.deny')}
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={authorizing}
-                className="flex-1 py-2.5 text-xs font-headline font-bold uppercase tracking-wider bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-50"
-              >
-                {authorizing ? t('devices.authorizing') : t('devices.approve')}
+                <X className="w-8 h-8 stroke-[3px] text-white" />
               </button>
             </div>
           </div>
