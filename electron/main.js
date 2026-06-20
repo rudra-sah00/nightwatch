@@ -23,10 +23,33 @@ const _path = require('node:path');
     }
   } catch (_e) {}
 })();
-const Store = require('electron-store');
-// --- 0.1. LOCAL SETTINGS STORAGE ---
-// Allows the React app to read/write native JSON config bypassing localStorage limits
-const store = new Store();
+/** @type {any} */
+let store;
+
+/**
+ * electron-store v11 is ESM-only. Since electron/ is CJS, we use a two-phase approach:
+ * Phase 1: Read config.json directly for synchronous startup needs (disable-gpu check).
+ * Phase 2: Async-import the real electron-store before app.whenReady, so all IPC
+ *          handlers use the real instance with full get/set/delete support.
+ */
+const _storeReady = (async () => {
+  // Phase 1: Sync read for pre-ready config access
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const configPath = path.join(app.getPath('userData'), 'config.json');
+  try {
+    const data = fs.existsSync(configPath)
+      ? JSON.parse(fs.readFileSync(configPath, 'utf8'))
+      : {};
+    store = { get: (k) => data[k], set: () => {}, delete: () => {} };
+  } catch {
+    store = { get: () => undefined, set: () => {}, delete: () => {} };
+  }
+
+  // Phase 2: Load real electron-store (async import for ESM package)
+  const { default: Store } = await import('electron-store');
+  store = new Store();
+})();
 
 const AppWindow = require('./modules/window.js');
 const { handleDeepLink } = require('./modules/deep-link.js');
@@ -395,8 +418,11 @@ const startElectronApp = async () => {
   ipcCleanup = cleanupIpc;
 };
 
-// Lifecycle Start hook
-app.whenReady().then(startElectronApp);
+// Lifecycle Start hook — wait for both app ready AND store loaded
+app
+  .whenReady()
+  .then(() => _storeReady)
+  .then(startElectronApp);
 
 // Prevent app from quitting when all windows are closed (tray keeps it alive)
 app.on('window-all-closed', () => {
