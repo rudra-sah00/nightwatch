@@ -75,6 +75,7 @@ export interface ExploreItem {
   title: string;
   genre: string;
   cover: string;
+  backdrop: string | null;
   imdbRating: string | null;
   releaseDate: string;
   type: 'movie' | 'series';
@@ -92,6 +93,7 @@ export interface ExploreData {
     detailPath: string;
     subjectId: string;
   }[];
+  trending: ExploreItem[];
   sections: ExploreSection[];
 }
 

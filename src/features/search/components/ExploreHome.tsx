@@ -3,10 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { type ExploreData, type ExploreItem, getExploreHome } from '../api';
+import { HeroCarousel } from './HeroCarousel';
 
 const ContentDetailModal = dynamic(
   () =>
@@ -18,7 +17,6 @@ const ContentDetailModal = dynamic(
 
 /**
  * Strips emoji characters from section titles.
- * Keeps letters, numbers, whitespace, and basic punctuation.
  */
 function stripEmojis(text: string): string {
   const cleaned: string[] = [];
@@ -34,10 +32,7 @@ function stripEmojis(text: string): string {
 }
 
 export function ExploreHome() {
-  const t = useTranslations('search');
-  const router = useRouter();
   const [enabled, setEnabled] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedContentId, setSelectedContentId] = useState<string | null>(
     null,
   );
@@ -53,61 +48,29 @@ export function ExploreHome() {
     enabled,
   });
 
-  if (!enabled || !data?.sections?.length) return null;
-
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+  if (!enabled || !data) return null;
 
   const handleItemClick = (item: ExploreItem) => {
     setSelectedContentId(item.id);
   };
 
+  const hasBanner = data.banner?.length > 0;
+  const hasTrending = data.trending?.length > 0;
+
   return (
     <>
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-10">
-        {/* Search Bar */}
-        <div className="relative w-full max-w-2xl mx-auto">
-          <div className="flex bg-background border-[3px] border-border overflow-hidden">
-            <div className="flex-grow flex items-center px-5 py-4">
-              <span
-                className="material-symbols-outlined text-2xl mr-3 text-foreground/50"
-                style={{ fontVariationSettings: "'FILL' 0" }}
-              >
-                search
-              </span>
-              <input
-                type="text"
-                placeholder={t('home.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
-                className="w-full bg-transparent border-none outline-none font-headline text-lg font-bold uppercase placeholder:text-foreground/30 text-foreground"
-                autoComplete="off"
-                autoCapitalize="none"
-                spellCheck={false}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (searchQuery.trim()) {
-                  router.push(
-                    `/search?q=${encodeURIComponent(searchQuery.trim())}`,
-                  );
-                }
-              }}
-              className="bg-neo-yellow text-foreground border-l-[3px] border-border px-8 font-headline text-base font-black uppercase tracking-widest hover:bg-primary hover:text-neo-yellow transition-colors cursor-pointer"
-            >
-              Search
-            </button>
-          </div>
-        </div>
+      {/* Hero Carousel */}
+      {hasBanner && hasTrending && (
+        <HeroCarousel
+          banner={data.banner}
+          trending={data.trending}
+          onItemClick={handleItemClick}
+        />
+      )}
 
-        {/* Sections */}
-        {data.sections.slice(0, 8).map((section) => (
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+        {/* Content Rows */}
+        {data.sections?.slice(0, 8).map((section) => (
           <section key={section.title}>
             <h2 className="font-headline font-black text-xl uppercase tracking-tight text-foreground mb-4">
               {stripEmojis(section.title)}
