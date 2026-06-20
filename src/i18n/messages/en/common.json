@@ -276,9 +276,9 @@
         "title": "Go Live",
         "desc": "Stream to your audience with RTMP and live chat."
       },
-      "messaging": {
-        "title": "Messaging",
-        "desc": "DMs, voice calls, and online presence."
+      "voiceCalls": {
+        "title": "Voice Calls",
+        "desc": "Crystal-clear voice calls with friends."
       },
       "secure": {
         "title": "Private & Secure",
@@ -302,8 +302,14 @@
       "music": {
         "title": "Music Streaming",
         "desc": "Gapless playback, synced lyrics, crossfade, equalizer, and device transfer."
+      },
+      "voiceCalls": {
+        "title": "Friends & Voice Calls",
+        "desc": "Add friends, see who's online, and jump into crystal-clear voice calls instantly."
       }
     },
+    "downloadTitle": "Download the App",
+    "downloadDesc": "Available on all major platforms. Get the native experience.",
     "ctaTitle": "Ready to Watch?",
     "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
     "footer": {
