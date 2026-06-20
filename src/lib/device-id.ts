@@ -28,15 +28,24 @@ export async function initDeviceInfo(): Promise<void> {
   if (cachedDeviceInfo) return;
   try {
     const info = await Device.getInfo();
+    const osLabel =
+      info.operatingSystem === 'mac'
+        ? 'macOS'
+        : info.operatingSystem === 'windows'
+          ? 'Windows'
+          : info.operatingSystem === 'ios'
+            ? 'iOS'
+            : info.operatingSystem === 'android'
+              ? 'Android'
+              : 'Linux';
     if (info.platform === 'android') {
       cachedDeviceInfo = `Android - ${info.manufacturer} ${info.model}`;
     } else if (info.platform === 'ios') {
       cachedDeviceInfo = `iOS - ${info.model}`;
     } else if ('electronAPI' in window) {
-      const os = info.operatingSystem;
-      cachedDeviceInfo = `Desktop App - ${os === 'mac' ? 'macOS' : os === 'windows' ? 'Windows' : 'Linux'}`;
+      cachedDeviceInfo = `Desktop App - ${osLabel}`;
     } else {
-      cachedDeviceInfo = 'Web Browser';
+      cachedDeviceInfo = `Web Browser - ${osLabel}`;
     }
   } catch {
     cachedDeviceInfo = getDeviceInfoSync();
