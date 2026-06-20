@@ -286,6 +286,13 @@ public class MusicPlaybackService extends Service {
     }
 
     @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        stopForeground(true);
+        stopSelf();
+        super.onTaskRemoved(rootIntent);
+    }
+
+    @Override
     public void onDestroy() {
         if (mediaSession != null) {
             mediaSession.setActive(false);
