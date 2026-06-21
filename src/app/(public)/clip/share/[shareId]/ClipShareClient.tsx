@@ -53,6 +53,7 @@ export default function ClipShareClient() {
       streamUrl={clip.videoUrl}
       metadata={metadata}
       hideBackButton
+      skipProgressHistory
     />
   );
 }

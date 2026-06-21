@@ -64,6 +64,8 @@ interface WatchPlayerProps {
   onAudioTrackChange?: (trackId: string) => void;
   /** Hide the back button in the player header (e.g. public clip page) */
   hideBackButton?: boolean;
+  /** Skip reporting watch progress to the backend (e.g. clips) */
+  skipProgressHistory?: boolean;
 }
 
 /**

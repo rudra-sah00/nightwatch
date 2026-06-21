@@ -136,9 +136,9 @@ export const ClipCard = memo(function ClipCard({
           <button
             type="button"
             onClick={() => onPlay(clip)}
-            className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors cursor-pointer"
+            className="absolute inset-0 flex items-center justify-center cursor-pointer"
           >
-            <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg stroke-[3px]" />
+            <Play className="w-12 h-12 text-foreground drop-shadow-lg stroke-[3px] opacity-0 group-hover:opacity-100" />
           </button>
         )}
       </div>

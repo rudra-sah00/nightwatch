@@ -25,7 +25,9 @@ function ClipPlayer() {
     movieId: 'clip',
   };
 
-  return <WatchVODPlayer streamUrl={src} metadata={metadata} />;
+  return (
+    <WatchVODPlayer streamUrl={src} metadata={metadata} skipProgressHistory />
+  );
 }
 
 export default function ClipPlayerPage() {
