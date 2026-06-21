@@ -111,6 +111,7 @@ export function SearchClient({
           <div className="space-y-6">
             {serverError &&
             !isTransitioning &&
+            !isPending &&
             hasSearched &&
             results.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border text-center">
