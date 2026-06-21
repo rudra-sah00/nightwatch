@@ -105,6 +105,7 @@ jobs:
           NEXT_PUBLIC_FIREBASE_VAPID_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY }}
           NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
           NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+          SITEMAP_SECRET=${{ secrets.SITEMAP_SECRET }}
           EOF
 
       - name: Build Project

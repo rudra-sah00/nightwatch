@@ -29,6 +29,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
       {
+        // Block AI training crawlers (not search engines or social preview bots)
         userAgent: [
           'GPTBot',
           'ChatGPT-User',
@@ -38,9 +39,7 @@ export default function robots(): MetadataRoute.Robots {
           'Claude-Web',
           'ClaudeBot',
           'Omgilibot',
-          'FacebookBot',
           'Bytespider',
-          'Applebot-Extended',
           'PerplexityBot',
           'Amazonbot',
           'YouBot',

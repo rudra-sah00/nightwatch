@@ -1,7 +1,7 @@
 {
   "name": "Nightwatch",
   "short_name": "Nightwatch",
-  "description": "Your personal streaming companion",
+  "description": "Synchronized playback, watch parties, live streaming, music, and voice calls with friends.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

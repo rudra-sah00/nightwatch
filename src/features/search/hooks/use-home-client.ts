@@ -24,7 +24,7 @@ export function useHomeClient({
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || initialQuery;
 
-  const { data: results = initialResults } = useQuery({
+  const { data: results = initialResults, isFetching } = useQuery({
     queryKey: ['search', query],
     queryFn: () => searchContent(query),
     enabled: !!query.trim(),
@@ -85,7 +85,7 @@ export function useHomeClient({
     query,
     user,
     results,
-    isTransitioning: false,
+    isTransitioning: isFetching,
     hasSearched,
     selectedContent,
     selectedContentId,

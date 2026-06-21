@@ -50,7 +50,11 @@
   },
   "overrides": [
     {
-      "includes": ["src/app/layout.tsx"],
+      "includes": [
+        "src/app/layout.tsx",
+        "src/app/(public)/terms/page.tsx",
+        "src/app/(public)/privacy/page.tsx"
+      ],
       "linter": {
         "rules": {
           "security": {

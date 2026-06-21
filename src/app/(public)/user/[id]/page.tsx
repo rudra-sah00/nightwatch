@@ -4,6 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import { getPublicProfile } from '@/features/profile/api';
 import { PublicProfileView } from '@/features/profile/components/public-profile-view';
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://nightwatch.in';
+
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -39,6 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: t('userProfileDescription', { name: displayName }),
       images: profile.profilePhoto ? [profile.profilePhoto] : [],
     },
+    alternates: { canonical: `${BASE_URL}/user/${id}` },
   };
 }
 

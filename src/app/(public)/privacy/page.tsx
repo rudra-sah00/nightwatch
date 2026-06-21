@@ -5,12 +5,36 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Privacy Policy — Nightwatch',
   description: 'Privacy Policy for the Nightwatch platform.',
+  alternates: { canonical: 'https://nightwatch.in/privacy' },
 };
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background text-foreground h-full overflow-y-auto">
       <div className="max-w-3xl mx-auto px-6 py-16">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: 'https://nightwatch.in',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'Privacy Policy',
+                  item: 'https://nightwatch.in/privacy',
+                },
+              ],
+            }),
+          }}
+        />
         <Link
           href="/"
           className="inline-flex items-center gap-2 mb-10 text-muted-foreground hover:text-foreground text-sm font-headline font-bold uppercase tracking-widest"

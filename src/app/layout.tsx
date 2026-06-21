@@ -31,17 +31,55 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://nightwatch.in';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(BASE_URL),
   title: {
-    default: 'Nightwatch',
+    default: 'Nightwatch — Watch Together, Stream, and Connect',
     template: '%s — Nightwatch',
   },
-  description: 'Your personal streaming companion',
+  description:
+    'Your personal streaming companion — synchronized playback, watch parties, live streaming, music, and voice calls with friends.',
+  keywords: [
+    'watch together',
+    'watch party',
+    'synchronized streaming',
+    'live streaming',
+    'voice calls',
+    'music streaming',
+    'stream with friends',
+  ],
   manifest: '/manifest.json',
   icons: {
     icon: '/logo.png',
     shortcut: '/logo.png',
     apple: '/logo.png',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Nightwatch',
+    title: 'Nightwatch — Watch Together, Stream, and Connect',
+    description:
+      'Synchronized playback, watch parties, live streaming, music, and voice calls with friends.',
+    url: BASE_URL,
+    images: [{ url: '/logo.png', width: 512, height: 512, alt: 'Nightwatch' }],
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Nightwatch — Watch Together, Stream, and Connect',
+    description:
+      'Synchronized playback, watch parties, live streaming, music, and voice calls with friends.',
+    images: ['/logo.png'],
+  },
+  alternates: {
+    canonical: BASE_URL,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 
@@ -60,6 +98,51 @@ export default async function RootLayout({
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'Nightwatch',
+              url: BASE_URL,
+              description:
+                'Synchronized playback, watch parties, live streaming, music, and voice calls with friends.',
+              applicationCategory: 'EntertainmentApplication',
+              operatingSystem: 'Windows, macOS, Linux, Android, iOS',
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+              image: `${BASE_URL}/logo.png`,
+            }),
+          }}
+        />
+        {/* hreflang alternate links for international SEO */}
+        {(
+          [
+            'en',
+            'hi',
+            'es',
+            'fr',
+            'ja',
+            'ko',
+            'de',
+            'pt',
+            'ar',
+            'ru',
+            'zh',
+            'it',
+            'tr',
+            'th',
+          ] as const
+        ).map((locale) => (
+          <link
+            key={locale}
+            rel="alternate"
+            hrefLang={locale}
+            href={`${BASE_URL}/?lang=${locale}`}
+          />
+        ))}
+        <link rel="alternate" hrefLang="x-default" href={BASE_URL} />
         {/* Blocking script to set dark class before React hydrates — prevents FOUC */}
         <script
           dangerouslySetInnerHTML={{

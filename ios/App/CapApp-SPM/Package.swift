@@ -18,9 +18,10 @@ let package = Package(
         .package(name: "CapacitorFirebaseCrashlytics", path: "../../../node_modules/.pnpm/@capacitor-firebase+crashlytics@8.3.0_@capacitor+core@8.3.1_firebase@12.14.0/node_modules/@capacitor-firebase/crashlytics"),
         .package(name: "CapacitorApp", path: "../../../node_modules/.pnpm/@capacitor+app@8.1.0_@capacitor+core@8.3.1/node_modules/@capacitor/app"),
         .package(name: "CapacitorClipboard", path: "../../../node_modules/.pnpm/@capacitor+clipboard@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/clipboard"),
+        .package(name: "CapacitorDevice", path: "../../../node_modules/.pnpm/@capacitor+device@8.0.2_@capacitor+core@8.3.1/node_modules/@capacitor/device"),
         .package(name: "CapacitorFilesystem", path: "../../../node_modules/.pnpm/@capacitor+filesystem@8.1.2_@capacitor+core@8.3.1/node_modules/@capacitor/filesystem"),
         .package(name: "CapacitorHaptics", path: "../../../node_modules/.pnpm/@capacitor+haptics@8.0.2_@capacitor+core@8.3.1/node_modules/@capacitor/haptics"),
-        .package(name: "CapacitorKeyboard", path: "../../../node_modules/.pnpm/@capacitor+keyboard@8.0.3_@capacitor+core@8.3.1/node_modules/@capacitor/keyboard"),
+        .package(name: "CapacitorKeyboard", path: "../../../node_modules/.pnpm/@capacitor+keyboard@8.0.5_@capacitor+core@8.3.1/node_modules/@capacitor/keyboard"),
         .package(name: "CapacitorNetwork", path: "../../../node_modules/.pnpm/@capacitor+network@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/network"),
         .package(name: "CapacitorPreferences", path: "../../../node_modules/.pnpm/@capacitor+preferences@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/preferences"),
         .package(name: "CapacitorPushNotifications", path: "../../../node_modules/.pnpm/@capacitor+push-notifications@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/push-notifications"),
@@ -29,8 +30,8 @@ let package = Package(
         .package(name: "CapacitorSplashScreen", path: "../../../node_modules/.pnpm/@capacitor+splash-screen@8.0.1_@capacitor+core@8.3.1/node_modules/@capacitor/splash-screen"),
         .package(name: "CapacitorStatusBar", path: "../../../node_modules/.pnpm/@capacitor+status-bar@8.0.2_@capacitor+core@8.3.1/node_modules/@capacitor/status-bar"),
         .package(name: "CapawesomeCapacitorBadge", path: "../../../node_modules/.pnpm/@capawesome+capacitor-badge@8.0.2_@capacitor+core@8.3.1/node_modules/@capawesome/capacitor-badge"),
-        .package(name: "CapgoCapacitorIncomingCallKit", path: "../../../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_patch_hash=4e3b122ca87f897e4c1346451a7caa655ab_fdc497a7bfb061d911c2c312b3e60ede/node_modules/@capgo/capacitor-incoming-call-kit"),
-        .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/.pnpm/@capgo+capacitor-social-login@8.3.22_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-social-login")
+        .package(name: "CapgoCapacitorIncomingCallKit", path: "../../../node_modules/.pnpm/@capgo+capacitor-incoming-call-kit@8.1.1_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-incoming-call-kit"),
+        .package(name: "CapgoCapacitorSocialLogin", path: "../../../node_modules/.pnpm/@capgo+capacitor-social-login@8.3.29_@capacitor+core@8.3.1/node_modules/@capgo/capacitor-social-login")
     ],
     targets: [
         .target(
@@ -44,6 +45,7 @@ let package = Package(
                 .product(name: "CapacitorFirebaseCrashlytics", package: "CapacitorFirebaseCrashlytics"),
                 .product(name: "CapacitorApp", package: "CapacitorApp"),
                 .product(name: "CapacitorClipboard", package: "CapacitorClipboard"),
+                .product(name: "CapacitorDevice", package: "CapacitorDevice"),
                 .product(name: "CapacitorFilesystem", package: "CapacitorFilesystem"),
                 .product(name: "CapacitorHaptics", package: "CapacitorHaptics"),
                 .product(name: "CapacitorKeyboard", package: "CapacitorKeyboard"),
