@@ -68,10 +68,9 @@ src/features/remote-control/
 │   ├── use-remote-control-listener.ts          # Desktop: advertise + respond to commands
 │   ├── use-remote-streams.ts                   # Mobile: track active desktop streams
 │   └── use-remote-commander.ts                 # Mobile: send commands + receive state
-├── components/
-│   ├── RemoteDisc.tsx                          # Floating disc (bottom-left) + overlay trigger
-│   └── RemoteControlSheet.tsx                  # Full-screen overlay with controls
-└── index.ts                                    # Barrel exports
+└── components/
+    ├── RemoteDisc.tsx                          # Floating disc (bottom-left) + overlay trigger
+    └── RemoteControlSheet.tsx                  # Full-screen overlay with controls
 ```
 
 ## Desktop Side (`use-remote-control-listener`)

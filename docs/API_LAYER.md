@@ -8,7 +8,6 @@ The Next.js application communicates across several data planes:
 
 1. **Nightwatch Backend**: Our primary monolithic Node.js/Express server handling the primary Database features.
 2. **Agora (RTC)**: Real-time Audio/Video streams.
-3. **Cloudflare Workers (Optional)**: Proxies for specific HLS/m3u8 CDN streams to circumvent scraping attacks.
 
 ## The `apiFetch` Wrapper
 
@@ -50,7 +49,7 @@ All API responses are cached client-side via TanStack Query's `QueryClient`. Thi
 
 - **Instant cache hits**: Default `staleTime` of 5 minutes means data is served instantly from cache on re-mount — no loading spinners for recently fetched data.
 - **Background revalidation**: After serving cached data, TanStack Query silently refetches in the background and updates the UI if the response has changed.
-- **Automatic garbage collection**: Queries with no active observers are garbage-collected after 5 minutes (`gcTime`).
+- **Automatic garbage collection**: Queries with no active observers are garbage-collected after 30 minutes (`gcTime`).
 
 ### Cache Key Convention
 

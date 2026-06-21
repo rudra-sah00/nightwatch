@@ -1,6 +1,6 @@
 # Contributing to Nightwatch
 
-With Nightwatch's extensive ecosystem (Next.js 15, Electron, React Server Components, custom WebRTC and WebSockets hooks), maintaining code stability is a priority. Please thoroughly read our tooling rules below.
+With Nightwatch's extensive ecosystem (Next.js 16, Electron, React Server Components, custom WebRTC and WebSockets hooks), maintaining code stability is a priority. Please thoroughly read our tooling rules below.
 
 ## Code Formatting & Linting (Biome)
 
@@ -8,8 +8,8 @@ We do **not** use Prettier or ESLint. We exclusively use [Biome (formerly Rome)]
 
 Before pushing PRs or committing changes, ensure your codebase is completely warning-free by running:
 ```bash
-pnpm biome format src/ --write
-pnpm biome check src/ --write
+pnpm format   # Runs: biome check --write .
+pnpm check    # Runs: biome check . (no auto-fix, CI validation)
 ```
 
 ### Strict Type Safety and Linting Rules
@@ -45,11 +45,6 @@ Because we heavily use Agora's real-time channels:
 
 *   **Mutations**: Standard data mutations (profiles, passwords) use **Server Actions**.
 *   **API Calling**: We do not use standard `fetch()` syntax. Route heavily through `src/lib/fetch.ts`, specifically employing `apiFetch` which wraps Mutex Queues to handle JWT Access Token timeouts silently without crashing active components executing parallel requests.
-
-## Adding Markdown Files to `/docs`
-
-If you add a new Markdown file, ensure it correctly proxies in Next.js Server config. Any file containing the string `api` out of pure coincidence (like `API_LAYER.md`) can trigger Vercel Edge Server 404 collapses unless whitelisted in `src/proxy.ts` using the correct negative-lookahead expressions:
-`/((?!api\/|_next\/static).*)`
 
 ## Running Tests
 

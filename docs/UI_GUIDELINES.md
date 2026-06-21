@@ -13,12 +13,22 @@ Core principles to follow when building new UI components:
 - **Sharp Typography:** Utilize the configured `font-headline` uppercase tracking formats for headers and buttons.
 - **No Drop Shadows:** Avoid CSS box-shadows with blur radii. If a component needs elevation, use a solid color offset block.
 
-## Tailwind Configuration
+## Tailwind Configuration (v4 CSS-Native)
 
-The `tailwind.config.ts` extends standard utilities to support our Neo-Brutalist theme.
+The project uses **Tailwind CSS v4** with CSS-native configuration. There is no `tailwind.config.ts` file — all theme tokens are defined in `src/app/globals.css` using `@theme {}` blocks.
 
-- **Colors:** We utilize CSS variables mapped to generic names (`bg-background`, `text-foreground`, `border-border`) so dark mode can be seamlessly toggled if implemented, while maintaining the high contrast ratio.
-- **Animations:** We heavily lean on Tailwind's `motion-safe:animate-in` for clean, snapping transition effects when dialogs or lobby components mount.
+```css
+@theme {
+  --color-neo-yellow: #ffcc00;
+  --color-neo-red: #e63b2e;
+  --font-headline: var(--font-space-grotesk);
+}
+```
+
+- **Colors:** CSS custom properties (`bg-background`, `text-foreground`, `border-border`) enable seamless dark mode toggling while maintaining high contrast.
+- **Animations:** The `tailwindcss-animate` plugin is loaded via `@plugin "tailwindcss-animate"` in the CSS file.
+- **Dark Mode:** Configured via `@custom-variant dark (&:is(.dark *))` in globals.css.
+- **shadcn/ui:** Base styles imported via `@import "shadcn/tailwind.css"`.
 
 ## Component API
 

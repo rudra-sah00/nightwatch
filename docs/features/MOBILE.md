@@ -38,6 +38,16 @@ Key decisions:
 - **iOS inline video** — `allowsLinkPreview: false` prevents forced fullscreen on video playback.
 - **Dev mode** — set `CAPACITOR_DEV=true` and `CAPACITOR_SERVER_URL` to point the WebView at your local dev server.
 
+## Capacitor Source Modules
+
+Native-specific logic lives in `src/capacitor/`:
+
+| File | Purpose |
+|------|----------|
+| `push.ts` | Push notification registration, token management, and tap handling |
+| `firebase.ts` | Firebase Cloud Messaging initialization for Capacitor |
+| `music-service.ts` | Background music playback service (lock screen controls, now playing) |
+
 ## Native Plugins (16)
 
 | # | Plugin | Package | Purpose |

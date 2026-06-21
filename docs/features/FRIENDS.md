@@ -8,14 +8,26 @@ The friends system provides social features: friend requests, online presence tr
 
 ```
 src/features/friends/
-├── api.ts                          # API layer with TTL caching
+├── api.ts                          # API layer (friends CRUD, search, block)
 ├── types.ts                        # TypeScript interfaces (FriendProfile, FriendActivity, etc.)
 ├── format-activity.ts              # Utility to format activity into display string
 ├── hooks/
 │   ├── use-friends.ts              # Friends list, requests, accept/reject/cancel, activity
-│   └── use-call.tsx                # CallProvider context, Agora RTC, call state machine
+│   ├── use-call.tsx                # CallProvider context, Agora RTC, call state machine
+│   └── use-friend-notifications.ts # Real-time friend event notifications
+├── call/
+│   ├── call-media.ts               # Agora RTC media track management
+│   ├── call.service.ts             # Call session lifecycle (initiate, answer, end)
+│   ├── call-native.ts              # Native CallKit/Phone notification integration
+│   ├── call.utils.ts               # Call utility functions
+│   ├── call.config.ts              # Agora RTC configuration constants
+│   ├── InviteSpotlight.tsx         # Call invite spotlight overlay
+│   └── PeerAvatar.tsx              # Remote peer avatar during calls
 └── components/
-    └── CallOverlay.tsx             # Global floating call card (top-right corner)
+    ├── CallOverlay.tsx             # Global floating call card (top-right corner)
+    ├── FriendRow.tsx               # Individual friend row in sidebar
+    ├── Avatar.tsx                  # Friend avatar with online indicator
+    └── FriendSearchSpotlight.tsx   # Username search overlay for adding friends
 ```
 
 ### Integration Points

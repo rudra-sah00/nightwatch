@@ -45,11 +45,11 @@ Due to the scale of the application, our detailed technical documentation is spl
 
 ## Technology Stack
 
-- **Framework:** Next.js (React 18+, App Router)
+- **Framework:** Next.js 16 (React 19, App Router)
 - **Desktop Wrapper:** Electron (Node.js)
 - **Mobile Wrapper:** Capacitor (iOS, Android)
 - **Language:** TypeScript (Strict Mode)
-- **Styling:** Tailwind CSS (Custom Neo-Brutalist Theme)
+- **Styling:** Tailwind CSS v4 (Custom Neo-Brutalist Theme)
 - **Internationalization:** next-intl (14 languages, cookie-based)
 - **Real-Time Data:** Agora RTM, Socket.IO (friends, presence, voice calls)
 - **Real-Time Media:** Agora RTC (WebRTC — watch party, voice calls)
@@ -69,8 +69,10 @@ src/
 ├── components/        # Global, reusable UI primitives (Buttons, Inputs, Dialogs)
 ├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream, friends)
 ├── hooks/             # Global generic hooks
+├── i18n/              # Internationalization (14 locales, 8 namespaces per locale)
 ├── lib/               # Shared utilities, formatting scripts, and global singletons
 ├── providers/         # Global React Contexts (Socket, Session, Theme)
+├── store/             # Zustand global stores (auth)
 └── types/             # Global TypeScript types (Zod inferred and explicit interfaces)
 ```
 
@@ -86,9 +88,11 @@ pnpm install
 pnpm dev
 ```
 
-For thorough type-checking, formatting, and tests before committing:
+For thorough type-checking and linting before committing:
 ```bash
-pnpm validate
+pnpm check        # Biome lint/format validation
+pnpm type-check   # TypeScript strict mode
+pnpm test         # Vitest unit tests
 ```
 
 ## Desktop Application (macOS, Windows, Linux)
@@ -113,13 +117,13 @@ You can easily trigger a new desktop build using the official [GitHub CLI (`gh`)
 gh release create v1.32.0 --title "v1.32.0 - Major Update" --notes "Release notes here..."
 ```
 
-As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action will spin up cloud runners, compile the Rust + Next.js binaries, and attach the installer links automatically to the GitHub Releases page.
+As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action will spin up cloud runners, compile the Next.js + Electron binaries, and attach the installer links automatically to the GitHub Releases page.
 
 ## Mobile Application (iOS, Android)
 
 The application includes a native mobile wrapper using Capacitor. It wraps the deployed Next.js app in a native WebView with access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, and swipe-based navigation.
 
-### Native Plugins (15)
+### Native Plugins (16)
 
 Splash Screen, Status Bar, Clipboard, Haptics, Keep Awake, Screen Orientation, Network Detection, Share, Badge, Keyboard, App Lifecycle, Preferences, Filesystem, Phone Call Notification, CallKit.
 

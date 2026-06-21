@@ -76,7 +76,7 @@ src/features/music/
 │   ├── queue.ts                    # Queue ops, shuffle order, persistence
 │   ├── equalizer.ts                # Web Audio API 5-band EQ chain
 │   └── sleep-timer.ts              # Timer set/clear/expiry check
-├── context/
+├── store/
 │   └── use-music-store.ts           # Zustand store for all playback state
 ├── hooks/
 │   ├── use-music-shortcuts.ts       # Global keyboard shortcuts (Space, ←→, ↑↓, M, S, R)

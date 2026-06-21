@@ -7,8 +7,7 @@ With a massive monolithic Next.js App Router frontend, concurrent WebRTC streams
 ### Zustand (Persistent Client State)
 For state that persists across page navigations and needs to survive refreshes:
 *   **`use-auth-store.ts`**: User authentication state with Zustand `persist` middleware. Uses a custom `StateStorage` adapter that syncs to both `localStorage` (web) and `electron-plugin-store` (desktop) via `desktopBridge.storeSet/storeGet`.
-*   **`use-navigation-store.ts`**: Navigation transition state for page loading indicators.
-*   **`use-music-store.ts`**: Music playback state with Zustand `persist` middleware. Stores volume, shuffle, repeat mode, crossfade duration, and gapless playback preferences. Non-persisted slices include current track, queue, playback position, and playing state for rapid UI updates without disk writes.
+*   **`use-music-store.ts`**: Located at `src/features/music/store/use-music-store.ts`. Music playback state with Zustand `persist` middleware. Stores volume, shuffle, repeat mode, crossfade duration, and gapless playback preferences. Non-persisted slices include current track, queue, playback position, and playing state for rapid UI updates without disk writes.
 
 ### React Context (Dependency Injection)
 For providing singleton instances and infrequently-changing values down the tree:
@@ -99,8 +98,4 @@ All client-side caching is handled by TanStack Query's built-in cache. The `stal
 
 There is no separate TTL cache layer — TanStack Query's garbage collection, background refetching, and structural sharing replace the previous manual `createTTLCache` utility entirely.
 
-## 7. Shared Utilities
 
-*   **`src/lib/errors.ts`**: `isApiError()` type guard, `handleApiError()` centralized handler, `mapErrorCode()` for user-friendly messages.
-*   **`src/hooks/use-abort-controller.ts`**: Shared request cancellation hook for API calls.
-*   **`src/features/auth/hooks/use-otp-verification.ts`**: Shared OTP flow (countdown, resend, submit).

@@ -29,6 +29,14 @@ When testing individual components:
 - `pnpm test:ui` : Opens the Vitest UI in the browser to visualize passing/failing tests and coverage metrics.
 - `pnpm test:coverage` : Generates a coverage report inside the `/coverage/` directory using the V8 engine.
 
+### Coverage Thresholds
+
+The project enforces minimum coverage via `vitest.config.ts`:
+- **Lines:** 82%
+- **Functions:** 74%
+- **Branches:** 67%
+- **Statements:** 79%
+
 ## Playwright (End-to-End Testing)
 
 E2E testing is uniquely challenging for a real-time, authenticated, and rate-limited application like Nightwatch. We use Playwright to simulate actual browser interactions, test WebSockets, and assert UI flows (e.g., Watch Party creation and lobby approval).
@@ -74,4 +82,4 @@ Triggers on every PR to `main`:
 3. Comments the preview URL on the PR
 
 ### Local Validation
-The `pnpm validate` command sequences type-checking, formatting, linting, and Vitest runs before allowing a merge.
+Run `pnpm check` (Biome lint/format) and `pnpm type-check` (TypeScript) before committing. The Husky pre-commit hook enforces these automatically.

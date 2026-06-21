@@ -4,9 +4,9 @@ Nightwatch is not a simple Next.js boilerplate; it's a massive, multi-environmen
 
 ## High-Level Tech Stack
 
-*   **Framework**: Next.js 15 (App Router fully utilizing RSC / Server Actions).
+*   **Framework**: Next.js 16 (App Router fully utilizing RSC / Server Actions).
 *   **Language**: TypeScript (Strict typing for RPC channels, APIs, and React props).
-*   **Styling**: Tailwind CSS (Custom Neo-Brutalist Theme with variables in `tailwind.config`).
+*   **Styling**: Tailwind CSS v4 (Custom Neo-Brutalist Theme with CSS-native @theme configuration).
 *   **Server State**: TanStack Query (client-side caching, background revalidation, optimistic updates).
 *   **Client State**: Zustand (lightweight stores for player, music, UI state).
 *   **Real-time Infrastructure**: Agora RTM (Signaling / UI State), Agora RTC (WebRTC Video/Audio Calls), and Socket.io (`socket.ts` legacy fallbacks).
@@ -45,8 +45,7 @@ Instead of throwing every component into a global `src/components/` folder, Nigh
 ## 3. The `src/lib/` Utilities Layer
 
 *   **`fetch.ts`:** The `apiFetch` wrapper with automatic token refresh, CSRF handling, configurable retries with linear backoff, and proper abort signal handling (user abort vs timeout are distinguished).
-*   **`query-provider.tsx`:** Initializes TanStack Query's `QueryClient` with a default `staleTime` of 5 minutes. Wraps the app to provide client-side caching, background revalidation, and automatic garbage collection of unused queries.
-*   **`errors.ts`:** Centralized error handling — `isApiError()` type guard, `handleApiError()` with toast, `mapErrorCode()` for user-friendly messages.
+*   **`query-provider.tsx`:** Located at `src/providers/query-provider.tsx`. Initializes TanStack Query's `QueryClient` with a default `staleTime` of 5 minutes. Wraps the app to provide client-side caching, background revalidation, and automatic garbage collection of unused queries.
 *   **`socket.ts`:** A global singleton initialization for the Socket.io server connection. Keeps track of force logouts and active connections.
 *   **`storage-cache.ts`:** In-memory cache for `localStorage` reads. Event listeners initialized lazily via `initStorageCache()` to avoid SSR side effects.
 *   **`linkify.ts`:** URL parsing for chat messages. Uses separate global/non-global regex to avoid `lastIndex` mutation bugs.
@@ -55,22 +54,14 @@ Instead of throwing every component into a global `src/components/` folder, Nigh
 
 ---
 
-## 4. The Edge Proxy & Custom Matchers
-
-Inside Next.js `src/proxy.ts` (mapped in Edge infrastructure), our frontend intercepts direct CDN manifest requests (`.m3u8` or chunk `.ts` files) dynamically. This forces CDN edge servers to believe the VOD stream is being requested by the authorized Host Platform, mitigating hard CORS rules and Hotlink protections designed to crash third-party React players.
-
-*   **The Regex Matcher Strategy:** A heavily tested Regex pattern `/((?!api/|_next/static).*)` ensures internal documentation links like `/API_LAYER` aren't automatically redirected into 404 Vercel Edge endpoints.
-
----
-
-## 5. The Electron Sandbox (`src/hooks/use-desktop-app.ts`)
+## 4. The Electron Sandbox (`src/hooks/use-desktop-app.ts`)
 
 Instead of rendering a normal web app in a system webview, the Nightwatch standard browser experience contains fallback abstractions checking for custom protocol handlers (`nightwatch://`).
 If the system timeout detects `document.hidden` failing to trigger after 2000 milliseconds, it visually outputs a Sonner Toast asking the user to manually install the desktop shell to enjoy Frameless borders, system hardware rendering, and Discord Rich Presence integrations linked explicitly inside `src/lib/electron-bridge.ts`.
 
 ---
 
-## 6. Desktop Platform Layer (Electron)
+## 5. Desktop Platform Layer (Electron)
 
 The desktop app wraps the Next.js frontend in an Electron shell with a preload script that exposes `window.electronAPI`. The frontend communicates with the main process exclusively through `src/lib/electron-bridge.ts`, which provides a safe no-op fallback when running outside Electron.
 
@@ -113,7 +104,7 @@ export function checkIsDesktop(): boolean { ... }
 
 ---
 
-## 7. Mobile Platform Layer (Capacitor)
+## 6. Mobile Platform Layer (Capacitor)
 
 The mobile app wraps the deployed Next.js app in a native WebView via Capacitor, with 16 native plugins providing device API access. The frontend communicates through `src/lib/mobile-bridge.ts`, which mirrors the `desktopBridge` pattern.
 
@@ -160,7 +151,7 @@ const isMobile = useIsMobile(); // true if <768px OR Capacitor native
 
 ---
 
-## 8. Player Compound Component Pattern
+## 7. Player Compound Component Pattern
 
 The video player uses a **compound component** architecture where a root provider exposes shared state to composable child components via React Context.
 
@@ -250,7 +241,7 @@ This pattern allows `WatchVODPlayer` and `WatchLivePlayer` to compose different 
 
 ---
 
-## 9. Service Worker (Workbox)
+## 8. Service Worker (Workbox)
 
 The app uses a runtime-caching service worker (`public/sw.js`) powered by **Google Workbox via CDN** (`importScripts`). No build step or npm dependency is required for the SW itself — modules are loaded on-demand from Google's CDN.
 

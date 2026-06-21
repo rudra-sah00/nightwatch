@@ -34,7 +34,7 @@ src/features/watch/
     │   ├── useNextEpisode.ts
     │   ├── useStreamUrls.ts
     │   ├── usePlayerEngine.ts
-    │   ├── useS2AudioTracks.ts
+    │   ├── useAudioTracks.ts
     │   ├── useMobileDetection.ts
     │   ├── useMobileOrientation.ts
     │   └── series-cache.ts
@@ -69,7 +69,6 @@ src/features/watch/
     │   │   ├── LiveSeekBar.tsx
     │   │   ├── Volume.tsx
     │   │   ├── Fullscreen.tsx
-    │   │   ├── PipButton.tsx
     │   │   ├── SkipButtons.tsx
     │   │   ├── SettingsMenu.tsx
     │   │   ├── AudioSelector.tsx
@@ -77,7 +76,6 @@ src/features/watch/
     │   │   └── EpisodePanel.tsx
     │   ├── overlays/
     │   │   ├── NextEpisodeOverlay.tsx
-    │   │   ├── PipOverlay.tsx
     │   │   ├── LoadingOverlay.tsx
     │   │   ├── ErrorOverlay.tsx
     │   │   └── BufferingOverlay.tsx
@@ -169,7 +167,7 @@ Exports a `Player` namespace object grouping all compound components:
 </Player.Root>
 ```
 
-Full component list: `Root`, `Video`, `Controls`, `ControlRow`, `MobileTopBar`, `MobileCenterControls`, `MobileBottomRight`, `Spacer`, `PipButton`, `PlayPause`, `SeekBar`, `MobileSeekBar`, `Volume`, `TimeDisplay`, `Fullscreen`, `SettingsMenu`, `AudioSubtitleSelectors`, `LiveBadge`, `Header`, `SkipButtons`, `EpisodePanel`, `EpisodePanelOverlay`, `EpisodePanelTrigger`.
+Full component list: `Root`, `Video`, `Controls`, `ControlRow`, `MobileTopBar`, `MobileCenterControls`, `MobileBottomRight`, `Spacer`, `PlayPause`, `SeekBar`, `MobileSeekBar`, `Volume`, `TimeDisplay`, `Fullscreen`, `SettingsMenu`, `AudioSubtitleSelectors`, `LiveBadge`, `Header`, `SkipButtons`, `EpisodePanel`, `EpisodePanelOverlay`, `EpisodePanelTrigger`.
 
 ### PlayerContext
 

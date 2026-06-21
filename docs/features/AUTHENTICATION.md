@@ -5,12 +5,11 @@ Our authentication strategy is a heavily secured, token-based system managed cen
 
 ## Core Mechanisms
 
-### 1. Proxy Gate (`src/proxy.ts`)
-The server-side proxy (Next.js 16 convention — replaces the deprecated `middleware.ts`) runs before any route renders:
+### 1. Route Protection (Layout Guards)
+Route protection is handled at the layout level using React Server Components. The `(protected)` route group layouts verify session cookies before rendering:
 - Checks for `refreshToken` cookie presence (NOT `accessToken` alone, since it expires every 15 min).
 - **Protected routes** → redirect to `/login?from={path}` if no session cookie exists.
 - **Auth routes** (`/login`, `/signup`) → redirect to `/home` if session exists.
-- Also handles locale detection (sets `NEXT_LOCALE` cookie from `Accept-Language` header).
 
 ### 2. Client-Side Token Refresh (`src/lib/fetch.ts`)
 The `apiFetch()` wrapper intercepts 401 responses:

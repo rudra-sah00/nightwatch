@@ -38,9 +38,6 @@ Your `.env.local` file should be configured strictly according to where your bac
 # The URL pointing to your locally running nightwatch-backend instance
 NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
 
-# The URL pointing to your local Cloudflare Worker proxy (if applicable)
-NEXT_PUBLIC_CF_WORKER_URL=http://localhost:8787
-
 # The WebSocket connection URL (typically exactly matches the backend URL)
 NEXT_PUBLIC_WS_URL=http://localhost:4000
 
@@ -53,8 +50,15 @@ NEXT_PUBLIC_AGORA_DEBUG=false
 # Cloudflare Turnstile site key (anti-bot verification on login/signup)
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key
 
-# Sentry DSN for error tracking (disabled in development via enabled: false)
-NEXT_PUBLIC_SENTRY_DSN=
+# Google OAuth Client ID
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=your_vapid_key
 ```
 
 > **Note:** Do not check `.env.local` into version control. It is ignored by Git automatically.
