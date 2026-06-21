@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import 'material-symbols/outlined.css';
 import './globals.css';
 import { Suspense } from 'react';
+import { CookieConsent } from '@/components/layout/CookieConsent';
 import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
 import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
 import { MobileShell } from '@/components/layout/MobileShell';
@@ -187,6 +188,7 @@ export default async function RootLayout({
                       {children}
                       <Toaster />
                       <SwRegister />
+                      <CookieConsent />
                     </div>
                   </AuthProvider>
                 </SocketProvider>

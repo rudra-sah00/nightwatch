@@ -1,15 +1,19 @@
 /**
  * Analytics consent management.
- * Stores user preference in localStorage. Defaults to true (opt-out model).
+ * Stores user preference in localStorage. Defaults to false (opt-in model).
+ * User must explicitly accept before any analytics cookies are set.
  */
 
 const CONSENT_KEY = 'analytics_consent';
 
 export function getAnalyticsConsent(): boolean {
   if (typeof window === 'undefined') return false;
-  const stored = localStorage.getItem(CONSENT_KEY);
-  // Default: enabled. User must explicitly opt out.
-  return stored !== 'false';
+  return localStorage.getItem(CONSENT_KEY) === 'true';
+}
+
+export function hasAnsweredConsent(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(CONSENT_KEY) !== null;
 }
 
 export function setAnalyticsConsent(enabled: boolean) {
