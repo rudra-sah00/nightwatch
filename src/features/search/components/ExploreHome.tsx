@@ -48,13 +48,25 @@ export function ExploreHome() {
     enabled,
   });
 
+  console.log(
+    '[ExploreHome] enabled:',
+    enabled,
+    'data:',
+    data
+      ? {
+          banner: data.banner?.length,
+          trending: data.trending?.length,
+          sections: data.sections?.length,
+        }
+      : null,
+  );
+
   if (!enabled || !data) return null;
 
   const handleItemClick = (item: ExploreItem) => {
     setSelectedContentId(item.id);
   };
 
-  const hasBanner = data.banner?.length > 0;
   // Use dedicated trending field, fallback to first section items
   const trendingItems = data.trending?.length
     ? data.trending

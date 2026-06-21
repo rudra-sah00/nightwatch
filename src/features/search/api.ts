@@ -99,8 +99,20 @@ export interface ExploreData {
 
 export async function getExploreHome(): Promise<ExploreData | null> {
   try {
-    return await apiFetch<ExploreData>('/api/video/explore/home');
-  } catch {
+    const result = await apiFetch<ExploreData>('/api/video/explore/home');
+    console.log(
+      '[getExploreHome] response keys:',
+      Object.keys(result || {}),
+      'banner:',
+      result?.banner?.length,
+      'trending:',
+      result?.trending?.length,
+      'sections:',
+      result?.sections?.length,
+    );
+    return result;
+  } catch (err) {
+    console.error('[getExploreHome] failed:', err);
     return null;
   }
 }
