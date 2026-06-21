@@ -49,6 +49,7 @@
     "checking": "確認中...",
     "saving": "保存中...",
     "signOut": "サインアウト",
+    "signOutConfirm": "アカウントからサインアウトしますか？",
     "saveChanges": "変更を保存",
     "publicLinkCopied": "公開プロフィールリンクをコピーしました",
     "publicLinkFailed": "公開プロフィールリンクのコピーに失敗しました"

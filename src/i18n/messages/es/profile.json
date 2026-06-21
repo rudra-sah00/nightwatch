@@ -49,6 +49,7 @@
     "checking": "Verificando...",
     "saving": "Guardando...",
     "signOut": "Cerrar Sesión",
+    "signOutConfirm": "¿Estás seguro de que quieres cerrar sesión?",
     "saveChanges": "Guardar Cambios",
     "publicLinkCopied": "Enlace de perfil público copiado",
     "publicLinkFailed": "Error al copiar el enlace de perfil público"

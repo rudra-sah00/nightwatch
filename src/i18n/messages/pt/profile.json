@@ -49,6 +49,7 @@
     "checking": "Verificando...",
     "saving": "Salvando...",
     "signOut": "Sair",
+    "signOutConfirm": "Tem certeza de que deseja sair da sua conta?",
     "saveChanges": "Salvar Alterações",
     "publicLinkCopied": "Link do perfil público copiado",
     "publicLinkFailed": "Falha ao copiar link do perfil público"

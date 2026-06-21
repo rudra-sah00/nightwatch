@@ -2,7 +2,7 @@
 
 import { Camera, Loader2, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -28,6 +28,7 @@ import { GoogleAccountSection } from './google-account-section';
  */
 export function UpdateProfileForm() {
   const t = useTranslations('profile');
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const {
     user,
     logout,
@@ -305,7 +306,7 @@ export function UpdateProfileForm() {
               size="default"
               onClick={(e) => {
                 e.preventDefault();
-                logout();
+                setShowLogoutDialog(true);
               }}
               className="gap-2 shrink-0 md:self-start self-center w-full max-w-xs md:w-auto min-w-[140px]"
               title={t('updateForm.signOut')}
@@ -381,6 +382,28 @@ export function UpdateProfileForm() {
           </Button>
         </div>
       </section>
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('updateForm.signOut')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('updateForm.signOutConfirm')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8">
+            <AlertDialogCancel
+              type="button"
+              onClick={() => setShowLogoutDialog(false)}
+            >
+              {t('dangerZone.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => logout()}>
+              {t('updateForm.signOut')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={profileForm.showDeleteDialog}

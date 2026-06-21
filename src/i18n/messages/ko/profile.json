@@ -49,6 +49,7 @@
     "checking": "확인 중...",
     "saving": "저장 중...",
     "signOut": "로그아웃",
+    "signOutConfirm": "계정에서 로그아웃하시겠습니까?",
     "saveChanges": "변경 사항 저장",
     "publicLinkCopied": "공개 프로필 링크가 복사되었습니다",
     "publicLinkFailed": "공개 프로필 링크 복사에 실패했습니다"

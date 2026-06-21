@@ -49,6 +49,7 @@
     "checking": "Kontrol ediliyor...",
     "saving": "Kaydediliyor...",
     "signOut": "Çıkış Yap",
+    "signOutConfirm": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?",
     "saveChanges": "Değişiklikleri Kaydet",
     "publicLinkCopied": "Herkese açık profil linki kopyalandı",
     "publicLinkFailed": "Herkese açık profil linki kopyalanamadı"

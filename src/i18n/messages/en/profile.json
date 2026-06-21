@@ -65,6 +65,7 @@
     "checking": "Checking...",
     "saving": "Saving...",
     "signOut": "Sign Out",
+    "signOutConfirm": "Are you sure you want to sign out of your account?",
     "saveChanges": "Save Changes",
     "publicLinkCopied": "Public profile link copied",
     "publicLinkFailed": "Failed to copy public profile link"

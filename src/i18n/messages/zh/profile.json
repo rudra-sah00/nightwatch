@@ -49,6 +49,7 @@
     "checking": "检查中...",
     "saving": "保存中...",
     "signOut": "退出登录",
+    "signOutConfirm": "确定要退出登录吗？",
     "saveChanges": "保存更改",
     "publicLinkCopied": "公开资料链接已复制",
     "publicLinkFailed": "复制公开资料链接失败"

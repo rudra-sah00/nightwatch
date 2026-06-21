@@ -49,6 +49,7 @@
     "checking": "Vérification...",
     "saving": "Enregistrement...",
     "signOut": "Déconnexion",
+    "signOutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
     "saveChanges": "Enregistrer les Modifications",
     "publicLinkCopied": "Lien du profil public copié",
     "publicLinkFailed": "Échec de la copie du lien du profil public"

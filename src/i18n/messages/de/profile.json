@@ -49,6 +49,7 @@
     "checking": "Prüfe...",
     "saving": "Speichere...",
     "signOut": "Abmelden",
+    "signOutConfirm": "Möchten Sie sich wirklich abmelden?",
     "saveChanges": "Änderungen speichern",
     "publicLinkCopied": "Öffentlicher Profillink kopiert",
     "publicLinkFailed": "Kopieren des öffentlichen Profillinks fehlgeschlagen"
