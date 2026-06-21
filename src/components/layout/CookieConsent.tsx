@@ -23,24 +23,23 @@ export function CookieConsent() {
   };
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-[9999] mx-auto max-w-lg animate-in slide-in-from-bottom-4 fade-in duration-300">
-      <div className="rounded-2xl border-2 border-border bg-card p-4 shadow-xl">
-        <p className="text-sm text-foreground/80">
-          We use cookies for analytics to improve your experience. No data is
-          shared with third parties for advertising.
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] w-full backdrop-blur-md bg-background/70 border-t border-border/50 px-4 py-3 animate-in slide-in-from-bottom-4 fade-in duration-300">
+      <div className="mx-auto max-w-lg flex flex-col items-center gap-2 text-center">
+        <p className="text-xs text-foreground/70">
+          We use cookies for analytics to improve your experience.
         </p>
-        <div className="mt-3 flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => respond(true)}
-            className="rounded-full bg-neo-yellow px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-black transition-transform hover:scale-105 active:scale-95"
+            className="text-xs font-bold uppercase tracking-wide text-foreground hover:text-neo-yellow transition-colors"
           >
             Accept
           </button>
           <button
             type="button"
             onClick={() => respond(false)}
-            className="rounded-full border-2 border-border px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-foreground/60 transition-transform hover:scale-105 active:scale-95"
+            className="text-xs font-bold uppercase tracking-wide text-foreground/50 hover:text-foreground transition-colors"
           >
             Decline
           </button>
