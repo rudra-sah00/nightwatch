@@ -14,6 +14,7 @@ import { TvMusicFullPlayer } from '../components/TvMusicFullPlayer';
 import { TvMusicMiniPlayer } from '../components/TvMusicMiniPlayer';
 import { TvScreensaver } from '../components/TvScreensaver';
 import { useTvBack } from '../hooks/use-tv-back';
+import { useTvVideoPresence } from '../hooks/use-tv-video-presence';
 import { FOCUS_KEYS } from '../lib/focus-keys';
 import { initSpatialNavigation } from '../lib/spatial-navigation';
 import { TvNavbar } from './TvNavbar';
@@ -33,6 +34,7 @@ export function TvRootLayout({ children }: { children: React.ReactNode }) {
   });
 
   useTvBack();
+  useTvVideoPresence();
 
   useEffect(() => {
     document.documentElement.classList.add('tv');

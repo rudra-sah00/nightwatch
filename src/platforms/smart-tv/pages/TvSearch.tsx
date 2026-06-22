@@ -31,7 +31,7 @@ function LetterKey({ char, onPress }: { char: string; onPress: () => void }) {
       className={`w-11 h-11 flex items-center justify-center rounded-lg text-base font-bold transition-all ${
         focused
           ? 'bg-tv-focus text-white scale-110'
-          : 'bg-white/10 text-white/80'
+          : 'bg-secondary text-foreground'
       }`}
     >
       {char}
@@ -55,7 +55,7 @@ function ActionKey({
       className={`flex items-center justify-center gap-2 px-4 h-11 rounded-lg text-sm font-bold transition-all ${
         focused
           ? 'bg-tv-focus text-white scale-105'
-          : 'bg-white/10 text-white/80'
+          : 'bg-secondary text-foreground'
       }`}
     >
       <span className="material-symbols-outlined text-lg">{icon}</span>
@@ -138,8 +138,8 @@ function SearchResultCard({
   return (
     <div
       ref={ref}
-      className={`flex flex-col rounded-xl overflow-hidden border-[3px] transition-all ${
-        focused ? 'border-tv-focus scale-105 z-10' : 'border-border'
+      className={`tv-focusable flex flex-col rounded-xl overflow-hidden border-[3px] transition-all ${
+        focused ? 'tv-focusable--focused border-tv-focus' : 'border-border'
       }`}
     >
       <div className="aspect-[2/3] relative bg-muted">

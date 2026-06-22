@@ -36,6 +36,7 @@ Thumbs.db
 # Testing
 coverage/
 playwright-report/
+.playwright-mcp/
 test-results/
 .last-run.json
 

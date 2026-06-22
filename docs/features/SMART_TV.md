@@ -455,3 +455,73 @@ adb install -r app/build/outputs/apk/release/app-release.apk
 | Remote Control | ✅ | ✅ (sender) | ✅ (receiver) | ✅ (receiver) |
 | Friends/Voice | ✅ | ✅ | ✅ | ❌ |
 | Games | ✅ | ❌ | ✅ | ❌ |
+
+---
+
+## Debugging D-Pad Navigation
+
+If spatial navigation stops working (focus gets stuck, keys stop responding), follow this guide:
+
+### 1. Enable Visual Debug
+
+In `src/platforms/smart-tv/lib/spatial-navigation.ts`, set:
+
+```ts
+init({
+  debug: true,
+  visualDebug: true,
+  // ...rest
+});
+```
+
+This draws colored overlays on focusable elements and logs navigation decisions to the console.
+
+### 2. Check `addFocusable` Logs
+
+Every component that calls `useFocusable()` should appear in the console with an `addFocusable` log. If a component shows `node: null`, its ref isn't attached to a DOM element.
+
+### 3. Root Cause Pattern
+
+The most common cause of broken navigation:
+
+> A component calls `useFocusable()` but conditionally returns `null` AFTER the hook call.
+
+This registers a focusable with `node: null` in the spatial navigation tree, creating a dead zone.
+
+**Fix:** Don't mount the component at all — use conditional rendering from the **parent** instead of returning null inside the component.
+
+```tsx
+// ❌ BAD — hook runs but ref never attaches
+function MyButton({ visible }) {
+  const { ref, focused } = useFocusable();
+  if (!visible) return null; // node: null registered!
+  return <div ref={ref}>...</div>;
+}
+
+// ✅ GOOD — component never mounts, no dead focusable
+{visible && <MyButton />}
+```
+
+### 4. Focus Target Issues
+
+`setFocus(key)` and `focusSelf()` pick the **first child by tree order**. If that child has `node: null`, focus gets stuck silently. Always ensure the initial focus target has a valid DOM node.
+
+### 5. Key Map Reference
+
+| Key | Code | Event |
+|-----|------|-------|
+| Left | 37 | ArrowLeft |
+| Right | 39 | ArrowRight |
+| Up | 38 | ArrowUp |
+| Down | 40 | ArrowDown |
+| Enter/Select | 13 | Enter |
+
+**Test:** Press ArrowDown in Chrome DevTools, check if `smartNavigate` appears in console (with `debug: true`).
+
+### 6. Quick Checklist
+
+- [ ] `initSpatialNavigation()` called before any `useFocusable()` hook
+- [ ] Root `<FocusContext.Provider>` wraps all focusable children
+- [ ] No conditional returns after `useFocusable()` calls
+- [ ] `focusKey` values are unique across the tree
+- [ ] `setFocus()` target exists and has a mounted DOM node

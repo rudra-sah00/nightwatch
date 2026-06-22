@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Suspense, useCallback, useRef, useState } from 'react';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
+import { PlayOnTvButton } from '@/features/remote-control/components/PlayOnTvButton';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import { useWatchContent } from '@/features/watch/hooks/use-watch-content';
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
@@ -208,6 +209,8 @@ function WatchContent() {
             </p>
           ) : null}
         </div>
+
+        <PlayOnTvButton movieId={movieId} title={metadata.title} />
 
         {metadata.description ? (
           <p className="text-sm leading-relaxed text-foreground/80">

@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/use-auth-store';
+import { TvActivityHeatmap } from '../components/TvActivityHeatmap';
 import { useTvFocus } from '../hooks/use-tv-focus';
 import { FOCUS_KEYS } from '../lib/focus-keys';
 
@@ -118,6 +119,9 @@ export function TvProfile() {
             </p>
           </div>
         </section>
+
+        {/* Activity Heatmap */}
+        <TvActivityHeatmap />
 
         {/* Nav */}
         <nav className="flex flex-col gap-2">
