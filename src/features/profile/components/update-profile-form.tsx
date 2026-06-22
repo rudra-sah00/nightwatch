@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
 import { useProfileOverview } from '../hooks/use-profile-overview';
 import { useUpdateProfileForm } from '../hooks/use-update-profile-form';
 import { GoogleAccountSection } from './google-account-section';
@@ -331,56 +332,60 @@ export function UpdateProfileForm() {
         </div>
       </section>
 
-      {/* Public Profile Sharing */}
-      <section className="bg-card border border-border rounded-xl shadow-sm p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
-        <div className="space-y-2 text-center md:text-left">
-          <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
-            {t('publicIdentity.title')}
-          </h2>
-          <p className="text-sm font-bold uppercase font-headline text-foreground/40">
-            {t('publicIdentity.description')}
-          </p>
-          <div className="bg-background border border-border px-4 py-2 mt-4 font-mono text-xs md:text-sm font-semibold break-all text-foreground/60 select-all rounded-md">
-            {user.id}
-          </div>
-        </div>
-
-        <Button
-          type="button"
-          variant="neo-outline"
-          size="default"
-          onClick={handleCopyPublicLink}
-          className="w-full md:w-auto"
-        >
-          {t('publicIdentity.copyLink')}
-        </Button>
-      </section>
-
-      {/* Google Account Connection */}
-      <GoogleAccountSection />
-
-      {/* Danger Zone */}
-      <section className="bg-card border border-neo-red/30 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-neo-red/10">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-neo-red mb-2">
-              {t('dangerZone.title')}
+      {/* Public Profile Sharing — hidden on TV */}
+      {!isTV() && (
+        <section className="bg-card border border-border rounded-xl shadow-sm p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+          <div className="space-y-2 text-center md:text-left">
+            <h2 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground">
+              {t('publicIdentity.title')}
             </h2>
-            <p className="text-neo-red font-bold font-headline uppercase tracking-widest text-sm opacity-80">
-              {t('dangerZone.description')}
+            <p className="text-sm font-bold uppercase font-headline text-foreground/40">
+              {t('publicIdentity.description')}
             </p>
+            <div className="bg-background border border-border px-4 py-2 mt-4 font-mono text-xs md:text-sm font-semibold break-all text-foreground/60 select-all rounded-md">
+              {user.id}
+            </div>
           </div>
 
           <Button
             type="button"
-            onClick={() => profileForm.setShowDeleteDialog(true)}
-            variant="neo-red"
-            className="w-full md:w-auto shrink-0"
+            variant="neo-outline"
+            size="default"
+            onClick={handleCopyPublicLink}
+            className="w-full md:w-auto"
           >
-            {t('dangerZone.deleteAccount')}
+            {t('publicIdentity.copyLink')}
           </Button>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* Google Account Connection — hidden on TV */}
+      {!isTV() && <GoogleAccountSection />}
+
+      {/* Danger Zone — hidden on TV */}
+      {!isTV() && (
+        <section className="bg-card border border-neo-red/30 rounded-xl shadow-sm p-8 mt-16 group relative overflow-hidden transition-colors hover:bg-neo-red/10">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-black font-headline uppercase tracking-tighter text-neo-red mb-2">
+                {t('dangerZone.title')}
+              </h2>
+              <p className="text-neo-red font-bold font-headline uppercase tracking-widest text-sm opacity-80">
+                {t('dangerZone.description')}
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => profileForm.setShowDeleteDialog(true)}
+              variant="neo-red"
+              className="w-full md:w-auto shrink-0"
+            >
+              {t('dangerZone.deleteAccount')}
+            </Button>
+          </div>
+        </section>
+      )}
 
       <AlertDialog
         open={profileForm.showDeleteDialog}

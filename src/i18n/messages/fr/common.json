@@ -395,5 +395,89 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "Continuer à regarder",
+      "trending": "Tendances"
+    },
+    "search": {
+      "placeholder": "Rechercher films, séries...",
+      "searching": "Recherche...",
+      "noResults": "Aucun résultat pour \"{query}\"",
+      "hint": "Utilisez la grille pour rechercher du contenu",
+      "voiceListening": "Écoute..."
+    },
+    "live": {
+      "watchSolo": "Regarder seul",
+      "watchTogether": "Regarder ensemble",
+      "noChannels": "Aucune chaîne",
+      "noChannelsHint": "Les chaînes TV en direct apparaîtront ici",
+      "loadingChannels": "Chargement...",
+      "liveLabel": "TV en direct"
+    },
+    "music": {
+      "title": "Musique",
+      "noPlaying": "Aucune musique",
+      "browseHint": "Parcourez ci-dessous pour écouter",
+      "loading": "Chargement...",
+      "playAll": "Tout lire",
+      "songs": "{count} chansons"
+    },
+    "manga": {
+      "popular": "Populaire",
+      "latest": "Récent",
+      "favorites": "Favoris",
+      "continue": "Continuer",
+      "noManga": "Aucun manga trouvé",
+      "chapters": "{count} Chapitres"
+    },
+    "watchlist": {
+      "title": "Ma liste",
+      "empty": "Vide",
+      "emptyHint": "Parcourez et ajoutez du contenu à votre liste",
+      "loading": "Chargement..."
+    },
+    "library": {
+      "noClips": "Aucun clip",
+      "noClipsHint": "Enregistrez des moments depuis les lives"
+    },
+    "content": {
+      "watchSolo": "Regarder seul",
+      "resume": "Reprendre",
+      "watchTogether": "Regarder ensemble",
+      "watchlist": "Ma liste",
+      "inWatchlist": "Dans ma liste",
+      "back": "Retour",
+      "episodes": "Épisodes"
+    },
+    "player": {
+      "retry": "Réessayer",
+      "goBack": "Retour",
+      "nextIn": "Prochain épisode dans",
+      "playNow": "Lire maintenant",
+      "cancel": "Annuler",
+      "quality": "Qualité",
+      "subtitles": "Sous-titres",
+      "off": "Désactivé"
+    },
+    "party": {
+      "roomCode": "Code de salle",
+      "watching": "{count} regardent",
+      "joinRequest": "Demande",
+      "joinRequests": "Demandes"
+    },
+    "login": {
+      "title": "Se connecter à Nightwatch",
+      "scanHint": "Scannez avec votre téléphone",
+      "waiting": "En attente du scan...",
+      "success": "Connecté ! Redirection...",
+      "expired": "Code QR expiré.",
+      "retry": "Générer un nouveau code"
+    },
+    "common": {
+      "loading": "Chargement...",
+      "back": "Retour"
+    }
   }
 }

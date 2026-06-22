@@ -30,7 +30,10 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
         if (isTV) {
             getBridge().getWebView().post(() -> {
                 WebView wv = getBridge().getWebView();
-                wv.evaluateJavascript("window.__ANDROID_TV__=true;", null);
+                wv.evaluateJavascript(
+                    "window.__ANDROID_TV__=true;localStorage.setItem('__ANDROID_TV__','true');",
+                    null
+                );
             });
         }
     }

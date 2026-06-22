@@ -1,6 +1,7 @@
 @import "tailwindcss";
 /* @import "tw-animate-css"; */
 @import "shadcn/tailwind.css";
+@import "../platforms/smart-tv/styles/tv.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -725,13 +726,30 @@ button {
   -webkit-user-drag: none;
 }
 
-/* ─── Android TV: visible focus ring for D-pad navigation ─── */
-html.tv *:focus {
-  outline: 3px solid #6366f1;
-  outline-offset: 2px;
-  border-radius: 4px;
+/* Player settings menu theme override (replaces arbitrary variants with escaped slashes that break Turbopack) */
+.settings-menu-theme button {
+  color: hsl(var(--foreground) / 0.8) !important;
+  border-color: var(--color-border) !important;
 }
-
-html.tv *:focus:not(:focus-visible) {
-  outline: none;
+.settings-menu-theme button:hover {
+  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--foreground) / 0.1) !important;
+}
+.settings-menu-theme span {
+  color: hsl(var(--foreground) / 0.8) !important;
+}
+.settings-menu-theme .text-white {
+  color: hsl(var(--foreground)) !important;
+}
+.settings-menu-theme .text-white\/80 {
+  color: hsl(var(--foreground) / 0.8) !important;
+}
+.settings-menu-theme .text-white\/60 {
+  color: hsl(var(--foreground) / 0.6) !important;
+}
+.settings-menu-theme .text-white\/30 {
+  color: hsl(var(--foreground) / 0.3) !important;
+}
+.settings-menu-theme .border-white\/10 {
+  border-color: var(--color-border) !important;
 }

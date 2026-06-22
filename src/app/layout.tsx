@@ -10,7 +10,6 @@ import { MobileShell } from '@/components/layout/MobileShell';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
 import { SwRegister } from '@/components/layout/sw-register';
-import { TvShell } from '@/components/layout/TvShell';
 import { Toaster } from '@/components/ui/sonner';
 import { SplashScreen } from '@/components/ui/splash-screen';
 import { AuthProvider } from '@/providers/auth-provider';
@@ -182,7 +181,6 @@ export default async function RootLayout({
                       <ProgressBar />
                       <DiscordPresenceSync />
                       <MobileShell />
-                      <TvShell />
                       <OfflineIndicator />
                       <SplashScreen />
                       {children}

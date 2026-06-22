@@ -6,6 +6,8 @@ import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import { useWatchContent } from '@/features/watch/hooks/use-watch-content';
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvWatch } from '@/platforms/smart-tv/pages/TvWatch';
 
 function WatchContent() {
   const {
@@ -99,6 +101,53 @@ function WatchContent() {
   // Create a unique key that changes when episode changes to force WatchPage remount
   const watchKey = `${movieId}-${season || 0}-${episode || 0}`;
   const isSeries = metadata.type === 'series';
+
+  // TV: render fullscreen D-pad player
+  if (isTV() && streamUrl) {
+    const tvSubtitle =
+      isSeries && metadata.season != null
+        ? `S${metadata.season} E${metadata.episode}${metadata.episodeTitle ? ` • ${metadata.episodeTitle}` : ''}`
+        : metadata.year || undefined;
+
+    // Episode navigation for series on TV
+    const handleTvNextEpisode =
+      isSeries && metadata.season != null && metadata.episode != null
+        ? () => {
+            const nextEp = (metadata.episode ?? 0) + 1;
+            const params = new URLSearchParams(window.location.search);
+            params.set('episode', String(nextEp));
+            params.delete('stream'); // Force refetch
+            router.replace(`/watch/${movieId}?${params.toString()}`);
+          }
+        : undefined;
+
+    const handleTvPrevEpisode =
+      isSeries && metadata.episode != null && metadata.episode > 1
+        ? () => {
+            const prevEp = (metadata.episode ?? 1) - 1;
+            const params = new URLSearchParams(window.location.search);
+            params.set('episode', String(prevEp));
+            params.delete('stream');
+            router.replace(`/watch/${movieId}?${params.toString()}`);
+          }
+        : undefined;
+
+    return (
+      <TvWatch
+        key={watchKey}
+        streamUrl={streamUrl}
+        title={metadata.title}
+        subtitle={tvSubtitle}
+        posterUrl={metadata.posterUrl}
+        qualities={qualities}
+        subtitleTracks={subtitleTracks}
+        onStreamExpired={handleStreamExpired}
+        onNextEpisode={handleTvNextEpisode}
+        onPrevEpisode={handleTvPrevEpisode}
+        metadata={metadata}
+      />
+    );
+  }
 
   const metaLabel = isSeries
     ? [

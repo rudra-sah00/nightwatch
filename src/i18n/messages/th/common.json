@@ -395,5 +395,89 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "ดูต่อ",
+      "trending": "กำลังนิยม"
+    },
+    "search": {
+      "placeholder": "ค้นหาหนัง ซีรีส์...",
+      "searching": "กำลังค้นหา...",
+      "noResults": "ไม่พบผลลัพธ์สำหรับ \"{query}\"",
+      "hint": "ใช้ตารางตัวอักษรเพื่อค้นหา",
+      "voiceListening": "กำลังฟัง..."
+    },
+    "live": {
+      "watchSolo": "ดูคนเดียว",
+      "watchTogether": "ดูด้วยกัน",
+      "noChannels": "ไม่มีช่อง",
+      "noChannelsHint": "ช่องทีวีสดจะแสดงที่นี่",
+      "loadingChannels": "กำลังโหลดช่อง...",
+      "liveLabel": "ทีวีสด"
+    },
+    "music": {
+      "title": "เพลง",
+      "noPlaying": "ไม่มีเพลงเล่นอยู่",
+      "browseHint": "เรียกดูด้านล่างเพื่อเริ่มฟัง",
+      "loading": "กำลังโหลดเพลง...",
+      "playAll": "เล่นทั้งหมด",
+      "songs": "{count} เพลง"
+    },
+    "manga": {
+      "popular": "ยอดนิยม",
+      "latest": "ล่าสุด",
+      "favorites": "รายการโปรด",
+      "continue": "อ่านต่อ",
+      "noManga": "ไม่พบมังงะ",
+      "chapters": "{count} ตอน"
+    },
+    "watchlist": {
+      "title": "รายการของฉัน",
+      "empty": "ว่าง",
+      "emptyHint": "เรียกดูและเพิ่มเนื้อหาในรายการ",
+      "loading": "กำลังโหลด..."
+    },
+    "library": {
+      "noClips": "ไม่มีคลิป",
+      "noClipsHint": "บันทึกช่วงเวลาจากสตรีมสด"
+    },
+    "content": {
+      "watchSolo": "ดูคนเดียว",
+      "resume": "ดูต่อ",
+      "watchTogether": "ดูด้วยกัน",
+      "watchlist": "รายการ",
+      "inWatchlist": "อยู่ในรายการ",
+      "back": "กลับ",
+      "episodes": "ตอน"
+    },
+    "player": {
+      "retry": "ลองอีกครั้ง",
+      "goBack": "กลับ",
+      "nextIn": "ตอนถัดไปใน",
+      "playNow": "เล่นเลย",
+      "cancel": "ยกเลิก",
+      "quality": "คุณภาพ",
+      "subtitles": "ซับไตเติ้ล",
+      "off": "ปิด"
+    },
+    "party": {
+      "roomCode": "รหัสห้อง",
+      "watching": "{count} คนกำลังดู",
+      "joinRequest": "คำขอเข้าร่วม",
+      "joinRequests": "คำขอเข้าร่วม"
+    },
+    "login": {
+      "title": "เข้าสู่ระบบ Nightwatch",
+      "scanHint": "สแกนด้วยโทรศัพท์เพื่อเข้าสู่ระบบ",
+      "waiting": "รอการสแกน...",
+      "success": "เข้าสู่ระบบแล้ว! กำลังเปลี่ยนเส้นทาง...",
+      "expired": "QR code หมดอายุ",
+      "retry": "สร้างรหัสใหม่"
+    },
+    "common": {
+      "loading": "กำลังโหลด...",
+      "back": "กลับ"
+    }
   }
 }

@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { searchContent } from '@/features/search/api';
 import { SearchClient } from '@/features/search/components/SearchClient';
 import type { SearchResult } from '@/features/search/types';
+import { SearchTvGate } from './SearchTvGate';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.metadata');
@@ -31,10 +32,12 @@ export default async function SearchPage({
   }
 
   return (
-    <SearchClient
-      initialResults={initialResults}
-      initialQuery={query}
-      serverError={error}
-    />
+    <SearchTvGate>
+      <SearchClient
+        initialResults={initialResults}
+        initialQuery={query}
+        serverError={error}
+      />
+    </SearchTvGate>
   );
 }

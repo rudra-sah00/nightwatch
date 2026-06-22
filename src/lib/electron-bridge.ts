@@ -66,7 +66,9 @@ export const isTV =
  * Re-evaluates on every call — useful in effects that run before module init.
  */
 export function checkIsTV(): boolean {
-  return typeof window !== 'undefined' && window.__ANDROID_TV__ === true;
+  if (typeof window === 'undefined') return false;
+  if (window.__ANDROID_TV__ === true) return true;
+  return localStorage.getItem('__ANDROID_TV__') === 'true';
 }
 
 const api = () =>

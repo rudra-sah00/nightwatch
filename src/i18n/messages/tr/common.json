@@ -395,5 +395,89 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "İzlemeye devam et",
+      "trending": "Popüler"
+    },
+    "search": {
+      "placeholder": "Film, dizi ara...",
+      "searching": "Aranıyor...",
+      "noResults": "\"{query}\" için sonuç yok",
+      "hint": "İçerik aramak için harf ızgarasını kullanın",
+      "voiceListening": "Dinleniyor..."
+    },
+    "live": {
+      "watchSolo": "Tek başına izle",
+      "watchTogether": "Birlikte izle",
+      "noChannels": "Kanal yok",
+      "noChannelsHint": "Canlı TV kanalları burada görünecek",
+      "loadingChannels": "Kanallar yükleniyor...",
+      "liveLabel": "Canlı TV"
+    },
+    "music": {
+      "title": "Müzik",
+      "noPlaying": "Müzik çalmıyor",
+      "browseHint": "Dinlemeye başlamak için aşağıya göz atın",
+      "loading": "Müzik yükleniyor...",
+      "playAll": "Tümünü çal",
+      "songs": "{count} şarkı"
+    },
+    "manga": {
+      "popular": "Popüler",
+      "latest": "En yeni",
+      "favorites": "Favoriler",
+      "continue": "Devam et",
+      "noManga": "Manga bulunamadı",
+      "chapters": "{count} Bölüm"
+    },
+    "watchlist": {
+      "title": "İzleme listem",
+      "empty": "Boş",
+      "emptyHint": "İçeriklere göz atın ve listenize ekleyin",
+      "loading": "Yükleniyor..."
+    },
+    "library": {
+      "noClips": "Klip yok",
+      "noClipsHint": "Canlı yayınlardan anları kaydedin"
+    },
+    "content": {
+      "watchSolo": "Tek başına izle",
+      "resume": "Devam et",
+      "watchTogether": "Birlikte izle",
+      "watchlist": "Liste",
+      "inWatchlist": "Listede",
+      "back": "Geri",
+      "episodes": "Bölümler"
+    },
+    "player": {
+      "retry": "Tekrar dene",
+      "goBack": "Geri",
+      "nextIn": "Sonraki bölüm",
+      "playNow": "Şimdi oynat",
+      "cancel": "İptal",
+      "quality": "Kalite",
+      "subtitles": "Altyazı",
+      "off": "Kapalı"
+    },
+    "party": {
+      "roomCode": "Oda kodu",
+      "watching": "{count} izliyor",
+      "joinRequest": "Katılım isteği",
+      "joinRequests": "Katılım istekleri"
+    },
+    "login": {
+      "title": "Nightwatch'a giriş yap",
+      "scanHint": "Telefonunuzla tarayın",
+      "waiting": "Tarama bekleniyor...",
+      "success": "Giriş yapıldı! Yönlendiriliyor...",
+      "expired": "QR kodu süresi doldu.",
+      "retry": "Yeni kod oluştur"
+    },
+    "common": {
+      "loading": "Yükleniyor...",
+      "back": "Geri"
+    }
   }
 }

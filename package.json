@@ -61,6 +61,7 @@
     "@capgo/capacitor-social-login": "^8.3.29",
     "@marsidev/react-turnstile": "^1.4.1",
     "@mediapipe/tasks-vision": "^0.10.32",
+    "@noriginmedia/norigin-spatial-navigation": "3.2.0",
     "@ottimis/capacitor-volumes": "7.0.0",
     "@radix-ui/react-label": "^2.1.10",
     "@radix-ui/react-slot": "^1.2.4",

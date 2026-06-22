@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { COOKIE_NAME, locales } from '@/i18n/config';
+import { setCookie } from '@/lib/cookies';
 import { cn } from '@/lib/utils';
 
 const LOCALE_META: Record<string, { native: string; english: string }> = {
@@ -29,11 +30,6 @@ const LOCALE_META: Record<string, { native: string; english: string }> = {
   tr: { native: 'Türkçe', english: 'Turkish' },
   th: { native: 'ไทย', english: 'Thai' },
 };
-
-function setCookie(name: string, value: string) {
-  // biome-ignore lint/suspicious/noDocumentCookie: required for SSR locale detection
-  document.cookie = `${name}=${value};path=/;max-age=31536000;samesite=lax`;
-}
 
 /**
  * Full-screen language picker dialog supporting 14 locales.

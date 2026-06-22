@@ -23,10 +23,13 @@ import {
   getMangaProgress,
   removeMangaFavorite,
 } from '@/features/manga/api';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvMangaTitle } from '@/platforms/smart-tv/pages/TvMangaTitle';
 
 export default function MangaTitlePage() {
   const { titleId } = useParams<{ titleId: string }>();
   const router = useRouter();
+
   const [isFav, setIsFav] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
 
@@ -52,6 +55,9 @@ export default function MangaTitlePage() {
     queryKey: ['manga', 'progress'],
     queryFn: () => getMangaProgress(),
   });
+
+  // TV: render D-pad optimized title page
+  if (isTV()) return <TvMangaTitle />;
 
   const resumeProgress: MangaProgress | null =
     progressData?.progress.find((x) => x.titleId === Number(titleId)) ?? null;

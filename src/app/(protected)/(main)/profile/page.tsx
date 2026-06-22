@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import ProfileClient from './ProfileClient';
+import { ProfileTvGate } from './ProfileTvGate';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.metadata');
@@ -11,5 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProfilePage() {
-  return <ProfileClient />;
+  return (
+    <ProfileTvGate>
+      <ProfileClient />
+    </ProfileTvGate>
+  );
 }

@@ -16,6 +16,8 @@ import {
 } from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicStore } from '@/features/music/store/use-music-store';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvMusicDetail } from '@/platforms/smart-tv/pages/TvMusicDetail';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -50,6 +52,21 @@ export default function UserPlaylistDetailPage() {
   useEffect(() => {
     if (editing) nameInputRef.current?.focus();
   }, [editing]);
+
+  // TV: simplified track list view
+  if (isTV() && playlist) {
+    return (
+      <TvMusicDetail
+        title={playlist.name}
+        image={playlist.coverUrl ?? undefined}
+        subtitle={`${playlist.tracks.length} songs`}
+        songs={
+          playlist.tracks as unknown as import('@/features/music/types').MusicTrack[]
+        }
+        isLoading={loading}
+      />
+    );
+  }
 
   const handleRename = async () => {
     if (!playlist || !editName.trim() || editName.trim() === playlist.name)

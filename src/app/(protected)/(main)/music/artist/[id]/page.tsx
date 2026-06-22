@@ -16,6 +16,8 @@ import {
 } from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicStore } from '@/features/music/store/use-music-store';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvMusicDetail } from '@/platforms/smart-tv/pages/TvMusicDetail';
 
 type Tab = 'overview' | 'songs' | 'albums';
 
@@ -58,6 +60,24 @@ export default function MusicArtistPage() {
     }
   }, [artist?.topAlbums]);
 
+  useEffect(() => {
+    void tab; // trigger dependency
+    setSongsVisible(50);
+  }, [tab]);
+
+  // TV: D-pad track list
+  if (isTV()) {
+    return (
+      <TvMusicDetail
+        title={artist?.name ?? 'Artist'}
+        image={artist?.image}
+        subtitle={`${songs.length} songs`}
+        songs={songs}
+        isLoading={loading}
+      />
+    );
+  }
+
   const playArtistRadio = () => {
     if (!meta || radioLoading) return;
     setRadioLoading(true);
@@ -70,11 +90,6 @@ export default function MusicArtistPage() {
       .catch(() => {})
       .finally(() => setRadioLoading(false));
   };
-
-  useEffect(() => {
-    void tab; // trigger dependency
-    setSongsVisible(50);
-  }, [tab]);
 
   const loadMoreAlbums = () => {
     if (albumsLoading || !albumsHasMore) return;

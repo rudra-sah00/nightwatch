@@ -16,6 +16,15 @@ import { LeftSidebar } from '@/components/layout/left-sidebar';
 import { Navbar } from '@/components/layout/navbar';
 import { OfflineState } from '@/components/layout/OfflineState';
 import { RightSidebar } from '@/components/layout/right-sidebar';
+import { isTV, waitForTvFlag } from '@/platforms/smart-tv/lib/detection';
+
+const TvRootLayout = dynamic(
+  () =>
+    import('@/platforms/smart-tv/layouts/TvRootLayout').then(
+      (m) => m.TvRootLayout,
+    ),
+  { ssr: false },
+);
 
 const GlobalTour = dynamic(
   () => import('@/components/ui/global-tour').then((m) => m.GlobalTour),
@@ -244,6 +253,20 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [isTvMode, setIsTvMode] = useState(false);
+
+  useEffect(() => {
+    if (isTV()) {
+      setIsTvMode(true);
+    } else {
+      waitForTvFlag().then((flag) => {
+        if (flag) setIsTvMode(true);
+      });
+    }
+  }, []);
+
+  if (isTvMode) return <TvRootLayout>{children}</TvRootLayout>;
+
   return (
     <PageTitleProvider>
       <MainLayoutInner>{children}</MainLayoutInner>

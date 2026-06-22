@@ -395,5 +395,89 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "继续观看",
+      "trending": "热门"
+    },
+    "search": {
+      "placeholder": "搜索电影、剧集...",
+      "searching": "搜索中...",
+      "noResults": "无\"{query}\"的结果",
+      "hint": "使用字母网格搜索内容",
+      "voiceListening": "正在听..."
+    },
+    "live": {
+      "watchSolo": "独自观看",
+      "watchTogether": "一起观看",
+      "noChannels": "无频道",
+      "noChannelsHint": "直播频道将在此显示",
+      "loadingChannels": "加载频道中...",
+      "liveLabel": "直播电视"
+    },
+    "music": {
+      "title": "音乐",
+      "noPlaying": "未播放音乐",
+      "browseHint": "浏览下方开始收听",
+      "loading": "加载音乐中...",
+      "playAll": "全部播放",
+      "songs": "{count}首歌曲"
+    },
+    "manga": {
+      "popular": "热门",
+      "latest": "最新",
+      "favorites": "收藏",
+      "continue": "继续",
+      "noManga": "未找到漫画",
+      "chapters": "{count}章"
+    },
+    "watchlist": {
+      "title": "我的片单",
+      "empty": "空",
+      "emptyHint": "浏览并添加内容到片单",
+      "loading": "加载中..."
+    },
+    "library": {
+      "noClips": "无剪辑",
+      "noClipsHint": "从直播中录制精彩瞬间"
+    },
+    "content": {
+      "watchSolo": "独自观看",
+      "resume": "继续",
+      "watchTogether": "一起观看",
+      "watchlist": "片单",
+      "inWatchlist": "已加入片单",
+      "back": "返回",
+      "episodes": "剧集"
+    },
+    "player": {
+      "retry": "重试",
+      "goBack": "返回",
+      "nextIn": "下一集倒计时",
+      "playNow": "立即播放",
+      "cancel": "取消",
+      "quality": "画质",
+      "subtitles": "字幕",
+      "off": "关闭"
+    },
+    "party": {
+      "roomCode": "房间号",
+      "watching": "{count}人在看",
+      "joinRequest": "加入请求",
+      "joinRequests": "加入请求"
+    },
+    "login": {
+      "title": "登录Nightwatch",
+      "scanHint": "用手机扫码登录",
+      "waiting": "等待扫描...",
+      "success": "登录成功！跳转中...",
+      "expired": "二维码已过期",
+      "retry": "生成新代码"
+    },
+    "common": {
+      "loading": "加载中...",
+      "back": "返回"
+    }
   }
 }
