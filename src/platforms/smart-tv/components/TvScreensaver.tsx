@@ -55,7 +55,7 @@ export function TvScreensaver() {
           height={64}
           unoptimized
         />
-        <span className="text-2xl font-mono text-white/40 font-bold">
+        <span className="text-2xl font-mono text-foreground/40 font-bold">
           {time}
         </span>
       </div>

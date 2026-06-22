@@ -46,14 +46,14 @@ function TrackItem({
       ref={ref}
       className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
         focused
-          ? 'bg-indigo-500/20 ring-2 ring-tv-focus'
+          ? 'bg-tv-focus/10 ring-2 ring-tv-focus'
           : isActive
-            ? 'bg-white/5'
+            ? 'bg-secondary/50'
             : ''
       }`}
     >
       <span
-        className={`text-sm w-6 text-right font-mono ${isActive ? 'text-tv-focus' : 'text-white/40'}`}
+        className={`text-sm w-6 text-right font-mono ${isActive ? 'text-tv-focus' : 'text-muted-foreground'}`}
       >
         {index + 1}
       </span>
@@ -67,13 +67,13 @@ function TrackItem({
       />
       <div className="flex-1 min-w-0">
         <p
-          className={`text-sm font-medium truncate ${isActive ? 'text-tv-focus' : 'text-white'}`}
+          className={`text-sm font-medium truncate ${isActive ? 'text-tv-focus' : 'text-foreground'}`}
         >
           {track.title}
         </p>
-        <p className="text-xs text-white/40 truncate">{track.artist}</p>
+        <p className="text-xs text-muted-foreground truncate">{track.artist}</p>
       </div>
-      <span className="text-xs text-white/30 font-mono">
+      <span className="text-xs text-muted-foreground/60 font-mono">
         {Math.floor(track.duration / 60)}:
         {String(Math.floor(track.duration % 60)).padStart(2, '0')}
       </span>
@@ -95,7 +95,7 @@ function PlayAllButton({ songs }: { songs: MusicTrack[] }) {
       className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
         focused
           ? 'bg-tv-focus text-white scale-105'
-          : 'bg-white/10 text-white/80'
+          : 'bg-secondary text-foreground'
       }`}
     >
       <span className="material-symbols-outlined">play_arrow</span>
@@ -151,11 +151,15 @@ export function TvMusicDetail({
             />
           )}
           <div className="min-w-0">
-            <h1 className="text-3xl font-bold text-white truncate">{title}</h1>
+            <h1 className="text-3xl font-bold text-foreground truncate">
+              {title}
+            </h1>
             {subtitle && (
-              <p className="text-sm text-white/50 mt-1">{subtitle}</p>
+              <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
             )}
-            <p className="text-xs text-white/30 mt-2">{songs.length} songs</p>
+            <p className="text-xs text-muted-foreground/60 mt-2">
+              {songs.length} songs
+            </p>
             <div className="mt-4">
               <PlayAllButton songs={songs} />
             </div>
@@ -164,7 +168,7 @@ export function TvMusicDetail({
 
         {/* Track list */}
         <div className="px-8 pb-8 flex flex-col gap-1">
-          {isLoading && <p className="text-white/40">Loading...</p>}
+          {isLoading && <p className="text-muted-foreground">Loading...</p>}
           {songs.slice(0, 100).map((track, i) => (
             <TrackItem
               key={track.id}

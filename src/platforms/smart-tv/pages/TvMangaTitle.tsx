@@ -118,7 +118,9 @@ export function TvMangaTitle() {
                   {data.title.author}
                 </p>
                 {data.rating && (
-                  <p className="text-xs text-white/40">⭐ {data.rating}</p>
+                  <p className="text-xs text-muted-foreground">
+                    ⭐ {data.rating}
+                  </p>
                 )}
                 {data.overview && (
                   <p className="text-sm text-muted-foreground mt-3 line-clamp-3">

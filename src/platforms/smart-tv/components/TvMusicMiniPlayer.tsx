@@ -32,7 +32,7 @@ export function TvMusicMiniPlayer() {
       }`}
     >
       {/* Progress bar */}
-      <div className="h-1 w-full bg-white/5">
+      <div className="h-1 w-full bg-border/50">
         <div
           className="h-full bg-tv-focus transition-[width] duration-200"
           style={{ width: `${progress}%` }}
@@ -64,7 +64,7 @@ export function TvMusicMiniPlayer() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="p-2 rounded-full text-foreground hover:bg-white/10"
+            className="p-2 rounded-full text-foreground hover:bg-secondary"
             onClick={(e) => {
               e.stopPropagation();
               togglePlay();
@@ -77,7 +77,7 @@ export function TvMusicMiniPlayer() {
           </button>
           <button
             type="button"
-            className="p-2 rounded-full text-muted-foreground hover:bg-white/10"
+            className="p-2 rounded-full text-muted-foreground hover:bg-secondary"
             onClick={(e) => {
               e.stopPropagation();
               next();
@@ -90,7 +90,7 @@ export function TvMusicMiniPlayer() {
 
         {/* Expand hint */}
         {focused && (
-          <span className="text-xs text-white/40 ml-2">
+          <span className="text-xs text-muted-foreground ml-2">
             Press Enter for full player
           </span>
         )}
