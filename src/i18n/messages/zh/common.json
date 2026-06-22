@@ -406,7 +406,12 @@
       "searching": "搜索中...",
       "noResults": "无\"{query}\"的结果",
       "hint": "使用字母网格搜索内容",
-      "voiceListening": "正在听..."
+      "voiceListening": "正在听...",
+      "space": "空格",
+      "delete": "删除",
+      "clear": "清除",
+      "voice": "语音",
+      "listening": "正在听..."
     },
     "live": {
       "watchSolo": "独自观看",
@@ -459,7 +464,10 @@
       "cancel": "取消",
       "quality": "画质",
       "subtitles": "字幕",
-      "off": "关闭"
+      "off": "关闭",
+      "audio": "音频",
+      "auto": "自动",
+      "live": "直播"
     },
     "party": {
       "roomCode": "房间号",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "加载中...",
       "back": "返回"
+    },
+    "askAi": {
+      "pressEnter": "按Enter键说话",
+      "listening": "正在听...",
+      "speaking": "AI正在说...",
+      "you": "你",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "章节"
+    },
+    "watchTogether": {
+      "roomCode": "房间代码",
+      "joinRequest": "加入请求"
     }
   }
 }

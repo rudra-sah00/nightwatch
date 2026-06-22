@@ -406,7 +406,12 @@
       "searching": "검색 중...",
       "noResults": "\"{query}\" 결과 없음",
       "hint": "문자 그리드로 검색하세요",
-      "voiceListening": "듣는 중..."
+      "voiceListening": "듣는 중...",
+      "space": "공백",
+      "delete": "삭제",
+      "clear": "지우기",
+      "voice": "음성",
+      "listening": "듣는 중..."
     },
     "live": {
       "watchSolo": "혼자 보기",
@@ -459,7 +464,10 @@
       "cancel": "취소",
       "quality": "화질",
       "subtitles": "자막",
-      "off": "끄기"
+      "off": "끄기",
+      "audio": "오디오",
+      "auto": "자동",
+      "live": "실시간"
     },
     "party": {
       "roomCode": "방 코드",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "로딩 중...",
       "back": "뒤로"
+    },
+    "askAi": {
+      "pressEnter": "Enter를 눌러 말하기",
+      "listening": "듣는 중...",
+      "speaking": "AI가 말하고 있습니다...",
+      "you": "나",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "챕터"
+    },
+    "watchTogether": {
+      "roomCode": "방 코드",
+      "joinRequest": "참가 요청"
     }
   }
 }

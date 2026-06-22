@@ -6,6 +6,7 @@ import {
   resume as resumeNav,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import { useTranslations } from 'next-intl';
 import {
   useCallback,
   useEffect,
@@ -471,6 +472,7 @@ function NextEpisodeCountdown({
   onCancel: () => void;
   onSkip: () => void;
 }) {
+  const t = useTranslations('common.tv.player');
   const { ref, focused: cancelFocused } = useFocusable({
     onEnterPress: onCancel,
   });
@@ -480,7 +482,7 @@ function NextEpisodeCountdown({
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
       <div className="text-center">
-        <p className="text-white/60 text-lg mb-2">Next episode in</p>
+        <p className="text-white/60 text-lg mb-2">{t('nextIn')}</p>
         <p className="text-6xl font-bold text-white mb-6">{seconds}</p>
         <div className="flex gap-4 justify-center">
           <button
@@ -488,14 +490,14 @@ function NextEpisodeCountdown({
             type="button"
             className={`px-6 py-3 rounded-xl font-bold transition-all ${skipFocused ? 'bg-indigo-500 text-white scale-105' : 'bg-white/20 text-white'}`}
           >
-            Play Now
+            {t('playNow')}
           </button>
           <button
             ref={ref}
             type="button"
             className={`px-6 py-3 rounded-xl font-bold transition-all ${cancelFocused ? 'bg-white text-black scale-105' : 'bg-white/10 text-white/70'}`}
           >
-            Cancel
+            {t('cancel')}
           </button>
         </div>
       </div>
@@ -513,6 +515,7 @@ function ErrorOverlay({
   onRetry: () => void;
   onExit?: () => void;
 }) {
+  const t = useTranslations('common.tv.player');
   const { ref, focused: retryFocused } = useFocusable({
     onEnterPress: onRetry,
   });
@@ -532,7 +535,7 @@ function ErrorOverlay({
             type="button"
             className={`px-6 py-3 rounded-xl font-bold transition-all ${retryFocused ? 'bg-indigo-500 text-white scale-105' : 'bg-white/20 text-white'}`}
           >
-            Try Again
+            {t('retry')}
           </button>
           {onExit && (
             <button
@@ -540,7 +543,7 @@ function ErrorOverlay({
               type="button"
               className={`px-6 py-3 rounded-xl font-bold transition-all ${exitFocused ? 'bg-white text-black scale-105' : 'bg-white/10 text-white/70'}`}
             >
-              Go Back
+              {t('goBack')}
             </button>
           )}
         </div>

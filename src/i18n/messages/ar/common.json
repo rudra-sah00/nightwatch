@@ -406,7 +406,12 @@
       "searching": "جارٍ البحث...",
       "noResults": "لا نتائج لـ \"{query}\"",
       "hint": "استخدم شبكة الحروف للبحث",
-      "voiceListening": "جارٍ الاستماع..."
+      "voiceListening": "جارٍ الاستماع...",
+      "space": "مسافة",
+      "delete": "حذف",
+      "clear": "مسح",
+      "voice": "صوت",
+      "listening": "جارٍ الاستماع..."
     },
     "live": {
       "watchSolo": "مشاهدة فردية",
@@ -459,7 +464,10 @@
       "cancel": "إلغاء",
       "quality": "الجودة",
       "subtitles": "ترجمة",
-      "off": "إيقاف"
+      "off": "إيقاف",
+      "audio": "صوتي",
+      "auto": "تلقائي",
+      "live": "مباشر"
     },
     "party": {
       "roomCode": "رمز الغرفة",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "جارٍ التحميل...",
       "back": "رجوع"
+    },
+    "askAi": {
+      "pressEnter": "اضغط Enter للتحدث",
+      "listening": "جارٍ الاستماع...",
+      "speaking": "الذكاء الاصطناعي يتحدث...",
+      "you": "أنت",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "الفصول"
+    },
+    "watchTogether": {
+      "roomCode": "رمز الغرفة",
+      "joinRequest": "طلب الانضمام"
     }
   }
 }

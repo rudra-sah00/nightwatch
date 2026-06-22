@@ -406,7 +406,12 @@
       "searching": "खोज रहे हैं...",
       "noResults": "\"{query}\" के लिए कोई परिणाम नहीं",
       "hint": "सामग्री खोजने के लिए अक्षर ग्रिड का उपयोग करें",
-      "voiceListening": "सुन रहे हैं..."
+      "voiceListening": "सुन रहे हैं...",
+      "space": "स्पेस",
+      "delete": "मिटाएं",
+      "clear": "साफ करें",
+      "voice": "आवाज़",
+      "listening": "सुन रहा है..."
     },
     "live": {
       "watchSolo": "अकेले देखें",
@@ -459,7 +464,10 @@
       "cancel": "रद्द करें",
       "quality": "गुणवत्ता",
       "subtitles": "उपशीर्षक",
-      "off": "बंद"
+      "off": "बंद",
+      "audio": "ऑडियो",
+      "auto": "ऑटो",
+      "live": "लाइव"
     },
     "party": {
       "roomCode": "रूम कोड",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "लोड हो रहा है...",
       "back": "वापस"
+    },
+    "askAi": {
+      "pressEnter": "एंटर दबाकर बात करें",
+      "listening": "सुन रहा है...",
+      "speaking": "AI बोल रहा है...",
+      "you": "आप",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "अध्याय"
+    },
+    "watchTogether": {
+      "roomCode": "रूम कोड",
+      "joinRequest": "शामिल होने का अनुरोध"
     }
   }
 }

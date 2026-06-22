@@ -7,7 +7,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useRef, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import {
   getMangaFavorites,
   getMangaLatest,
@@ -20,7 +20,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { useTvFocus } from '../hooks/use-tv-focus';
 import { FOCUS_KEYS } from '../lib/focus-keys';
 
-function FocusableMangaCard({
+const FocusableMangaCard = memo(function FocusableMangaCard({
   title,
   onPress,
 }: {
@@ -63,7 +63,7 @@ function FocusableMangaCard({
       </div>
     </div>
   );
-}
+});
 
 function SearchInput({
   value,

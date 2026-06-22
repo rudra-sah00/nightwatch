@@ -406,7 +406,12 @@
       "searching": "Aranıyor...",
       "noResults": "\"{query}\" için sonuç yok",
       "hint": "İçerik aramak için harf ızgarasını kullanın",
-      "voiceListening": "Dinleniyor..."
+      "voiceListening": "Dinleniyor...",
+      "space": "Boşluk",
+      "delete": "Sil",
+      "clear": "Temizle",
+      "voice": "Ses",
+      "listening": "Dinleniyor..."
     },
     "live": {
       "watchSolo": "Tek başına izle",
@@ -459,7 +464,10 @@
       "cancel": "İptal",
       "quality": "Kalite",
       "subtitles": "Altyazı",
-      "off": "Kapalı"
+      "off": "Kapalı",
+      "audio": "Ses",
+      "auto": "Otomatik",
+      "live": "CANLI"
     },
     "party": {
       "roomCode": "Oda kodu",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "Yükleniyor...",
       "back": "Geri"
+    },
+    "askAi": {
+      "pressEnter": "Konuşmak için Enter'a basın",
+      "listening": "Dinleniyor...",
+      "speaking": "AI konuşuyor...",
+      "you": "Sen",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "Bölümler"
+    },
+    "watchTogether": {
+      "roomCode": "Oda Kodu",
+      "joinRequest": "Katılma İsteği"
     }
   }
 }

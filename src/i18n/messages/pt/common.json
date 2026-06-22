@@ -406,7 +406,12 @@
       "searching": "Buscando...",
       "noResults": "Sem resultados para \"{query}\"",
       "hint": "Use a grade de letras para buscar",
-      "voiceListening": "Ouvindo..."
+      "voiceListening": "Ouvindo...",
+      "space": "Espaço",
+      "delete": "Apagar",
+      "clear": "Limpar",
+      "voice": "Voz",
+      "listening": "Ouvindo..."
     },
     "live": {
       "watchSolo": "Assistir sozinho",
@@ -459,7 +464,10 @@
       "cancel": "Cancelar",
       "quality": "Qualidade",
       "subtitles": "Legendas",
-      "off": "Desligado"
+      "off": "Desligado",
+      "audio": "Áudio",
+      "auto": "Auto",
+      "live": "AO VIVO"
     },
     "party": {
       "roomCode": "Código da sala",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "Carregando...",
       "back": "Voltar"
+    },
+    "askAi": {
+      "pressEnter": "Pressione Enter para falar",
+      "listening": "Ouvindo...",
+      "speaking": "A IA está falando...",
+      "you": "Você",
+      "ai": "IA"
+    },
+    "mangaTitle": {
+      "chapters": "Capítulos"
+    },
+    "watchTogether": {
+      "roomCode": "Código da sala",
+      "joinRequest": "Pedido de entrada"
     }
   }
 }

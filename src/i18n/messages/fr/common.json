@@ -406,7 +406,12 @@
       "searching": "Recherche...",
       "noResults": "Aucun résultat pour \"{query}\"",
       "hint": "Utilisez la grille pour rechercher du contenu",
-      "voiceListening": "Écoute..."
+      "voiceListening": "Écoute...",
+      "space": "Espace",
+      "delete": "Supprimer",
+      "clear": "Effacer",
+      "voice": "Voix",
+      "listening": "Écoute..."
     },
     "live": {
       "watchSolo": "Regarder seul",
@@ -459,7 +464,10 @@
       "cancel": "Annuler",
       "quality": "Qualité",
       "subtitles": "Sous-titres",
-      "off": "Désactivé"
+      "off": "Désactivé",
+      "audio": "Audio",
+      "auto": "Auto",
+      "live": "EN DIRECT"
     },
     "party": {
       "roomCode": "Code de salle",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "Chargement...",
       "back": "Retour"
+    },
+    "askAi": {
+      "pressEnter": "Appuyez sur Entrée pour parler",
+      "listening": "Écoute...",
+      "speaking": "L'IA parle...",
+      "you": "Vous",
+      "ai": "IA"
+    },
+    "mangaTitle": {
+      "chapters": "Chapitres"
+    },
+    "watchTogether": {
+      "roomCode": "Code de salle",
+      "joinRequest": "Demande d'accès"
     }
   }
 }

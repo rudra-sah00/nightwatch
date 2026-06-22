@@ -5,7 +5,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { getSyncedLyrics } from '@/features/music/api';
 import { useMusicStore } from '@/features/music/store/use-music-store';
 import type { SyncedLyricLine } from '@/features/music/types';
@@ -150,7 +150,7 @@ function LyricsPanel({
 }
 
 // ─── Queue Item ───
-function QueueItem({
+const QueueItem = memo(function QueueItem({
   track,
   index,
   isActive,
@@ -189,7 +189,7 @@ function QueueItem({
       </div>
     </div>
   );
-}
+});
 
 // ─── Volume Control ───
 function VolumeControl() {
@@ -305,6 +305,8 @@ export function TvMusicFullPlayer() {
   const { ref, focusKey } = useFocusable({
     focusKey: 'TV_MUSIC_FULL_PLAYER',
     trackChildren: true,
+    isFocusBoundary: true,
+    focusBoundaryDirections: ['up', 'down', 'left', 'right'],
   });
 
   // Back/Escape key closes the full player

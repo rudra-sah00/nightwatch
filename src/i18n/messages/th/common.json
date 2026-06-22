@@ -406,7 +406,12 @@
       "searching": "กำลังค้นหา...",
       "noResults": "ไม่พบผลลัพธ์สำหรับ \"{query}\"",
       "hint": "ใช้ตารางตัวอักษรเพื่อค้นหา",
-      "voiceListening": "กำลังฟัง..."
+      "voiceListening": "กำลังฟัง...",
+      "space": "เว้นวรรค",
+      "delete": "ลบ",
+      "clear": "ล้าง",
+      "voice": "เสียง",
+      "listening": "กำลังฟัง..."
     },
     "live": {
       "watchSolo": "ดูคนเดียว",
@@ -459,7 +464,10 @@
       "cancel": "ยกเลิก",
       "quality": "คุณภาพ",
       "subtitles": "ซับไตเติ้ล",
-      "off": "ปิด"
+      "off": "ปิด",
+      "audio": "เสียง",
+      "auto": "อัตโนมัติ",
+      "live": "สด"
     },
     "party": {
       "roomCode": "รหัสห้อง",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "กำลังโหลด...",
       "back": "กลับ"
+    },
+    "askAi": {
+      "pressEnter": "กด Enter เพื่อพูด",
+      "listening": "กำลังฟัง...",
+      "speaking": "AI กำลังพูด...",
+      "you": "คุณ",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "บท"
+    },
+    "watchTogether": {
+      "roomCode": "รหัสห้อง",
+      "joinRequest": "คำขอเข้าร่วม"
     }
   }
 }

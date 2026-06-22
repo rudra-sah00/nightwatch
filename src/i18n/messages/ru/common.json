@@ -406,7 +406,12 @@
       "searching": "Поиск...",
       "noResults": "Нет результатов для \"{query}\"",
       "hint": "Используйте буквенную сетку для поиска",
-      "voiceListening": "Слушаю..."
+      "voiceListening": "Слушаю...",
+      "space": "Пробел",
+      "delete": "Удалить",
+      "clear": "Очистить",
+      "voice": "Голос",
+      "listening": "Слушаю..."
     },
     "live": {
       "watchSolo": "Смотреть одному",
@@ -459,7 +464,10 @@
       "cancel": "Отмена",
       "quality": "Качество",
       "subtitles": "Субтитры",
-      "off": "Выкл"
+      "off": "Выкл",
+      "audio": "Аудио",
+      "auto": "Авто",
+      "live": "ПРЯМОЙ ЭФИР"
     },
     "party": {
       "roomCode": "Код комнаты",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "Загрузка...",
       "back": "Назад"
+    },
+    "askAi": {
+      "pressEnter": "Нажмите Enter чтобы говорить",
+      "listening": "Слушаю...",
+      "speaking": "ИИ говорит...",
+      "you": "Вы",
+      "ai": "ИИ"
+    },
+    "mangaTitle": {
+      "chapters": "Главы"
+    },
+    "watchTogether": {
+      "roomCode": "Код комнаты",
+      "joinRequest": "Запрос на вступление"
     }
   }
 }

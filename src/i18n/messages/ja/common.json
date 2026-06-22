@@ -406,7 +406,12 @@
       "searching": "検索中...",
       "noResults": "「{query}」の結果なし",
       "hint": "文字グリッドで検索",
-      "voiceListening": "聞いています..."
+      "voiceListening": "聞いています...",
+      "space": "スペース",
+      "delete": "削除",
+      "clear": "クリア",
+      "voice": "音声",
+      "listening": "聞いています..."
     },
     "live": {
       "watchSolo": "一人で見る",
@@ -459,7 +464,10 @@
       "cancel": "キャンセル",
       "quality": "画質",
       "subtitles": "字幕",
-      "off": "オフ"
+      "off": "オフ",
+      "audio": "オーディオ",
+      "auto": "自動",
+      "live": "ライブ"
     },
     "party": {
       "roomCode": "ルームコード",
@@ -478,6 +486,20 @@
     "common": {
       "loading": "読込中...",
       "back": "戻る"
+    },
+    "askAi": {
+      "pressEnter": "Enterで話す",
+      "listening": "聞いています...",
+      "speaking": "AIが話しています...",
+      "you": "あなた",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "チャプター"
+    },
+    "watchTogether": {
+      "roomCode": "ルームコード",
+      "joinRequest": "参加リクエスト"
     }
   }
 }

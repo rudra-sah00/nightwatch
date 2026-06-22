@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import type {
   Quality,
@@ -83,6 +84,7 @@ function SeekBar({
   isLive?: boolean;
   onSeek: (time: number) => void;
 }) {
+  const t = useTranslations('common.tv.player');
   const holdRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const [localTime, setLocalTime] = useState(currentTime);
 
@@ -121,7 +123,7 @@ function SeekBar({
     return (
       <div ref={ref} className="flex items-center gap-3 w-full">
         <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded">
-          LIVE
+          {t('live')}
         </span>
         <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
           <div className="h-full bg-red-500 rounded-full w-full" />
@@ -167,6 +169,7 @@ function QualityPanel({
   currentQuality: string;
   onSelect: (index: number) => void;
 }) {
+  const t = useTranslations('common.tv.player');
   const { ref, focusKey, focusSelf } = useFocusable({
     focusKey: 'TV_QUALITY_PANEL',
     isFocusBoundary: true,
@@ -184,7 +187,7 @@ function QualityPanel({
         className="absolute bottom-28 right-8 bg-black/95 border border-white/20 rounded-xl p-3 min-w-[180px] z-40"
       >
         <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 px-2">
-          Quality
+          {t('quality')}
         </p>
         <AutoQualityItem
           active={currentQuality === 'auto'}
@@ -210,6 +213,7 @@ function AutoQualityItem({
   active: boolean;
   onSelect: () => void;
 }) {
+  const t = useTranslations('common.tv.player');
   const { ref, focused } = useFocusable({ onEnterPress: onSelect });
   return (
     <div
@@ -222,7 +226,7 @@ function AutoQualityItem({
             : 'text-white/80'
       }`}
     >
-      Auto {active && '✓'}
+      {t('auto')} {active && '✓'}
     </div>
   );
 }
@@ -263,6 +267,7 @@ function SubtitlePanel({
   currentTrack: string | null;
   onSelect: (id: string | null) => void;
 }) {
+  const t = useTranslations('common.tv.player');
   const { ref, focusKey, focusSelf } = useFocusable({
     focusKey: 'TV_SUBTITLE_PANEL',
     isFocusBoundary: true,
@@ -280,19 +285,19 @@ function SubtitlePanel({
         className="absolute bottom-28 right-8 bg-black/95 border border-white/20 rounded-xl p-3 min-w-[180px] z-40"
       >
         <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 px-2">
-          Subtitles
+          {t('subtitles')}
         </p>
         <SubtitleItem
-          label="Off"
+          label={t('off')}
           active={!currentTrack}
           onSelect={() => onSelect(null)}
         />
-        {tracks.map((t) => (
+        {tracks.map((track) => (
           <SubtitleItem
-            key={t.id}
-            label={t.label}
-            active={currentTrack === t.id}
-            onSelect={() => onSelect(t.id)}
+            key={track.id}
+            label={track.label}
+            active={currentTrack === track.id}
+            onSelect={() => onSelect(track.id)}
           />
         ))}
       </div>
@@ -336,6 +341,7 @@ function AudioPanel({
   currentTrack: string | null;
   onSelect: (id: string) => void;
 }) {
+  const t = useTranslations('common.tv.player');
   const { ref, focusKey, focusSelf } = useFocusable({
     focusKey: 'TV_AUDIO_PANEL',
     isFocusBoundary: true,
@@ -351,14 +357,14 @@ function AudioPanel({
         className="absolute bottom-28 right-8 bg-black/95 border border-white/20 rounded-xl p-3 min-w-[180px] z-40"
       >
         <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 px-2">
-          Audio
+          {t('audio')}
         </p>
-        {tracks.map((t) => (
+        {tracks.map((track) => (
           <AudioItem
-            key={t.id}
-            track={t}
-            active={currentTrack === t.id}
-            onSelect={() => onSelect(t.id)}
+            key={track.id}
+            track={track}
+            active={currentTrack === track.id}
+            onSelect={() => onSelect(track.id)}
           />
         ))}
       </div>
