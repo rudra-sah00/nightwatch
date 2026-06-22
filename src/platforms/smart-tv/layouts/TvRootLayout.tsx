@@ -25,6 +25,7 @@ if (typeof window !== 'undefined') {
 
 export function TvRootLayout({ children }: { children: React.ReactNode }) {
   const expanded = useMusicStore((s) => s.expanded);
+  const hasTrack = useMusicStore((s) => !!s.currentTrack);
 
   const { ref, focusKey } = useFocusable({
     focusKey: 'TV_ROOT',
@@ -51,8 +52,8 @@ export function TvRootLayout({ children }: { children: React.ReactNode }) {
           <TvErrorBoundary>{children}</TvErrorBoundary>
         </main>
 
-        {/* Persistent mini player (bottom bar) */}
-        <TvMusicMiniPlayer />
+        {/* Persistent mini player (bottom bar) — only mount when track exists */}
+        {hasTrack && <TvMusicMiniPlayer />}
 
         {/* Music remote command handler (phone → TV control) */}
         <TvMusicCommandHandler />

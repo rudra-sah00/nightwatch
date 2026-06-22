@@ -20,7 +20,6 @@ export function TvMusicMiniPlayer() {
   const { ref, focused } = useFocusable({
     focusKey: 'TV_MINI_PLAYER',
     onEnterPress: () => setExpanded(true),
-    focusable: !!currentTrack,
   });
 
   if (!currentTrack) return null;
