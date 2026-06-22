@@ -1,0 +1,82 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]: NIGHTWATCH
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: Nightwatch
+        - generic [ref=e8]: Invite Only Beta
+        - heading "Watch Anything Together" [level=1] [ref=e9]:
+          - text: Watch Anything
+          - text: Together
+        - paragraph [ref=e10]: Synchronized playback, real-time watch parties, live streaming, voice calls, and messaging — all in one place.
+        - link "Login" [ref=e11] [cursor=pointer]:
+          - /url: /login
+          - text: Login
+          - img [ref=e12]
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - img [ref=e16]
+            - generic [ref=e19]: Watch Together
+          - generic [ref=e20]:
+            - img [ref=e21]
+            - generic [ref=e26]: Watch Parties
+          - generic [ref=e27]:
+            - img [ref=e28]
+            - generic [ref=e34]: Go Live
+          - generic [ref=e35]:
+            - img [ref=e36]
+            - generic [ref=e38]: Voice Calls
+          - generic [ref=e39]:
+            - img [ref=e40]
+            - generic [ref=e42]: Private & Secure
+      - generic [ref=e43]:
+        - heading "Everything You Need" [level=2] [ref=e44]
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - img [ref=e47]
+            - generic [ref=e50]:
+              - heading "Synchronized Playback" [level=3] [ref=e51]
+              - paragraph [ref=e52]: Watch movies, shows, and videos perfectly in sync with anyone. Play, pause, and seek — everyone stays on the same frame.
+          - generic [ref=e53]:
+            - img [ref=e54]
+            - generic [ref=e59]:
+              - heading "Watch Parties" [level=3] [ref=e60]
+              - paragraph [ref=e61]: Peer-to-peer video calls with shared controls. See reactions in real-time over WebRTC.
+          - generic [ref=e62]:
+            - img [ref=e63]
+            - generic [ref=e69]:
+              - heading "Go Live" [level=3] [ref=e70]
+              - paragraph [ref=e71]: Stream with RTMP ingestion, HLS delivery, and real-time chat with your audience.
+          - generic [ref=e72]:
+            - img [ref=e73]
+            - generic [ref=e77]:
+              - heading "Music Streaming" [level=3] [ref=e78]
+              - paragraph [ref=e79]: Gapless playback, synced lyrics, crossfade, equalizer, and device transfer.
+          - generic [ref=e80]:
+            - img [ref=e81]
+            - generic [ref=e83]:
+              - heading "Friends & Voice Calls" [level=3] [ref=e84]
+              - paragraph [ref=e85]: Add friends, see who's online, and jump into crystal-clear voice calls instantly.
+      - generic [ref=e86]:
+        - heading "Download the App" [level=2] [ref=e87]
+        - paragraph [ref=e88]: Available on all major platforms. Get the native experience.
+      - generic [ref=e90]:
+        - heading "Ready to Watch?" [level=2] [ref=e91]
+        - paragraph [ref=e92]: Nightwatch is currently invite-only. Log in with your account to get started.
+        - link "Login" [ref=e93] [cursor=pointer]:
+          - /url: /login
+          - text: Login
+          - img [ref=e94]
+      - contentinfo [ref=e96]:
+        - paragraph [ref=e98]: Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - link "Terms" [ref=e101] [cursor=pointer]:
+              - /url: /terms
+            - link "Privacy" [ref=e102] [cursor=pointer]:
+              - /url: /privacy
+          - paragraph [ref=e103]: © 2026 Nightwatch. All rights reserved.
+    - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e109] [cursor=pointer]:
+    - img [ref=e110]
+  - alert [ref=e113]

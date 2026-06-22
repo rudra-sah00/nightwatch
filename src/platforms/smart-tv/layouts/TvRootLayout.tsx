@@ -2,6 +2,7 @@
 
 import {
   FocusContext,
+  setFocus,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useEffect } from 'react';
@@ -13,13 +14,19 @@ import { TvMusicFullPlayer } from '../components/TvMusicFullPlayer';
 import { TvMusicMiniPlayer } from '../components/TvMusicMiniPlayer';
 import { TvScreensaver } from '../components/TvScreensaver';
 import { useTvBack } from '../hooks/use-tv-back';
+import { FOCUS_KEYS } from '../lib/focus-keys';
 import { initSpatialNavigation } from '../lib/spatial-navigation';
 import { TvNavbar } from './TvNavbar';
+
+// Must init before any useFocusable() hook runs
+if (typeof window !== 'undefined') {
+  initSpatialNavigation();
+}
 
 export function TvRootLayout({ children }: { children: React.ReactNode }) {
   const expanded = useMusicStore((s) => s.expanded);
 
-  const { ref, focusKey, focusSelf } = useFocusable({
+  const { ref, focusKey } = useFocusable({
     focusKey: 'TV_ROOT',
     trackChildren: true,
   });
@@ -27,11 +34,10 @@ export function TvRootLayout({ children }: { children: React.ReactNode }) {
   useTvBack();
 
   useEffect(() => {
-    initSpatialNavigation();
     document.documentElement.classList.add('tv');
-    focusSelf();
+    setFocus(FOCUS_KEYS.SIDEBAR);
     return () => document.documentElement.classList.remove('tv');
-  }, [focusSelf]);
+  }, []);
 
   return (
     <FocusContext.Provider value={focusKey}>
