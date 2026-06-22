@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { getMangaChapter } from '@/features/manga/api';
@@ -66,11 +67,12 @@ export function TvMangaReader() {
 
   return (
     <div className="relative w-full h-screen bg-black flex items-center justify-center">
-      <img
+      <Image
         src={pages[pageIdx].imageUrl}
         alt={`Page ${pageIdx + 1}`}
         className="max-w-full max-h-full object-contain"
-        decoding="async"
+        fill
+        unoptimized
       />
       {/* Page indicator */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/70 px-4 py-2 rounded-full text-sm text-white/70">

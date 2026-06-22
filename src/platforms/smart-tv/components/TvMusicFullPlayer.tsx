@@ -5,6 +5,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { getSyncedLyrics } from '@/features/music/api';
 import { useMusicStore } from '@/features/music/store/use-music-store';
@@ -39,7 +40,7 @@ function Btn({
         focused
           ? 'bg-white text-black scale-110'
           : active
-            ? 'text-indigo-400'
+            ? 'text-tv-focus'
             : 'text-white/70'
       }`}
     >
@@ -86,11 +87,11 @@ function SeekBar() {
       </span>
       <div
         className={`flex-1 h-1.5 rounded-full overflow-hidden transition-all ${
-          focused ? 'h-2.5 ring-2 ring-indigo-400' : 'bg-white/10'
+          focused ? 'h-2.5 ring-2 ring-tv-focus' : 'bg-white/10'
         }`}
       >
         <div
-          className="h-full bg-indigo-500 rounded-full transition-[width] duration-100"
+          className="h-full bg-tv-focus rounded-full transition-[width] duration-100"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -172,16 +173,17 @@ const QueueItem = memo(function QueueItem({
         focused ? 'bg-indigo-500/30' : isActive ? 'bg-white/10' : ''
       }`}
     >
-      <img
+      <Image
         src={track.image}
         alt=""
         className="w-10 h-10 rounded object-cover shrink-0"
-        loading="lazy"
-        decoding="async"
+        width={40}
+        height={40}
+        unoptimized
       />
       <div className="min-w-0 flex-1">
         <p
-          className={`text-sm font-medium truncate ${isActive ? 'text-indigo-400' : 'text-white/80'}`}
+          className={`text-sm font-medium truncate ${isActive ? 'text-tv-focus' : 'text-white/80'}`}
         >
           {track.title}
         </p>
@@ -238,7 +240,7 @@ function VolumeControl() {
   return (
     <div
       ref={ref}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${focused ? 'ring-2 ring-indigo-400' : ''}`}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${focused ? 'ring-2 ring-tv-focus' : ''}`}
     >
       <span className="material-symbols-outlined text-lg text-white/60">
         {volume === 0
@@ -249,7 +251,7 @@ function VolumeControl() {
       </span>
       <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
-          className="h-full bg-indigo-500 rounded-full"
+          className="h-full bg-tv-focus rounded-full"
           style={{ width: `${volume * 100}%` }}
         />
       </div>
@@ -276,7 +278,7 @@ function SleepTimerBtn() {
   return (
     <div
       ref={ref}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${focused ? 'ring-2 ring-indigo-400' : ''} ${active ? 'text-indigo-400' : 'text-white/60'}`}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${focused ? 'ring-2 ring-tv-focus' : ''} ${active ? 'text-tv-focus' : 'text-white/60'}`}
     >
       <span className="material-symbols-outlined text-lg">bedtime</span>
       <span className="text-xs font-bold">
@@ -345,11 +347,13 @@ export function TvMusicFullPlayer() {
       <div ref={ref} className="fixed inset-0 z-50 bg-black flex">
         {/* Left: Album art + info */}
         <div className="w-[45%] flex flex-col items-center justify-center p-12">
-          <img
+          <Image
             src={currentTrack.image}
             alt={currentTrack.title}
             className="w-[300px] h-[300px] rounded-2xl object-cover shadow-2xl mb-8"
-            decoding="async"
+            width={300}
+            height={300}
+            unoptimized
           />
           <h2 className="text-2xl font-bold text-white text-center truncate max-w-full">
             {currentTrack.title}

@@ -5,6 +5,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
@@ -29,7 +30,7 @@ function LetterKey({ char, onPress }: { char: string; onPress: () => void }) {
       ref={ref}
       className={`w-11 h-11 flex items-center justify-center rounded-lg text-base font-bold transition-all ${
         focused
-          ? 'bg-indigo-500 text-white scale-110'
+          ? 'bg-tv-focus text-white scale-110'
           : 'bg-white/10 text-white/80'
       }`}
     >
@@ -53,7 +54,7 @@ function ActionKey({
       ref={ref}
       className={`flex items-center justify-center gap-2 px-4 h-11 rounded-lg text-sm font-bold transition-all ${
         focused
-          ? 'bg-indigo-500 text-white scale-105'
+          ? 'bg-tv-focus text-white scale-105'
           : 'bg-white/10 text-white/80'
       }`}
     >
@@ -138,17 +139,17 @@ function SearchResultCard({
     <div
       ref={ref}
       className={`flex flex-col rounded-xl overflow-hidden border-[3px] transition-all ${
-        focused ? 'border-indigo-500 scale-105 z-10' : 'border-border'
+        focused ? 'border-tv-focus scale-105 z-10' : 'border-border'
       }`}
     >
       <div className="aspect-[2/3] relative bg-muted">
         {item.poster && (
-          <img
+          <Image
             src={item.poster}
             alt={item.title}
             className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
+            fill
+            unoptimized
           />
         )}
       </div>

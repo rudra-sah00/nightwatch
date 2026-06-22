@@ -4,6 +4,7 @@ import {
   type FocusableComponentLayout,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 
@@ -49,12 +50,13 @@ export const TvCard = memo(function TvCard({
       className={`tv-focusable tv-card relative ${focused ? 'tv-focusable--focused' : ''} ${large ? 'tv-card--large' : ''}`}
     >
       {image ? (
-        <img
+        <Image
           src={image}
           alt={title}
           className="w-full h-full object-cover"
-          loading={eager ? 'eager' : 'lazy'}
-          decoding="async"
+          fill
+          unoptimized
+          priority={eager}
         />
       ) : (
         <div className="w-full h-full bg-gradient-to-br from-indigo-800 to-zinc-900" />
@@ -66,7 +68,7 @@ export const TvCard = memo(function TvCard({
       {progress != null && progress > 0 && (
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
           <div
-            className="h-full bg-indigo-500"
+            className="h-full bg-tv-focus"
             style={{ width: `${Math.min(100, progress)}%` }}
           />
         </div>

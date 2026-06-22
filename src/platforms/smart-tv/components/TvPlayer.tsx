@@ -76,7 +76,7 @@ export function TvPlayer({
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
   const [activePanel, setActivePanel] = useState<
-    'none' | 'quality' | 'subtitle' | 'audio'
+    'none' | 'quality' | 'subtitle' | 'audio' | 'speed'
   >('none');
   const [countdown, setCountdown] = useState<number | null>(null);
 
@@ -87,6 +87,10 @@ export function TvPlayer({
   onNextEpisodeRef.current = onNextEpisode;
   const titleRef = useRef(title);
   titleRef.current = title;
+
+  const tPlayer = useTranslations('common.tv.player');
+  const errorMsgRef = useRef(tPlayer('error'));
+  errorMsgRef.current = tPlayer('error');
 
   const { ref, focusKey } = useFocusable({
     focusKey: 'TV_PLAYER',
@@ -157,7 +161,7 @@ export function TvPlayer({
       dispatch({ type: 'SET_BUFFERING', isBuffering: false });
     };
     const onError = () => {
-      dispatch({ type: 'SET_ERROR', error: 'Playback error. Try again.' });
+      dispatch({ type: 'SET_ERROR', error: errorMsgRef.current });
       import('@/lib/analytics').then(({ reportError, trackEvent }) => {
         reportError(`[TV Player] Playback error`);
         trackEvent('video_error', { title: titleRef.current, platform: 'tv' });
@@ -351,6 +355,13 @@ export function TvPlayer({
     }
   }, []);
 
+  const handlePlaybackRateChange = useCallback((rate: number) => {
+    const v = videoRef.current;
+    if (v) v.playbackRate = rate;
+    dispatch({ type: 'SET_PLAYBACK_RATE', rate });
+    setActivePanel('none');
+  }, []);
+
   const handleRetry = useCallback(() => {
     dispatch({ type: 'SET_ERROR', error: null });
     dispatch({ type: 'SET_LOADING', isLoading: true });
@@ -434,6 +445,8 @@ export function TvPlayer({
             audioTracks={state.audioTracks}
             currentAudioTrack={state.currentAudioTrack}
             onAudioTrackChange={handleAudioTrackChange}
+            playbackRate={state.playbackRate}
+            onPlaybackRateChange={handlePlaybackRateChange}
           />
         )}
 
@@ -488,7 +501,7 @@ function NextEpisodeCountdown({
           <button
             ref={skipRef}
             type="button"
-            className={`px-6 py-3 rounded-xl font-bold transition-all ${skipFocused ? 'bg-indigo-500 text-white scale-105' : 'bg-white/20 text-white'}`}
+            className={`px-6 py-3 rounded-xl font-bold transition-all ${skipFocused ? 'bg-tv-focus text-white scale-105' : 'bg-white/20 text-white'}`}
           >
             {t('playNow')}
           </button>
@@ -533,7 +546,7 @@ function ErrorOverlay({
           <button
             ref={ref}
             type="button"
-            className={`px-6 py-3 rounded-xl font-bold transition-all ${retryFocused ? 'bg-indigo-500 text-white scale-105' : 'bg-white/20 text-white'}`}
+            className={`px-6 py-3 rounded-xl font-bold transition-all ${retryFocused ? 'bg-tv-focus text-white scale-105' : 'bg-white/20 text-white'}`}
           >
             {t('retry')}
           </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useCall } from '@/features/friends/hooks/use-call';
 
 /**
@@ -43,10 +44,13 @@ export function TvCallOverlay() {
         {/* Avatar */}
         <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center overflow-hidden shrink-0">
           {peer.photo ? (
-            <img
+            <Image
               src={peer.photo}
               alt=""
               className="w-full h-full object-cover"
+              width={48}
+              height={48}
+              unoptimized
             />
           ) : (
             <span className="text-lg font-bold text-white">

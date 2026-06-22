@@ -19,7 +19,7 @@ function WatchlistEmpty() {
     <div
       ref={ref}
       className={`py-32 border-[4px] border-dashed text-center flex flex-col items-center justify-center bg-card rounded-xl transition-colors ${
-        focused ? 'border-indigo-500' : 'border-border'
+        focused ? 'border-tv-focus' : 'border-border'
       }`}
     >
       <span className="material-symbols-outlined text-6xl text-foreground/20 mb-6">

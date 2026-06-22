@@ -108,6 +108,10 @@
   /* Emerald (profile form success banners — distinct shade from green) */
   --color-emerald: var(--emerald-color);
   --color-emerald-light: var(--emerald-color-light);
+
+  /* Smart TV focus accent (indigo — driven by --tv-focus-color in tv.css) */
+  --color-tv-focus: var(--tv-focus-color, #6366f1);
+  --color-tv-focus-glow: var(--tv-focus-glow, rgba(99, 102, 241, 0.4));
 }
 
 @layer base {

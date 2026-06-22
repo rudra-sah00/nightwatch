@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useContentDetail } from '@/features/search/hooks/use-content-detail';
@@ -42,8 +43,8 @@ function SeasonPill({
     <div
       ref={ref}
       className={`px-4 py-2 rounded-lg font-headline font-bold text-sm transition-all ${
-        focused ? 'ring-2 ring-indigo-500 scale-105' : ''
-      } ${active ? 'bg-indigo-500 text-white' : 'bg-card border border-border text-foreground'}`}
+        focused ? 'ring-2 ring-tv-focus scale-105' : ''
+      } ${active ? 'bg-tv-focus text-white' : 'bg-card border border-border text-foreground'}`}
     >
       Season {season.seasonNumber}
     </div>
@@ -72,7 +73,7 @@ function EpisodeItem({
     <div
       ref={ref}
       className={`flex items-center gap-4 px-5 py-4 rounded-xl border-[3px] transition-all ${
-        focused ? 'border-indigo-500 bg-secondary/50' : 'border-border'
+        focused ? 'border-tv-focus bg-secondary/50' : 'border-border'
       }`}
     >
       <span className="text-muted-foreground font-bold text-lg w-8">
@@ -128,11 +129,12 @@ export function TvContentDetail() {
         {/* Hero */}
         <div className="relative w-full h-[40vh] bg-black">
           {(show.posterHdUrl || show.posterUrl) && (
-            <img
+            <Image
               src={show.posterHdUrl || show.posterUrl || ''}
               alt={show.title}
               className="w-full h-full object-cover opacity-60"
-              decoding="async"
+              fill
+              unoptimized
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />

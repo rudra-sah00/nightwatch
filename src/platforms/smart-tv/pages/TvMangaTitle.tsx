@@ -5,6 +5,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getMangaDetail, type MangaChapter } from '@/features/manga/api';
@@ -43,15 +44,16 @@ function ChapterItem({
   return (
     <div
       ref={ref}
-      className={`flex items-center gap-4 px-5 py-4 rounded-xl border-[3px] transition-all ${focused ? 'border-indigo-500 bg-secondary/50' : 'border-border'}`}
+      className={`flex items-center gap-4 px-5 py-4 rounded-xl border-[3px] transition-all ${focused ? 'border-tv-focus bg-secondary/50' : 'border-border'}`}
     >
       {chapter.thumbnailUrl && (
-        <img
+        <Image
           src={chapter.thumbnailUrl}
           alt=""
           className="w-16 h-10 rounded object-cover shrink-0"
-          loading="lazy"
-          decoding="async"
+          width={64}
+          height={40}
+          unoptimized
         />
       )}
       <div className="flex-1 min-w-0">
@@ -102,11 +104,13 @@ export function TvMangaTitle() {
           <>
             {/* Header */}
             <div className="flex gap-6 px-8 pb-6">
-              <img
+              <Image
                 src={data.title.portraitImageUrl}
                 alt=""
                 className="w-32 h-48 rounded-xl object-cover shrink-0"
-                decoding="async"
+                width={128}
+                height={192}
+                unoptimized
               />
               <div className="min-w-0 flex-1">
                 <h1 className="text-3xl font-bold mb-2">{data.title.name}</h1>

@@ -467,7 +467,9 @@
       "off": "Kapalı",
       "audio": "Ses",
       "auto": "Otomatik",
-      "live": "CANLI"
+      "live": "CANLI",
+      "error": "Oynatma hatası. Tekrar deneyin.",
+      "speed": "Hız"
     },
     "party": {
       "roomCode": "Oda kodu",

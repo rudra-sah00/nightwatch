@@ -21,7 +21,7 @@ function RetryButton({ onRetry }: { onRetry: () => void }) {
       type="button"
       className={`px-6 py-3 rounded-xl font-medium transition-all ${
         focused
-          ? 'bg-indigo-500 text-foreground scale-105'
+          ? 'bg-tv-focus text-foreground scale-105'
           : 'bg-muted text-muted-foreground'
       }`}
     >

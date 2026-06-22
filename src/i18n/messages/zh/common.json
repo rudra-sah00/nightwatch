@@ -467,7 +467,9 @@
       "off": "关闭",
       "audio": "音频",
       "auto": "自动",
-      "live": "直播"
+      "live": "直播",
+      "error": "播放错误。请重试。",
+      "speed": "速度"
     },
     "party": {
       "roomCode": "房间号",

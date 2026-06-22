@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { useEffect, useRef } from 'react';
 import type { AgoraParticipant } from '@/features/watch-party/media/hooks/useAgora';
 
@@ -60,10 +62,13 @@ function ParticipantTile({ participant }: { participant: AgoraParticipant }) {
         /* Avatar fallback */
         <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
           {participant.metadata ? (
-            <img
+            <Image
               src={parseAvatar(participant.metadata)}
               alt=""
               className="w-10 h-10 rounded-full object-cover"
+              width={40}
+              height={40}
+              unoptimized
             />
           ) : (
             <span className="text-lg font-bold text-white/60">

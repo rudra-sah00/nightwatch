@@ -38,6 +38,6 @@ describe('TvButton', () => {
   it('applies focused styles when focused', () => {
     mockUseFocusable.mockReturnValue({ ref: { current: null }, focused: true });
     render(<TvButton label="Focused" />);
-    expect(screen.getByRole('button')).toHaveClass('bg-indigo-500');
+    expect(screen.getByRole('button')).toHaveClass('bg-tv-focus');
   });
 });

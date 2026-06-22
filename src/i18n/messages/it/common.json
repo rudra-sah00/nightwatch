@@ -467,7 +467,9 @@
       "off": "Spento",
       "audio": "Audio",
       "auto": "Auto",
-      "live": "IN DIRETTA"
+      "live": "IN DIRETTA",
+      "error": "Errore di riproduzione. Riprova.",
+      "speed": "Velocità"
     },
     "party": {
       "roomCode": "Codice stanza",

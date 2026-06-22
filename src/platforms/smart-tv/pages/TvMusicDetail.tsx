@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMusicStore } from '@/features/music/store/use-music-store';
 import type { MusicTrack } from '@/features/music/types';
@@ -45,27 +46,28 @@ function TrackItem({
       ref={ref}
       className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
         focused
-          ? 'bg-indigo-500/20 ring-2 ring-indigo-500'
+          ? 'bg-indigo-500/20 ring-2 ring-tv-focus'
           : isActive
             ? 'bg-white/5'
             : ''
       }`}
     >
       <span
-        className={`text-sm w-6 text-right font-mono ${isActive ? 'text-indigo-400' : 'text-white/40'}`}
+        className={`text-sm w-6 text-right font-mono ${isActive ? 'text-tv-focus' : 'text-white/40'}`}
       >
         {index + 1}
       </span>
-      <img
+      <Image
         src={track.image}
         alt=""
         className="w-10 h-10 rounded object-cover shrink-0"
-        loading="lazy"
-        decoding="async"
+        width={40}
+        height={40}
+        unoptimized
       />
       <div className="flex-1 min-w-0">
         <p
-          className={`text-sm font-medium truncate ${isActive ? 'text-indigo-400' : 'text-white'}`}
+          className={`text-sm font-medium truncate ${isActive ? 'text-tv-focus' : 'text-white'}`}
         >
           {track.title}
         </p>
@@ -92,7 +94,7 @@ function PlayAllButton({ songs }: { songs: MusicTrack[] }) {
       type="button"
       className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
         focused
-          ? 'bg-indigo-500 text-white scale-105'
+          ? 'bg-tv-focus text-white scale-105'
           : 'bg-white/10 text-white/80'
       }`}
     >
@@ -139,11 +141,13 @@ export function TvMusicDetail({
         </div>
         <div className="flex items-end gap-6 px-8 pb-6">
           {image && (
-            <img
+            <Image
               src={image}
               alt={title}
               className="w-40 h-40 rounded-2xl object-cover shadow-xl shrink-0"
-              decoding="async"
+              width={160}
+              height={160}
+              unoptimized
             />
           )}
           <div className="min-w-0">

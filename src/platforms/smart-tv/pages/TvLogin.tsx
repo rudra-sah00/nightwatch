@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -89,7 +90,14 @@ export function TvLogin() {
         className="flex items-center justify-center h-screen bg-background"
       >
         <div className="flex flex-col items-center gap-6 max-w-md text-center">
-          <img src="/logo.png" alt="Nightwatch" className="w-16 h-16" />
+          <Image
+            src="/logo.png"
+            alt="Nightwatch"
+            className="w-16 h-16"
+            width={64}
+            height={64}
+            unoptimized
+          />
           <h1 className="text-3xl font-bold">{t('title')}</h1>
 
           {error && <p className="text-red-400">{error}</p>}
@@ -98,10 +106,13 @@ export function TvLogin() {
             <>
               <p className="text-muted-foreground">{t('scanHint')}</p>
               <div className="rounded-2xl overflow-hidden bg-white p-2">
-                <img
+                <Image
                   src={qrDataUrl}
                   alt="QR Code"
                   className="w-[280px] h-[280px]"
+                  width={280}
+                  height={280}
+                  unoptimized
                 />
               </div>
               <div className="flex items-center gap-3 text-muted-foreground text-sm">
@@ -128,7 +139,7 @@ export function TvLogin() {
                 type="button"
                 className={`px-6 py-3 rounded-xl font-medium transition-all ${
                   retryFocused
-                    ? 'bg-indigo-500 text-foreground scale-105'
+                    ? 'bg-tv-focus text-foreground scale-105'
                     : 'bg-muted text-muted-foreground'
                 }`}
               >

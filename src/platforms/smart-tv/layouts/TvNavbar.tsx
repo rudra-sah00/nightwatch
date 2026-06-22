@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { FOCUS_KEYS } from '../lib/focus-keys';
 
@@ -37,7 +38,7 @@ function NavItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
       ref={ref}
       className={`
         flex items-center gap-4 px-5 py-3 rounded-xl transition-all duration-200
-        ${focused ? 'bg-indigo-500 text-foreground' : ''}
+        ${focused ? 'bg-tv-focus text-foreground' : ''}
         ${isActive && !focused ? 'text-foreground bg-white/10' : ''}
         ${!focused && !isActive ? 'text-muted-foreground' : ''}
       `}
@@ -73,7 +74,14 @@ export function TvNavbar() {
         }`}
       >
         <div className="mb-6 flex items-center gap-3 px-4">
-          <img src="/logo.png" alt="Nightwatch" className="w-8 h-8 shrink-0" />
+          <Image
+            src="/logo.png"
+            alt="Nightwatch"
+            className="w-8 h-8 shrink-0"
+            width={32}
+            height={32}
+            unoptimized
+          />
           <span className="tv-navbar__label text-lg font-bold whitespace-nowrap">
             Nightwatch
           </span>

@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -29,7 +30,7 @@ function FocusableNavLink({
       ref={ref}
       className={`flex items-center gap-4 px-5 py-4 bg-card border rounded-xl transition-all ${
         focused
-          ? 'border-indigo-500 bg-secondary/50 scale-[1.01]'
+          ? 'border-tv-focus bg-secondary/50 scale-[1.01]'
           : 'border-border'
       }`}
     >
@@ -95,10 +96,13 @@ export function TvProfile() {
         {/* User Info */}
         <section className="bg-card border border-border rounded-xl shadow-sm p-8 flex items-center gap-6">
           {user.profilePhoto ? (
-            <img
+            <Image
               src={user.profilePhoto}
               alt=""
               className="w-20 h-20 rounded-full object-cover border-4 border-border"
+              width={80}
+              height={80}
+              unoptimized
             />
           ) : (
             <div className="w-20 h-20 rounded-full bg-indigo-600 flex items-center justify-center text-3xl font-black text-white">

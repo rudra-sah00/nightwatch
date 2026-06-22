@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useClips } from '@/features/clips/hooks/use-clips';
@@ -24,15 +25,19 @@ function FocusableClipCard({
     <div
       ref={ref}
       className={`relative rounded-xl overflow-hidden border-[3px] transition-all ${
-        focused ? 'border-indigo-500 scale-105 z-10' : 'border-border'
+        focused ? 'border-tv-focus scale-105 z-10' : 'border-border'
       }`}
     >
       {clip.thumbnailUrl ? (
-        <img
-          src={clip.thumbnailUrl}
-          alt={clip.title}
-          className="w-full aspect-video object-cover"
-        />
+        <div className="relative w-full aspect-video">
+          <Image
+            src={clip.thumbnailUrl}
+            alt={clip.title}
+            className="object-cover"
+            fill
+            unoptimized
+          />
+        </div>
       ) : (
         <div className="w-full aspect-video bg-secondary" />
       )}
@@ -51,7 +56,7 @@ function LibraryEmpty() {
     <div
       ref={ref}
       className={`py-32 border-[4px] border-dashed text-center flex flex-col items-center justify-center bg-card rounded-xl transition-colors ${
-        focused ? 'border-indigo-500' : 'border-border'
+        focused ? 'border-tv-focus' : 'border-border'
       }`}
     >
       <span className="material-symbols-outlined text-6xl text-foreground/20 mb-6">

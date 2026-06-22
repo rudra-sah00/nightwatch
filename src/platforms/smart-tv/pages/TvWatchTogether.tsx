@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect } from 'react';
 import type { SubtitleTrack } from '@/features/watch/player/context/types';
@@ -241,10 +242,13 @@ function JoinRequestItem({
       {/* Avatar */}
       <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center overflow-hidden shrink-0">
         {member.profilePhoto ? (
-          <img
+          <Image
             src={member.profilePhoto}
             alt=""
             className="w-full h-full object-cover"
+            width={40}
+            height={40}
+            unoptimized
           />
         ) : (
           <span className="text-sm font-bold text-white">

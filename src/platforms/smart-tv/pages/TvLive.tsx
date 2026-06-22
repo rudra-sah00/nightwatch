@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
@@ -33,14 +34,17 @@ function ChannelCard({
     <div
       ref={ref}
       className={`flex flex-col items-center gap-2 p-4 rounded-xl border-[3px] transition-all ${
-        focused ? 'border-indigo-500 scale-105 z-10 bg-card' : 'border-border'
+        focused ? 'border-tv-focus scale-105 z-10 bg-card' : 'border-border'
       }`}
     >
       {channel.icon ? (
-        <img
+        <Image
           src={channel.icon}
           alt={channel.name}
           className="w-16 h-16 object-contain rounded-lg"
+          width={64}
+          height={64}
+          unoptimized
         />
       ) : (
         <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
@@ -91,10 +95,13 @@ function ChannelDetail({
         {/* Hero */}
         <div className="w-full h-[40vh] bg-muted border-b-[4px] border-border relative flex items-center justify-center">
           {channel.icon ? (
-            <img
+            <Image
               src={channel.icon}
               alt={channel.name}
               className="max-w-[200px] max-h-[200px] object-contain"
+              width={200}
+              height={200}
+              unoptimized
             />
           ) : (
             <span className="material-symbols-outlined text-[80px] text-muted-foreground">
@@ -158,7 +165,7 @@ function EmptyState() {
     <div
       ref={ref}
       className={`py-32 border-[4px] border-dashed text-center flex flex-col items-center justify-center bg-card rounded-xl transition-colors ${
-        focused ? 'border-indigo-500' : 'border-border'
+        focused ? 'border-tv-focus' : 'border-border'
       }`}
     >
       <span className="material-symbols-outlined text-6xl text-foreground/20 mb-6">

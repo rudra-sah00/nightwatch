@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { useEffect, useState } from 'react';
 import { useTvIdle } from '../hooks/use-tv-idle';
 
@@ -45,7 +47,14 @@ export function TvScreensaver() {
           top: `${position.y}%`,
         }}
       >
-        <img src="/logo.png" alt="" className="w-16 h-16 opacity-60" />
+        <Image
+          src="/logo.png"
+          alt=""
+          className="w-16 h-16 opacity-60"
+          width={64}
+          height={64}
+          unoptimized
+        />
         <span className="text-2xl font-mono text-white/40 font-bold">
           {time}
         </span>

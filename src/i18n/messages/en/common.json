@@ -467,7 +467,9 @@
       "off": "Off",
       "audio": "Audio",
       "auto": "Auto",
-      "live": "LIVE"
+      "live": "LIVE",
+      "speed": "Speed",
+      "error": "Playback error. Try again."
     },
     "party": {
       "roomCode": "Room Code",

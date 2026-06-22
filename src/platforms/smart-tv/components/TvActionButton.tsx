@@ -1,11 +1,26 @@
 'use client';
 
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-interface TvActionButtonProps {
+const tvActionButtonVariants = cva(
+  'flex-1 flex items-center justify-center gap-3 px-6 py-5 border-[4px] font-headline font-black uppercase tracking-widest text-base transition-all rounded-md',
+  {
+    variants: {
+      color: {
+        default: 'bg-card text-foreground border-border',
+        blue: 'bg-neo-blue text-white border-border',
+        yellow: 'bg-neo-yellow text-foreground border-border',
+      },
+    },
+    defaultVariants: { color: 'default' },
+  },
+);
+
+interface TvActionButtonProps
+  extends VariantProps<typeof tvActionButtonVariants> {
   label: string;
   icon: string;
-  color?: 'blue' | 'yellow' | 'default';
   onPress: () => void;
   disabled?: boolean;
 }
@@ -13,7 +28,7 @@ interface TvActionButtonProps {
 export function TvActionButton({
   label,
   icon,
-  color = 'default',
+  color,
   onPress,
   disabled,
 }: TvActionButtonProps) {
@@ -24,21 +39,15 @@ export function TvActionButton({
     focusable: !disabled,
   });
 
-  const baseColors = {
-    blue: 'bg-neo-blue text-white border-border',
-    yellow: 'bg-neo-yellow text-foreground border-border',
-    default: 'bg-card text-foreground border-border',
-  };
-
   return (
     <div
       ref={ref}
-      className={`flex-1 flex items-center justify-center gap-3 px-6 py-5 border-[4px] font-headline font-black uppercase tracking-widest text-base transition-all rounded-md ${
+      className={`${tvActionButtonVariants({ color })} ${
         disabled ? 'opacity-50' : ''
       } ${
         focused
           ? 'border-foreground bg-foreground text-background scale-[1.03] shadow-lg'
-          : baseColors[color]
+          : ''
       }`}
     >
       <span className="material-symbols-outlined text-2xl">{icon}</span>

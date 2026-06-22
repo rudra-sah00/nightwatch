@@ -6,6 +6,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getMusicHome, getUserPlaylists } from '@/features/music/api';
@@ -29,15 +30,18 @@ function NowPlaying() {
     <div
       ref={ref}
       className={`mx-8 mb-8 flex items-center gap-6 p-6 rounded-2xl bg-card border transition-all ${
-        focused ? 'border-indigo-500 ring-2 ring-indigo-500' : 'border-border'
+        focused ? 'border-tv-focus ring-2 ring-tv-focus' : 'border-border'
       }`}
     >
       {currentTrack ? (
         <>
-          <img
+          <Image
             src={currentTrack.image}
             alt={currentTrack.title}
             className="w-24 h-24 rounded-xl object-cover"
+            width={96}
+            height={96}
+            unoptimized
           />
           <div className="flex-1 min-w-0">
             <p className="text-lg font-semibold truncate">

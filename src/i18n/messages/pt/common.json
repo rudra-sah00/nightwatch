@@ -467,7 +467,9 @@
       "off": "Desligado",
       "audio": "Áudio",
       "auto": "Auto",
-      "live": "AO VIVO"
+      "live": "AO VIVO",
+      "error": "Erro de reprodução. Tente novamente.",
+      "speed": "Velocidade"
     },
     "party": {
       "roomCode": "Código da sala",

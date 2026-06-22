@@ -49,7 +49,7 @@ function FocusableToggle({
     <div
       ref={ref}
       className={`flex items-center justify-between gap-4 px-6 py-5 rounded-xl transition-colors ${
-        focused ? 'bg-secondary/50 ring-2 ring-indigo-500' : ''
+        focused ? 'bg-secondary/50 ring-2 ring-tv-focus' : ''
       }`}
     >
       <div className="flex flex-col gap-1">
@@ -97,7 +97,7 @@ function FocusableThemeButton({
       ref={ref}
       className={cn(
         'flex items-center gap-4 px-6 py-4 rounded-xl transition-all',
-        focused && 'ring-2 ring-indigo-500',
+        focused && 'ring-2 ring-tv-focus',
         active
           ? 'bg-primary text-primary-foreground'
           : 'bg-card border border-border',
@@ -124,7 +124,7 @@ function FocusableLangButton({
       ref={ref}
       className={cn(
         'px-5 py-3 rounded-xl transition-all text-sm font-headline font-bold',
-        focused && 'ring-2 ring-indigo-500',
+        focused && 'ring-2 ring-tv-focus',
         active
           ? 'bg-primary text-primary-foreground'
           : 'bg-card border border-border text-foreground',

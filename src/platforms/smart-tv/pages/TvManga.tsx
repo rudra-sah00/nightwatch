@@ -5,6 +5,7 @@ import {
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { memo, useCallback, useRef, useState } from 'react';
@@ -40,16 +41,17 @@ const FocusableMangaCard = memo(function FocusableMangaCard({
     <div
       ref={ref}
       className={`flex flex-col rounded-xl overflow-hidden border-[3px] transition-all ${
-        focused ? 'border-indigo-500 scale-105 z-10' : 'border-border'
+        focused ? 'border-tv-focus scale-105 z-10' : 'border-border'
       }`}
     >
       <div className="aspect-[2/3] relative bg-muted">
         {title.portraitImageUrl && (
-          <img
+          <Image
             src={title.portraitImageUrl}
             alt={title.name}
             className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
+            fill
+            unoptimized
           />
         )}
       </div>
@@ -89,7 +91,7 @@ function SearchInput({
     <div
       ref={ref}
       className={`flex items-center gap-3 px-5 py-3 rounded-xl border-[3px] transition-all ${
-        focused ? 'border-indigo-500 bg-card' : 'border-border bg-card/50'
+        focused ? 'border-tv-focus bg-card' : 'border-border bg-card/50'
       }`}
     >
       <span className="material-symbols-outlined text-xl text-muted-foreground">
@@ -131,7 +133,7 @@ function FocusableTab({
     <div
       ref={ref}
       className={`px-5 py-2 rounded-lg font-headline font-bold uppercase tracking-widest text-sm transition-all ${
-        focused ? 'ring-2 ring-indigo-500' : ''
+        focused ? 'ring-2 ring-tv-focus' : ''
       } ${active ? 'bg-primary text-primary-foreground' : 'bg-card border border-border'}`}
     >
       {label}

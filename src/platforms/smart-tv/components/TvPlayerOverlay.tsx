@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface TvPlayerOverlayProps {
   title: string;
   subtitle?: string;
@@ -38,10 +40,13 @@ export function TvPlayerOverlay({
                 title={p.name}
               >
                 {p.profilePhoto ? (
-                  <img
+                  <Image
                     src={p.profilePhoto}
                     alt={p.name}
                     className="w-full h-full object-cover"
+                    width={32}
+                    height={32}
+                    unoptimized
                   />
                 ) : (
                   <span className="text-xs font-bold text-white">

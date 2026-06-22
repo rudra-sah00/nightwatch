@@ -79,13 +79,13 @@ export const TvRow = memo(function TvRow({
           ref={scrollRef}
           className="overflow-x-auto overflow-y-hidden scrollbar-hide"
         >
-          <div ref={ref} className="flex gap-4 px-8 py-2">
+          <ul ref={ref} aria-label={title} className="flex gap-4 px-8 py-2">
             {typeof children === 'function'
               ? (children as (onFocus: typeof onChildFocus) => React.ReactNode)(
                   onChildFocus,
                 )
               : children}
-          </div>
+          </ul>
         </div>
       </section>
     </FocusContext.Provider>

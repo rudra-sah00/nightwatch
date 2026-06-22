@@ -1,6 +1,7 @@
 'use client';
 
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useMusicStore } from '@/features/music/store/use-music-store';
 
 /**
@@ -27,24 +28,26 @@ export function TvMusicMiniPlayer() {
     <div
       ref={ref}
       className={`fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border transition-all ${
-        focused ? 'ring-2 ring-indigo-500 ring-inset' : ''
+        focused ? 'ring-2 ring-tv-focus ring-inset' : ''
       }`}
     >
       {/* Progress bar */}
       <div className="h-1 w-full bg-white/5">
         <div
-          className="h-full bg-indigo-500 transition-[width] duration-200"
+          className="h-full bg-tv-focus transition-[width] duration-200"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       <div className="flex items-center gap-4 px-6 py-3">
         {/* Album art */}
-        <img
+        <Image
           src={currentTrack.image}
           alt={currentTrack.title}
           className="w-12 h-12 rounded-lg object-cover shrink-0"
-          decoding="async"
+          width={48}
+          height={48}
+          unoptimized
         />
 
         {/* Track info */}

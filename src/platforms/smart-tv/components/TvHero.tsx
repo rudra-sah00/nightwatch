@@ -4,6 +4,7 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ExploreData, ExploreItem } from '@/features/search/api';
@@ -40,7 +41,7 @@ export function TvHero({ banner, trending }: TvHeroProps) {
       items[nextIdx]?.backdrop ||
       items[nextIdx]?.cover;
     if (nextImg) {
-      const img = new Image();
+      const img = new globalThis.Image();
       img.src = nextImg;
     }
   }, [active, items, banner]);
@@ -81,11 +82,12 @@ export function TvHero({ banner, trending }: TvHeroProps) {
         className="relative h-[360px] rounded-2xl overflow-hidden mx-8 mb-8"
       >
         {/* Background image */}
-        <img
+        <Image
           src={bgImage}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          decoding="async"
+          fill
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
@@ -116,7 +118,7 @@ export function TvHero({ banner, trending }: TvHeroProps) {
             <div
               key={items[i].id}
               className={`h-2 rounded-full transition-[width,background-color] duration-300 ${
-                i === active ? 'bg-indigo-400 w-6' : 'bg-white/40 w-2'
+                i === active ? 'bg-tv-focus w-6' : 'bg-white/40 w-2'
               }`}
             />
           ))}
@@ -124,7 +126,7 @@ export function TvHero({ banner, trending }: TvHeroProps) {
 
         {/* Focus ring */}
         {(focused || hasFocusedChild) && (
-          <div className="absolute inset-0 rounded-2xl ring-3 ring-indigo-500 pointer-events-none" />
+          <div className="absolute inset-0 rounded-2xl ring-3 ring-tv-focus pointer-events-none" />
         )}
       </div>
     </FocusContext.Provider>
@@ -139,7 +141,7 @@ function WatchButton({ onPress }: { onPress: () => void }) {
       type="button"
       className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
         focused
-          ? 'bg-indigo-500 text-white scale-105 shadow-lg'
+          ? 'bg-tv-focus text-white scale-105 shadow-lg'
           : 'bg-white/20 text-white backdrop-blur-sm'
       }`}
     >

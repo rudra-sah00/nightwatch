@@ -71,7 +71,7 @@ export function TvAskAi() {
         )}
         {transcript && (
           <div className="text-left">
-            <span className="text-xs text-indigo-400 uppercase tracking-wider">
+            <span className="text-xs text-tv-focus uppercase tracking-wider">
               {t('ai')}
             </span>
             <p className="text-sm text-foreground mt-1 leading-relaxed">

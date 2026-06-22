@@ -22,7 +22,7 @@ interface TvPlayerControlsProps {
   currentQuality: string;
   subtitleTracks: SubtitleTrack[];
   currentSubtitleTrack: string | null;
-  activePanel: 'none' | 'quality' | 'subtitle' | 'audio';
+  activePanel: 'none' | 'quality' | 'subtitle' | 'audio' | 'speed';
   hasNext: boolean;
   hasPrev: boolean;
   isClipping?: boolean;
@@ -34,10 +34,14 @@ interface TvPlayerControlsProps {
   onPrev?: () => void;
   onQualityChange: (index: number) => void;
   onSubtitleChange: (trackId: string | null) => void;
-  onOpenPanel: (panel: 'none' | 'quality' | 'subtitle' | 'audio') => void;
+  onOpenPanel: (
+    panel: 'none' | 'quality' | 'subtitle' | 'audio' | 'speed',
+  ) => void;
   audioTracks: { id: string; label: string; language: string }[];
   currentAudioTrack: string | null;
   onAudioTrackChange: (trackId: string) => void;
+  playbackRate: number;
+  onPlaybackRateChange: (rate: number) => void;
 }
 
 // ─── Control Button ───
@@ -144,11 +148,11 @@ function SeekBar({
       </span>
       <div
         className={`flex-1 h-1.5 rounded-full overflow-hidden transition-all ${
-          focused ? 'h-2.5 ring-2 ring-indigo-400' : 'bg-white/20'
+          focused ? 'h-2.5 ring-2 ring-tv-focus' : 'bg-white/20'
         }`}
       >
         <div
-          className="h-full bg-indigo-500 rounded-full transition-[width] duration-75"
+          className="h-full bg-tv-focus rounded-full transition-[width] duration-75"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -220,9 +224,9 @@ function AutoQualityItem({
       ref={ref}
       className={`px-3 py-2 rounded-lg text-sm transition-all ${
         focused
-          ? 'bg-indigo-500 text-white'
+          ? 'bg-tv-focus text-white'
           : active
-            ? 'text-indigo-400'
+            ? 'text-tv-focus'
             : 'text-white/80'
       }`}
     >
@@ -246,9 +250,9 @@ function QualityItem({
       ref={ref}
       className={`px-3 py-2 rounded-lg text-sm transition-all ${
         focused
-          ? 'bg-indigo-500 text-white'
+          ? 'bg-tv-focus text-white'
           : active
-            ? 'text-indigo-400'
+            ? 'text-tv-focus'
             : 'text-white/80'
       }`}
     >
@@ -320,9 +324,9 @@ function SubtitleItem({
       ref={ref}
       className={`px-3 py-2 rounded-lg text-sm transition-all ${
         focused
-          ? 'bg-indigo-500 text-white'
+          ? 'bg-tv-focus text-white'
           : active
-            ? 'text-indigo-400'
+            ? 'text-tv-focus'
             : 'text-white/80'
       }`}
     >
@@ -385,10 +389,77 @@ function AudioItem({
   return (
     <div
       ref={ref}
-      className={`px-3 py-2 rounded-lg text-sm transition-all ${focused ? 'bg-indigo-500 text-white' : active ? 'text-indigo-400' : 'text-white/80'}`}
+      className={`px-3 py-2 rounded-lg text-sm transition-all ${focused ? 'bg-tv-focus text-white' : active ? 'text-tv-focus' : 'text-white/80'}`}
     >
       {track.label} {active && '✓'}
     </div>
+  );
+}
+
+// ─── Speed Panel ───
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
+function SpeedItem({
+  speed,
+  active,
+  onSelect,
+}: {
+  speed: number;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  const { ref, focused } = useFocusable({ onEnterPress: onSelect });
+  return (
+    <div
+      ref={ref}
+      className={`px-3 py-2 rounded-lg text-sm transition-all ${
+        focused
+          ? 'bg-tv-focus text-white'
+          : active
+            ? 'text-indigo-400'
+            : 'text-white/80'
+      }`}
+    >
+      {speed === 1 ? 'Normal' : `${speed}×`} {active && '✓'}
+    </div>
+  );
+}
+
+function SpeedPanel({
+  currentRate,
+  onSelect,
+}: {
+  currentRate: number;
+  onSelect: (rate: number) => void;
+}) {
+  const t = useTranslations('common.tv.player');
+  const { ref, focusKey, focusSelf } = useFocusable({
+    focusKey: 'TV_SPEED_PANEL',
+    isFocusBoundary: true,
+    trackChildren: true,
+  });
+  useEffect(() => {
+    focusSelf();
+  }, [focusSelf]);
+  return (
+    <FocusContext.Provider value={focusKey}>
+      <div
+        ref={ref}
+        className="absolute bottom-28 right-8 bg-black/95 border border-white/20 rounded-xl p-3 min-w-[180px] z-40"
+      >
+        <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-2 px-2">
+          {t('speed')}
+        </p>
+        {SPEEDS.map((s) => (
+          <SpeedItem
+            key={s}
+            speed={s}
+            active={currentRate === s}
+            onSelect={() => onSelect(s)}
+          />
+        ))}
+      </div>
+    </FocusContext.Provider>
   );
 }
 
@@ -456,6 +527,8 @@ export function TvPlayerControls({
   audioTracks,
   currentAudioTrack,
   onAudioTrackChange,
+  playbackRate,
+  onPlaybackRateChange,
 }: TvPlayerControlsProps) {
   const { ref, focusKey, focusSelf } = useFocusable({
     focusKey: FOCUS_KEYS.PLAYER_CONTROLS,
@@ -541,6 +614,15 @@ export function TvPlayerControls({
                 }
               />
             )}
+            {!isLive && (
+              <ControlBtn
+                icon="speed"
+                label="Speed"
+                onPress={() =>
+                  onOpenPanel(activePanel === 'speed' ? 'none' : 'speed')
+                }
+              />
+            )}
             {qualities.length > 0 && (
               <ControlBtn
                 icon="tune"
@@ -573,6 +655,12 @@ export function TvPlayerControls({
             tracks={audioTracks}
             currentTrack={currentAudioTrack}
             onSelect={onAudioTrackChange}
+          />
+        )}
+        {activePanel === 'speed' && (
+          <SpeedPanel
+            currentRate={playbackRate}
+            onSelect={onPlaybackRateChange}
           />
         )}
       </div>
