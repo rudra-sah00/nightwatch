@@ -63,7 +63,7 @@ export function TvNavbar() {
     focusBoundaryDirections: ['left'],
   });
 
-  const collapsed = !hasFocusedChild;
+  const collapsed = false;
 
   return (
     <FocusContext.Provider value={focusKey}>

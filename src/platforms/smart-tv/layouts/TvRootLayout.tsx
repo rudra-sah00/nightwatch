@@ -16,8 +16,6 @@ import { useTvBack } from '../hooks/use-tv-back';
 import { initSpatialNavigation } from '../lib/spatial-navigation';
 import { TvNavbar } from './TvNavbar';
 
-initSpatialNavigation();
-
 export function TvRootLayout({ children }: { children: React.ReactNode }) {
   const expanded = useMusicStore((s) => s.expanded);
 
@@ -29,6 +27,7 @@ export function TvRootLayout({ children }: { children: React.ReactNode }) {
   useTvBack();
 
   useEffect(() => {
+    initSpatialNavigation();
     document.documentElement.classList.add('tv');
     focusSelf();
     return () => document.documentElement.classList.remove('tv');
