@@ -17,8 +17,13 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const app =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const hasFirebaseConfig = !!firebaseConfig.projectId && !!firebaseConfig.apiKey;
+
+const app = hasFirebaseConfig
+  ? getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApps()[0]
+  : null;
 
 // --- Analytics (web/desktop) ---
 
@@ -30,6 +35,7 @@ let analytics: Analytics | null = null;
  */
 export async function getFirebaseAnalytics(): Promise<Analytics | null> {
   if (typeof window === 'undefined') return null;
+  if (!app) return null;
   if (process.env.NEXT_PUBLIC_APP_ENV === 'staging') return null;
   if (analytics) return analytics;
   try {
@@ -46,6 +52,7 @@ let messaging: Messaging | null = null;
 
 function getMessagingInstance(): Messaging | null {
   if (typeof window === 'undefined') return null;
+  if (!app) return null;
   if (!('Notification' in window)) return null;
   if (!messaging) messaging = getMessaging(app);
   return messaging;
