@@ -24,6 +24,12 @@ function FocusableNavLink({
   const router = useRouter();
   const { ref, focused } = useFocusable({
     onEnterPress: () => router.push(href),
+    onFocus: () => {
+      (ref as React.RefObject<HTMLDivElement>).current?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    },
   });
 
   return (
@@ -56,6 +62,12 @@ function SignOutButton() {
   const logout = useAuthStore((s) => s.logout);
   const { ref, focused } = useFocusable({
     onEnterPress: () => logout(),
+    onFocus: () => {
+      (ref as React.RefObject<HTMLDivElement>).current?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    },
   });
 
   return (
