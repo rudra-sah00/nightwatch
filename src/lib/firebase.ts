@@ -30,6 +30,7 @@ let analytics: Analytics | null = null;
  */
 export async function getFirebaseAnalytics(): Promise<Analytics | null> {
   if (typeof window === 'undefined') return null;
+  if (process.env.NEXT_PUBLIC_APP_ENV === 'staging') return null;
   if (analytics) return analytics;
   try {
     const { getAnalytics, isSupported } = await import('firebase/analytics');
