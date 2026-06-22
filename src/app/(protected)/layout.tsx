@@ -1,12 +1,12 @@
 import dynamic from 'next/dynamic';
 import { FirebaseIdentity } from '@/components/layout/FirebaseIdentity';
-import { MobileAppLifecycle } from '@/components/layout/MobileAppLifecycle';
 import { PushNotifications } from '@/components/layout/PushNotifications';
 import { ScreenTracker } from '@/components/layout/ScreenTracker';
 import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
 import { FloatingDisc } from '@/features/music/components/FloatingDisc';
+import { MobileAppLifecycle } from '@/platforms/mobile/MobileAppLifecycle';
 
 const FullPlayer = dynamic(() =>
   import('@/features/music/components/FullPlayer').then((m) => m.FullPlayer),

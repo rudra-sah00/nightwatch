@@ -8,8 +8,8 @@ import { Avatar } from '@/features/friends/components/Avatar';
 import { FriendRow } from '@/features/friends/components/FriendRow';
 import { FriendSearchSpotlight } from '@/features/friends/components/FriendSearchSpotlight';
 import { useFriends } from '@/features/friends/hooks/use-friends';
-import { useIsMobile } from '@/hooks/use-is-mobile';
-import { MobileSidebarShell } from './sidebar/MobileSidebarShell';
+import { MobileSidebarShell } from '@/platforms/mobile/MobileSidebarShell';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import { useSidebarAnimation } from './sidebar/use-sidebar-animation';
 
 /**

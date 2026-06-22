@@ -7,7 +7,7 @@ import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { WatchPartyLoading } from '@/features/watch-party/components/WatchPartyLoading';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
-import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import { isTV } from '@/platforms/smart-tv/lib/detection';
 import { TvWatchTogether } from '@/platforms/smart-tv/pages/TvWatchTogether';
 import { useDesktopNotifications } from '../hooks/use-desktop-notifications';

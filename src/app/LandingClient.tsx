@@ -12,7 +12,7 @@ import {
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { useDownloadLinks } from '@/hooks/use-download-links';
+import { useDownloadLinks } from '@/platforms/desktop/use-download-links';
 import { LandingRedirect } from './LandingRedirect';
 
 const FEATURE_ICONS = [MonitorPlay, Users, Radio, Phone, Shield] as const;

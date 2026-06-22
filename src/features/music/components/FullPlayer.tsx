@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import { getSongRecommendations, getSyncedLyrics } from '../api';
 import { useNativeVolume } from '../hooks/use-native-volume';
 import { useMusicStore } from '../store/use-music-store';

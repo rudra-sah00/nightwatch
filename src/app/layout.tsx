@@ -4,14 +4,14 @@ import 'material-symbols/outlined.css';
 import './globals.css';
 import { Suspense } from 'react';
 import { CookieConsent } from '@/components/layout/CookieConsent';
-import { DiscordPresenceSync } from '@/components/layout/DiscordPresenceSync';
-import { ElectronDragRegion } from '@/components/layout/electron-drag-region';
-import { MobileShell } from '@/components/layout/MobileShell';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { ProgressBar } from '@/components/layout/progress-bar';
 import { SwRegister } from '@/components/layout/sw-register';
 import { Toaster } from '@/components/ui/sonner';
 import { SplashScreen } from '@/components/ui/splash-screen';
+import { DiscordPresenceSync } from '@/platforms/desktop/DiscordPresenceSync';
+import { ElectronDragRegion } from '@/platforms/desktop/ElectronDragRegion';
+import { MobileShell } from '@/platforms/mobile/MobileShell';
 import { AuthProvider } from '@/providers/auth-provider';
 
 import { IntlProvider } from '@/providers/intl-provider';
