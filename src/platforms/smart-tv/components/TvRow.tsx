@@ -39,8 +39,8 @@ export const TvRow = memo(function TvRow({
     const section = sectionRef.current;
     if (!container) return;
 
-    // Vertical: scroll section into view (instant to avoid fighting horizontal smooth)
-    section?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    // Vertical: scroll section into view smoothly
+    section?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
     // Horizontal: center the focused card
     requestAnimationFrame(() => {

@@ -37,10 +37,10 @@ function NavItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
     <div
       ref={ref}
       className={`
-        flex items-center gap-4 px-5 py-3 rounded-xl transition-all duration-200
-        ${focused ? 'bg-tv-focus text-foreground' : ''}
-        ${isActive && !focused ? 'text-foreground bg-white/10' : ''}
-        ${!focused && !isActive ? 'text-muted-foreground' : ''}
+        flex items-center gap-4 px-5 py-3 rounded-2xl transition-all duration-200
+        ${focused ? 'bg-tv-focus text-white scale-[1.03] shadow-lg shadow-tv-focus/30' : ''}
+        ${isActive && !focused ? 'text-foreground bg-secondary/80' : ''}
+        ${!focused && !isActive ? 'text-muted-foreground hover:text-foreground' : ''}
       `}
     >
       <span className="material-symbols-outlined text-2xl shrink-0">
@@ -69,11 +69,12 @@ export function TvNavbar() {
     <FocusContext.Provider value={focusKey}>
       <nav
         ref={ref}
-        className={`tv-navbar flex flex-col gap-1 py-6 px-3 h-full shrink-0 bg-card/80 backdrop-blur-sm ${
+        className={`tv-navbar relative flex flex-col gap-1 py-6 px-3 h-full shrink-0 ${
           collapsed ? 'tv-navbar--collapsed' : ''
         }`}
       >
-        <div className="mb-6 flex items-center gap-3 px-4">
+        <div className="absolute inset-y-4 inset-x-2 bg-card/90 backdrop-blur-md rounded-3xl border border-border/40 shadow-xl -z-10" />
+        <div className="mb-6 flex items-center gap-3 px-4 pt-2">
           <Image
             src="/logo.png"
             alt="Nightwatch"

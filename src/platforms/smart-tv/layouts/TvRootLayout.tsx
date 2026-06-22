@@ -50,7 +50,7 @@ export function TvRootLayout({ children }: { children: React.ReactNode }) {
       >
         <TvScreensaver />
         <TvNavbar />
-        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden scroll-smooth">
           <TvErrorBoundary>{children}</TvErrorBoundary>
         </main>
 

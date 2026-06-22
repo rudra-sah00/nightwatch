@@ -124,6 +124,7 @@ src/platforms/smart-tv/
 │   ├── TvScreensaver.tsx    # Idle screensaver (bouncing logo + clock)
 │   ├── TvErrorBoundary.tsx  # Error boundary with focusable retry + Crashlytics
 │   ├── TvMusicCommandHandler.tsx # Music remote command receiver (phone → TV)
+│   ├── TvActivityHeatmap.tsx  # Profile activity heatmap (same as web laptop version)
 │   ├── TvSkeleton.tsx       # Loading skeletons (row, grid, page)
 │   └── TvPageGate.tsx       # TV/Web router gate
 ├── pages/               # Full-page TV views
@@ -145,13 +146,14 @@ src/platforms/smart-tv/
 │   ├── TvAskAi.tsx          # Voice AI assistant (orb + transcripts)
 │   └── TvLogin.tsx          # QR code sign-in
 ├── layouts/
-│   ├── TvRootLayout.tsx     # Root: safe area + navbar + screensaver + mini player
-│   └── TvNavbar.tsx         # Collapsible sidebar navigation
+│   ├── TvRootLayout.tsx     # Root: safe area + navbar + screensaver + mini player + video presence
+│   └── TvNavbar.tsx         # Floating rounded sidebar navigation (rounded-3xl card)
 ├── hooks/
 │   ├── use-tv-focus.ts      # Per-page focus memory (save/restore)
 │   ├── use-tv-back.ts       # Back/Escape key handler
 │   ├── use-tv-idle.ts       # 5-minute idle detection
-│   └── use-tv-remote-receiver.ts # Remote control receiver (phone → TV player)
+│   ├── use-tv-remote-receiver.ts # Remote control receiver (phone → TV player)
+│   └── use-tv-video-presence.ts  # Global TV presence for video cast (phone → TV)
 ├── lib/
 │   ├── detection.ts         # isTV() + waitForTvFlag()
 │   ├── spatial-navigation.ts # norigin init config
@@ -279,8 +281,8 @@ V W X Y Z 1 2
 [Space] [Delete] [Clear] [🎤 Voice]
 ```
 
-- Each letter is a focusable button
-- Results appear on the right side as a grid
+- Each letter is a focusable button (theme-aware: `bg-secondary text-foreground`, works in both light/dark)
+- Results appear on the right side as a grid (uses `tv-focusable` class for consistent focus indicators)
 - Voice search uses Web Speech API (shows "Listening..." indicator)
 - Results capped at 30 items for performance
 
@@ -334,8 +336,8 @@ html.tv .tv-focusable--focused {
 }
 ```
 
-### Navbar Collapse
-Navbar transitions from 240px → 72px (icons only) when focus leaves the sidebar.
+### Navbar
+Floating card design with `rounded-3xl` corners, `backdrop-blur-md`, and subtle border/shadow. Nav items use `rounded-2xl` with `scale-[1.03]` + `shadow-lg` on focus, active state uses `bg-secondary/80` (works in both light and dark themes). Collapses from 240px → 72px (icons only) when focus leaves the sidebar.
 
 ## Performance Optimizations
 
@@ -347,7 +349,7 @@ Navbar transitions from 240px → 72px (icons only) when focus leaves the sideba
 | `router.prefetch()` | Cards prefetch their target route on focus |
 | Hero image preload | Next slide's image preloaded via `new Image()` |
 | List capping | Search: 30, episodes: 50, queue: 50, rows: 15 items max |
-| Vertical scroll: instant | TvRow uses `behavior: "instant"` for vertical (no jank), smooth only for horizontal |
+| Vertical scroll: smooth | TvRow uses `behavior: "smooth"` for both vertical and horizontal; main content has `scroll-smooth` |
 | `retry: false` | All TV queries skip TanStack Query retry (fail fast on TV) |
 
 ## Android Configuration
@@ -434,6 +436,43 @@ cd android && ./gradlew assembleRelease -PtvBuild
 adb install -r app/build/outputs/apk/release/app-release.apk
 ```
 
+## Video Cast (Phone/Desktop → TV)
+
+A Spotify Connect-like feature for video. Users can send a video from their phone or desktop to the TV.
+
+### Architecture
+
+```
+Phone/Desktop                    Server (Socket.IO)              Android TV
+─────────────                    ──────────────────              ──────────────
+                                                                 useTvVideoPresence mounts
+                                                                 emit remote:tv_available (60s)
+                                 ← broadcast to user room ←
+
+useAvailableTvs detects TV online
+"Play on TV" button appears (mobile portrait player only)
+
+User taps "Play on TV" ─────────→ remote:cast_content ──────────→ router.push(/watch/{movieId})
+                                                                  TvWatch renders
+```
+
+### Socket Events
+
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| `remote:tv_available` | TV → Phone/Desktop | `{ socketId, deviceName }` |
+| `remote:cast_content` | Phone/Desktop → TV | `{ movieId, streamUrl?, title }` |
+
+### Implementation
+
+- **TV side** (`use-tv-video-presence.ts`): Always mounted in TvRootLayout. Emits `remote:tv_available` every 60s. Listens for `remote:cast_content` → navigates to watch page.
+- **Client side** (`use-available-tvs.ts`): Discovers TVs via `remote:tv_available` events. Provides `tvs` array and `castToTv()` function.
+- **UI** (`PlayOnTvButton.tsx`): Renders only in mobile portrait video player (under the video). Only visible when a TV is online. Hidden on desktop/laptop entirely.
+
+## Profile Activity Heatmap
+
+The TV profile page includes the same GitHub-style activity heatmap as the web laptop version — full 365-day grid with watch and music color legends. Uses the same `ActivityGraph` component and same data queries (`['profile', 'activity', 'watch']` and `['profile', 'activity', 'music']`).
+
 ## Feature Parity Matrix
 
 | Feature | Web | Mobile | Desktop | TV |
@@ -453,6 +492,8 @@ adb install -r app/build/outputs/apk/release/app-release.apk
 | Profile/Prefs | ✅ | ✅ | ✅ | ✅ (simplified) |
 | Ask AI | ✅ | ✅ | ✅ | ✅ (voice orb) |
 | Remote Control | ✅ | ✅ (sender) | ✅ (receiver) | ✅ (receiver) |
+| Video Cast | ❌ | ✅ (sender) | ❌ | ✅ (receiver) |
+| Activity Heatmap | ✅ | ❌ | ✅ | ✅ |
 | Friends/Voice | ✅ | ✅ | ✅ | ❌ |
 | Games | ✅ | ❌ | ✅ | ❌ |
 
