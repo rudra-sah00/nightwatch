@@ -395,5 +395,113 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "視聴を続ける",
+      "trending": "トレンド"
+    },
+    "search": {
+      "placeholder": "映画、番組を検索...",
+      "searching": "検索中...",
+      "noResults": "「{query}」の結果なし",
+      "hint": "文字グリッドで検索",
+      "voiceListening": "聞いています...",
+      "space": "スペース",
+      "delete": "削除",
+      "clear": "クリア",
+      "voice": "音声",
+      "listening": "聞いています..."
+    },
+    "live": {
+      "watchSolo": "一人で見る",
+      "watchTogether": "一緒に見る",
+      "noChannels": "チャンネルなし",
+      "noChannelsHint": "ライブTVチャンネルがここに表示されます",
+      "loadingChannels": "チャンネル読込中...",
+      "liveLabel": "ライブTV"
+    },
+    "music": {
+      "title": "音楽",
+      "noPlaying": "再生中の音楽なし",
+      "browseHint": "下を閲覧して聴き始める",
+      "loading": "音楽を読込中...",
+      "playAll": "すべて再生",
+      "songs": "{count}曲"
+    },
+    "manga": {
+      "popular": "人気",
+      "latest": "最新",
+      "favorites": "お気に入り",
+      "continue": "続きを読む",
+      "noManga": "マンガが見つかりません",
+      "chapters": "{count}話"
+    },
+    "watchlist": {
+      "title": "マイリスト",
+      "empty": "空",
+      "emptyHint": "コンテンツを閲覧してリストに追加",
+      "loading": "読込中..."
+    },
+    "library": {
+      "noClips": "クリップなし",
+      "noClipsHint": "ライブ配信の瞬間を録画"
+    },
+    "content": {
+      "watchSolo": "一人で見る",
+      "resume": "再開",
+      "watchTogether": "一緒に見る",
+      "watchlist": "リスト",
+      "inWatchlist": "リスト追加済",
+      "back": "戻る",
+      "episodes": "エピソード"
+    },
+    "player": {
+      "retry": "再試行",
+      "goBack": "戻る",
+      "nextIn": "次のエピソードまで",
+      "playNow": "今すぐ再生",
+      "cancel": "キャンセル",
+      "quality": "画質",
+      "subtitles": "字幕",
+      "off": "オフ",
+      "audio": "オーディオ",
+      "auto": "自動",
+      "live": "ライブ",
+      "error": "再生エラー。もう一度お試しください。",
+      "speed": "速度"
+    },
+    "party": {
+      "roomCode": "ルームコード",
+      "watching": "{count}人が視聴中",
+      "joinRequest": "参加リクエスト",
+      "joinRequests": "参加リクエスト"
+    },
+    "login": {
+      "title": "Nightwatchにサインイン",
+      "scanHint": "スマホでスキャンしてサインイン",
+      "waiting": "スキャン待機中...",
+      "success": "サインイン完了！リダイレクト中...",
+      "expired": "QRコードの期限切れ",
+      "retry": "新しいコードを生成"
+    },
+    "common": {
+      "loading": "読込中...",
+      "back": "戻る"
+    },
+    "askAi": {
+      "pressEnter": "Enterで話す",
+      "listening": "聞いています...",
+      "speaking": "AIが話しています...",
+      "you": "あなた",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "チャプター"
+    },
+    "watchTogether": {
+      "roomCode": "ルームコード",
+      "joinRequest": "参加リクエスト"
+    }
   }
 }

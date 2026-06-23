@@ -8,11 +8,15 @@ import { ActivityGraph } from '@/features/profile/components/activity-graph';
 import { UpdateProfileForm } from '@/features/profile/components/update-profile-form';
 import { useProfileOverview } from '@/features/profile/hooks/use-profile-overview';
 
-const sections = [
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+
+const allSections = [
   { href: '/profile/preferences', icon: Palette, key: 'preferences' },
   { href: '/profile/security', icon: Shield, key: 'security' },
   { href: '/profile/devices', icon: Monitor, key: 'devices' },
 ] as const;
+
+const tvHidden = new Set(['security', 'devices']);
 
 export default function ProfileClient() {
   const t = useTranslations('profile');
@@ -31,19 +35,21 @@ export default function ProfileClient() {
       <UpdateProfileForm />
 
       <nav className="flex flex-col gap-2">
-        {sections.map(({ href, icon: Icon, key }) => (
-          <Link
-            key={key}
-            href={href}
-            className="flex items-center gap-4 px-5 py-4 bg-card border border-border rounded-xl hover:bg-secondary/50 active:scale-[0.99] transition-all group"
-          >
-            <Icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-            <span className="flex-1 font-headline font-bold uppercase tracking-wider text-sm">
-              {t(`nav.${key}`)}
-            </span>
-            <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
-          </Link>
-        ))}
+        {allSections
+          .filter((s) => !isTV() || !tvHidden.has(s.key))
+          .map(({ href, icon: Icon, key }) => (
+            <Link
+              key={key}
+              href={href}
+              className="flex items-center gap-4 px-5 py-4 bg-card border border-border rounded-xl hover:bg-secondary/50 active:scale-[0.99] transition-all group"
+            >
+              <Icon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <span className="flex-1 font-headline font-bold uppercase tracking-wider text-sm">
+                {t(`nav.${key}`)}
+              </span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
+            </Link>
+          ))}
       </nav>
 
       <section

@@ -8,6 +8,8 @@ import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getMusicPlaylist } from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicStore } from '@/features/music/store/use-music-store';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvMusicDetail } from '@/platforms/smart-tv/pages/TvMusicDetail';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -35,6 +37,19 @@ export default function MusicPlaylistPage() {
   const meta = playlist
     ? { title: playlist.title, image: playlist.image, artist: '' }
     : null;
+
+  // TV: D-pad optimized track list
+  if (isTV()) {
+    return (
+      <TvMusicDetail
+        title={playlist?.title ?? 'Playlist'}
+        image={playlist?.image}
+        subtitle={`${songs.length} songs`}
+        songs={songs}
+        isLoading={loading}
+      />
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">

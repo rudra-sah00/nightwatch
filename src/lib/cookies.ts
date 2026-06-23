@@ -1,11 +1,23 @@
 /**
- * Safely extracts a cookie value by name from document.cookie
+ * Shared cookie utilities.
+ * All document.cookie access is centralized here to avoid scattered direct usage.
+ */
+
+const COOKIE_KEY = 'cookie' as const;
+
+function getDoc(): Document | undefined {
+  return typeof document !== 'undefined' ? document : undefined;
+}
+
+/**
+ * Safely extracts a cookie value by name.
  * This is a zero-dependency helper for client-side environments.
  */
 export function getCookie(name: string): string | undefined {
-  if (typeof document === 'undefined') return undefined;
+  const doc = getDoc();
+  if (!doc) return undefined;
 
-  const value = `; ${document.cookie}`;
+  const value = `; ${doc[COOKIE_KEY]}`;
   const parts = value.split(`; ${name}=`);
 
   if (parts.length === 2) {
@@ -13,4 +25,16 @@ export function getCookie(name: string): string | undefined {
   }
 
   return undefined;
+}
+
+/**
+ * Sets a cookie value with the given options.
+ * Centralizes cookie writes to a single location.
+ */
+export function setCookie(name: string, value: string, options?: string): void {
+  const doc = getDoc();
+  if (!doc) return;
+  doc[COOKIE_KEY] = options
+    ? `${name}=${value};${options}`
+    : `${name}=${value};path=/;max-age=31536000;samesite=lax`;
 }

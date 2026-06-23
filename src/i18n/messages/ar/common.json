@@ -395,5 +395,113 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "متابعة المشاهدة",
+      "trending": "رائج"
+    },
+    "search": {
+      "placeholder": "ابحث عن أفلام، مسلسلات...",
+      "searching": "جارٍ البحث...",
+      "noResults": "لا نتائج لـ \"{query}\"",
+      "hint": "استخدم شبكة الحروف للبحث",
+      "voiceListening": "جارٍ الاستماع...",
+      "space": "مسافة",
+      "delete": "حذف",
+      "clear": "مسح",
+      "voice": "صوت",
+      "listening": "جارٍ الاستماع..."
+    },
+    "live": {
+      "watchSolo": "مشاهدة فردية",
+      "watchTogether": "مشاهدة جماعية",
+      "noChannels": "لا قنوات",
+      "noChannelsHint": "ستظهر قنوات التلفزيون المباشر هنا",
+      "loadingChannels": "تحميل القنوات...",
+      "liveLabel": "تلفزيون مباشر"
+    },
+    "music": {
+      "title": "موسيقى",
+      "noPlaying": "لا موسيقى قيد التشغيل",
+      "browseHint": "تصفح أدناه لبدء الاستماع",
+      "loading": "تحميل الموسيقى...",
+      "playAll": "تشغيل الكل",
+      "songs": "{count} أغاني"
+    },
+    "manga": {
+      "popular": "شائع",
+      "latest": "أحدث",
+      "favorites": "المفضلة",
+      "continue": "متابعة",
+      "noManga": "لم يتم العثور على مانغا",
+      "chapters": "{count} فصول"
+    },
+    "watchlist": {
+      "title": "قائمتي",
+      "empty": "فارغة",
+      "emptyHint": "تصفح المحتوى وأضفه إلى قائمتك",
+      "loading": "جارٍ التحميل..."
+    },
+    "library": {
+      "noClips": "لا مقاطع",
+      "noClipsHint": "سجّل لحظات من البث المباشر"
+    },
+    "content": {
+      "watchSolo": "مشاهدة فردية",
+      "resume": "استئناف",
+      "watchTogether": "مشاهدة جماعية",
+      "watchlist": "قائمتي",
+      "inWatchlist": "في القائمة",
+      "back": "رجوع",
+      "episodes": "حلقات"
+    },
+    "player": {
+      "retry": "إعادة المحاولة",
+      "goBack": "رجوع",
+      "nextIn": "الحلقة التالية في",
+      "playNow": "تشغيل الآن",
+      "cancel": "إلغاء",
+      "quality": "الجودة",
+      "subtitles": "ترجمة",
+      "off": "إيقاف",
+      "audio": "صوتي",
+      "auto": "تلقائي",
+      "live": "مباشر",
+      "error": "خطأ في التشغيل. حاول مرة أخرى.",
+      "speed": "السرعة"
+    },
+    "party": {
+      "roomCode": "رمز الغرفة",
+      "watching": "{count} يشاهدون",
+      "joinRequest": "طلب انضمام",
+      "joinRequests": "طلبات الانضمام"
+    },
+    "login": {
+      "title": "تسجيل الدخول إلى Nightwatch",
+      "scanHint": "امسح بهاتفك لتسجيل الدخول",
+      "waiting": "بانتظار المسح...",
+      "success": "تم تسجيل الدخول! جارٍ التحويل...",
+      "expired": "انتهت صلاحية رمز QR",
+      "retry": "إنشاء رمز جديد"
+    },
+    "common": {
+      "loading": "جارٍ التحميل...",
+      "back": "رجوع"
+    },
+    "askAi": {
+      "pressEnter": "اضغط Enter للتحدث",
+      "listening": "جارٍ الاستماع...",
+      "speaking": "الذكاء الاصطناعي يتحدث...",
+      "you": "أنت",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "الفصول"
+    },
+    "watchTogether": {
+      "roomCode": "رمز الغرفة",
+      "joinRequest": "طلب الانضمام"
+    }
   }
 }

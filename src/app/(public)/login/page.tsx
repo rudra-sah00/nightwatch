@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import LoginClient from './LoginClient';
+import { TvLoginGate } from './TvLoginGate';
 
 export async function generateMetadata() {
   const t = await getTranslations('auth');
@@ -10,7 +11,10 @@ export async function generateMetadata() {
 }
 
 export default async function LoginPage() {
-  // Mandatory 2.5s delay to showcase premium loading animation
-
-  return <LoginClient />;
+  return (
+    <>
+      <TvLoginGate />
+      <LoginClient />
+    </>
+  );
 }

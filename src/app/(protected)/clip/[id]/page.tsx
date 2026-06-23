@@ -5,6 +5,8 @@ import { Suspense } from 'react';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvWatch } from '@/platforms/smart-tv/pages/TvWatch';
 
 function ClipPlayer() {
   const searchParams = useSearchParams();
@@ -17,6 +19,11 @@ function ClipPlayer() {
         <p className="text-white/60">No clip URL provided</p>
       </div>
     );
+  }
+
+  // TV: use TvWatch player
+  if (isTV()) {
+    return <TvWatch streamUrl={src} title={title} />;
   }
 
   const metadata: VideoMetadata = {

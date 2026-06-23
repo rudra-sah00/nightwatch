@@ -22,6 +22,7 @@ function isElectron(): boolean {
 function shouldTrack(): boolean {
   if (typeof window === 'undefined') return false;
   if (process.env.NODE_ENV === 'development') return false;
+  if (process.env.NEXT_PUBLIC_APP_ENV === 'staging') return false;
   return getAnalyticsConsent();
 }
 

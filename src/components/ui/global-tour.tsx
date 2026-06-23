@@ -6,8 +6,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
-import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useDesktopApp } from '@/platforms/desktop/use-desktop-app';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import { useTheme } from '@/providers/theme-provider';
 
 /**

@@ -1,0 +1,61 @@
+name: Build webOS IPK
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build webOS TV App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install webOS CLI v3.2.4
+        run: npm install -g @webos-tools/cli@3.2.4
+
+      - name: Verify CLI installation
+        run: ares-package --version
+
+      - name: Sync version from package.json to appinfo.json
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          cd webos
+          node -e "
+            const fs = require('fs');
+            const info = JSON.parse(fs.readFileSync('appinfo.json', 'utf8'));
+            info.version = '$VERSION';
+            fs.writeFileSync('appinfo.json', JSON.stringify(info, null, 2) + '\n');
+          "
+          echo "Building webOS app v$VERSION"
+
+      - name: Package webOS IPK
+        run: |
+          cd webos
+          ares-package .
+          ls -la *.ipk
+
+      - name: Upload IPK to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: webos/*.ipk
+
+      - name: Upload IPK as Artifact
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: webos-ipk
+          path: webos/*.ipk
+          retention-days: 30

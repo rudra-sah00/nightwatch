@@ -51,4 +51,17 @@ export const REMOTE_EVENTS = {
   COMMAND: 'remote:command',
   STATE_UPDATE: 'remote:state_update',
   REQUEST_ADVERTISE: 'remote:request_advertise',
+  TV_AVAILABLE: 'remote:tv_available',
+  CAST_CONTENT: 'remote:cast_content',
 } as const;
+
+export interface TvAvailablePayload {
+  socketId: string;
+  deviceName: string;
+}
+
+export interface CastContentPayload {
+  movieId: string;
+  streamUrl?: string;
+  title: string;
+}

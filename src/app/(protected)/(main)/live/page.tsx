@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import LiveClient from './LiveClient';
+import { LiveTvGate } from './LiveTvGate';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('common.metadata');
@@ -11,5 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LivePage() {
-  return <LiveClient />;
+  return (
+    <LiveTvGate>
+      <LiveClient />
+    </LiveTvGate>
+  );
 }

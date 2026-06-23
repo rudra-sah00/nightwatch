@@ -46,6 +46,8 @@ RemoteDisc disappears
 | `remote:command` | Mobile → Desktop | `{ targetSocketId, command, seekSeconds?, seekTo? }` |
 | `remote:state_update` | Desktop → Mobile | `{ socketId, isPlaying, currentTime, duration }` |
 | `remote:request_advertise` | Mobile → Desktop | `{}` (signal for desktops to re-advertise) |
+| `remote:tv_available` | TV → Phone/Desktop | `{ socketId, deviceName }` |
+| `remote:cast_content` | Phone/Desktop → TV | `{ targetSocketId, movieId, streamUrl?, title }` |
 
 ### Commands
 
@@ -67,10 +69,12 @@ src/features/remote-control/
 ├── hooks/
 │   ├── use-remote-control-listener.ts          # Desktop: advertise + respond to commands
 │   ├── use-remote-streams.ts                   # Mobile: track active desktop streams
-│   └── use-remote-commander.ts                 # Mobile: send commands + receive state
+│   ├── use-remote-commander.ts                 # Mobile: send commands + receive state
+│   └── use-available-tvs.ts                    # Mobile/Desktop: discover available TVs for video cast
 └── components/
     ├── RemoteDisc.tsx                          # Floating disc (bottom-left) + overlay trigger
-    └── RemoteControlSheet.tsx                  # Full-screen overlay with controls
+    ├── RemoteControlSheet.tsx                  # Full-screen overlay with controls
+    └── PlayOnTvButton.tsx                      # "Play on TV" button (mobile portrait player only)
 ```
 
 ## Desktop Side (`use-remote-control-listener`)
@@ -151,3 +155,13 @@ On socket disconnect, the handler:
 - **`WatchVODPlayer`**: Calls `useRemoteControlListener` with `onNextEpisode: nextEpisode.play` for series.
 - **`WatchLivePlayer`**: Calls `useRemoteControlListener` without `onNextEpisode`.
 - **Protected layout**: Renders `<RemoteDisc />` globally (only visible on mobile when streams active).
+- **Watch page** (`/watch/[id]`): Renders `<PlayOnTvButton />` in mobile portrait section (under video).
+- **TvRootLayout**: Mounts `useTvVideoPresence()` globally for TV cast availability.
+
+## Video Cast (Phone → TV)
+
+Separate from the remote control feature (which controls desktop from mobile), Video Cast sends content to the TV:
+
+- **`use-tv-video-presence`** (TV side): Broadcasts `remote:tv_available` every 60s with `{ socketId, deviceName: 'Android TV' }`. Listens for `remote:cast_content` → navigates to `/watch/{movieId}`.
+- **`use-available-tvs`** (Mobile side): Tracks available TVs. Removes stale entries after 90s. Provides `castToTv(socketId, { movieId, title })`.
+- **`PlayOnTvButton`**: Only renders in mobile portrait video player when a TV is online. Tapping sends `remote:cast_content` to the TV's socket. Hidden on desktop/laptop completely.

@@ -8,8 +8,8 @@ import type {
   PartyStateUpdate,
   RoomPreview,
 } from '@/features/watch-party/room/types';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { trackEvent } from '@/lib/analytics';
+import { useDesktopApp } from '@/platforms/desktop/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 

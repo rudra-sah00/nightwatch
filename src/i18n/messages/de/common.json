@@ -395,5 +395,113 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "Weiterschauen",
+      "trending": "Im Trend"
+    },
+    "search": {
+      "placeholder": "Filme, Serien suchen...",
+      "searching": "Suche...",
+      "noResults": "Keine Ergebnisse für \"{query}\"",
+      "hint": "Buchstabenraster zur Suche verwenden",
+      "voiceListening": "Höre zu...",
+      "space": "Leer",
+      "delete": "Löschen",
+      "clear": "Leeren",
+      "voice": "Stimme",
+      "listening": "Hört zu..."
+    },
+    "live": {
+      "watchSolo": "Allein schauen",
+      "watchTogether": "Zusammen schauen",
+      "noChannels": "Keine Sender",
+      "noChannelsHint": "Live-TV-Sender werden hier angezeigt",
+      "loadingChannels": "Sender laden...",
+      "liveLabel": "Live-TV"
+    },
+    "music": {
+      "title": "Musik",
+      "noPlaying": "Keine Musik",
+      "browseHint": "Durchstöbern Sie unten",
+      "loading": "Musik laden...",
+      "playAll": "Alle abspielen",
+      "songs": "{count} Songs"
+    },
+    "manga": {
+      "popular": "Beliebt",
+      "latest": "Neueste",
+      "favorites": "Favoriten",
+      "continue": "Fortsetzen",
+      "noManga": "Kein Manga gefunden",
+      "chapters": "{count} Kapitel"
+    },
+    "watchlist": {
+      "title": "Meine Liste",
+      "empty": "Leer",
+      "emptyHint": "Inhalte durchsuchen und zur Liste hinzufügen",
+      "loading": "Laden..."
+    },
+    "library": {
+      "noClips": "Keine Clips",
+      "noClipsHint": "Momente aus Livestreams aufnehmen"
+    },
+    "content": {
+      "watchSolo": "Allein schauen",
+      "resume": "Fortsetzen",
+      "watchTogether": "Zusammen schauen",
+      "watchlist": "Merkliste",
+      "inWatchlist": "Gemerkt",
+      "back": "Zurück",
+      "episodes": "Folgen"
+    },
+    "player": {
+      "retry": "Erneut versuchen",
+      "goBack": "Zurück",
+      "nextIn": "Nächste Folge in",
+      "playNow": "Jetzt abspielen",
+      "cancel": "Abbrechen",
+      "quality": "Qualität",
+      "subtitles": "Untertitel",
+      "off": "Aus",
+      "audio": "Audio",
+      "auto": "Auto",
+      "live": "LIVE",
+      "error": "Wiedergabefehler. Erneut versuchen.",
+      "speed": "Geschwindigkeit"
+    },
+    "party": {
+      "roomCode": "Raumcode",
+      "watching": "{count} schauen zu",
+      "joinRequest": "Beitrittsanfrage",
+      "joinRequests": "Beitrittsanfragen"
+    },
+    "login": {
+      "title": "Bei Nightwatch anmelden",
+      "scanHint": "Mit dem Handy scannen",
+      "waiting": "Warte auf Scan...",
+      "success": "Angemeldet! Weiterleitung...",
+      "expired": "QR-Code abgelaufen.",
+      "retry": "Neuen Code generieren"
+    },
+    "common": {
+      "loading": "Laden...",
+      "back": "Zurück"
+    },
+    "askAi": {
+      "pressEnter": "Enter drücken zum Sprechen",
+      "listening": "Hört zu...",
+      "speaking": "KI spricht...",
+      "you": "Du",
+      "ai": "KI"
+    },
+    "mangaTitle": {
+      "chapters": "Kapitel"
+    },
+    "watchTogether": {
+      "roomCode": "Raumcode",
+      "joinRequest": "Beitrittsanfrage"
+    }
   }
 }

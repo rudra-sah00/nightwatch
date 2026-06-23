@@ -142,11 +142,14 @@ Each shortcut displays key badges and a translated label.
 
 GitHub-style contribution heatmap:
 - 52-week grid (7 rows × ~52 columns)
-- 5 intensity levels with neo-brutalist colors: `bg-secondary` (0), `bg-neo-blue/40` (1), `bg-neo-blue` (2), `bg-neo-yellow` (3), `bg-neo-red` (4)
+- Split cells: left half watch activity, right half music activity
+- Watch levels: `bg-secondary` (0), `bg-activity-1` (1), `bg-activity-2` (2), `bg-activity-3` (3), `bg-activity-4` (4)
+- Music levels: `bg-secondary` (0), `bg-music-1` (1), `bg-music-2` (2), `bg-music-3` (3), `bg-music-4` (4)
 - Month labels derived from week start dates
-- Tooltip on hover showing date and watch minutes
+- Tooltip on hover showing date, watch minutes, and music minutes
 - Loading skeleton state
 - Locale-aware month names via `useTranslations`
+- **TV platform**: Same component rendered in `TvActivityHeatmap` wrapper on TV profile page
 
 ### PublicProfileView
 

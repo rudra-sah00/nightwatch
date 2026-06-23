@@ -16,7 +16,11 @@ export function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-import { checkIsDesktop, checkIsMobile } from '@/lib/electron-bridge';
+import {
+  checkIsDesktop,
+  checkIsMobile,
+  checkIsTV,
+} from '@/lib/electron-bridge';
 
 let _volumeThrottleTimer: ReturnType<typeof setTimeout> | null = null;
 let _pendingVolume: number | null = null;
@@ -67,6 +71,7 @@ export function getDeviceName(): string {
     const override = sessionStorage.getItem('nightwatch:device-name-override');
     if (override) return override;
   }
+  if (checkIsTV()) return 'Android TV';
   if (checkIsDesktop()) return 'Desktop App';
   if (checkIsMobile()) return 'Mobile';
   return 'Web Player';

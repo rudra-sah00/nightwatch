@@ -7,7 +7,9 @@ import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { WatchPartyLoading } from '@/features/watch-party/components/WatchPartyLoading';
 import { SketchProvider } from '@/features/watch-party/interactions/context/SketchContext';
 import type { RoomPreview } from '@/features/watch-party/room/types';
-import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvWatchTogether } from '@/platforms/smart-tv/pages/TvWatchTogether';
 import { useDesktopNotifications } from '../hooks/use-desktop-notifications';
 import { useWatchPartyClient } from '../hooks/use-watch-party-client';
 
@@ -127,6 +129,7 @@ export function WatchPartyClient({
 
   const t = useTranslations('party');
   const isMobile = useIsMobile();
+  const [isTvMode] = useState(() => isTV());
 
   // Multi-tab detection — prevent duplicate RTM/RTC connections
   const [isBlockedByOtherTab, setIsBlockedByOtherTab] = useState(false);
@@ -174,6 +177,22 @@ export function WatchPartyClient({
   }
 
   if (isConnected && room) {
+    // TV: render simplified watch-together (no sketch, no chat, no sidebar)
+    if (isTvMode) {
+      return (
+        <TvWatchTogether
+          room={room}
+          isHost={isHost}
+          currentUserId={currentUserId}
+          videoRef={videoRef}
+          onPartyEvent={emitEvent}
+          onApprove={approveMember}
+          onReject={rejectMember}
+          onLeave={confirmLeave}
+        />
+      );
+    }
+
     return (
       <FeatureErrorBoundary feature="watch-party">
         <SketchProvider>

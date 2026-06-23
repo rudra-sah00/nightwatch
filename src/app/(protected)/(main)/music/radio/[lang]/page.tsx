@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { getRadioSongs, getRadioStations } from '@/features/music/api';
 import { useMusicStore } from '@/features/music/store/use-music-store';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvMusicDetail } from '@/platforms/smart-tv/pages/TvMusicDetail';
 
 const LANGUAGES = [
   'hindi',
@@ -37,6 +39,31 @@ export default function MusicRadioLangPage() {
       ),
     enabled: !!lang,
   });
+
+  // TV: show stations as track-list-like cards
+  if (isTV()) {
+    const tvSongs = stations.map(
+      (s) =>
+        ({
+          id: s.id,
+          title: s.title,
+          artist: lang,
+          album: 'Radio',
+          albumId: '',
+          duration: 0,
+          image: s.image,
+          language: lang,
+          year: 0,
+        }) as unknown as import('@/features/music/types').MusicTrack,
+    );
+    return (
+      <TvMusicDetail
+        title={`${lang.charAt(0).toUpperCase()}${lang.slice(1)} Radio`}
+        songs={tvSongs}
+        isLoading={loading}
+      />
+    );
+  }
 
   const handlePlayStation = async (station: RadioItem) => {
     setPlayingStation(station.id);

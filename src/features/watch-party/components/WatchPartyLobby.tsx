@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { Captcha } from '@/components/ui/captcha';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
+import { useDesktopApp } from '@/platforms/desktop/use-desktop-app';
 import type { User } from '@/types';
 import type { RoomPreview } from '../room/types';
 import { WatchPartyLoading } from './WatchPartyLoading';

@@ -395,5 +395,113 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "देखना जारी रखें",
+      "trending": "ट्रेंडिंग"
+    },
+    "search": {
+      "placeholder": "फ़िल्में, शो खोजें...",
+      "searching": "खोज रहे हैं...",
+      "noResults": "\"{query}\" के लिए कोई परिणाम नहीं",
+      "hint": "सामग्री खोजने के लिए अक्षर ग्रिड का उपयोग करें",
+      "voiceListening": "सुन रहे हैं...",
+      "space": "स्पेस",
+      "delete": "मिटाएं",
+      "clear": "साफ करें",
+      "voice": "आवाज़",
+      "listening": "सुन रहा है..."
+    },
+    "live": {
+      "watchSolo": "अकेले देखें",
+      "watchTogether": "साथ में देखें",
+      "noChannels": "कोई चैनल नहीं",
+      "noChannelsHint": "लाइव टीवी चैनल यहां दिखाई देंगे",
+      "loadingChannels": "चैनल लोड हो रहे हैं...",
+      "liveLabel": "लाइव टीवी"
+    },
+    "music": {
+      "title": "संगीत",
+      "noPlaying": "कोई संगीत नहीं चल रहा",
+      "browseHint": "सुनना शुरू करने के लिए नीचे ब्राउज़ करें",
+      "loading": "संगीत लोड हो रहा है...",
+      "playAll": "सभी चलाएं",
+      "songs": "{count} गाने"
+    },
+    "manga": {
+      "popular": "लोकप्रिय",
+      "latest": "नवीनतम",
+      "favorites": "पसंदीदा",
+      "continue": "जारी रखें",
+      "noManga": "कोई मंगा नहीं मिला",
+      "chapters": "{count} अध्याय"
+    },
+    "watchlist": {
+      "title": "मेरी वॉचलिस्ट",
+      "empty": "खाली",
+      "emptyHint": "सामग्री ब्राउज़ करें और अपनी वॉचलिस्ट में जोड़ें",
+      "loading": "लोड हो रहा है..."
+    },
+    "library": {
+      "noClips": "कोई क्लिप नहीं",
+      "noClipsHint": "लाइव स्ट्रीम से पलों को रिकॉर्ड करें"
+    },
+    "content": {
+      "watchSolo": "अकेले देखें",
+      "resume": "फिर से शुरू करें",
+      "watchTogether": "साथ में देखें",
+      "watchlist": "वॉचलिस्ट",
+      "inWatchlist": "वॉचलिस्ट में",
+      "back": "वापस",
+      "episodes": "एपिसोड"
+    },
+    "player": {
+      "retry": "फिर से कोशिश करें",
+      "goBack": "वापस जाएं",
+      "nextIn": "अगला एपिसोड",
+      "playNow": "अभी चलाएं",
+      "cancel": "रद्द करें",
+      "quality": "गुणवत्ता",
+      "subtitles": "उपशीर्षक",
+      "off": "बंद",
+      "audio": "ऑडियो",
+      "auto": "ऑटो",
+      "live": "लाइव",
+      "error": "प्लेबैक त्रुटि। पुनः प्रयास करें।",
+      "speed": "गति"
+    },
+    "party": {
+      "roomCode": "रूम कोड",
+      "watching": "{count} देख रहे हैं",
+      "joinRequest": "जुड़ने का अनुरोध",
+      "joinRequests": "जुड़ने के अनुरोध"
+    },
+    "login": {
+      "title": "Nightwatch में साइन इन करें",
+      "scanHint": "साइन इन करने के लिए अपने फ़ोन से स्कैन करें",
+      "waiting": "स्कैन की प्रतीक्षा...",
+      "success": "साइन इन हो गया! रीडायरेक्ट हो रहा है...",
+      "expired": "QR कोड समाप्त हो गया।",
+      "retry": "नया कोड जेनरेट करें"
+    },
+    "common": {
+      "loading": "लोड हो रहा है...",
+      "back": "वापस"
+    },
+    "askAi": {
+      "pressEnter": "एंटर दबाकर बात करें",
+      "listening": "सुन रहा है...",
+      "speaking": "AI बोल रहा है...",
+      "you": "आप",
+      "ai": "AI"
+    },
+    "mangaTitle": {
+      "chapters": "अध्याय"
+    },
+    "watchTogether": {
+      "roomCode": "रूम कोड",
+      "joinRequest": "शामिल होने का अनुरोध"
+    }
   }
 }

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { useIsMobile } from '@/hooks/use-is-mobile';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import { useMusicShortcuts } from '../hooks/use-music-shortcuts';
 import { useMusicStore } from '../store/use-music-store';
 import { dispatchRemoteVolume } from '../utils';

@@ -15,8 +15,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
-import { useIsMobile } from '@/hooks/use-is-mobile';
-import { MobileSidebarShell } from './sidebar/MobileSidebarShell';
+import { MobileSidebarShell } from '@/platforms/mobile/MobileSidebarShell';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import { useSidebarAnimation } from './sidebar/use-sidebar-animation';
 
 /**

@@ -395,5 +395,113 @@
     "exitFullscreen": "Exit Fullscreen",
     "exitButton": "✕ Exit",
     "loading": "Loading game..."
+  },
+  "tv": {
+    "home": {
+      "continueWatching": "Продолжить просмотр",
+      "trending": "В тренде"
+    },
+    "search": {
+      "placeholder": "Поиск фильмов, сериалов...",
+      "searching": "Поиск...",
+      "noResults": "Нет результатов для \"{query}\"",
+      "hint": "Используйте буквенную сетку для поиска",
+      "voiceListening": "Слушаю...",
+      "space": "Пробел",
+      "delete": "Удалить",
+      "clear": "Очистить",
+      "voice": "Голос",
+      "listening": "Слушаю..."
+    },
+    "live": {
+      "watchSolo": "Смотреть одному",
+      "watchTogether": "Смотреть вместе",
+      "noChannels": "Нет каналов",
+      "noChannelsHint": "Каналы появятся здесь",
+      "loadingChannels": "Загрузка каналов...",
+      "liveLabel": "Прямой эфир"
+    },
+    "music": {
+      "title": "Музыка",
+      "noPlaying": "Музыка не воспроизводится",
+      "browseHint": "Просматривайте ниже",
+      "loading": "Загрузка музыки...",
+      "playAll": "Воспроизвести всё",
+      "songs": "{count} треков"
+    },
+    "manga": {
+      "popular": "Популярное",
+      "latest": "Новинки",
+      "favorites": "Избранное",
+      "continue": "Продолжить",
+      "noManga": "Манга не найдена",
+      "chapters": "{count} Глав"
+    },
+    "watchlist": {
+      "title": "Мой список",
+      "empty": "Пусто",
+      "emptyHint": "Просматривайте и добавляйте контент",
+      "loading": "Загрузка..."
+    },
+    "library": {
+      "noClips": "Нет клипов",
+      "noClipsHint": "Записывайте моменты из прямых эфиров"
+    },
+    "content": {
+      "watchSolo": "Смотреть одному",
+      "resume": "Продолжить",
+      "watchTogether": "Смотреть вместе",
+      "watchlist": "Список",
+      "inWatchlist": "В списке",
+      "back": "Назад",
+      "episodes": "Серии"
+    },
+    "player": {
+      "retry": "Повторить",
+      "goBack": "Назад",
+      "nextIn": "Следующая серия через",
+      "playNow": "Играть сейчас",
+      "cancel": "Отмена",
+      "quality": "Качество",
+      "subtitles": "Субтитры",
+      "off": "Выкл",
+      "audio": "Аудио",
+      "auto": "Авто",
+      "live": "ПРЯМОЙ ЭФИР",
+      "error": "Ошибка воспроизведения. Попробуйте снова.",
+      "speed": "Скорость"
+    },
+    "party": {
+      "roomCode": "Код комнаты",
+      "watching": "{count} смотрят",
+      "joinRequest": "Запрос",
+      "joinRequests": "Запросы"
+    },
+    "login": {
+      "title": "Войти в Nightwatch",
+      "scanHint": "Отсканируйте телефоном",
+      "waiting": "Ожидание сканирования...",
+      "success": "Вход выполнен! Перенаправление...",
+      "expired": "QR-код истёк.",
+      "retry": "Сгенерировать новый код"
+    },
+    "common": {
+      "loading": "Загрузка...",
+      "back": "Назад"
+    },
+    "askAi": {
+      "pressEnter": "Нажмите Enter чтобы говорить",
+      "listening": "Слушаю...",
+      "speaking": "ИИ говорит...",
+      "you": "Вы",
+      "ai": "ИИ"
+    },
+    "mangaTitle": {
+      "chapters": "Главы"
+    },
+    "watchTogether": {
+      "roomCode": "Код комнаты",
+      "joinRequest": "Запрос на вступление"
+    }
   }
 }

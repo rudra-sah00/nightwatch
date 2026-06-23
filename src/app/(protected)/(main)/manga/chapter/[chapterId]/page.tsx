@@ -13,9 +13,12 @@ import {
   updateMangaProgress,
 } from '@/features/manga/api';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvMangaReader } from '@/platforms/smart-tv/pages/TvMangaReader';
 
 export default function ChapterReaderPage() {
   const { chapterId } = useParams<{ chapterId: string }>();
+
   const [currentPage, setCurrentPage] = useState(0);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const coverUrl = useRef('');
@@ -160,6 +163,9 @@ export default function ChapterReaderPage() {
       saveProgress();
     };
   }, [viewer, saveProgress]);
+
+  // TV: fullscreen D-pad reader
+  if (isTV()) return <TvMangaReader />;
 
   if (loading) {
     return (

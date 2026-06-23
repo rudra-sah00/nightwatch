@@ -3,8 +3,8 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { desktopBridge } from '@/lib/electron-bridge';
+import { useDesktopApp } from '@/platforms/desktop/use-desktop-app';
 
 const ROUTE_NAMES: Record<string, string> = {
   '/home': 'Home',

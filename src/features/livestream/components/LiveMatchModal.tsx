@@ -4,8 +4,8 @@ import { Loader2, Play, Users, X } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
-import { useIsMobile } from '@/hooks/use-is-mobile';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import type { LiveMatch } from '../types';
 
 /** Props for the {@link LiveMatchModal} component. */

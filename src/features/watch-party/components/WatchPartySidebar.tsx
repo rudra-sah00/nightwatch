@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import { useDesktopApp } from '@/hooks/use-desktop-app';
 import { cn } from '@/lib/utils';
+import { useDesktopApp } from '@/platforms/desktop/use-desktop-app';
 import {
   WatchPartyChat,
   WatchPartyChatDisabled,

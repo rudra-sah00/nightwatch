@@ -12,6 +12,8 @@ import {
   type PodcastEpisode,
 } from '@/features/music/api';
 import { useMusicStore } from '@/features/music/store/use-music-store';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvMusicDetail } from '@/platforms/smart-tv/pages/TvMusicDetail';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -109,6 +111,33 @@ export default function PodcastPage() {
     },
     [episodes, episodeToTrack, play],
   );
+
+  // TV: show episodes as track list
+  if (isTV() && show) {
+    const tvSongs = episodes.map(
+      (ep) =>
+        ({
+          id: ep.id,
+          title: ep.title,
+          artist: show.title,
+          album: show.title,
+          albumId: id,
+          duration: ep.duration ?? 0,
+          image: ep.image || show.image,
+          language: '',
+          year: 0,
+        }) as unknown as import('@/features/music/types').MusicTrack,
+    );
+    return (
+      <TvMusicDetail
+        title={show.title}
+        image={show.image}
+        subtitle={show.description?.slice(0, 50)}
+        songs={tvSongs}
+        isLoading={loading}
+      />
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-28">

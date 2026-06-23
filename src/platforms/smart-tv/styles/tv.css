@@ -1,0 +1,161 @@
+/* ─── Smart TV Platform Styles ─── */
+/* Applied when html.tv class is set  */
+
+/* Reset: hide scrollbars on TV (no touch scrolling) */
+html.tv ::-webkit-scrollbar {
+  display: none;
+}
+
+html.tv {
+  color-scheme: dark;
+  --tv-focus-color: #6366f1;
+  --tv-focus-glow: rgba(99, 102, 241, 0.4);
+  --tv-spacing: 2rem;
+  --tv-card-radius: 12px;
+  --tv-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --tv-safe-x: 48px;
+  --tv-safe-y: 27px;
+  font-size: 18px;
+  overflow: hidden;
+}
+
+/* ─── Overscan Safe Area ─── */
+html.tv .tv-safe-area {
+  padding: var(--tv-safe-y) var(--tv-safe-x);
+}
+
+/* ─── Focus scale + glow for focusable elements ─── */
+html.tv .tv-focusable {
+  transition:
+    transform var(--tv-transition),
+    box-shadow var(--tv-transition);
+  will-change: transform;
+}
+
+html.tv .tv-focusable--focused {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 0 3px var(--tv-focus-color),
+    0 0 20px var(--tv-focus-glow);
+  z-index: 10;
+  position: relative;
+}
+
+/* ─── Sidebar items: no scale, just highlight bg ─── */
+html.tv .tv-sidebar-item--focused {
+  background-color: var(--tv-focus-color);
+  color: white;
+}
+
+/* ─── Suppress native focus outlines — spatial nav handles it ─── */
+html.tv *:focus {
+  outline: none;
+}
+
+/* Generic interactive elements fallback outline */
+html.tv a,
+html.tv button,
+html.tv input,
+html.tv select,
+html.tv [role="button"] {
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s;
+}
+html.tv a:focus,
+html.tv button:focus,
+html.tv input:focus,
+html.tv select:focus,
+html.tv [role="button"]:focus {
+  outline-color: var(--tv-focus-color);
+}
+
+/* ─── Row title highlight ─── */
+html.tv .tv-row--active .tv-row__title {
+  color: white;
+}
+
+/* ─── Scroll containers ─── */
+html.tv .tv-page-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100vh;
+  scroll-behavior: smooth;
+}
+
+html.tv .tv-row-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+/* ─── Card poster image sizing ─── */
+html.tv .tv-card {
+  width: 220px;
+  height: 130px;
+  border-radius: var(--tv-card-radius);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #1a1a2e;
+}
+
+html.tv .tv-card--large {
+  width: 300px;
+  height: 170px;
+}
+
+/* ─── Player controls bar ─── */
+html.tv .tv-player-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+}
+
+/* ─── Navbar collapse ─── */
+html.tv .tv-navbar {
+  width: 240px;
+  transition: width var(--tv-transition);
+  overflow: hidden;
+}
+
+html.tv .tv-navbar__label {
+  transition: opacity var(--tv-transition);
+}
+
+html.tv .tv-navbar--collapsed {
+  width: 72px;
+}
+
+html.tv .tv-navbar--collapsed .tv-navbar__label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+/* ─── Reduced motion (low-end TV SoCs) ─── */
+@media (prefers-reduced-motion: reduce) {
+  html.tv .tv-focusable--focused {
+    transform: none;
+    box-shadow: 0 0 0 3px var(--tv-focus-color);
+  }
+
+  html.tv .tv-navbar {
+    transition: none;
+  }
+}
+
+/* ─── Emoji float animation ─── */
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-200px) scale(1.5);
+  }
+}

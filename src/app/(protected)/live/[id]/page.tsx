@@ -9,11 +9,14 @@ import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
+import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
 import { fetchIptvResolve } from '@/features/livestream/api';
 import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
 import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
+import { isTV } from '@/platforms/smart-tv/lib/detection';
+import { TvWatch } from '@/platforms/smart-tv/pages/TvWatch';
 
 export default function LiveMatchPlayerPage() {
   const params = useParams();
@@ -36,6 +39,14 @@ export default function LiveMatchPlayerPage() {
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
+
+  // Clip recording for TV
+  const clip = useClipRecorder({
+    matchId,
+    title: titleFromRoute || 'Live Clip',
+    streamToken: null,
+    streamUrl: resolvedUrl || sessionUrl,
+  });
 
   useEffect(() => {
     if (isIptv) return;
@@ -97,6 +108,20 @@ export default function LiveMatchPlayerPage() {
       type: 'livestream',
       posterUrl: iptvPoster || undefined,
     };
+
+    if (isTV()) {
+      return (
+        <TvWatch
+          streamUrl={resolvedUrl}
+          title={titleFromRoute || 'Live TV'}
+          isLive
+          isClipping={clip.isRecording}
+          clipDuration={clip.duration}
+          onClipStart={clip.start}
+          onClipStop={clip.stop}
+        />
+      );
+    }
 
     return (
       <div className="min-h-screen bg-background">
@@ -322,6 +347,20 @@ export default function LiveMatchPlayerPage() {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  if (isTV() && sessionUrl) {
+    return (
+      <TvWatch
+        streamUrl={sessionUrl}
+        title={displayTitle}
+        isLive
+        isClipping={clip.isRecording}
+        clipDuration={clip.duration}
+        onClipStart={clip.start}
+        onClipStop={clip.stop}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
