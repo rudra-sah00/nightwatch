@@ -43,13 +43,15 @@ jobs:
       - name: Create signing certificate
         run: |
           mkdir -p ~/tizen-studio-data/keystore/author
-          tizen certificate -a Nightwatch -p "${{ secrets.TIZEN_CERT_PASSWORD || 'nightwatch123' }}" \
+          tizen certificate -a Nightwatch -p "$TIZEN_CERT_PASSWORD" \
             -c IN -s Odisha -ct Bhubaneswar -o NightWatch \
             -n "Rudra Sahoo" -e rudranarayanaknr@gmail.com -f nightwatch
           tizen security-profiles add -n NightwatchProfile \
             -a ~/tizen-studio-data/keystore/author/nightwatch.p12 \
-            -p "${{ secrets.TIZEN_CERT_PASSWORD || 'nightwatch123' }}"
+            -p "$TIZEN_CERT_PASSWORD"
           tizen cli-config "profiles.path=/home/runner/tizen-studio-data/profile/profiles.xml"
+        env:
+          TIZEN_CERT_PASSWORD: ${{ secrets.TIZEN_CERT_PASSWORD }}
 
       - name: Sync version from package.json
         run: |
