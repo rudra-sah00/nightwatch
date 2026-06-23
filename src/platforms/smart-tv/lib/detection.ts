@@ -8,8 +8,7 @@
 export function isTV(): boolean {
   if (typeof window === 'undefined') return false;
   if (window.__ANDROID_TV__ === true) return true;
-  if (localStorage.getItem('__ANDROID_TV__') === 'true') return true;
-  return isWebOS() || isTizen();
+  return localStorage.getItem('__ANDROID_TV__') === 'true';
 }
 
 /** Detect LG webOS TV via user-agent. */

@@ -39,24 +39,8 @@ export function TvRootLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.classList.add('tv');
     setFocus(FOCUS_KEYS.SIDEBAR);
-
-    // Handle webOS/Tizen back button forwarded from parent iframe shell
-    const onMessage = (e: MessageEvent) => {
-      if (e.data?.type === 'webos:back' || e.data?.type === 'tizen:back') {
-        document.dispatchEvent(
-          new KeyboardEvent('keydown', {
-            key: 'Escape',
-            keyCode: 27,
-            bubbles: true,
-          }),
-        );
-      }
-    };
-    window.addEventListener('message', onMessage);
-
     return () => {
       document.documentElement.classList.remove('tv');
-      window.removeEventListener('message', onMessage);
     };
   }, []);
 
