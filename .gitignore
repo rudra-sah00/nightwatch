@@ -77,3 +77,5 @@ logs/
 out/
 .vercel
 *.ipk
+*.wgt
+.buildResult

@@ -115,6 +115,21 @@ const PLATFORM_BUTTONS = [
       </svg>
     ),
   },
+  {
+    key: 'tizen' as const,
+    label: 'Samsung TV',
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="w-5 h-5 shrink-0"
+        role="img"
+        aria-label="Samsung Tizen TV"
+      >
+        <path d="M21 17H3V5h18m0-2H3a2 2 0 00-2 2v12a2 2 0 002 2h7l-1 2H8v2h8v-2h-1l-1-2h7a2 2 0 002-2V5a2 2 0 00-2-2z" />
+      </svg>
+    ),
+  },
 ];
 
 const BENTO_CONFIG = [
