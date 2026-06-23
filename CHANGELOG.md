@@ -1,5 +1,43 @@
 # Changelog
 
+## [2.16.0](https://github.com/rudra-sah00/nightwatch/compare/v2.15.0...v2.16.0) (2026-06-23)
+
+
+### Features
+
+* add GDPR cookie consent banner ([473792b](https://github.com/rudra-sah00/nightwatch/commit/473792bc7fd283ad39968cbcf4c9bf9db4428c88))
+* add LG TV (webOS) download button to landing page ([76fbcbb](https://github.com/rudra-sah00/nightwatch/commit/76fbcbbe167d7eca7ef2ed87591d2af763e8e026))
+* add Samsung Tizen TV support with packaging workflow ([0ca2fbc](https://github.com/rudra-sah00/nightwatch/commit/0ca2fbc954f76db7302844642ccd4ee78739e3b9))
+* add sign out confirmation dialog with i18n (14 locales) ([72e437a](https://github.com/rudra-sah00/nightwatch/commit/72e437a4e9e193d686abd127810fd2a13edfe3a1))
+* add webOS LG TV support with packaging workflow ([f9321f6](https://github.com/rudra-sah00/nightwatch/commit/f9321f6f8ec55e25a485105a9161fdf29834932f))
+* **explore:** add search spotlight with suggestions overlay ([f3080dc](https://github.com/rudra-sah00/nightwatch/commit/f3080dc64e97e31b7697c9353bca72b3db0a211f))
+* **explore:** Netflix-style hero carousel with trending content ([3b9af57](https://github.com/rudra-sah00/nightwatch/commit/3b9af574e26f004d808e9bdacb780b26928981c3))
+* **explore:** optimize hero carousel — crossfade, GPU perf, smoother gradients ([77c69c3](https://github.com/rudra-sah00/nightwatch/commit/77c69c351e1b9dbbdd9a035e58e286c872916c39))
+* Samsung Tizen TV + landing page downloads ([0ecb3d4](https://github.com/rudra-sah00/nightwatch/commit/0ecb3d44cb151bb9219d3ad60f6f05dbcfe35167))
+* **tv:** activity heatmap, video cast, search theme fixes, D-pad debug guide ([516ae71](https://github.com/rudra-sah00/nightwatch/commit/516ae71d2fda5ceee9ec5c28f07bb859b4be2b94))
+* **tv:** add i18n translations, focus trapping, and memo optimizations ([e38b267](https://github.com/rudra-sah00/nightwatch/commit/e38b2671470f80db0d303be0e6b95296829c198d))
+* **tv:** add neo-brutalist hero section to watchlist page ([d199688](https://github.com/rudra-sah00/nightwatch/commit/d199688fc52ee1dd72233630d44f736c48bd9d92))
+* **tv:** complete Smart TV platform implementation ([056da9d](https://github.com/rudra-sah00/nightwatch/commit/056da9dda6c6560a052e8ddd21e702ef130724ca))
+* **tv:** CSS focus token, next/image, CVA, speed control, accessibility ([c7eae36](https://github.com/rudra-sah00/nightwatch/commit/c7eae363ca823034a9b171edcc705bed1661752e))
+* **tv:** smooth scrolling, rounded sidebar, sync all docs ([6048321](https://github.com/rudra-sah00/nightwatch/commit/60483212c3171e2905659dcac9acb6dce528567a))
+
+
+### Bug Fixes
+
+* clip player skip progress tracking, simplify hover in library ([b45f446](https://github.com/rudra-sah00/nightwatch/commit/b45f446adadaa79ac23375ffd39f7c8dc64c133c))
+* **explore:** fallback to first section for hero when trending field unavailable ([ce357b7](https://github.com/rudra-sah00/nightwatch/commit/ce357b7e4c5007c0c7912b151d75b701e6907613))
+* **explore:** show hero even without banner data, use cover as fallback ([c5a4bed](https://github.com/rudra-sah00/nightwatch/commit/c5a4bed5839579c6248415758994fc574c3f3f41))
+* guard Firebase initializeApp when config is missing ([d4ed19b](https://github.com/rudra-sah00/nightwatch/commit/d4ed19ba71123e50d747991a7dac75fe96a664f3))
+* **oauth:** only redirect to deep link for desktop-initiated flows ([1541064](https://github.com/rudra-sah00/nightwatch/commit/15410646777d9486ae0c9bee137b8861e1cec8c9))
+* **oauth:** redirect Google callback back to desktop app via deep link ([d409570](https://github.com/rudra-sah00/nightwatch/commit/d409570bfa9714015015e7d07ba7ea27e3b948d2))
+* remove unused hasFocusedChild from TvNavbar ([9ba4238](https://github.com/rudra-sah00/nightwatch/commit/9ba423814c67505b0711168f4cb99704218efc60))
+* **search:** add loading skeleton + prevent error flash on navigation ([60e0ba4](https://github.com/rudra-sah00/nightwatch/commit/60e0ba443b88cd912cbe14b874b50d4c6139ef45))
+* **tv:** always show full navbar, fix spatial nav init timing ([2d63410](https://github.com/rudra-sah00/nightwatch/commit/2d63410d080111938a9434b70882db27ae985e99))
+* **tv:** fix D-pad navigation not working ([539ed9f](https://github.com/rudra-sah00/nightwatch/commit/539ed9f292de70ab972e15380c4dafedb11f9f1d))
+* **tv:** profile page scrolls into view on focus navigation ([843a3e5](https://github.com/rudra-sah00/nightwatch/commit/843a3e5474a06d604384a9223259bacd1c90cc39))
+* **tv:** replace hardcoded white colors with theme tokens for light theme ([b27dc9a](https://github.com/rudra-sah00/nightwatch/commit/b27dc9a91c7b3be7e058623d53573eda533776a2))
+* **ui:** hide navbar center page title on desktop screens ([306dfde](https://github.com/rudra-sah00/nightwatch/commit/306dfded37c0a73df5348232d07fd3d877aeb128))
+
 ## [2.15.0](https://github.com/rudra-sah00/nightwatch/compare/v2.14.0...v2.15.0) (2026-06-20)
 
 
