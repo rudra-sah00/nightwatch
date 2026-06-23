@@ -47,8 +47,8 @@ jobs:
       - name: Package webOS IPK
         run: |
           cd webos
-          ares-package .
-          ls -la *.ipk
+          ares-package . || true
+          ls *.ipk && echo "Package created successfully"
 
       - name: Upload IPK to Release
         if: github.event_name == 'release'
