@@ -37,7 +37,7 @@ export function waitForTvFlag(): Promise<boolean> {
         clearInterval(interval);
         resolve(true);
       }
-      if (++tries >= 15) {
+      if (++tries >= 25) {
         clearInterval(interval);
         resolve(false);
       }

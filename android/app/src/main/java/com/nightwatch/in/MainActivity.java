@@ -28,6 +28,11 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
                 && uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
 
         if (isTV) {
+            // Inject TV flag immediately and also after page load to ensure detection
+            getBridge().getWebView().evaluateJavascript(
+                "window.__ANDROID_TV__=true;localStorage.setItem('__ANDROID_TV__','true');",
+                null
+            );
             getBridge().getWebView().post(() -> {
                 WebView wv = getBridge().getWebView();
                 wv.evaluateJavascript(
