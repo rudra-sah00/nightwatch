@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { isTV, waitForTvFlag } from '@/platforms/smart-tv/lib/detection';
+import {
+  isTV,
+  isWebOS,
+  waitForTvFlag,
+} from '@/platforms/smart-tv/lib/detection';
 
 describe('isTV', () => {
   beforeEach(() => {
@@ -19,6 +23,41 @@ describe('isTV', () => {
   it('returns true when localStorage has __ANDROID_TV__=true', () => {
     localStorage.setItem('__ANDROID_TV__', 'true');
     expect(isTV()).toBe(true);
+  });
+
+  it('returns true when on webOS (user-agent detection)', () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value:
+        'Mozilla/5.0 (Web0S; Linux) AppleWebKit/537.36 Chrome/87.0.4280.88 Safari/537.36 WebAppManager',
+      configurable: true,
+    });
+    expect(isTV()).toBe(true);
+  });
+});
+
+describe('isWebOS', () => {
+  it('returns true for webOS user-agent', () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Web0S; Linux) AppleWebKit/537.36',
+      configurable: true,
+    });
+    expect(isWebOS()).toBe(true);
+  });
+
+  it('returns true for lowercase webos user-agent', () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (webOS; Linux) SmartTV',
+      configurable: true,
+    });
+    expect(isWebOS()).toBe(true);
+  });
+
+  it('returns false for non-webOS user-agent', () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (Linux; Android 12) Chrome/100',
+      configurable: true,
+    });
+    expect(isWebOS()).toBe(false);
   });
 });
 

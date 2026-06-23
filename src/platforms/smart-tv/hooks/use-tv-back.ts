@@ -17,7 +17,7 @@ export function useTvBack() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' && e.key !== 'GoBack') return;
+      if (e.key !== 'Escape' && e.key !== 'GoBack' && e.keyCode !== 461) return;
       // If a higher-priority handler already consumed this event, skip
       if (e.defaultPrevented) return;
       e.preventDefault();

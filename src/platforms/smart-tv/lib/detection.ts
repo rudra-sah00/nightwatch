@@ -1,14 +1,21 @@
 /**
  * Smart TV platform detection.
  * The native Android TV MainActivity injects `window.__ANDROID_TV__ = true`.
+ * webOS LG TVs are detected via user-agent string.
  *
  * For browser testing: run `localStorage.setItem('__ANDROID_TV__', 'true')` then reload.
  */
 export function isTV(): boolean {
   if (typeof window === 'undefined') return false;
   if (window.__ANDROID_TV__ === true) return true;
-  // Fallback for browser testing (localStorage persists across reloads)
-  return localStorage.getItem('__ANDROID_TV__') === 'true';
+  if (localStorage.getItem('__ANDROID_TV__') === 'true') return true;
+  return isWebOS();
+}
+
+/** Detect LG webOS TV via user-agent. */
+export function isWebOS(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /web0s|webos/i.test(navigator.userAgent);
 }
 
 /**
