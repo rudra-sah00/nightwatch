@@ -55,7 +55,7 @@ function NavItem({ item, isActive }: { item: NavItem; isActive: boolean }) {
 
 export function TvNavbar() {
   const pathname = usePathname() || '';
-  const { ref, focusKey, hasFocusedChild } = useFocusable({
+  const { ref, focusKey } = useFocusable({
     focusKey: FOCUS_KEYS.SIDEBAR,
     trackChildren: true,
     saveLastFocusedChild: true,
