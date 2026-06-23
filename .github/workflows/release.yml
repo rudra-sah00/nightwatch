@@ -149,15 +149,3 @@ jobs:
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     uses: ./.github/workflows/build-android-tv.yml
     secrets: inherit
-
-  build-webos:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    uses: ./.github/workflows/build-webos.yml
-    secrets: inherit
-
-  build-tizen:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    uses: ./.github/workflows/build-tizen.yml
-    secrets: inherit

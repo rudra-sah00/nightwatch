@@ -17,8 +17,6 @@ type DownloadLinks = {
   linux: string;
   android: string;
   tv: string;
-  webos: string;
-  tizen: string;
 };
 
 /**
@@ -49,8 +47,6 @@ export function useDownloadLinks() {
               n.includes('Android') && !n.includes('TV') && n.endsWith('.apk'),
           ),
           tv: find((n) => n.includes('Android-TV') && n.endsWith('.apk')),
-          webos: find((n) => n.endsWith('.ipk')),
-          tizen: find((n) => n.endsWith('.wgt')),
         });
       })
       .catch(() =>
@@ -60,8 +56,6 @@ export function useDownloadLinks() {
           linux: RELEASES_FALLBACK,
           android: RELEASES_FALLBACK,
           tv: RELEASES_FALLBACK,
-          webos: RELEASES_FALLBACK,
-          tizen: RELEASES_FALLBACK,
         }),
       );
   }, []);
