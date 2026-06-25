@@ -3,6 +3,7 @@
 import {
   Archive,
   ArrowLeft,
+  BellOff,
   Camera,
   ChevronDown,
   Image as ImageIcon,
@@ -51,6 +52,8 @@ interface Conversation {
   peer_photo: string | null;
   archived: boolean;
   locked: boolean;
+  muted: boolean;
+  marked_unread: boolean;
 }
 
 interface Message {
@@ -112,6 +115,7 @@ export function DMView({
   const [lockPromptPeer, setLockPromptPeer] = useState<Conversation | null>(
     null,
   );
+  const [clearConfirmPeer, setClearConfirmPeer] = useState<string | null>(null);
   const [pinInput, setPinInput] = useState('');
   const t = useTranslations('common.dm');
 
@@ -260,13 +264,53 @@ export function DMView({
   }, []);
 
   const handleClear = useCallback((peerId: string) => {
-    apiFetch(`/api/messages/${peerId}/clear`, { method: 'POST' }).catch(
+    setClearConfirmPeer(peerId);
+  }, []);
+
+  const confirmClear = useCallback(() => {
+    if (!clearConfirmPeer) return;
+    apiFetch(`/api/messages/${clearConfirmPeer}/clear`, {
+      method: 'POST',
+    }).catch(() => {});
+    setConversations(
+      (prev) =>
+        prev?.map((c) =>
+          c.peer_id === clearConfirmPeer ? { ...c, content: null } : c,
+        ) ?? null,
+    );
+    setClearConfirmPeer(null);
+  }, [clearConfirmPeer]);
+
+  const handleMute = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/mute`, { method: 'POST' }).catch(
       () => {},
     );
     setConversations(
       (prev) =>
+        prev?.map((c) => (c.peer_id === peerId ? { ...c, muted: true } : c)) ??
+        null,
+    );
+  }, []);
+
+  const handleUnmute = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/mute`, { method: 'DELETE' }).catch(
+      () => {},
+    );
+    setConversations(
+      (prev) =>
+        prev?.map((c) => (c.peer_id === peerId ? { ...c, muted: false } : c)) ??
+        null,
+    );
+  }, []);
+
+  const handleMarkUnread = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/mark-unread`, {
+      method: 'POST',
+    }).catch(() => {});
+    setConversations(
+      (prev) =>
         prev?.map((c) =>
-          c.peer_id === peerId ? { ...c, content: null } : c,
+          c.peer_id === peerId ? { ...c, marked_unread: true } : c,
         ) ?? null,
     );
   }, []);
@@ -1017,6 +1061,33 @@ export function DMView({
         </div>
       )}
 
+      {/* Clear Chat confirmation dialog */}
+      {clearConfirmPeer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-card rounded-2xl p-6 w-72 space-y-4 text-center">
+            <p className="text-sm font-bold">{t('clearConfirmTitle')}</p>
+            <p className="text-xs text-foreground/50">
+              {t('clearConfirmDesc')}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setClearConfirmPeer(null)}
+                className="flex-1 py-2 rounded-lg bg-muted text-sm"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={confirmClear}
+                className="flex-1 py-2 rounded-lg bg-red-500 text-white text-sm"
+              >
+                {t('clearChat')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto">
         {conversations === null ? (
           <div className="space-y-1 p-2">
@@ -1047,11 +1118,15 @@ export function DMView({
                 peerId={conv.peer_id}
                 isArchived={false}
                 isLocked={conv.locked}
+                isMuted={conv.muted}
                 onArchive={() => handleArchive(conv.peer_id)}
                 onUnarchive={() => handleUnarchive(conv.peer_id)}
                 onClear={() => handleClear(conv.peer_id)}
                 onLock={() => handleLock(conv.peer_id)}
                 onUnlock={() => handleUnlock(conv.peer_id)}
+                onMute={() => handleMute(conv.peer_id)}
+                onUnmute={() => handleUnmute(conv.peer_id)}
+                onMarkUnread={() => handleMarkUnread(conv.peer_id)}
               >
                 <button
                   type="button"
@@ -1084,11 +1159,15 @@ export function DMView({
                   {conv.locked && (
                     <Lock className="w-4 h-4 text-foreground/30 shrink-0" />
                   )}
-                  {!conv.read_at &&
-                    conv.sender_id &&
-                    conv.sender_id !== user?.id && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
-                    )}
+                  {conv.muted && (
+                    <BellOff className="w-3.5 h-3.5 text-foreground/30 shrink-0" />
+                  )}
+                  {(conv.marked_unread ||
+                    (!conv.read_at &&
+                      conv.sender_id &&
+                      conv.sender_id !== user?.id)) && (
+                    <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+                  )}
                 </button>
               </DMContextMenu>
             ))}
@@ -1114,11 +1193,15 @@ export function DMView({
                       peerId={conv.peer_id}
                       isArchived
                       isLocked={conv.locked}
+                      isMuted={conv.muted}
                       onArchive={() => handleArchive(conv.peer_id)}
                       onUnarchive={() => handleUnarchive(conv.peer_id)}
                       onClear={() => handleClear(conv.peer_id)}
                       onLock={() => handleLock(conv.peer_id)}
                       onUnlock={() => handleUnlock(conv.peer_id)}
+                      onMute={() => handleMute(conv.peer_id)}
+                      onUnmute={() => handleUnmute(conv.peer_id)}
+                      onMarkUnread={() => handleMarkUnread(conv.peer_id)}
                     >
                       <button
                         type="button"

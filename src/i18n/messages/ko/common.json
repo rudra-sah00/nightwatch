@@ -522,6 +522,11 @@
     "unlock": "잠금 해제",
     "archived": "보관됨",
     "enterPin": "PIN을 입력하여 잠금 해제",
-    "cancel": "취소"
+    "cancel": "취소",
+    "mute": "알림 끄기",
+    "unmute": "알림 켜기",
+    "markUnread": "읽지 않음으로 표시",
+    "clearConfirmTitle": "채팅을 지우시겠습니까?",
+    "clearConfirmDesc": "모든 메시지가 숨겨집니다. 새 메시지는 계속 표시됩니다."
   }
 }

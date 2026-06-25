@@ -522,6 +522,11 @@
     "unlock": "Déverrouiller",
     "archived": "Archivés",
     "enterPin": "Entrez le PIN pour déverrouiller",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "mute": "Muet",
+    "unmute": "Activer",
+    "markUnread": "Marquer comme non lu",
+    "clearConfirmTitle": "Effacer ce chat ?",
+    "clearConfirmDesc": "Tous les messages seront masqués. Les nouveaux messages apparaîtront toujours."
   }
 }

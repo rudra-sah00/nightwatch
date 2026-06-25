@@ -522,6 +522,11 @@
     "unlock": "Entsperren",
     "archived": "Archiviert",
     "enterPin": "PIN eingeben zum Entsperren",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "mute": "Stumm",
+    "unmute": "Laut",
+    "markUnread": "Als ungelesen markieren",
+    "clearConfirmTitle": "Chat löschen?",
+    "clearConfirmDesc": "Alle Nachrichten werden ausgeblendet. Neue Nachrichten erscheinen weiterhin."
   }
 }

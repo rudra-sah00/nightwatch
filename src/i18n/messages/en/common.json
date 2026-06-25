@@ -522,6 +522,11 @@
     "unlock": "Unlock",
     "archived": "Archived",
     "enterPin": "Enter PIN to unlock",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "markUnread": "Mark as Unread",
+    "clearConfirmTitle": "Clear this chat?",
+    "clearConfirmDesc": "All messages will be hidden. New messages will still appear."
   }
 }

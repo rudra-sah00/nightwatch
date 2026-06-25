@@ -9,10 +9,27 @@ The Explore module is Nightwatch's social feed — a Twitter/X-style timeline wh
 - **Feed ranking:** Redis sorted sets (cron-recomputed every 5 min)
 - **Fan-out:** Redis sorted sets per user (`explore:timeline:{userId}`)
 - **View counts:** Redis HyperLogLog (`explore:views:{postId}`)
-- **DM storage:** PostgreSQL (`messages` table via Drizzle ORM)
+- **DM storage:** PostgreSQL (`messages` table + `dm_settings` table via Drizzle ORM)
 - **Real-time:** Socket.IO (typing, delivery receipts, thread updates)
 - **Media:** Cloudinary (images, videos, voice notes)
 - **AI:** AWS Bedrock Nova + Tavily web search
+
+### DM Features
+
+- **Messaging:** Send, receive, reply, forward, delete-for-everyone, pin messages
+- **Voice notes:** Record and send with waveform visualization
+- **GIFs:** Giphy integration with inline picker
+- **Attachments:** Images, videos, documents with preview
+- **Search:** Full-text search within conversations
+- **Friends list:** All accepted friends shown (even with 0 messages)
+- **Archive:** Hide conversations from main list, collapsible archived section
+- **Clear Chat:** Hide messages before a timestamp (with confirmation dialog)
+- **Lock:** PIN-protected conversations (4-digit, client-side localStorage)
+- **Mute:** Per-conversation notification suppression
+- **Mark as Unread:** Manually flag conversations as unread
+- **Context Menu:** Right-click (desktop) / long-press (mobile) with haptic feedback
+- **Offline queue:** Messages queued and sent when connection restores
+- **Read receipts:** Double-tick delivery + read indicators
 
 ---
 
@@ -69,8 +86,8 @@ The Explore module is Nightwatch's social feed — a Twitter/X-style timeline wh
 | File | Purpose |
 |------|---------|
 | `messages.routes.ts` | Express routes (all authenticated) |
-| `messages.controller.ts` | Conversations, send, read, search, pin, delete |
-| `messages.service.ts` | PostgreSQL queries via Drizzle, friendship enforcement |
+| `messages.controller.ts` | Conversations, send, read, search, pin, delete, archive, clear, lock, mute, mark-unread |
+| `messages.service.ts` | PostgreSQL queries via Drizzle, friendship enforcement, dm_settings management |
 
 ### WebSocket Handlers
 
@@ -112,16 +129,24 @@ The Explore module is Nightwatch's social feed — a Twitter/X-style timeline wh
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/messages/conversations` | List conversations |
-| GET | `/api/messages/:peerId` | Get messages (paginated) |
-| POST | `/api/messages/send` | Send message |
-| POST | `/api/messages/:peerId/read` | Mark as read |
-| GET | `/api/messages/unread-count` | Unread count |
+| GET | `/api/messages` | List conversations (`?includeArchived=true`) |
+| GET | `/api/messages/:peerId` | Get messages (paginated, respects `cleared_at`) |
+| POST | `/api/messages` | Send message |
+| POST | `/api/messages/:peerId/read` | Mark as read (also clears `marked_unread`) |
+| GET | `/api/messages/unread` | Unread count |
 | DELETE | `/api/messages/:messageId` | Delete message |
 | GET | `/api/messages/:peerId/search` | Search messages (ILIKE) |
 | POST | `/api/messages/:messageId/pin` | Pin message |
 | DELETE | `/api/messages/:messageId/pin` | Unpin message |
 | GET | `/api/messages/:peerId/pinned` | Get pinned messages |
+| POST | `/api/messages/:peerId/archive` | Archive conversation |
+| DELETE | `/api/messages/:peerId/archive` | Unarchive conversation |
+| POST | `/api/messages/:peerId/clear` | Clear chat (set `cleared_at`) |
+| POST | `/api/messages/:peerId/lock` | Lock conversation |
+| DELETE | `/api/messages/:peerId/lock` | Unlock conversation |
+| POST | `/api/messages/:peerId/mute` | Mute notifications |
+| DELETE | `/api/messages/:peerId/mute` | Unmute notifications |
+| POST | `/api/messages/:peerId/mark-unread` | Mark as unread |
 
 ---
 
@@ -254,3 +279,17 @@ The `notification_preferences` table controls per-user notification delivery:
 | `explore_reactions` | boolean | false |
 | `friend_requests` | boolean | true |
 | `updated_at` | timestamptz | now() |
+
+### `dm_settings` table
+
+Per-user per-peer conversation settings. Composite PK: `(user_id, peer_id)`.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `user_id` | UUID | FK → users | The settings owner |
+| `peer_id` | UUID | FK → users | The conversation peer |
+| `archived` | boolean | false | Hide from main list |
+| `locked` | boolean | false | Require PIN to open |
+| `muted` | boolean | false | Suppress push notifications |
+| `marked_unread` | boolean | false | Show unread indicator manually |
+| `cleared_at` | timestamptz | null | Hide messages before this time |

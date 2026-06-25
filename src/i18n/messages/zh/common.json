@@ -522,6 +522,11 @@
     "unlock": "解锁",
     "archived": "已归档",
     "enterPin": "输入PIN解锁",
-    "cancel": "取消"
+    "cancel": "取消",
+    "mute": "静音",
+    "unmute": "取消静音",
+    "markUnread": "标记为未读",
+    "clearConfirmTitle": "清除此聊天？",
+    "clearConfirmDesc": "所有消息将被隐藏。新消息仍会显示。"
   }
 }

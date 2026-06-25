@@ -522,6 +522,11 @@
     "unlock": "Kilidi aç",
     "archived": "Arşivlenenler",
     "enterPin": "Kilidi açmak için PIN girin",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "mute": "Sessize al",
+    "unmute": "Sesi aç",
+    "markUnread": "Okunmadı olarak işaretle",
+    "clearConfirmTitle": "Bu sohbeti temizle?",
+    "clearConfirmDesc": "Tüm mesajlar gizlenecek. Yeni mesajlar görünmeye devam edecek."
   }
 }

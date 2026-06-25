@@ -522,6 +522,11 @@
     "unlock": "Desbloquear",
     "archived": "Arquivados",
     "enterPin": "Digite o PIN para desbloquear",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "mute": "Silenciar",
+    "unmute": "Ativar som",
+    "markUnread": "Marcar como não lida",
+    "clearConfirmTitle": "Limpar este chat?",
+    "clearConfirmDesc": "Todas as mensagens serão ocultadas. Novas mensagens continuarão aparecendo."
   }
 }

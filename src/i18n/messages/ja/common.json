@@ -522,6 +522,11 @@
     "unlock": "ロック解除",
     "archived": "アーカイブ済み",
     "enterPin": "PINを入力して解除",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "markUnread": "未読にする",
+    "clearConfirmTitle": "チャットを消去しますか？",
+    "clearConfirmDesc": "すべてのメッセージが非表示になります。新しいメッセージは引き続き表示されます。"
   }
 }
