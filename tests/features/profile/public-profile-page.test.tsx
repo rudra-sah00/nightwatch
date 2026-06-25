@@ -17,6 +17,9 @@ vi.mock('@/features/profile/components/activity-graph', () => ({
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(),
+  useRouter: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/user/testuser',
 }));
 
 // Mock the API service so we don't need to mock global fetch
