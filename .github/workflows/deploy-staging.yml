@@ -41,6 +41,7 @@ jobs:
             NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.STAGING_TURNSTILE_SITE_KEY }}
             NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+            NEXT_PUBLIC_GIPHY_API_KEY=${{ secrets.NEXT_PUBLIC_GIPHY_API_KEY }}
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@v3
