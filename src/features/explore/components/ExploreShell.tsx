@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { PageTitle } from '@/components/layout/page-title';
 import { DMView } from './DMView';
 import { ExploreBottomBar } from './ExploreBottomBar';
 import { ExploreFeed } from './ExploreFeed';
@@ -112,6 +113,12 @@ export function ExploreShell() {
 
   return (
     <div className="flex flex-col h-full relative">
+      {!chatOpen && (
+        <PageTitle
+          title={activeIndex === 0 ? 'Explore' : 'Messages'}
+          href={activeIndex === 0 ? '/explore' : '/dm'}
+        />
+      )}
       <div
         ref={containerRef}
         className="flex-1 overflow-hidden relative"
