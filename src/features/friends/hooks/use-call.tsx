@@ -326,6 +326,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     if (!socket || !peer) return;
     trackEvent('call_decline', { peerId: peer.id });
     socket.emit('call:reject', { callerId: peer.id });
+    socket.emit('call:save-history', {
+      peerId: peer.id,
+      type: 'declined',
+    });
     cleanup();
   }, [socket, peer, cleanup]);
 
@@ -333,8 +337,13 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     if (!socket || !peer) return;
     trackEvent('call_end', { peerId: peer.id });
     socket.emit('call:end', { peerId: peer.id });
+    socket.emit('call:save-history', {
+      peerId: peer.id,
+      type: 'ended',
+      duration: callDuration,
+    });
     cleanup();
-  }, [socket, peer, cleanup]);
+  }, [socket, peer, callDuration, cleanup]);
 
   // ── Native call UI event listeners ────────────────────────────────
   const acceptCallRef = useRef(acceptCall);

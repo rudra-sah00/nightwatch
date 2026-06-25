@@ -560,7 +560,7 @@ export function DMView({
         {dmPinned.pinned.length > 0 && (
           <div className="px-4 py-2 border-b border-border/50 bg-amber-500/5">
             <p className="text-[10px] font-bold text-amber-600 mb-1">
-              📌 Pinned ({dmPinned.pinned.length})
+              Pinned ({dmPinned.pinned.length})
             </p>
             <div className="space-y-1 max-h-24 overflow-y-auto">
               {dmPinned.pinned.map((m) => (
@@ -655,7 +655,7 @@ export function DMView({
                   {/* Forwarded label */}
                   {msg.forwardedFromId && (
                     <p className="text-[9px] text-foreground/40 italic mb-0.5 px-1">
-                      ↗ Forwarded
+                      Forwarded
                     </p>
                   )}
                   {/* Reply quote bubble */}
@@ -669,7 +669,18 @@ export function DMView({
                   {/* Deleted for everyone */}
                   {msg.deletedForAll ? (
                     <div className="inline-block px-3.5 py-2 rounded-2xl text-sm bg-muted/30 text-foreground/40 italic border border-border/50">
-                      🚫 Message deleted
+                      Message deleted
+                    </div>
+                  ) : msg.content.startsWith('[call] ') ? (
+                    <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl text-sm bg-muted/20 border border-border/50 text-foreground/60">
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>
+                        {msg.content.includes('missed')
+                          ? 'Missed call'
+                          : msg.content.includes('declined')
+                            ? 'Call declined'
+                            : `Call · ${formatCallDuration(msg.content)}`}
+                      </span>
                     </div>
                   ) : msg.content.startsWith('[document] ') ? (
                     <FilePreview
@@ -1363,4 +1374,13 @@ export function DMView({
       </div>
     </div>
   );
+}
+
+function formatCallDuration(content: string): string {
+  const match = content.match(/duration:(\d+)/);
+  if (!match) return 'Ended';
+  const secs = Number(match[1]);
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
