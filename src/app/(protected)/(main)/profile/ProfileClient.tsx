@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Monitor, Palette, Shield } from 'lucide-react';
+import { ChevronRight, FileText, Monitor, Palette, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { PageTitle } from '@/components/layout/page-title';
@@ -11,6 +11,7 @@ import { useProfileOverview } from '@/features/profile/hooks/use-profile-overvie
 import { isTV } from '@/platforms/smart-tv/lib/detection';
 
 const allSections = [
+  { href: '/profile/posts', icon: FileText, key: 'posts' },
   { href: '/profile/preferences', icon: Palette, key: 'preferences' },
   { href: '/profile/security', icon: Shield, key: 'security' },
   { href: '/profile/devices', icon: Monitor, key: 'devices' },

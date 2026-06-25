@@ -160,7 +160,7 @@ export function ExploreFeed({
         )}
 
         {!isLoading && posts.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-foreground/40">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-foreground/40">
             <Compass className="w-12 h-12 mb-3" />
             <p className="font-headline font-bold">No posts yet</p>
             <p className="text-sm mt-1">Be the first to share something!</p>

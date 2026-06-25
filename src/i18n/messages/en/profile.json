@@ -169,7 +169,8 @@
     "preferences": "Preferences",
     "security": "Security",
     "devices": "Devices",
-    "activity": "Activity"
+    "activity": "Activity",
+    "posts": "My Posts"
   },
   "devices": {
     "title": "Active Devices",
