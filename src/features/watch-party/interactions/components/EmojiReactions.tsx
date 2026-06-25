@@ -1,6 +1,6 @@
 'use client';
+import type { Theme } from 'emoji-picker-react';
 
-import { Theme } from 'emoji-picker-react';
 import { Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
@@ -92,7 +92,7 @@ export function EmojiReactions({
           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-[100] shadow-2xl rounded-xl overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
-            theme={resolvedDark ? Theme.DARK : Theme.LIGHT}
+            theme={(resolvedDark ? 'dark' : 'light') as Theme}
             onEmojiClick={(emojiData) => handleTriggerEmoji(emojiData.emoji)}
             lazyLoadEmojis={true}
             height={320}

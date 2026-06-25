@@ -1,6 +1,6 @@
 'use client';
+import type { Theme } from 'emoji-picker-react';
 
-import { Theme } from 'emoji-picker-react';
 import { ArrowLeft, MessageCircle, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -431,7 +431,7 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
       {emojiOpen && (
         <div className="px-3 pb-1 rounded-xl overflow-hidden">
           <EmojiPicker
-            theme={isDark ? Theme.DARK : Theme.LIGHT}
+            theme={(isDark ? 'dark' : 'light') as Theme}
             onEmojiClick={(d) => {
               setReplyText((prev) => prev + d.emoji);
               setEmojiOpen(false);

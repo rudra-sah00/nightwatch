@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations('common.errors');
 
   const { connect, disconnect } = useSocket();
+  const queryClient = useQueryClient();
   const forceLogoutHandlerRef = useRef<
     ((payload: ForceLogoutPayload) => void) | null
   >(null);
@@ -137,6 +139,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           useAuthStore.getState().updateUser(profileData);
           setIsLoading(false);
 
+          // Prefetch commonly needed data in background
+          queryClient.prefetchQuery({
+            queryKey: ['watchlist'],
+            queryFn: () =>
+              import('@/features/watchlist/api').then((m) => m.getWatchlist()),
+            staleTime: 5 * 60 * 1000,
+          });
+          queryClient.prefetchQuery({
+            queryKey: ['friends'],
+            queryFn: () =>
+              import('@/features/friends/api').then((m) => m.getFriends()),
+            staleTime: 5 * 60 * 1000,
+          });
+
           // Only arm the proactive refresh timer if it hasn't been set yet
           // (i.e., this is a page reload — the verifyOtp flow already arms it
           // on fresh logins via setTokenExpiration). Setting it unconditionally
@@ -173,7 +189,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       controller.abort();
       window.removeEventListener('auth:expired', handleAuthExpired);
     };
-  }, [userId, handleAuthExpired, disconnect, setUser, setIsLoading, t]);
+  }, [
+    userId,
+    handleAuthExpired,
+    disconnect,
+    setUser,
+    setIsLoading,
+    t,
+    queryClient,
+  ]);
 
   return <>{children}</>;
 }

@@ -3,9 +3,59 @@
 import { Archive, BellOff, ChevronDown, Lock } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { DMContextMenu } from './DMContextMenu';
 import type { Conversation } from './DMView';
+
+const ConversationRow = memo(function ConversationRow({
+  conv,
+  userId,
+  onClick,
+  tapToStart,
+}: {
+  conv: Conversation;
+  userId: string | undefined;
+  onClick: () => void;
+  tapToStart: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors text-left"
+    >
+      <div className="w-11 h-11 rounded-full overflow-hidden bg-muted border-2 border-border shrink-0">
+        {conv.peer_photo ? (
+          <Image
+            src={conv.peer_photo}
+            alt=""
+            width={44}
+            height={44}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center font-bold text-sm">
+            {conv.peer_name[0]}
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold truncate">{conv.peer_name}</p>
+        <p className="text-xs text-foreground/50 truncate">
+          {conv.content ?? tapToStart}
+        </p>
+      </div>
+      {conv.locked && <Lock className="w-4 h-4 text-foreground/30 shrink-0" />}
+      {conv.muted && (
+        <BellOff className="w-3.5 h-3.5 text-foreground/30 shrink-0" />
+      )}
+      {(conv.marked_unread ||
+        (!conv.read_at && conv.sender_id && conv.sender_id !== userId)) && (
+        <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+      )}
+    </button>
+  );
+});
 
 interface DMConversationListProps {
   conversations: Conversation[] | null;
@@ -92,45 +142,12 @@ export function DMConversationList({
           onUnmute={() => onUnmute(conv.peer_id)}
           onMarkUnread={() => onMarkUnread(conv.peer_id)}
         >
-          <button
-            type="button"
+          <ConversationRow
+            conv={conv}
+            userId={userId}
             onClick={() => onOpenChat(conv)}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors text-left"
-          >
-            <div className="w-11 h-11 rounded-full overflow-hidden bg-muted border-2 border-border shrink-0">
-              {conv.peer_photo ? (
-                <Image
-                  src={conv.peer_photo}
-                  alt=""
-                  width={44}
-                  height={44}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center font-bold text-sm">
-                  {conv.peer_name[0]}
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold truncate">{conv.peer_name}</p>
-              <p className="text-xs text-foreground/50 truncate">
-                {conv.content ?? t('tapToStart')}
-              </p>
-            </div>
-            {conv.locked && (
-              <Lock className="w-4 h-4 text-foreground/30 shrink-0" />
-            )}
-            {conv.muted && (
-              <BellOff className="w-3.5 h-3.5 text-foreground/30 shrink-0" />
-            )}
-            {(conv.marked_unread ||
-              (!conv.read_at &&
-                conv.sender_id &&
-                conv.sender_id !== userId)) && (
-              <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
-            )}
-          </button>
+            tapToStart={t('tapToStart')}
+          />
         </DMContextMenu>
       ))}
 
@@ -164,38 +181,14 @@ export function DMConversationList({
                 onUnmute={() => onUnmute(conv.peer_id)}
                 onMarkUnread={() => onMarkUnread(conv.peer_id)}
               >
-                <button
-                  type="button"
-                  onClick={() => onOpenChat(conv)}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors text-left opacity-70"
-                >
-                  <div className="w-11 h-11 rounded-full overflow-hidden bg-muted border-2 border-border shrink-0">
-                    {conv.peer_photo ? (
-                      <Image
-                        src={conv.peer_photo}
-                        alt=""
-                        width={44}
-                        height={44}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center font-bold text-sm">
-                        {conv.peer_name[0]}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate">
-                      {conv.peer_name}
-                    </p>
-                    <p className="text-xs text-foreground/50 truncate">
-                      {conv.content ?? t('tapToStart')}
-                    </p>
-                  </div>
-                  {conv.locked && (
-                    <Lock className="w-4 h-4 text-foreground/30 shrink-0" />
-                  )}
-                </button>
+                <div className="opacity-70">
+                  <ConversationRow
+                    conv={conv}
+                    userId={userId}
+                    onClick={() => onOpenChat(conv)}
+                    tapToStart={t('tapToStart')}
+                  />
+                </div>
               </DMContextMenu>
             ))}
         </>

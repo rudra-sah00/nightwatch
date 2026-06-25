@@ -1,6 +1,6 @@
 'use client';
+import type { Theme } from 'emoji-picker-react';
 
-import { Theme } from 'emoji-picker-react';
 import { ImagePlus, SmilePlus, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -493,7 +493,7 @@ export function CreatePostDialog({
           {emojiOpen && (
             <div className="rounded-xl overflow-hidden shadow-2xl">
               <EmojiPicker
-                theme={isDark ? Theme.DARK : Theme.LIGHT}
+                theme={(isDark ? 'dark' : 'light') as Theme}
                 onEmojiClick={(d) => {
                   store.setContent(store.content + d.emoji);
                   setEmojiOpen(false);

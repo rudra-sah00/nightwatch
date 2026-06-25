@@ -1,4 +1,4 @@
-import { EmojiStyle, Theme } from 'emoji-picker-react';
+import type { EmojiStyle, Theme } from 'emoji-picker-react';
 import dynamic from 'next/dynamic';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
@@ -405,14 +405,14 @@ export function WatchPartySketch() {
               <EmojiPicker
                 onEmojiClick={handleEmojiClick}
                 theme={
-                  appTheme === 'dark' ||
+                  (appTheme === 'dark' ||
                   (appTheme === 'system' &&
                     typeof window !== 'undefined' &&
                     window.matchMedia('(prefers-color-scheme: dark)').matches)
-                    ? Theme.DARK
-                    : Theme.LIGHT
+                    ? 'dark'
+                    : 'light') as Theme
                 }
-                emojiStyle={EmojiStyle.NATIVE}
+                emojiStyle={'native' as EmojiStyle}
                 lazyLoadEmojis={true}
                 searchPlaceHolder={t('sketch.searchStickers')}
                 width={320}

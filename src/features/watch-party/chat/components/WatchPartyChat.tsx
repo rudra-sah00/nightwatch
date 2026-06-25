@@ -1,4 +1,4 @@
-import { EmojiStyle, Theme } from 'emoji-picker-react';
+import type { EmojiStyle, Theme } from 'emoji-picker-react';
 import { ExternalLink, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -241,8 +241,8 @@ export const WatchPartyChat = memo(function WatchPartyChat({
           className="absolute bottom-20 left-4 z-50 border-[4px] border-border bg-background  rounded-none overflow-hidden motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none"
         >
           <EmojiPicker
-            theme={resolvedDark ? Theme.DARK : Theme.LIGHT}
-            emojiStyle={EmojiStyle.APPLE}
+            theme={(resolvedDark ? 'dark' : 'light') as Theme}
+            emojiStyle={'apple' as EmojiStyle}
             lazyLoadEmojis={true}
             height={350}
             width={300}

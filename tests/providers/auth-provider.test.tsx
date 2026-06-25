@@ -6,6 +6,10 @@ import { useAuthStore } from '@/store/use-auth-store';
 const mockConnect = vi.fn();
 const mockDisconnect = vi.fn();
 
+vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ prefetchQuery: vi.fn() }),
+}));
+
 vi.mock('@/providers/socket-provider', () => ({
   useSocket: vi.fn(() => ({
     socket: { connected: true, on: vi.fn(), off: vi.fn(), emit: vi.fn() },
