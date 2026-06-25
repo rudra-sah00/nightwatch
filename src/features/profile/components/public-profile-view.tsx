@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ArrowLeft,
   Calendar,
   Home,
   ShieldBan,
@@ -147,17 +148,28 @@ export function PublicProfileView({
         <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] border-[80px] border-border rotate-45" />
       </div>
 
-      <div className="container max-w-5xl mx-auto px-4 py-20 relative z-10">
+      <div className="container max-w-5xl mx-auto px-4 py-6 relative z-10">
         {/* Header Navigation */}
-        <div className="mb-12 flex justify-between items-center">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="group flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground border-[3px] border-border transition-colors duration-200 uppercase font-headline font-bold text-sm tracking-tight hover:bg-primary/90"
-          >
-            <Home className="w-4 h-4" />
-            <span>{t('publicProfile.returnBase')}</span>
-          </button>
+        <div className="mb-8 flex justify-between items-center">
+          {currentUser ? (
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-foreground/40 hover:text-foreground font-headline font-bold uppercase tracking-widest text-xs transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="group flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground border-[3px] border-border transition-colors duration-200 uppercase font-headline font-bold text-sm tracking-tight hover:bg-primary/90"
+            >
+              <Home className="w-4 h-4" />
+              <span>{t('publicProfile.returnBase')}</span>
+            </button>
+          )}
           <div className="hidden md:block bg-neo-yellow border-[3px] border-border px-5 py-2  font-headline font-black uppercase text-sm tracking-widest">
             {t('publicProfile.identityVerified')}
           </div>
