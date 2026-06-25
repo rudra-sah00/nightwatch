@@ -470,7 +470,8 @@ export function DMView({
   if (activePeer) {
     return (
       <div
-        className={`absolute inset-0 z-30 flex flex-col bg-card transition-transform duration-250 ease-out ${chatVisible ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`absolute inset-0 z-30 flex flex-col bg-card transition-transform duration-250 ease-out max-h-[100dvh] ${chatVisible ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ paddingBottom: 'var(--keyboard-height, 0px)' }}
       >
         <PageTitle title={activePeer.peer_name} href="/dm" />
         {/* Header */}
