@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import { DMView } from './DMView';
@@ -24,7 +24,6 @@ export function ExploreShell() {
   }>({ startX: 0, startY: 0, locked: null });
   const containerRef = useRef<HTMLDivElement>(null);
   const closeChatRef = useRef<(() => void) | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -35,14 +34,11 @@ export function ExploreShell() {
     if (target !== activeIndex) setActiveIndex(target);
   }, [pathname, activeIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const navigateTo = useCallback(
-    (index: number) => {
-      setActiveIndex(index);
-      setTranslateX(0);
-      router.push(index === 0 ? '/explore' : '/dm', { scroll: false });
-    },
-    [router],
-  );
+  const navigateTo = useCallback((index: number) => {
+    setActiveIndex(index);
+    setTranslateX(0);
+    window.history.replaceState(null, '', index === 0 ? '/explore' : '/dm');
+  }, []);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     touchRef.current = {
