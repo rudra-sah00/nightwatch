@@ -508,5 +508,18 @@
       "roomCode": "رمز الغرفة",
       "joinRequest": "طلب الانضمام"
     }
+  },
+  "dm": {
+    "noMessages": "لا رسائل بعد",
+    "startConversation": "ابدأ محادثة مع صديق",
+    "tapToStart": "اضغط لبدء المحادثة",
+    "archive": "أرشفة",
+    "unarchive": "إلغاء الأرشفة",
+    "clearChat": "مسح المحادثة",
+    "lock": "قفل",
+    "unlock": "فتح",
+    "archived": "المؤرشفة",
+    "enterPin": "أدخل الرمز للفتح",
+    "cancel": "إلغاء"
   }
 }

@@ -508,5 +508,18 @@
       "roomCode": "방 코드",
       "joinRequest": "참가 요청"
     }
+  },
+  "dm": {
+    "noMessages": "메시지가 없습니다",
+    "startConversation": "친구와 대화를 시작하세요",
+    "tapToStart": "탭하여 채팅 시작",
+    "archive": "보관",
+    "unarchive": "보관 해제",
+    "clearChat": "채팅 지우기",
+    "lock": "잠금",
+    "unlock": "잠금 해제",
+    "archived": "보관됨",
+    "enterPin": "PIN을 입력하여 잠금 해제",
+    "cancel": "취소"
   }
 }

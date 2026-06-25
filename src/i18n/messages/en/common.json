@@ -508,5 +508,18 @@
       "roomCode": "Room Code",
       "joinRequest": "Join Request"
     }
+  },
+  "dm": {
+    "noMessages": "No messages yet",
+    "startConversation": "Start a conversation with a friend",
+    "tapToStart": "Tap to start chatting",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "clearChat": "Clear Chat",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "archived": "Archived",
+    "enterPin": "Enter PIN to unlock",
+    "cancel": "Cancel"
   }
 }

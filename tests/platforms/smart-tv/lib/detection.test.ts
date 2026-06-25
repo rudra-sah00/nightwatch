@@ -47,7 +47,7 @@ describe('waitForTvFlag', () => {
 
   it('resolves false after timeout when flag never appears', async () => {
     const promise = waitForTvFlag();
-    await vi.advanceTimersByTimeAsync(400);
+    await vi.advanceTimersByTimeAsync(600);
     await expect(promise).resolves.toBe(false);
   });
 });

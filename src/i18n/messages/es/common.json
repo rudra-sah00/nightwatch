@@ -508,5 +508,18 @@
       "roomCode": "Código de sala",
       "joinRequest": "Solicitud de unión"
     }
+  },
+  "dm": {
+    "noMessages": "Sin mensajes aún",
+    "startConversation": "Inicia una conversación con un amigo",
+    "tapToStart": "Toca para empezar a chatear",
+    "archive": "Archivar",
+    "unarchive": "Desarchivar",
+    "clearChat": "Borrar chat",
+    "lock": "Bloquear",
+    "unlock": "Desbloquear",
+    "archived": "Archivados",
+    "enterPin": "Ingresa PIN para desbloquear",
+    "cancel": "Cancelar"
   }
 }

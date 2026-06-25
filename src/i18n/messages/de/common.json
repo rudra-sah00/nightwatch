@@ -508,5 +508,18 @@
       "roomCode": "Raumcode",
       "joinRequest": "Beitrittsanfrage"
     }
+  },
+  "dm": {
+    "noMessages": "Noch keine Nachrichten",
+    "startConversation": "Starte eine Unterhaltung mit einem Freund",
+    "tapToStart": "Tippen zum Chatten",
+    "archive": "Archivieren",
+    "unarchive": "Dearchivieren",
+    "clearChat": "Chat löschen",
+    "lock": "Sperren",
+    "unlock": "Entsperren",
+    "archived": "Archiviert",
+    "enterPin": "PIN eingeben zum Entsperren",
+    "cancel": "Abbrechen"
   }
 }

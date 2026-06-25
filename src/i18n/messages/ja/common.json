@@ -508,5 +508,18 @@
       "roomCode": "ルームコード",
       "joinRequest": "参加リクエスト"
     }
+  },
+  "dm": {
+    "noMessages": "メッセージはまだありません",
+    "startConversation": "友達と会話を始めましょう",
+    "tapToStart": "タップしてチャット開始",
+    "archive": "アーカイブ",
+    "unarchive": "アーカイブ解除",
+    "clearChat": "チャットを消去",
+    "lock": "ロック",
+    "unlock": "ロック解除",
+    "archived": "アーカイブ済み",
+    "enterPin": "PINを入力して解除",
+    "cancel": "キャンセル"
   }
 }

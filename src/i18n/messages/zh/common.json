@@ -508,5 +508,18 @@
       "roomCode": "房间代码",
       "joinRequest": "加入请求"
     }
+  },
+  "dm": {
+    "noMessages": "暂无消息",
+    "startConversation": "与朋友开始对话",
+    "tapToStart": "点击开始聊天",
+    "archive": "归档",
+    "unarchive": "取消归档",
+    "clearChat": "清除聊天",
+    "lock": "锁定",
+    "unlock": "解锁",
+    "archived": "已归档",
+    "enterPin": "输入PIN解锁",
+    "cancel": "取消"
   }
 }

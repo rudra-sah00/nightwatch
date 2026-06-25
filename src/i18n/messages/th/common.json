@@ -508,5 +508,18 @@
       "roomCode": "รหัสห้อง",
       "joinRequest": "คำขอเข้าร่วม"
     }
+  },
+  "dm": {
+    "noMessages": "ยังไม่มีข้อความ",
+    "startConversation": "เริ่มการสนทนากับเพื่อน",
+    "tapToStart": "แตะเพื่อเริ่มแชท",
+    "archive": "เก็บถาวร",
+    "unarchive": "ยกเลิกเก็บถาวร",
+    "clearChat": "ล้างแชท",
+    "lock": "ล็อค",
+    "unlock": "ปลดล็อค",
+    "archived": "ที่เก็บถาวร",
+    "enterPin": "ใส่ PIN เพื่อปลดล็อค",
+    "cancel": "ยกเลิก"
   }
 }

@@ -508,5 +508,18 @@
       "roomCode": "Codice stanza",
       "joinRequest": "Richiesta di accesso"
     }
+  },
+  "dm": {
+    "noMessages": "Nessun messaggio",
+    "startConversation": "Inizia una conversazione con un amico",
+    "tapToStart": "Tocca per iniziare",
+    "archive": "Archivia",
+    "unarchive": "Disarchivia",
+    "clearChat": "Cancella chat",
+    "lock": "Blocca",
+    "unlock": "Sblocca",
+    "archived": "Archiviati",
+    "enterPin": "Inserisci PIN per sbloccare",
+    "cancel": "Annulla"
   }
 }

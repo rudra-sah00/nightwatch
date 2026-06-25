@@ -508,5 +508,18 @@
       "roomCode": "Oda Kodu",
       "joinRequest": "Katılma İsteği"
     }
+  },
+  "dm": {
+    "noMessages": "Henüz mesaj yok",
+    "startConversation": "Bir arkadaşınızla sohbet başlatın",
+    "tapToStart": "Sohbet başlatmak için dokunun",
+    "archive": "Arşivle",
+    "unarchive": "Arşivden çıkar",
+    "clearChat": "Sohbeti temizle",
+    "lock": "Kilitle",
+    "unlock": "Kilidi aç",
+    "archived": "Arşivlenenler",
+    "enterPin": "Kilidi açmak için PIN girin",
+    "cancel": "İptal"
   }
 }

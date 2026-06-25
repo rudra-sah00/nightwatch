@@ -1,9 +1,12 @@
 'use client';
 
 import {
+  Archive,
   ArrowLeft,
   Camera,
+  ChevronDown,
   Image as ImageIcon,
+  Lock,
   Mic,
   Pin,
   Play,
@@ -14,7 +17,8 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import {
   useDmGif,
@@ -30,20 +34,23 @@ import { apiFetch } from '@/lib/fetch';
 import { hapticLight } from '@/lib/haptics';
 import { useSocket } from '@/providers/socket-provider';
 import { useAuthStore } from '@/store/use-auth-store';
+import { DMContextMenu } from './DMContextMenu';
 import { FilePreview } from './FilePreview';
 import { LinkPreviewCard } from './LinkPreviewCard';
 import { Waveform } from './Waveform';
 
 interface Conversation {
   id: string;
-  content: string;
-  created_at: string;
+  content: string | null;
+  created_at: string | null;
   read_at: string | null;
-  sender_id: string;
+  sender_id: string | null;
   peer_id: string;
   peer_name: string;
   peer_username: string | null;
   peer_photo: string | null;
+  archived: boolean;
+  locked: boolean;
 }
 
 interface Message {
@@ -101,6 +108,12 @@ export function DMView({
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [pinnedOpen, setPinnedOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [lockPromptPeer, setLockPromptPeer] = useState<Conversation | null>(
+    null,
+  );
+  const [pinInput, setPinInput] = useState('');
+  const t = useTranslations('common.dm');
 
   const dmSearch = useDmSearch(activePeer?.peer_id || null);
   const dmPinned = useDmPinned(activePeer?.peer_id || null);
@@ -123,7 +136,9 @@ export function DMView({
   }, [activePeer, onChatOpen]);
 
   useEffect(() => {
-    apiFetch<{ conversations: Conversation[] }>('/api/messages')
+    apiFetch<{ conversations: Conversation[] }>(
+      '/api/messages?includeArchived=true',
+    )
       .then((r) => setConversations(r.conversations))
       .catch(() => setConversations([]));
   }, []);
@@ -211,9 +226,103 @@ export function DMView({
       scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [msgs.length]);
 
+  const activeConversations = useMemo(
+    () => conversations?.filter((c) => !c.archived) ?? [],
+    [conversations],
+  );
+  const archivedConversations = useMemo(
+    () => conversations?.filter((c) => c.archived) ?? [],
+    [conversations],
+  );
+
+  const handleArchive = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/archive`, { method: 'POST' }).catch(
+      () => {},
+    );
+    setConversations(
+      (prev) =>
+        prev?.map((c) =>
+          c.peer_id === peerId ? { ...c, archived: true } : c,
+        ) ?? null,
+    );
+  }, []);
+
+  const handleUnarchive = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/archive`, { method: 'DELETE' }).catch(
+      () => {},
+    );
+    setConversations(
+      (prev) =>
+        prev?.map((c) =>
+          c.peer_id === peerId ? { ...c, archived: false } : c,
+        ) ?? null,
+    );
+  }, []);
+
+  const handleClear = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/clear`, { method: 'POST' }).catch(
+      () => {},
+    );
+    setConversations(
+      (prev) =>
+        prev?.map((c) =>
+          c.peer_id === peerId ? { ...c, content: null } : c,
+        ) ?? null,
+    );
+  }, []);
+
+  const handleLock = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/lock`, { method: 'POST' }).catch(
+      () => {},
+    );
+    setConversations(
+      (prev) =>
+        prev?.map((c) => (c.peer_id === peerId ? { ...c, locked: true } : c)) ??
+        null,
+    );
+  }, []);
+
+  const handleUnlock = useCallback((peerId: string) => {
+    apiFetch(`/api/messages/${peerId}/lock`, { method: 'DELETE' }).catch(
+      () => {},
+    );
+    setConversations(
+      (prev) =>
+        prev?.map((c) =>
+          c.peer_id === peerId ? { ...c, locked: false } : c,
+        ) ?? null,
+    );
+  }, []);
+
   const openChat = (conv: Conversation) => {
+    if (conv.locked) {
+      setLockPromptPeer(conv);
+      setPinInput('');
+      return;
+    }
     setActivePeer(conv);
     requestAnimationFrame(() => setChatVisible(true));
+  };
+
+  const handlePinSubmit = () => {
+    const stored = localStorage.getItem(`dm_pin_${lockPromptPeer?.peer_id}`);
+    if (!stored) {
+      // First time setting PIN — save it
+      localStorage.setItem(`dm_pin_${lockPromptPeer?.peer_id}`, pinInput);
+      setActivePeer(lockPromptPeer);
+      setLockPromptPeer(null);
+      setPinInput('');
+      requestAnimationFrame(() => setChatVisible(true));
+      return;
+    }
+    if (pinInput === stored) {
+      setActivePeer(lockPromptPeer);
+      setLockPromptPeer(null);
+      setPinInput('');
+      requestAnimationFrame(() => setChatVisible(true));
+    } else {
+      setPinInput('');
+    }
   };
 
   const closeChat = () => {
@@ -869,6 +978,45 @@ export function DMView({
     <div className="flex flex-col h-full">
       <PageTitle title="Messages" href="/dm" />
 
+      {/* Lock PIN overlay */}
+      {lockPromptPeer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-card rounded-2xl p-6 w-72 space-y-4 text-center">
+            <Lock className="w-8 h-8 mx-auto text-foreground/60" />
+            <p className="text-sm font-bold">{t('enterPin')}</p>
+            <input
+              type="password"
+              maxLength={4}
+              value={pinInput}
+              onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && pinInput.length === 4)
+                  handlePinSubmit();
+              }}
+              className="w-full text-center text-2xl tracking-[0.5em] bg-muted/30 rounded-lg py-2 outline-none"
+              placeholder="••••"
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setLockPromptPeer(null)}
+                className="flex-1 py-2 rounded-lg bg-muted text-sm"
+              >
+                {t('cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handlePinSubmit}
+                disabled={pinInput.length !== 4}
+                className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm disabled:opacity-40"
+              >
+                {t('unlock')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto">
         {conversations === null ? (
           <div className="space-y-1 p-2">
@@ -885,46 +1033,129 @@ export function DMView({
               </div>
             ))}
           </div>
-        ) : conversations.length === 0 ? (
+        ) : activeConversations.length === 0 &&
+          archivedConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-foreground/40">
-            <p className="font-headline font-bold">No messages yet</p>
-            <p className="text-sm mt-1">Start a conversation with a friend</p>
+            <p className="font-headline font-bold">{t('noMessages')}</p>
+            <p className="text-sm mt-1">{t('startConversation')}</p>
           </div>
         ) : (
           <div className="p-2 space-y-0.5">
-            {conversations.map((conv) => (
-              <button
+            {activeConversations.map((conv) => (
+              <DMContextMenu
                 key={conv.peer_id}
-                type="button"
-                onClick={() => openChat(conv)}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors text-left"
+                peerId={conv.peer_id}
+                isArchived={false}
+                isLocked={conv.locked}
+                onArchive={() => handleArchive(conv.peer_id)}
+                onUnarchive={() => handleUnarchive(conv.peer_id)}
+                onClear={() => handleClear(conv.peer_id)}
+                onLock={() => handleLock(conv.peer_id)}
+                onUnlock={() => handleUnlock(conv.peer_id)}
               >
-                <div className="w-11 h-11 rounded-full overflow-hidden bg-muted border-2 border-border shrink-0">
-                  {conv.peer_photo ? (
-                    <Image
-                      src={conv.peer_photo}
-                      alt=""
-                      width={44}
-                      height={44}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center font-bold text-sm">
-                      {conv.peer_name[0]}
-                    </div>
+                <button
+                  type="button"
+                  onClick={() => openChat(conv)}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors text-left"
+                >
+                  <div className="w-11 h-11 rounded-full overflow-hidden bg-muted border-2 border-border shrink-0">
+                    {conv.peer_photo ? (
+                      <Image
+                        src={conv.peer_photo}
+                        alt=""
+                        width={44}
+                        height={44}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-bold text-sm">
+                        {conv.peer_name[0]}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">
+                      {conv.peer_name}
+                    </p>
+                    <p className="text-xs text-foreground/50 truncate">
+                      {conv.content ?? t('tapToStart')}
+                    </p>
+                  </div>
+                  {conv.locked && (
+                    <Lock className="w-4 h-4 text-foreground/30 shrink-0" />
                   )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate">{conv.peer_name}</p>
-                  <p className="text-xs text-foreground/50 truncate">
-                    {conv.content}
-                  </p>
-                </div>
-                {!conv.read_at && conv.sender_id !== user?.id && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
-                )}
-              </button>
+                  {!conv.read_at &&
+                    conv.sender_id &&
+                    conv.sender_id !== user?.id && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+                    )}
+                </button>
+              </DMContextMenu>
             ))}
+
+            {/* Archived section */}
+            {archivedConversations.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowArchived(!showArchived)}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 mt-2 text-xs text-foreground/50 hover:bg-muted/30 rounded-lg transition-colors"
+                >
+                  <Archive className="w-3.5 h-3.5" />
+                  {t('archived')} ({archivedConversations.length})
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 ml-auto transition-transform ${showArchived ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {showArchived &&
+                  archivedConversations.map((conv) => (
+                    <DMContextMenu
+                      key={conv.peer_id}
+                      peerId={conv.peer_id}
+                      isArchived
+                      isLocked={conv.locked}
+                      onArchive={() => handleArchive(conv.peer_id)}
+                      onUnarchive={() => handleUnarchive(conv.peer_id)}
+                      onClear={() => handleClear(conv.peer_id)}
+                      onLock={() => handleLock(conv.peer_id)}
+                      onUnlock={() => handleUnlock(conv.peer_id)}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => openChat(conv)}
+                        className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors text-left opacity-70"
+                      >
+                        <div className="w-11 h-11 rounded-full overflow-hidden bg-muted border-2 border-border shrink-0">
+                          {conv.peer_photo ? (
+                            <Image
+                              src={conv.peer_photo}
+                              alt=""
+                              width={44}
+                              height={44}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center font-bold text-sm">
+                              {conv.peer_name[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold truncate">
+                            {conv.peer_name}
+                          </p>
+                          <p className="text-xs text-foreground/50 truncate">
+                            {conv.content ?? t('tapToStart')}
+                          </p>
+                        </div>
+                        {conv.locked && (
+                          <Lock className="w-4 h-4 text-foreground/30 shrink-0" />
+                        )}
+                      </button>
+                    </DMContextMenu>
+                  ))}
+              </>
+            )}
           </div>
         )}
       </div>
