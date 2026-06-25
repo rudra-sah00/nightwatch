@@ -1029,7 +1029,10 @@ export function DMView({
 
         {/* Attachment panel (WhatsApp-style popup from bottom) */}
         {attachPanel && (
-          <div className="px-4 py-3 bg-card border-t border-border/50">
+          <div
+            className="flex items-center justify-center bg-card border-t border-border/50 min-h-[200px]"
+            style={{ height: 'var(--keyboard-height, 260px)' }}
+          >
             <div className="grid grid-cols-4 gap-4 max-w-xs mx-auto">
               <button
                 type="button"
