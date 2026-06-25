@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import PublicProfilePage from '@/app/(public)/user/[id]/page';
+import PublicProfilePage from '@/app/(protected)/(main)/user/[id]/page';
 
 // Mock specific lucide-react icons used in the page
 vi.mock('lucide-react', () => ({
@@ -44,6 +44,14 @@ vi.mock('@/features/friends/api', () => ({
 
 vi.mock('@/providers/socket-provider', () => ({
   useSocket: () => ({ socket: null }),
+}));
+
+vi.mock('@/components/layout/page-title', () => ({
+  PageTitle: () => null,
+}));
+
+vi.mock('@/hooks/use-page-title', () => ({
+  usePageTitle: () => ({ title: '', href: '', setTitle: vi.fn() }),
 }));
 
 describe('PublicProfilePage (Server Component)', () => {
