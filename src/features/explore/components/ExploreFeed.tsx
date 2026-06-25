@@ -22,6 +22,7 @@ export function ExploreFeed({
     isLoading,
     hasMore,
     loadMore,
+    refresh,
     prependPost,
     removePost,
     updatePost,
@@ -86,6 +87,9 @@ export function ExploreFeed({
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
+  const [pullY, setPullY] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const pullStartRef = useRef<{ y: number; scrollTop: number } | null>(null);
 
   useEffect(() => {
     if (observerRef.current) observerRef.current.disconnect();
@@ -107,7 +111,46 @@ export function ExploreFeed({
   return (
     <div className="flex flex-col h-full relative">
       {/* Feed */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto" data-explore-feed>
+      <div
+        ref={feedRef}
+        className="flex-1 overflow-y-auto"
+        data-explore-feed
+        onTouchStart={(e) => {
+          pullStartRef.current = {
+            y: e.touches[0].clientY,
+            scrollTop: e.currentTarget.scrollTop,
+          };
+        }}
+        onTouchMove={(e) => {
+          if (!pullStartRef.current || refreshing) return;
+          if (pullStartRef.current.scrollTop > 0) return;
+          const dy = e.touches[0].clientY - pullStartRef.current.y;
+          if (dy > 10) {
+            setPullY(Math.min((dy - 10) * 0.4, 60));
+          }
+        }}
+        onTouchEnd={async () => {
+          if (pullY > 50 && !refreshing) {
+            setRefreshing(true);
+            await refresh();
+            setRefreshing(false);
+          }
+          setPullY(0);
+          pullStartRef.current = null;
+        }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {(pullY > 0 || refreshing) && (
+          <div
+            className="flex justify-center py-2 transition-all"
+            style={{ height: refreshing ? 40 : pullY }}
+          >
+            <div
+              className={`w-5 h-5 border-2 border-primary border-t-transparent rounded-full ${refreshing ? 'animate-spin' : ''}`}
+              style={{ opacity: Math.min(pullY / 50, 1) }}
+            />
+          </div>
+        )}
         {posts.map((post) => (
           <PostCardErrorBoundary key={post.id} postId={post.id}>
             <PostCard

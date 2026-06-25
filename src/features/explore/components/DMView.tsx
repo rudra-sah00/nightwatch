@@ -114,6 +114,9 @@ export function DMView({
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [attachPanel, setAttachPanel] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [peerTyping, setPeerTyping] = useState(false);
+  const [reactionMsgId, setReactionMsgId] = useState<string | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [lockPromptPeer, setLockPromptPeer] = useState<Conversation | null>(
     null,
@@ -228,6 +231,21 @@ export function DMView({
       socket.off('dm:message-deleted', deleteHandler);
     };
   }, [socket, activePeer]);
+
+  // Typing indicator
+  useEffect(() => {
+    if (!socket) return;
+    const onTyping = (data: { senderId: string }) => {
+      if (data.senderId === activePeer?.peer_id) {
+        setPeerTyping(true);
+        setTimeout(() => setPeerTyping(false), 3000);
+      }
+    };
+    socket.on('dm:typing', onTyping);
+    return () => {
+      socket.off('dm:typing', onTyping);
+    };
+  }, [socket, activePeer?.peer_id]);
 
   useEffect(() => {
     if (msgs.length)
@@ -380,6 +398,9 @@ export function DMView({
 
   const handleInputChange = (text: string) => {
     setInput(text);
+    if (text && activePeer && socket) {
+      socket.emit('dm:typing', { peerId: activePeer.peer_id });
+    }
     const slashMatch = text.match(/^\/(\w+)\s*(.*)/);
     const validCmds: string[] = SLASH_COMMANDS.map((c) => c.command);
     if (slashMatch && validCmds.includes(`/${slashMatch[1]}`)) {
@@ -602,8 +623,22 @@ export function DMView({
                   (e.currentTarget as HTMLElement).dataset.swipeX = String(
                     touch.clientX,
                   );
+                  longPressTimer.current = setTimeout(() => {
+                    setReactionMsgId(msg.id);
+                    hapticLight();
+                  }, 500);
+                }}
+                onTouchMove={() => {
+                  if (longPressTimer.current) {
+                    clearTimeout(longPressTimer.current);
+                    longPressTimer.current = null;
+                  }
                 }}
                 onTouchEnd={(e) => {
+                  if (longPressTimer.current) {
+                    clearTimeout(longPressTimer.current);
+                    longPressTimer.current = null;
+                  }
                   const startX = Number(
                     (e.currentTarget as HTMLElement).dataset.swipeX || 0,
                   );
@@ -712,7 +747,41 @@ export function DMView({
               </div>
             ))
           )}
+          {peerTyping && (
+            <div className="flex justify-start">
+              <div className="px-3.5 py-2 rounded-2xl bg-muted rounded-bl-md text-sm text-foreground/50 italic">
+                typing...
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Reaction picker */}
+        {reactionMsgId && (
+          <div className="px-4 py-2 border-t border-border/50 bg-card flex items-center gap-2">
+            {['❤️', '👍', '😂', '😮', '😢', '🔥'].map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => {
+                  socket?.emit('dm:react', { messageId: reactionMsgId, emoji });
+                  setReactionMsgId(null);
+                  hapticLight();
+                }}
+                className="text-xl p-1.5 hover:scale-125 active:scale-90 transition-transform"
+              >
+                {emoji}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setReactionMsgId(null)}
+              className="ml-auto p-1 text-foreground/40"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Image lightbox */}
         {lightboxUrl && (

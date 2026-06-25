@@ -108,11 +108,26 @@ export function useExploreFeed() {
     [],
   );
 
+  // Refresh feed (pull-to-refresh)
+  const refresh = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { posts: fresh, lastDoc } = await fetchPublicPosts(20);
+      setPosts(fresh);
+      lastDocRef.current = lastDoc;
+      setHasMore(fresh.length === 20);
+    } catch {
+      /* non-fatal */
+    }
+    setIsLoading(false);
+  }, []);
+
   return {
     posts,
     isLoading,
     hasMore,
     loadMore,
+    refresh,
     prependPost,
     removePost,
     updatePost,
