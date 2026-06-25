@@ -65,6 +65,11 @@ function ReplyItem({
             )}
           </div>
           <span className="text-xs font-bold">{reply.authorName}</span>
+          {reply.authorId === 'nightwatch-ai' && (
+            <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+              AI
+            </span>
+          )}
           <span className="text-[10px] text-foreground/40">
             · {getTimeAgo(new Date(reply.createdAt))}
           </span>
@@ -362,7 +367,14 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
                     )}
                   </div>
                   <div>
-                    <p className="font-bold text-sm">{root.authorName}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-bold text-sm">{root.authorName}</p>
+                      {root.authorId === 'nightwatch-ai' && (
+                        <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                          AI
+                        </span>
+                      )}
+                    </div>
                     {root.authorUsername && (
                       <p className="text-[10px] text-foreground/50">
                         @{root.authorUsername}

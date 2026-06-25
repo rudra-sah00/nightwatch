@@ -103,6 +103,8 @@
     "hrsTotal": "总小时数",
     "coreVersion": "核心版本: V1.0-稳定版",
     "userIdentity": "用户身份: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "删除好友",
     "blockUser": "屏蔽",
     "friendRemoved": "已删除好友",

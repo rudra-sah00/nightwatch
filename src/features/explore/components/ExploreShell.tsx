@@ -135,7 +135,7 @@ export function ExploreShell() {
 
         {/* DM panel */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 overflow-hidden"
           style={{
             transform: `translateX(${activeIndex === 1 ? swipePercent : 100 + swipePercent}%)`,
             transition: isSwiping

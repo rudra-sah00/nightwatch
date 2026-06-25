@@ -105,6 +105,8 @@
     "userIdentity": "उपयोगकर्ता पहचान: {id}",
     "removeFriend": "मित्र हटाएं",
     "blockUser": "ब्लॉक करें",
+    "addFriend": "फ्रेंड रिक्वेस्ट भेजें",
+    "requestSent": "फ्रेंड रिक्वेस्ट भेजी गई",
     "friendRemoved": "मित्र हटाया गया",
     "userBlocked": "उपयोगकर्ता अवरुद्ध"
   },

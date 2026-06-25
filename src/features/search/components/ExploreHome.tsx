@@ -101,7 +101,7 @@ export function ExploreHome() {
     setEnabled(localStorage.getItem('nightwatch:exploreOnHome') === 'true');
   }, []);
 
-  const { data } = useQuery<ExploreData | null>({
+  const { data, isLoading } = useQuery<ExploreData | null>({
     queryKey: ['explore', 'home'],
     queryFn: getExploreHome,
     enabled,
@@ -118,7 +118,36 @@ export function ExploreHome() {
     [data],
   );
 
-  if (!enabled || !data) return null;
+  if (!enabled) return null;
+
+  if (isLoading || !data) {
+    return (
+      <div className="w-full">
+        {/* Hero skeleton */}
+        <div className="w-full aspect-[16/7] sm:aspect-[21/9] max-h-[400px] bg-secondary animate-pulse rounded-lg" />
+        {/* Rows skeleton */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+          {[0, 1, 2].map((row) => (
+            <section key={row}>
+              <div className="h-6 w-40 bg-secondary animate-pulse rounded mb-4" />
+              <div className="flex gap-3 overflow-hidden">
+                {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((k) => (
+                  <div
+                    key={`${row}${k}`}
+                    className="shrink-0 w-[120px] sm:w-[140px]"
+                  >
+                    <div className="aspect-[2/3] bg-secondary animate-pulse rounded-lg" />
+                    <div className="h-3 w-4/5 bg-secondary animate-pulse rounded mt-2" />
+                    <div className="h-2.5 w-1/2 bg-secondary animate-pulse rounded mt-1" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -8,6 +8,7 @@ vi.mock('lucide-react', () => ({
   Calendar: () => <div data-testid="calendar-icon" />,
   Home: () => <div data-testid="home-icon" />,
   UserMinus: () => <div data-testid="user-minus-icon" />,
+  UserPlus: () => <div data-testid="user-plus-icon" />,
   ShieldBan: () => <div data-testid="shield-ban-icon" />,
 }));
 
@@ -37,6 +38,12 @@ vi.mock('@/store/use-auth-store', () => ({
 vi.mock('@/features/friends/api', () => ({
   removeFriend: vi.fn(),
   blockUser: vi.fn(),
+  getFriends: vi.fn().mockResolvedValue([]),
+  sendFriendRequest: vi.fn(),
+}));
+
+vi.mock('@/providers/socket-provider', () => ({
+  useSocket: () => ({ socket: null }),
 }));
 
 describe('PublicProfilePage (Server Component)', () => {

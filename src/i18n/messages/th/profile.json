@@ -103,6 +103,8 @@
     "hrsTotal": "ชั่วโมงรวม",
     "coreVersion": "เวอร์ชันหลัก: V1.0-เสถียร",
     "userIdentity": "ตัวตนผู้ใช้: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "ลบเพื่อน",
     "blockUser": "บล็อค",
     "friendRemoved": "ลบเพื่อนแล้ว",

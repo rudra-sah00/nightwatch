@@ -103,6 +103,8 @@
     "hrsTotal": "ЧАСОВ ВСЕГО",
     "coreVersion": "ВЕРСИЯ ЯДРА: V1.0-СТАБИЛЬНАЯ",
     "userIdentity": "ИДЕНТИФИКАТОР ПОЛЬЗОВАТЕЛЯ: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "Удалить друга",
     "blockUser": "Заблокировать",
     "friendRemoved": "Друг удалён",

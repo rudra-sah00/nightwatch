@@ -103,6 +103,8 @@
     "hrsTotal": "HRS TOTAIS",
     "coreVersion": "VERSÃO CORE: V1.0-ESTÁVEL",
     "userIdentity": "IDENTIDADE DO USUÁRIO: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "Remover amigo",
     "blockUser": "Bloquear",
     "friendRemoved": "Amigo removido",

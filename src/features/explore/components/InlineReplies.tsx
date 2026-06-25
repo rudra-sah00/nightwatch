@@ -63,6 +63,11 @@ export function InlineReplies({ postId, replyCount }: InlineRepliesProps) {
               </div>
               <div className="min-w-0">
                 <span className="text-xs font-bold">{reply.authorName}</span>
+                {reply.authorId === 'nightwatch-ai' && (
+                  <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded ml-1">
+                    AI
+                  </span>
+                )}
                 <p className="text-xs text-foreground/80 break-words">
                   {reply.content}
                 </p>

@@ -7,10 +7,12 @@ import {
   Camera,
   ChevronDown,
   Image as ImageIcon,
+  Keyboard,
   Lock,
   Mic,
   Pin,
   Play,
+  Plus,
   Search,
   Send,
   X,
@@ -109,6 +111,7 @@ export function DMView({
   } = useDmMedia();
 
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [attachPanel, setAttachPanel] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [pinnedOpen, setPinnedOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
@@ -879,52 +882,33 @@ export function DMView({
 
         {/* Input */}
         <div className="px-3 py-2 flex items-end gap-2">
-          <div className="flex items-center gap-1">
-            <input
-              ref={videoInputRef}
-              type="file"
-              accept="video/*"
-              capture="environment"
-              className="hidden"
-              onChange={handleMediaSelect}
-            />
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx"
-              className="hidden"
-              onChange={handleMediaSelect}
-            />
-            <button
-              type="button"
-              onClick={() => videoInputRef.current?.click()}
-              className="p-2 rounded-full text-foreground/40 hover:text-foreground/70 hover:bg-muted/50 transition-colors active:scale-90"
-            >
-              <Camera className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => imageInputRef.current?.click()}
-              className="p-2 rounded-full text-foreground/40 hover:text-foreground/70 hover:bg-muted/50 transition-colors active:scale-90"
-            >
-              <ImageIcon className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={isRecording ? stopRecording : startRecording}
-              className={`p-2 rounded-full transition-colors active:scale-90 ${isRecording ? 'text-red-500 bg-red-500/10 animate-pulse' : 'text-foreground/40 hover:text-foreground/70 hover:bg-muted/50'}`}
-            >
-              <Mic className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={dmGif.toggle}
-              className={`p-2 rounded-full transition-colors active:scale-90 ${dmGif.open ? 'text-primary bg-primary/10' : 'text-foreground/40 hover:text-foreground/70 hover:bg-muted/50'}`}
-            >
-              <span className="text-xs font-bold">GIF</span>
-            </button>
-          </div>
-          <div className="flex-1 flex items-center bg-muted/30 rounded-3xl px-4 h-9">
+          <input
+            ref={videoInputRef}
+            type="file"
+            accept="video/*"
+            capture="environment"
+            className="hidden"
+            onChange={handleMediaSelect}
+          />
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.ppt,.pptx"
+            className="hidden"
+            onChange={handleMediaSelect}
+          />
+          <button
+            type="button"
+            onClick={() => setAttachPanel(!attachPanel)}
+            className={`p-2 rounded-full shrink-0 transition-colors active:scale-90 ${attachPanel ? 'bg-primary text-primary-foreground' : 'text-foreground/40 hover:text-foreground/70 hover:bg-muted/50'}`}
+          >
+            {attachPanel ? (
+              <Keyboard className="w-5 h-5" />
+            ) : (
+              <Plus className="w-5 h-5" />
+            )}
+          </button>
+          <div className="flex-1 flex items-center bg-muted/30 rounded-3xl px-4 h-10">
             {isRecording ? (
               <>
                 <span className="text-xs text-red-500 font-mono mr-2">
@@ -938,8 +922,9 @@ export function DMView({
                 type="text"
                 value={input}
                 onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="Message... (try /music)"
+                placeholder="Message..."
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-foreground/30"
+                onFocus={() => setAttachPanel(false)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') sendMessage();
                 }}
@@ -950,11 +935,71 @@ export function DMView({
             type="button"
             onClick={sendMessage}
             disabled={!input.trim() && !attachedTag && !attachment}
-            className="p-2.5 rounded-full bg-primary text-primary-foreground disabled:opacity-30 active:scale-90 transition-transform"
+            className="p-2.5 rounded-full bg-primary text-primary-foreground disabled:opacity-30 shrink-0 active:scale-90 transition-transform"
           >
             <Send className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Attachment panel (WhatsApp-style popup from bottom) */}
+        {attachPanel && (
+          <div className="px-4 py-3 bg-card border-t border-border/50">
+            <div className="grid grid-cols-4 gap-4 max-w-xs mx-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  videoInputRef.current?.click();
+                  setAttachPanel(false);
+                }}
+                className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform"
+              >
+                <div className="w-12 h-12 rounded-full bg-neo-blue/10 border border-neo-blue/20 flex items-center justify-center">
+                  <Camera className="w-5 h-5 text-neo-blue" />
+                </div>
+                <span className="text-[10px] text-foreground/60">Camera</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  imageInputRef.current?.click();
+                  setAttachPanel(false);
+                }}
+                className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform"
+              >
+                <div className="w-12 h-12 rounded-full bg-neo-green/10 border border-neo-green/20 flex items-center justify-center">
+                  <ImageIcon className="w-5 h-5 text-neo-green" />
+                </div>
+                <span className="text-[10px] text-foreground/60">Photo</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  isRecording ? stopRecording() : startRecording();
+                  setAttachPanel(false);
+                }}
+                className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform"
+              >
+                <div className="w-12 h-12 rounded-full bg-neo-red/10 border border-neo-red/20 flex items-center justify-center">
+                  <Mic className="w-5 h-5 text-neo-red" />
+                </div>
+                <span className="text-[10px] text-foreground/60">Audio</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  dmGif.toggle();
+                  setAttachPanel(false);
+                }}
+                className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform"
+              >
+                <div className="w-12 h-12 rounded-full bg-neo-yellow/10 border border-neo-yellow/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-neo-yellow">GIF</span>
+                </div>
+                <span className="text-[10px] text-foreground/60">GIF</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* GIF picker */}
         {dmGif.open && (
@@ -1088,7 +1133,7 @@ export function DMView({
           </div>
         </div>
       )}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto [touch-action:pan-y]">
         {conversations === null ? (
           <div className="space-y-1 p-2">
             {['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7'].map((key) => (

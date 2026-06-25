@@ -103,6 +103,8 @@
     "hrsTotal": "ساعات الإجمالي",
     "coreVersion": "الإصدار الأساسي: V1.0-مستقر",
     "userIdentity": "هوية المستخدم: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "إزالة صديق",
     "blockUser": "حظر",
     "friendRemoved": "تمت إزالة الصديق",

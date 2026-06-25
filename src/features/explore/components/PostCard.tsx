@@ -50,7 +50,7 @@ export const PostCard = memo(function PostCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const isOwn = user?.id === post.authorId;
-  const cardRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLButtonElement>(null);
   const viewedRef = useRef(false);
 
   // Track view when post enters viewport
@@ -81,9 +81,16 @@ export const PostCard = memo(function PostCard({
   const timeAgo = post.createdAt ? getTimeAgo(new Date(post.createdAt)) : '';
 
   return (
-    <article
+    <button
       ref={cardRef}
-      className="border-b border-border px-4 py-4 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+      type="button"
+      data-post-card
+      className="w-full text-left border-b border-border px-4 py-4 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02] cursor-pointer"
+      onClick={(e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('a, button:not([data-post-card])')) return;
+        onOpen?.(post.id);
+      }}
     >
       {/* Repost header */}
       {post.repostOf && (
@@ -228,18 +235,14 @@ export const PostCard = memo(function PostCard({
             </div>
           ) : (
             post.content && (
-              <button
-                type="button"
-                onClick={() => onOpen?.(post.id)}
-                className="mt-1 text-sm leading-relaxed whitespace-pre-wrap break-words text-left w-full"
-              >
+              <p className="mt-1 text-sm leading-relaxed whitespace-pre-wrap break-words text-left w-full">
                 {post.content}
                 {post.editHistory?.length ? (
                   <span className="text-[10px] text-foreground/40 ml-1">
                     (edited)
                   </span>
                 ) : null}
-              </button>
+              </p>
             )
           )}
 
@@ -332,7 +335,7 @@ export const PostCard = memo(function PostCard({
           </div>
         </div>
       </div>
-    </article>
+    </button>
   );
 });
 

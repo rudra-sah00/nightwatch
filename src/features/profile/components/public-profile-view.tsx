@@ -1,10 +1,23 @@
 'use client';
 
-import { Calendar, Home, ShieldBan, User, UserMinus } from 'lucide-react';
+import {
+  Calendar,
+  Home,
+  ShieldBan,
+  User,
+  UserMinus,
+  UserPlus,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
-import { useCallback, useMemo, useState } from 'react';
-import { blockUser, removeFriend } from '@/features/friends/api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  blockUser,
+  getFriends,
+  removeFriend,
+  sendFriendRequest,
+} from '@/features/friends/api';
+import { useSocket } from '@/providers/socket-provider';
 import { useAuthStore } from '@/store/use-auth-store';
 import type { ActivityData } from '../types';
 import { ActivityGraph } from './activity-graph';
@@ -84,18 +97,47 @@ export function PublicProfileView({
   const currentUser = useAuthStore((s) => s.user);
   const isOwnProfile = currentUser?.id === profile.id;
   const [friendAction, setFriendAction] = useState<
-    'none' | 'removed' | 'blocked'
+    'none' | 'removed' | 'blocked' | 'requested'
   >('none');
+  const [isFriend, setIsFriend] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!currentUser || isOwnProfile) return;
+    getFriends()
+      .then((friends) => setIsFriend(friends.some((f) => f.id === profile.id)))
+      .catch(() => setIsFriend(false));
+  }, [currentUser, isOwnProfile, profile.id]);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket || isOwnProfile) return;
+    const onAccepted = () => {
+      setIsFriend(true);
+      setFriendAction('none');
+    };
+    socket.on('friend:request_accepted', onAccepted);
+    return () => {
+      socket.off('friend:request_accepted', onAccepted);
+    };
+  }, [socket, isOwnProfile]);
 
   const handleRemove = useCallback(async () => {
     await removeFriend(profile.id);
     setFriendAction('removed');
+    setIsFriend(false);
   }, [profile.id]);
 
   const handleBlock = useCallback(async () => {
     await blockUser(profile.id);
     setFriendAction('blocked');
   }, [profile.id]);
+
+  const handleSendRequest = useCallback(async () => {
+    if (!profile.username) return;
+    await sendFriendRequest(profile.username);
+    setFriendAction('requested');
+  }, [profile.username]);
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto bg-background text-foreground selection:bg-neo-yellow selection:text-foreground">
@@ -163,14 +205,25 @@ export function PublicProfileView({
 
               {!isOwnProfile && friendAction === 'none' && (
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleRemove}
-                    className="flex items-center gap-2 px-4 py-2 border-[3px] border-border bg-muted hover:bg-muted/70 text-sm font-headline font-bold uppercase tracking-widest transition-colors"
-                  >
-                    <UserMinus className="w-4 h-4" />
-                    {t('publicProfile.removeFriend')}
-                  </button>
+                  {isFriend ? (
+                    <button
+                      type="button"
+                      onClick={handleRemove}
+                      className="flex items-center gap-2 px-4 py-2 border-[3px] border-border bg-muted hover:bg-muted/70 text-sm font-headline font-bold uppercase tracking-widest transition-colors"
+                    >
+                      <UserMinus className="w-4 h-4" />
+                      {t('publicProfile.removeFriend')}
+                    </button>
+                  ) : isFriend === false && profile.username ? (
+                    <button
+                      type="button"
+                      onClick={handleSendRequest}
+                      className="flex items-center gap-2 px-4 py-2 border-[3px] border-border bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-headline font-bold uppercase tracking-widest transition-colors"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      {t('publicProfile.addFriend')}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={handleBlock}
@@ -180,6 +233,11 @@ export function PublicProfileView({
                     {t('publicProfile.blockUser')}
                   </button>
                 </div>
+              )}
+              {friendAction === 'requested' && (
+                <p className="pt-4 text-sm font-headline font-bold text-primary/60 uppercase">
+                  {t('publicProfile.requestSent')}
+                </p>
               )}
               {friendAction === 'removed' && (
                 <p className="pt-4 text-sm font-headline font-bold text-foreground/40 uppercase">

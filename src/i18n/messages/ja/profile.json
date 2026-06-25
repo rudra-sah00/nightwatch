@@ -103,6 +103,8 @@
     "hrsTotal": "合計時間",
     "coreVersion": "コアバージョン: V1.0-STABLE",
     "userIdentity": "ユーザーID：{id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "フレンド削除",
     "blockUser": "ブロック",
     "friendRemoved": "フレンド削除済み",

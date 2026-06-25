@@ -103,6 +103,8 @@
     "hrsTotal": "총 시간",
     "coreVersion": "코어 버전: V1.0-STABLE",
     "userIdentity": "사용자 ID: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "친구 삭제",
     "blockUser": "차단",
     "friendRemoved": "친구 삭제됨",

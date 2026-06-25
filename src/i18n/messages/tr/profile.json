@@ -103,6 +103,8 @@
     "hrsTotal": "TOPLAM SAAT",
     "coreVersion": "ÇEKİRDEK SÜRÜM: V1.0-KARALI",
     "userIdentity": "KULLANICI KİMLİĞİ: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "Arkadaşı kaldır",
     "blockUser": "Engelle",
     "friendRemoved": "Arkadaş kaldırıldı",

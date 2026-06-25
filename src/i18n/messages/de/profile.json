@@ -103,6 +103,8 @@
     "hrsTotal": "STD GESAMT",
     "coreVersion": "KERNVERSION: V1.0-STABIL",
     "userIdentity": "BENUTZERIDENTITÄT: {id}",
+    "addFriend": "Send Friend Request",
+    "requestSent": "Friend request sent",
     "removeFriend": "Freund entfernen",
     "blockUser": "Blockieren",
     "friendRemoved": "Freund entfernt",
