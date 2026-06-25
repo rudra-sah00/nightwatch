@@ -229,165 +229,169 @@ export default function LiveClient() {
         </div>
 
         <div className="container mx-auto px-6 md:px-10">
-          {/* Search + Category */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <div className="relative flex-grow">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => handleSearch(e.target.value)}
-                placeholder={t('searchChannels')}
-                className="w-full pl-12 pr-4 py-4 bg-background border-[3px] border-border font-headline font-bold text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-neo-blue rounded-md"
-              />
-            </div>
-            <div className="relative sm:w-64">
-              <button
-                type="button"
-                onClick={() => setIsCatOpen(!isCatOpen)}
-                className="flex items-center justify-between gap-2 px-5 py-4 font-headline font-black text-sm uppercase tracking-widest border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md"
-              >
-                <span className="truncate">
-                  {selectedCategory || 'All Categories'}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 shrink-0 transition-transform ${isCatOpen ? 'rotate-180' : ''}`}
+          <div className="max-w-5xl mx-auto w-full space-y-6">
+            {/* Search + Category */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center bg-card border-[3px] border-border p-4 md:p-6 rounded-md">
+              <div className="relative flex-grow w-full">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-foreground/50" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder={t('searchChannels')}
+                  className="w-full pl-14 h-14 bg-background border-[3px] border-border font-headline font-bold text-lg uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-neo-blue placeholder:text-foreground/30 rounded-md"
                 />
-              </button>
-              {isCatOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-background border-[3px] border-border z-50 p-2 max-h-[300px] overflow-y-auto no-scrollbar rounded-md shadow-md">
-                  <button
-                    type="button"
-                    onClick={() => handleCategorySelect('')}
-                    className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded ${!selectedCategory ? 'bg-muted' : 'hover:bg-muted/80'}`}
-                  >
-                    All Categories
-                  </button>
-                  {categories.map((cat) => (
+              </div>
+              <div className="relative sm:w-64">
+                <button
+                  type="button"
+                  onClick={() => setIsCatOpen(!isCatOpen)}
+                  className="flex items-center justify-between gap-2 px-5 py-4 font-headline font-black text-sm uppercase tracking-widest border-[3px] border-border w-full bg-background text-foreground hover:bg-muted cursor-pointer rounded-md"
+                >
+                  <span className="truncate">
+                    {selectedCategory || 'All Categories'}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 shrink-0 transition-transform ${isCatOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {isCatOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-background border-[3px] border-border z-50 p-2 max-h-[300px] overflow-y-auto no-scrollbar rounded-md shadow-md">
                     <button
                       type="button"
-                      key={cat}
-                      onClick={() => handleCategorySelect(cat)}
-                      className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded truncate ${selectedCategory === cat ? 'bg-muted' : 'hover:bg-muted/80'}`}
+                      onClick={() => handleCategorySelect('')}
+                      className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded ${!selectedCategory ? 'bg-muted' : 'hover:bg-muted/80'}`}
                     >
-                      {cat}
+                      All Categories
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        type="button"
+                        key={cat}
+                        onClick={() => handleCategorySelect(cat)}
+                        className={`w-full px-4 py-2 text-left font-headline font-bold text-xs uppercase tracking-widest rounded truncate ${selectedCategory === cat ? 'bg-muted' : 'hover:bg-muted/80'}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Count */}
+            <div className="mb-6 flex items-center justify-between">
+              <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
+                {total.toLocaleString()} channels
+              </span>
+              {totalPages > 1 && (
+                <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
+                  Page {page}/{totalPages}
+                </span>
+              )}
+            </div>
+
+            {/* Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {[
+                  'a',
+                  'b',
+                  'c',
+                  'd',
+                  'e',
+                  'f',
+                  'g',
+                  'h',
+                  'i',
+                  'j',
+                  'k',
+                  'l',
+                  'm',
+                  'n',
+                  'o',
+                  'p',
+                  'q',
+                  'r',
+                ].map((id) => (
+                  <div
+                    key={id}
+                    className="aspect-square bg-muted border-[3px] border-border rounded-lg animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : channels.length === 0 ? (
+              <div className="py-32 border-[4px] border-border border-dashed text-center flex flex-col items-center justify-center bg-card">
+                <Tv className="w-16 h-16 text-foreground/20 mb-6" />
+                <p className="font-headline font-black text-4xl uppercase tracking-widest text-foreground/40">
+                  {t('noChannelsFound')}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                  {channels.map((channel) => (
+                    <button
+                      key={channel.id}
+                      type="button"
+                      onClick={() => handleChannelClick(channel)}
+                      className="group flex flex-col items-center gap-3 p-4 bg-background border-[3px] border-border rounded-lg hover:border-neo-blue hover:bg-muted/50 transition-colors cursor-pointer"
+                    >
+                      <div className="w-16 h-16 relative shrink-0 rounded-lg overflow-hidden bg-muted border-[2px] border-border">
+                        {channel.icon ? (
+                          <Image
+                            src={channel.icon}
+                            alt={channel.name}
+                            fill
+                            className="object-contain p-1"
+                            sizes="64px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Tv className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-center min-w-0 w-full">
+                        <p className="font-headline font-bold text-xs uppercase tracking-wider text-foreground truncate">
+                          {channel.name}
+                        </p>
+                        {channel.category && (
+                          <p className="font-headline text-[10px] uppercase tracking-widest text-muted-foreground truncate mt-1">
+                            {channel.category}
+                          </p>
+                        )}
+                      </div>
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* Count */}
-          <div className="mb-6 flex items-center justify-between">
-            <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
-              {total.toLocaleString()} channels
-            </span>
-            {totalPages > 1 && (
-              <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
-                Page {page}/{totalPages}
-              </span>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-3 mt-10">
+                    <Button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
+                    >
+                      Prev
+                    </Button>
+                    <span className="font-headline font-black text-sm uppercase tracking-widest px-4">
+                      {page}
+                    </span>
+                    <Button
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={page === totalPages}
+                      className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
-
-          {/* Grid */}
-          {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {[
-                'a',
-                'b',
-                'c',
-                'd',
-                'e',
-                'f',
-                'g',
-                'h',
-                'i',
-                'j',
-                'k',
-                'l',
-                'm',
-                'n',
-                'o',
-                'p',
-                'q',
-                'r',
-              ].map((id) => (
-                <div
-                  key={id}
-                  className="aspect-square bg-muted border-[3px] border-border rounded-lg animate-pulse"
-                />
-              ))}
-            </div>
-          ) : channels.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 bg-background border-[4px] border-border text-center max-w-2xl mx-auto rounded-lg">
-              <Tv className="w-20 h-20 text-neo-blue mb-6" />
-              <h3 className="text-3xl font-black font-headline uppercase tracking-tighter text-foreground mb-2">
-                {t('noChannelsFound')}
-              </h3>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {channels.map((channel) => (
-                  <button
-                    key={channel.id}
-                    type="button"
-                    onClick={() => handleChannelClick(channel)}
-                    className="group flex flex-col items-center gap-3 p-4 bg-background border-[3px] border-border rounded-lg hover:border-neo-blue hover:bg-muted/50 transition-colors cursor-pointer"
-                  >
-                    <div className="w-16 h-16 relative shrink-0 rounded-lg overflow-hidden bg-muted border-[2px] border-border">
-                      {channel.icon ? (
-                        <Image
-                          src={channel.icon}
-                          alt={channel.name}
-                          fill
-                          className="object-contain p-1"
-                          sizes="64px"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Tv className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-center min-w-0 w-full">
-                      <p className="font-headline font-bold text-xs uppercase tracking-wider text-foreground truncate">
-                        {channel.name}
-                      </p>
-                      {channel.category && (
-                        <p className="font-headline text-[10px] uppercase tracking-widest text-muted-foreground truncate mt-1">
-                          {channel.category}
-                        </p>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 mt-10">
-                  <Button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
-                  >
-                    Prev
-                  </Button>
-                  <span className="font-headline font-black text-sm uppercase tracking-widest px-4">
-                    {page}
-                  </span>
-                  <Button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className="bg-background text-foreground border-[3px] border-border px-6 py-3 font-headline font-black uppercase tracking-widest hover:bg-foreground hover:text-background disabled:opacity-40"
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
         </div>
       </div>
     </>

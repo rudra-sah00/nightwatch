@@ -9,6 +9,7 @@ import { useCallback, useRef } from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
 import { useMusicStore } from '@/features/music/store/use-music-store';
 import { usePageTitle } from '@/hooks/use-page-title';
+import { hapticLight } from '@/lib/haptics';
 import { useAuth } from '@/providers/auth-provider';
 
 function useLongPress(onLongPress: () => void, delay = 500) {
@@ -56,7 +57,7 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('common.nav');
-  const { setLeftOpen, setRightOpen } = useSidebar();
+  const { leftOpen, setLeftOpen, setRightOpen } = useSidebar();
 
   const logoLongPress = useLongPress(() => setLeftOpen(true));
   const profileLongPress = useLongPress(() => setRightOpen(true));
@@ -85,24 +86,38 @@ export function Navbar() {
           paddingRight: `max(1rem, var(--electron-inset-right, 0px))`,
         }}
       >
-        {/* Left Side: Brand Logo */}
+        {/* Left Side: Logo (mobile opens sidebar) / Brand (desktop) */}
         <div className="flex-1 flex justify-start items-center">
+          {/* Mobile: logo goes home (when sidebar closed) or closes sidebar */}
+          <button
+            type="button"
+            onClick={() => {
+              if (leftOpen) {
+                hapticLight();
+                setLeftOpen(false);
+              } else {
+                router.push('/home');
+              }
+            }}
+            className="md:hidden p-2 [-webkit-app-region:no-drag]"
+          >
+            <img
+              src="/logo.png"
+              alt={t('logoAlt')}
+              width={32}
+              height={32}
+              className="w-8 h-8 object-contain"
+            />
+          </button>
+
+          {/* Desktop: logo text */}
           <Link
             href="/home"
-            className="flex items-center gap-2 py-4 px-2 [-webkit-app-region:no-drag]"
+            className="hidden md:flex items-center gap-2 py-4 px-2 [-webkit-app-region:no-drag]"
             title={t('home')}
             {...logoLongPress}
           >
-            <div className="md:hidden w-10 h-10 flex items-center justify-center shrink-0">
-              <img
-                src="/logo.png"
-                alt={t('logoAlt')}
-                width={32}
-                height={32}
-                className="w-8 h-8 object-contain"
-              />
-            </div>
-            <span className="hidden md:block text-2xl md:text-3xl font-black italic tracking-tighter text-foreground font-headline uppercase whitespace-nowrap">
+            <span className="text-2xl md:text-3xl font-black italic tracking-tighter text-foreground font-headline uppercase whitespace-nowrap">
               NIGHTWATCH
             </span>
           </Link>
@@ -123,9 +138,34 @@ export function Navbar() {
 
         {/* Right Side: Profile */}
         <div className="flex-1 flex justify-end items-center shrink-0 gap-3">
+          {/* Mobile: profile icon opens left sidebar */}
+          <button
+            type="button"
+            onClick={() => {
+              hapticLight();
+              setLeftOpen(true);
+            }}
+            className="md:hidden [-webkit-app-region:no-drag] p-2"
+          >
+            <div className="w-7 h-7 rounded-full overflow-hidden bg-muted border border-border">
+              {user?.profilePhoto ? (
+                <Image
+                  src={user.profilePhoto}
+                  alt=""
+                  width={28}
+                  height={28}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="w-4 h-4 m-auto mt-1.5 text-foreground" />
+              )}
+            </div>
+          </button>
+
+          {/* Desktop: profile link */}
           <Link
             href="/profile"
-            className="flex flex-col items-center [-webkit-app-region:no-drag] justify-center gap-1 hover:bg-black/5 text-foreground rounded-lg px-3 py-1.5 transition-colors min-w-[72px]"
+            className="hidden md:flex flex-col items-center [-webkit-app-region:no-drag] justify-center gap-1 hover:bg-black/5 text-foreground rounded-lg px-3 py-1.5 transition-colors"
             title={t('profile')}
             {...profileLongPress}
           >

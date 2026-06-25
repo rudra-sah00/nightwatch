@@ -63,10 +63,32 @@ export function usePushNotifications() {
       }
     })();
 
-    // Handle foreground messages as toasts
+    // Handle foreground messages as toasts with proper deep-linking
     const unsub = onForegroundMessage((payload) => {
       if (payload.title) {
-        toast(payload.title, { description: payload.body });
+        const data = payload.data || {};
+        let route = '/';
+
+        if (data.type === 'dm') {
+          route = data.senderId ? `/dm?peer=${data.senderId}` : '/dm';
+        } else if (
+          data.type === 'explore_reply' ||
+          data.type === 'explore_ai_reply' ||
+          data.type === 'explore_mention'
+        ) {
+          const threadId = data.threadId || data.postId;
+          route = threadId ? `/explore?thread=${threadId}` : '/explore';
+        } else if (data.url) {
+          route = data.url;
+        }
+
+        toast(payload.title, {
+          description: payload.body,
+          action: {
+            label: 'Open',
+            onClick: () => window.location.assign(route),
+          },
+        });
       }
     });
 

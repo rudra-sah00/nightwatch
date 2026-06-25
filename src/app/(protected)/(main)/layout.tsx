@@ -12,7 +12,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { LeftSidebar } from '@/components/layout/left-sidebar';
+import {
+  LeftSidebar,
+  LeftSidebarDesktop,
+} from '@/components/layout/left-sidebar';
 import { Navbar } from '@/components/layout/navbar';
 import { OfflineState } from '@/components/layout/OfflineState';
 import { RightSidebar } from '@/components/layout/right-sidebar';
@@ -35,6 +38,7 @@ import { useFriendNotifications } from '@/features/friends/hooks/use-friend-noti
 import { useNetworkStatus } from '@/hooks/use-network-status';
 import { PageTitleProvider } from '@/hooks/use-page-title';
 import { checkIsMobile } from '@/lib/electron-bridge';
+import { hapticLight } from '@/lib/haptics';
 
 type SidebarContextType = {
   leftOpen: boolean;
@@ -221,7 +225,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
         setSidebarsDisabled,
       }}
     >
-      <div className="h-full w-full bg-background text-foreground font-body flex flex-col overflow-hidden">
+      <div className="h-full w-full bg-background text-foreground font-body flex flex-col overflow-hidden relative">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:bg-neo-yellow focus:text-foreground focus:px-4 focus:py-2 focus:border-[3px] focus:border-border focus:font-headline focus:font-black focus:uppercase focus:text-sm focus:tracking-widest"
@@ -231,17 +235,35 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
         <Suspense fallback={null}>
           <GlobalTour />
         </Suspense>
-        <Navbar />
+        <LeftSidebar />
+        {leftOpen && (
+          <button
+            type="button"
+            aria-label="Close sidebar"
+            className="fixed inset-0 z-20 max-md:block hidden bg-transparent border-none cursor-default"
+            onClick={() => {
+              hapticLight();
+              setLeftOpen(false);
+            }}
+          />
+        )}
         <div
-          ref={containerRef}
-          id="main-content"
-          className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative"
+          className={`flex-1 flex flex-col min-h-0 transition-all duration-300 ${leftOpen ? 'max-md:translate-x-[75%] max-md:rounded-3xl max-md:overflow-hidden max-md:shadow-2xl max-md:border-l max-md:border-border' : ''}`}
         >
-          <LeftSidebar />
-          <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative">
-            {showOfflineBlocker ? <OfflineState /> : children}
+          <Navbar />
+          <div
+            ref={containerRef}
+            id="main-content"
+            className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative"
+          >
+            <LeftSidebarDesktop />
+            <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative">
+              {showOfflineBlocker ? <OfflineState /> : children}
+            </div>
+            <div className="hidden md:block">
+              <RightSidebar />
+            </div>
           </div>
-          <RightSidebar />
         </div>
       </div>
     </SidebarContext.Provider>

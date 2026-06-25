@@ -1,0 +1,16 @@
+{
+  "firestore": {
+    "database": "nightwatch-prod",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8180,
+      "host": "127.0.0.1"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4040
+    }
+  }
+}
