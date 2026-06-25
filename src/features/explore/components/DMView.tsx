@@ -10,7 +10,7 @@ import {
   Keyboard,
   Lock,
   Mic,
-  Pin,
+  Phone,
   Play,
   Plus,
   Search,
@@ -32,6 +32,7 @@ import { useDmMedia } from '@/features/explore/hooks/use-dm-media';
 import { useTagSearch } from '@/features/explore/hooks/use-tag-search';
 import type { PostTag } from '@/features/explore/types';
 import { SLASH_COMMANDS } from '@/features/explore/types';
+import { useCall } from '@/features/friends/hooks/use-call';
 import { trackEvent } from '@/lib/analytics';
 import { apiFetch } from '@/lib/fetch';
 import { hapticLight } from '@/lib/haptics';
@@ -113,7 +114,6 @@ export function DMView({
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [attachPanel, setAttachPanel] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [pinnedOpen, setPinnedOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [lockPromptPeer, setLockPromptPeer] = useState<Conversation | null>(
     null,
@@ -123,6 +123,7 @@ export function DMView({
   const t = useTranslations('common.dm');
 
   const dmSearch = useDmSearch(activePeer?.peer_id || null);
+  const { initiateCall } = useCall();
   const dmPinned = useDmPinned(activePeer?.peer_id || null);
   const dmGif = useDmGif();
 
@@ -452,7 +453,7 @@ export function DMView({
       >
         <PageTitle title={activePeer.peer_name} href="/dm" />
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-card/90 backdrop-blur-lg px-4 py-3 flex items-center gap-3">
+        <div className="sticky top-0 z-10 bg-card/90 backdrop-blur-lg px-4 py-3 flex items-center gap-2">
           <button
             type="button"
             onClick={closeChat}
@@ -460,25 +461,7 @@ export function DMView({
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <Link
-            href={`/user/${activePeer.peer_username || activePeer.peer_id}`}
-            className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border shrink-0"
-          >
-            {activePeer.peer_photo ? (
-              <Image
-                src={activePeer.peer_photo}
-                alt=""
-                width={32}
-                height={32}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-xs font-bold">
-                {activePeer.peer_name[0]}
-              </div>
-            )}
-          </Link>
-          <div className="flex-1 flex items-center bg-muted/30 rounded-full px-3 h-8">
+          <div className="flex-1 flex items-center bg-muted/30 rounded-full px-3 h-8 min-w-0">
             <Search className="w-3.5 h-3.5 text-foreground/30 shrink-0 mr-2" />
             <input
               type="text"
@@ -488,7 +471,7 @@ export function DMView({
                 if (!searchOpen && e.target.value) setSearchOpen(true);
               }}
               placeholder="Search..."
-              className="flex-1 bg-transparent text-xs outline-none placeholder:text-foreground/30"
+              className="flex-1 bg-transparent text-xs outline-none placeholder:text-foreground/30 min-w-0"
             />
             {dmSearch.query && (
               <button
@@ -502,11 +485,35 @@ export function DMView({
           </div>
           <button
             type="button"
-            onClick={() => setPinnedOpen(!pinnedOpen)}
-            className="p-1.5 rounded-full hover:bg-muted text-foreground/50 shrink-0"
+            onClick={() =>
+              initiateCall({
+                id: activePeer.peer_id,
+                name: activePeer.peer_name,
+                photo: activePeer.peer_photo,
+              })
+            }
+            className="p-2 rounded-full hover:bg-muted text-foreground/50 shrink-0"
           >
-            <Pin className="w-4 h-4" />
+            <Phone className="w-4 h-4" />
           </button>
+          <Link
+            href={`/user/${activePeer.peer_username || activePeer.peer_id}`}
+            className="w-7 h-7 rounded-full overflow-hidden bg-muted border border-border shrink-0"
+          >
+            {activePeer.peer_photo ? (
+              <Image
+                src={activePeer.peer_photo}
+                alt=""
+                width={28}
+                height={28}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[9px] font-bold">
+                {activePeer.peer_name[0]}
+              </div>
+            )}
+          </Link>
         </div>
 
         {/* Search results */}
@@ -529,7 +536,7 @@ export function DMView({
         )}
 
         {/* Pinned messages */}
-        {pinnedOpen && dmPinned.pinned.length > 0 && (
+        {dmPinned.pinned.length > 0 && (
           <div className="px-4 py-2 border-b border-border/50 bg-amber-500/5">
             <p className="text-[10px] font-bold text-amber-600 mb-1">
               📌 Pinned ({dmPinned.pinned.length})
