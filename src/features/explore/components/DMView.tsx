@@ -456,13 +456,13 @@ export function DMView({
           <button
             type="button"
             onClick={closeChat}
-            className="p-1 rounded-full hover:bg-muted"
+            className="p-1 rounded-full hover:bg-muted shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <Link
             href={`/user/${activePeer.peer_username || activePeer.peer_id}`}
-            className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border"
+            className="w-8 h-8 rounded-full overflow-hidden bg-muted border border-border shrink-0"
           >
             {activePeer.peer_photo ? (
               <Image
@@ -478,55 +478,53 @@ export function DMView({
               </div>
             )}
           </Link>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold">{activePeer.peer_name}</p>
-            {activePeer.peer_username && (
-              <p className="text-[10px] text-foreground/50">
-                @{activePeer.peer_username}
-              </p>
+          <div className="flex-1 flex items-center bg-muted/30 rounded-full px-3 h-8">
+            <Search className="w-3.5 h-3.5 text-foreground/30 shrink-0 mr-2" />
+            <input
+              type="text"
+              value={dmSearch.query}
+              onChange={(e) => {
+                dmSearch.setQuery(e.target.value);
+                if (!searchOpen && e.target.value) setSearchOpen(true);
+              }}
+              placeholder="Search..."
+              className="flex-1 bg-transparent text-xs outline-none placeholder:text-foreground/30"
+            />
+            {dmSearch.query && (
+              <button
+                type="button"
+                onClick={() => dmSearch.setQuery('')}
+                className="p-0.5"
+              >
+                <X className="w-3 h-3 text-foreground/40" />
+              </button>
             )}
           </div>
           <button
             type="button"
             onClick={() => setPinnedOpen(!pinnedOpen)}
-            className="p-1.5 rounded-full hover:bg-muted text-foreground/50"
+            className="p-1.5 rounded-full hover:bg-muted text-foreground/50 shrink-0"
           >
             <Pin className="w-4 h-4" />
           </button>
-          <button
-            type="button"
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="p-1.5 rounded-full hover:bg-muted text-foreground/50"
-          >
-            <Search className="w-4 h-4" />
-          </button>
         </div>
 
-        {/* Search bar */}
-        {searchOpen && (
+        {/* Search results */}
+        {searchOpen && dmSearch.results.length > 0 && (
           <div className="px-4 py-2 border-b border-border/50">
-            <input
-              type="text"
-              value={dmSearch.query}
-              onChange={(e) => dmSearch.setQuery(e.target.value)}
-              placeholder="Search messages..."
-              className="w-full bg-muted/30 rounded-lg px-3 py-1.5 text-sm outline-none"
-            />
-            {dmSearch.results.length > 0 && (
-              <div className="mt-2 max-h-32 overflow-y-auto space-y-1">
-                {dmSearch.results.map((m) => (
-                  <div
-                    key={m.id}
-                    className="text-xs px-2 py-1.5 rounded bg-muted/30 truncate"
-                  >
-                    <span className="text-foreground/40">
-                      {new Date(m.createdAt).toLocaleDateString()}{' '}
-                    </span>
-                    {m.content}
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="max-h-32 overflow-y-auto space-y-1">
+              {dmSearch.results.map((m) => (
+                <div
+                  key={m.id}
+                  className="text-xs px-2 py-1.5 rounded bg-muted/30 truncate"
+                >
+                  <span className="text-foreground/40">
+                    {new Date(m.createdAt).toLocaleDateString()}{' '}
+                  </span>
+                  {m.content}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

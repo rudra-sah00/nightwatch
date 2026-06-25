@@ -203,7 +203,7 @@ export function PublicProfileView({
                 </div>
               </div>
 
-              {!isOwnProfile && friendAction === 'none' && (
+              {currentUser && !isOwnProfile && friendAction === 'none' && (
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-4">
                   {isFriend ? (
                     <button
