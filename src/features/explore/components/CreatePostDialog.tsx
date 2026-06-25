@@ -453,13 +453,20 @@ export function CreatePostDialog({
           {/* GIF picker */}
           {gifOpen && (
             <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-              <input
-                type="text"
-                value={gifQuery}
-                onChange={(e) => setGifQuery(e.target.value)}
-                placeholder="Search GIFs..."
-                className="w-full px-4 py-2 bg-transparent text-sm text-white outline-none placeholder:text-white/25 border-b border-white/10"
-              />
+              <div className="flex items-center justify-between px-4 py-1.5 border-b border-white/10">
+                <input
+                  type="text"
+                  value={gifQuery}
+                  onChange={(e) => setGifQuery(e.target.value)}
+                  placeholder="Search GIFs..."
+                  className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/25"
+                />
+                <img
+                  src="/giphy-attribution.svg"
+                  alt="Powered by GIPHY"
+                  className="h-3.5 ml-2 opacity-60"
+                />
+              </div>
               <div className="max-h-[180px] overflow-y-auto p-2 grid grid-cols-3 gap-1.5">
                 {gifResults.map((gif) => (
                   <button

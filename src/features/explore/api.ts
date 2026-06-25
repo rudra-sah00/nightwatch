@@ -147,11 +147,33 @@ export interface GifResult {
 }
 
 export async function searchGifs(query?: string): Promise<GifResult[]> {
-  const params = query ? `?q=${encodeURIComponent(query)}` : '';
-  const { gifs } = await apiFetch<{ gifs: GifResult[] }>(
-    `/api/explore/gif/search${params}`,
-  );
-  return gifs;
+  const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
+  if (!apiKey) return [];
+  const endpoint = query
+    ? `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&api_key=${apiKey}&limit=20&rating=g`
+    : `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}&limit=20&rating=g`;
+  try {
+    const res = await fetch(endpoint);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.data || []).map(
+      (r: {
+        id: string;
+        title: string;
+        images: {
+          fixed_width_small: { url: string };
+          fixed_width: { url: string };
+        };
+      }) => ({
+        id: r.id,
+        title: r.title || '',
+        preview: r.images?.fixed_width_small?.url || '',
+        url: r.images?.fixed_width?.url || '',
+      }),
+    );
+  } catch {
+    return [];
+  }
 }
 
 export async function getPostReplies(postId: string): Promise<ExplorePost[]> {

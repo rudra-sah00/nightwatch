@@ -806,13 +806,20 @@ export function DMView({
         {/* GIF picker */}
         {dmGif.open && (
           <div className="border-t border-border/50 bg-card">
-            <input
-              type="text"
-              value={dmGif.query}
-              onChange={(e) => dmGif.setQuery(e.target.value)}
-              placeholder="Search GIFs..."
-              className="w-full px-4 py-2 bg-transparent text-sm outline-none border-b border-border/30"
-            />
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
+              <input
+                type="text"
+                value={dmGif.query}
+                onChange={(e) => dmGif.setQuery(e.target.value)}
+                placeholder="Search GIFs..."
+                className="flex-1 bg-transparent text-sm outline-none"
+              />
+              <img
+                src="/giphy-attribution.svg"
+                alt="Powered by GIPHY"
+                className="h-3.5 opacity-60"
+              />
+            </div>
             <div className="grid grid-cols-3 gap-1 p-2 max-h-48 overflow-y-auto">
               {dmGif.results.map((gif) => (
                 <button
