@@ -15,6 +15,7 @@ import type { ExplorePost } from '@/features/explore/types';
 import { useSocket } from '@/providers/socket-provider';
 import { useTheme } from '@/providers/theme-provider';
 import { ReactionBar } from './ReactionBar';
+import { TagChip } from './TagChip';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 
@@ -69,6 +70,13 @@ function ReplyItem({
           </span>
         </div>
         <p className="text-sm mt-1 ml-8 break-words">{reply.content}</p>
+        {reply.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-1.5 ml-8">
+            {reply.tags.map((tag) => (
+              <TagChip key={tag.id} tag={tag} />
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-3 mt-1.5 ml-8">
           <button
             type="button"
