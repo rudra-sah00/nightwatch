@@ -41,6 +41,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Friends & Voice Calls](./docs/features/FRIENDS.md): Friend system, voice calls, media ducking, and online presence.
 - [Music](./docs/features/MUSIC.md): JioSaavn streaming, AudioEngine, synced lyrics, playlists, Redis queue, gapless playback, crossfade, equalizer, sleep timer, and Spotify Connect-like device transfer.
 - [Remote Control](./docs/features/REMOTE_CONTROL.md): Mobile-to-desktop video remote control via Socket.IO.
+- [Explore & Direct Messages](./docs/features/EXPLORE.md): Social feed with ranked timelines, polls, reactions, AI bot, and real-time 1-on-1 DM chat.
 - [Smart TV](./docs/features/SMART_TV.md): Android TV platform — spatial navigation, D-pad player, letter grid search, overscan, QR login, music full player, manga reader.
 - [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 16 native plugins, mobile bridge API, and dev workflow.
 
@@ -56,6 +57,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - **Real-Time Media:** Agora RTC (WebRTC — watch party, voice calls)
 - **Server State & Caching:** TanStack Query (useQuery, useMutation, stale-while-revalidate)
 - **Client State:** Zustand (auth state, music playback state)
+- **Real-Time Database:** Firestore (explore posts, reactions — real-time onSnapshot listeners)
 - **Quality Assurance:** Biome (Linting/Formatting), Vitest (Unit Testing), Playwright (E2E Testing)
 - **Package Manager:** pnpm
 
@@ -68,10 +70,11 @@ src/
 ├── app/               # Next.js App Router (Pages, Layouts, Server forms)
 ├── capacitor/         # Capacitor mobile-specific modules (native plugins, providers)
 ├── components/        # Global, reusable UI primitives (Buttons, Inputs, Dialogs)
-├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream, friends)
+├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream, explore, friends)
 ├── hooks/             # Global generic hooks
 ├── i18n/              # Internationalization (14 locales, 8 namespaces per locale)
 ├── lib/               # Shared utilities, formatting scripts, and global singletons
+├── platforms/         # Platform-specific layers (desktop, mobile, smart-tv)
 ├── providers/         # Global React Contexts (Socket, Session, Theme)
 ├── store/             # Zustand global stores (auth)
 └── types/             # Global TypeScript types (Zod inferred and explicit interfaces)

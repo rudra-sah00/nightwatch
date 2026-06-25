@@ -131,7 +131,11 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "explore": {
+      "title": "Explore",
+      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
+    }
   },
   "creatorFooter": {
     "title": "クリエイター情報",

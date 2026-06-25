@@ -179,6 +179,15 @@ function buildMobileSteps(
       },
     },
     {
+      element: 'a[href="/explore"]',
+      popover: {
+        title: title(t('explore.title')),
+        description: desc(t('explore.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
       element: 'a[href="/ask-ai"]',
       popover: {
         title: title(t('askAi.title')),
@@ -267,6 +276,15 @@ function buildDesktopSteps(
       popover: {
         title: title(t('live.title')),
         description: desc(t('live.description')),
+        side: 'right',
+        align: 'center',
+      },
+    },
+    {
+      element: 'a[href="/explore"]',
+      popover: {
+        title: title(t('explore.title')),
+        description: desc(t('explore.description')),
         side: 'right',
         align: 'center',
       },
