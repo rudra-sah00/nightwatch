@@ -1,12 +1,22 @@
 'use client';
 
-import { ArrowLeft, MessageCircle, Send } from 'lucide-react';
+import { Theme } from 'emoji-picker-react';
+import { ArrowLeft, MessageCircle, Send, Smile } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
-import { createPost, getPostThread } from '@/features/explore/api';
+import {
+  createPost,
+  type GifResult,
+  getPostThread,
+  searchGifs,
+} from '@/features/explore/api';
 import type { ExplorePost } from '@/features/explore/types';
 import { useSocket } from '@/providers/socket-provider';
+import { useTheme } from '@/providers/theme-provider';
 import { ReactionBar } from './ReactionBar';
+
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 
 interface ThreadViewProps {
   postId: string;
@@ -141,6 +151,16 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
   );
   const [isSending, setIsSending] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [gifOpen, setGifOpen] = useState(false);
+  const [gifQuery, setGifQuery] = useState('');
+  const [gifResults, setGifResults] = useState<GifResult[]>([]);
+  const { theme: appTheme } = useTheme();
+  const isDark =
+    appTheme === 'dark' ||
+    (appTheme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -189,6 +209,17 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
     setTimeout(onBack, 250);
   };
 
+  // GIF search debounce
+  useEffect(() => {
+    if (!gifOpen) return;
+    const timer = setTimeout(() => {
+      searchGifs(gifQuery || undefined)
+        .then(setGifResults)
+        .catch(() => {});
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [gifQuery, gifOpen]);
+
   const handleReplyTo = useCallback((id: string, name: string) => {
     setReplyTo({ id, name });
   }, []);
@@ -206,7 +237,6 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
       });
       setPosts((prev) => {
         const updated = [...prev, post];
-        // Increment reply count on root post
         if (updated[0]) {
           updated[0] = {
             ...updated[0],
@@ -219,6 +249,37 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
         return updated;
       });
       setReplyText('');
+      setReplyTo(null);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const sendGif = async (gif: GifResult) => {
+    setGifOpen(false);
+    setIsSending(true);
+    try {
+      const parentId = replyTo?.id || postId;
+      const post = await createPost({
+        content: gif.url,
+        type: 'text',
+        tags: [],
+        media: { urls: [gif.url], type: 'image' },
+        parentId,
+      });
+      setPosts((prev) => {
+        const updated = [...prev, post];
+        if (updated[0]) {
+          updated[0] = {
+            ...updated[0],
+            stats: {
+              ...updated[0].stats,
+              replies: updated[0].stats.replies + 1,
+            },
+          };
+        }
+        return updated;
+      });
       setReplyTo(null);
     } finally {
       setIsSending(false);
@@ -346,43 +407,112 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
         )}
       </div>
 
-      {/* Reply input */}
-      <div className="px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center gap-2">
-        <div className="flex-1">
-          {replyTo && (
-            <div className="flex items-center gap-1 mb-1">
-              <span className="text-[10px] text-foreground/50">
-                Replying to {replyTo.name}
-              </span>
+      {/* Emoji picker */}
+      {emojiOpen && (
+        <div className="px-3 pb-1 rounded-xl overflow-hidden">
+          <EmojiPicker
+            theme={isDark ? Theme.DARK : Theme.LIGHT}
+            onEmojiClick={(d) => {
+              setReplyText((prev) => prev + d.emoji);
+              setEmojiOpen(false);
+            }}
+            lazyLoadEmojis
+            height={260}
+            width="100%"
+            previewConfig={{ showPreview: false }}
+          />
+        </div>
+      )}
+
+      {/* GIF picker */}
+      {gifOpen && (
+        <div className="border-t border-border/50 bg-card">
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-border/30">
+            <input
+              type="text"
+              value={gifQuery}
+              onChange={(e) => setGifQuery(e.target.value)}
+              placeholder="Search GIFs..."
+              className="flex-1 bg-transparent text-sm outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-1 p-2 max-h-48 overflow-y-auto">
+            {gifResults.map((gif) => (
               <button
+                key={gif.id}
                 type="button"
-                onClick={() => setReplyTo(null)}
-                className="text-[10px] text-foreground/40 hover:text-foreground"
+                onClick={() => sendGif(gif)}
+                className="rounded-lg overflow-hidden hover:ring-2 hover:ring-primary"
               >
-                ✕
+                <img
+                  src={gif.preview}
+                  alt={gif.title}
+                  className="w-full h-20 object-cover"
+                  loading="lazy"
+                />
               </button>
-            </div>
-          )}
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Reply input */}
+      <div className="border-t border-border/50 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        {replyTo && (
+          <div className="flex items-center gap-1 mb-1.5 px-1">
+            <span className="text-[10px] text-foreground/50">
+              Replying to {replyTo.name}
+            </span>
+            <button
+              type="button"
+              onClick={() => setReplyTo(null)}
+              className="text-[10px] text-foreground/40 hover:text-foreground"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setEmojiOpen(!emojiOpen);
+              setGifOpen(false);
+            }}
+            className={`p-2 rounded-full transition-colors ${emojiOpen ? 'text-primary bg-primary/10' : 'text-foreground/40 hover:text-foreground/70 hover:bg-muted/50'}`}
+          >
+            <Smile className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setGifOpen(!gifOpen);
+              setEmojiOpen(false);
+            }}
+            className={`p-2 rounded-full transition-colors text-xs font-bold ${gifOpen ? 'text-primary bg-primary/10' : 'text-foreground/40 hover:text-foreground/70 hover:bg-muted/50'}`}
+          >
+            GIF
+          </button>
           <input
             type="text"
             value={replyText}
             onChange={(e) => setReplyText(e.target.value.slice(0, 500))}
             placeholder="Write a reply..."
             maxLength={500}
-            className="w-full bg-muted/30 rounded-2xl px-4 py-2 text-sm outline-none focus:bg-muted/50 transition-colors"
+            className="flex-1 bg-muted/30 rounded-full px-4 py-2 text-sm outline-none focus:bg-muted/50 transition-colors"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSend();
             }}
           />
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!replyText.trim() || isSending}
+            className="p-2 rounded-full bg-primary text-primary-foreground disabled:opacity-30 active:scale-90 transition-all"
+          >
+            <Send className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!replyText.trim() || isSending}
-          className="p-2.5 rounded-full bg-primary text-primary-foreground disabled:opacity-30 active:scale-90 transition-transform"
-        >
-          <Send className="w-4 h-4" />
-        </button>
       </div>
     </div>
   );
