@@ -102,7 +102,11 @@
     "daysActive": "วันที่ใช้งาน",
     "hrsTotal": "ชั่วโมงรวม",
     "coreVersion": "เวอร์ชันหลัก: V1.0-เสถียร",
-    "userIdentity": "ตัวตนผู้ใช้: {id}"
+    "userIdentity": "ตัวตนผู้ใช้: {id}",
+    "removeFriend": "ลบเพื่อน",
+    "blockUser": "บล็อค",
+    "friendRemoved": "ลบเพื่อนแล้ว",
+    "userBlocked": "บล็อคแล้ว"
   },
   "messages": {
     "invalidInput": "ข้อมูลไม่ถูกต้อง",

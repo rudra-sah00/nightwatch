@@ -343,7 +343,9 @@
       "callOverlay": "Anruf-Overlay",
       "speaker": "Lautsprecher",
       "earpiece": "Hörer"
-    }
+    },
+    "removeFriend": "Freund entfernen",
+    "blockUser": "Benutzer blockieren"
   },
   "clips": {
     "subtitle": "Your clips and saved moments",

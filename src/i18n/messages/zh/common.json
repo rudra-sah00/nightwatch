@@ -343,7 +343,9 @@
       "callOverlay": "通话窗口",
       "speaker": "扬声器",
       "earpiece": "听筒"
-    }
+    },
+    "removeFriend": "删除好友",
+    "blockUser": "屏蔽用户"
   },
   "clips": {
     "subtitle": "Your clips and saved moments",

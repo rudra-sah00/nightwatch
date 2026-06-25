@@ -102,7 +102,11 @@
     "daysActive": "AKTİF GÜN",
     "hrsTotal": "TOPLAM SAAT",
     "coreVersion": "ÇEKİRDEK SÜRÜM: V1.0-KARALI",
-    "userIdentity": "KULLANICI KİMLİĞİ: {id}"
+    "userIdentity": "KULLANICI KİMLİĞİ: {id}",
+    "removeFriend": "Arkadaşı kaldır",
+    "blockUser": "Engelle",
+    "friendRemoved": "Arkadaş kaldırıldı",
+    "userBlocked": "Kullanıcı engellendi"
   },
   "messages": {
     "invalidInput": "Geçersiz giriş",

@@ -102,7 +102,11 @@
     "daysActive": "सक्रिय दिन",
     "hrsTotal": "कुल घंटे",
     "coreVersion": "कोर संस्करण: V1.0-STABLE",
-    "userIdentity": "उपयोगकर्ता पहचान: {id}"
+    "userIdentity": "उपयोगकर्ता पहचान: {id}",
+    "removeFriend": "मित्र हटाएं",
+    "blockUser": "ब्लॉक करें",
+    "friendRemoved": "मित्र हटाया गया",
+    "userBlocked": "उपयोगकर्ता अवरुद्ध"
   },
   "messages": {
     "invalidInput": "अमान्य इनपुट",

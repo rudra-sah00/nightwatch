@@ -7,6 +7,8 @@ vi.mock('lucide-react', () => ({
   User: () => <div data-testid="user-icon" />,
   Calendar: () => <div data-testid="calendar-icon" />,
   Home: () => <div data-testid="home-icon" />,
+  UserMinus: () => <div data-testid="user-minus-icon" />,
+  ShieldBan: () => <div data-testid="shield-ban-icon" />,
 }));
 
 // Mock ActivityGraph component as it has its own tests
@@ -25,6 +27,16 @@ vi.mock('next/navigation', () => ({
 // Mock the API service so we don't need to mock global fetch
 vi.mock('@/features/profile/api', () => ({
   getPublicProfile: vi.fn(),
+}));
+
+vi.mock('@/store/use-auth-store', () => ({
+  useAuthStore: (selector: (s: { user: { id: string } | null }) => unknown) =>
+    selector({ user: { id: 'current-user-id' } }),
+}));
+
+vi.mock('@/features/friends/api', () => ({
+  removeFriend: vi.fn(),
+  blockUser: vi.fn(),
 }));
 
 describe('PublicProfilePage (Server Component)', () => {

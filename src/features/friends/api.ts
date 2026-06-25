@@ -115,6 +115,19 @@ export async function blockUser(userId: string): Promise<void> {
 }
 
 /**
+ * Removes an accepted friend by their user ID.
+ *
+ * @param userId - The friend's user ID to remove.
+ */
+export async function removeFriend(userId: string): Promise<void> {
+  await apiFetch('/api/friends/remove', {
+    method: 'DELETE',
+    body: JSON.stringify({ userId }),
+  });
+  trackEvent('friend_remove');
+}
+
+/**
  * Unblocks a previously blocked user.
  *
  * @param userId - The user ID to unblock.

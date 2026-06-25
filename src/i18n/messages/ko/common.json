@@ -343,7 +343,9 @@
       "callOverlay": "통화 오버레이",
       "speaker": "스피커",
       "earpiece": "이어피스"
-    }
+    },
+    "removeFriend": "친구 삭제",
+    "blockUser": "차단"
   },
   "clips": {
     "subtitle": "Your clips and saved moments",

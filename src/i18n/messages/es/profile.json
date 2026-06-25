@@ -102,7 +102,11 @@
     "daysActive": "DÍAS ACTIVO",
     "hrsTotal": "HRS TOTALES",
     "coreVersion": "VERSIÓN CORE: V1.0-STABLE",
-    "userIdentity": "IDENTIDAD DE USUARIO: {id}"
+    "userIdentity": "IDENTIDAD DE USUARIO: {id}",
+    "removeFriend": "Eliminar amigo",
+    "blockUser": "Bloquear usuario",
+    "friendRemoved": "Amigo eliminado",
+    "userBlocked": "Usuario bloqueado"
   },
   "messages": {
     "invalidInput": "Entrada no válida",

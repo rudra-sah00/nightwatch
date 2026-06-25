@@ -343,7 +343,9 @@
       "callOverlay": "Arama penceresi",
       "speaker": "Hoparlör",
       "earpiece": "Kulaklık"
-    }
+    },
+    "removeFriend": "Arkadaşı kaldır",
+    "blockUser": "Kullanıcıyı engelle"
   },
   "clips": {
     "subtitle": "Your clips and saved moments",

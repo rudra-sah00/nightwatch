@@ -232,6 +232,8 @@
     "blockedLabel": "Blocked",
     "unblockLabel": "Unblock",
     "searchFriends": "Search friends...",
+    "removeFriend": "Remove Friend",
+    "blockUser": "Block User",
     "call": {
       "incoming": "Incoming call...",
       "outgoing": "Calling...",

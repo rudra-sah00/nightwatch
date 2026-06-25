@@ -1,9 +1,11 @@
 'use client';
 
-import { Calendar, Home, User } from 'lucide-react';
+import { Calendar, Home, ShieldBan, User, UserMinus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { blockUser, removeFriend } from '@/features/friends/api';
+import { useAuthStore } from '@/store/use-auth-store';
 import type { ActivityData } from '../types';
 import { ActivityGraph } from './activity-graph';
 
@@ -79,6 +81,22 @@ export function PublicProfileView({
     profile.activity.reduce((acc, curr) => acc + curr.watchSeconds, 0) / 3600,
   );
 
+  const currentUser = useAuthStore((s) => s.user);
+  const isOwnProfile = currentUser?.id === profile.id;
+  const [friendAction, setFriendAction] = useState<
+    'none' | 'removed' | 'blocked'
+  >('none');
+
+  const handleRemove = useCallback(async () => {
+    await removeFriend(profile.id);
+    setFriendAction('removed');
+  }, [profile.id]);
+
+  const handleBlock = useCallback(async () => {
+    await blockUser(profile.id);
+    setFriendAction('blocked');
+  }, [profile.id]);
+
   return (
     <div className="min-h-0 flex-1 overflow-y-auto bg-background text-foreground selection:bg-neo-yellow selection:text-foreground">
       {/* Background patterns / abstract shapes for premium look */}
@@ -142,6 +160,37 @@ export function PublicProfileView({
                   {t('updateForm.joined', { date: joinDate })}
                 </div>
               </div>
+
+              {!isOwnProfile && friendAction === 'none' && (
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleRemove}
+                    className="flex items-center gap-2 px-4 py-2 border-[3px] border-border bg-muted hover:bg-muted/70 text-sm font-headline font-bold uppercase tracking-widest transition-colors"
+                  >
+                    <UserMinus className="w-4 h-4" />
+                    {t('publicProfile.removeFriend')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBlock}
+                    className="flex items-center gap-2 px-4 py-2 border-[3px] border-border bg-red-500/10 hover:bg-red-500/20 text-red-500 text-sm font-headline font-bold uppercase tracking-widest transition-colors"
+                  >
+                    <ShieldBan className="w-4 h-4" />
+                    {t('publicProfile.blockUser')}
+                  </button>
+                </div>
+              )}
+              {friendAction === 'removed' && (
+                <p className="pt-4 text-sm font-headline font-bold text-foreground/40 uppercase">
+                  {t('publicProfile.friendRemoved')}
+                </p>
+              )}
+              {friendAction === 'blocked' && (
+                <p className="pt-4 text-sm font-headline font-bold text-red-500/60 uppercase">
+                  {t('publicProfile.userBlocked')}
+                </p>
+              )}
             </div>
 
             {/* Quick Stats Bento */}

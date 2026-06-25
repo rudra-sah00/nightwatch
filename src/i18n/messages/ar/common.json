@@ -343,7 +343,9 @@
       "callOverlay": "نافذة المكالمة",
       "speaker": "مكبر الصوت",
       "earpiece": "سماعة الأذن"
-    }
+    },
+    "removeFriend": "إزالة صديق",
+    "blockUser": "حظر المستخدم"
   },
   "clips": {
     "subtitle": "Your clips and saved moments",

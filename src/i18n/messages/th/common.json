@@ -343,7 +343,9 @@
       "callOverlay": "หน้าต่างสาย",
       "speaker": "ลำโพง",
       "earpiece": "หูฟัง"
-    }
+    },
+    "removeFriend": "ลบเพื่อน",
+    "blockUser": "บล็อคผู้ใช้"
   },
   "clips": {
     "subtitle": "Your clips and saved moments",

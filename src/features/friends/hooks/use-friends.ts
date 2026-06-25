@@ -4,12 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   acceptFriendRequest,
   type BlockedUser,
+  blockUser,
   cancelFriendRequest,
   getBlockedUsers,
   getFriends,
   getPendingRequests,
   getSentRequests,
   rejectFriendRequest,
+  removeFriend,
   unblockUser,
 } from '@/features/friends/api';
 import type {
@@ -191,6 +193,22 @@ export function useFriends() {
     [fetchAll],
   );
 
+  const block = useCallback(
+    async (userId: string) => {
+      await blockUser(userId);
+      fetchAll();
+    },
+    [fetchAll],
+  );
+
+  const remove = useCallback(
+    async (userId: string) => {
+      await removeFriend(userId);
+      fetchAll();
+    },
+    [fetchAll],
+  );
+
   return {
     friends,
     onlineFriends,
@@ -203,6 +221,8 @@ export function useFriends() {
     reject,
     cancel,
     unblock,
+    block,
+    remove,
     refetch: fetchAll,
   };
 }

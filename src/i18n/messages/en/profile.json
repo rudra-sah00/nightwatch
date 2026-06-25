@@ -118,7 +118,11 @@
     "daysActive": "DAYS ACTIVE",
     "hrsTotal": "HRS TOTAL",
     "coreVersion": "CORE VERSION: V1.0-STABLE",
-    "userIdentity": "USER IDENTITY: {id}"
+    "userIdentity": "USER IDENTITY: {id}",
+    "removeFriend": "Remove Friend",
+    "blockUser": "Block User",
+    "friendRemoved": "Friend removed",
+    "userBlocked": "User blocked"
   },
   "validation": {
     "nameMinLength": "Name must be at least 2 characters",

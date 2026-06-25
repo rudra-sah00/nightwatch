@@ -343,7 +343,9 @@
       "callOverlay": "Окно звонка",
       "speaker": "Динамик",
       "earpiece": "Наушник"
-    }
+    },
+    "removeFriend": "Удалить друга",
+    "blockUser": "Заблокировать"
   },
   "clips": {
     "subtitle": "Your clips and saved moments",

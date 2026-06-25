@@ -102,7 +102,11 @@
     "daysActive": "ДНЕЙ АКТИВНОСТИ",
     "hrsTotal": "ЧАСОВ ВСЕГО",
     "coreVersion": "ВЕРСИЯ ЯДРА: V1.0-СТАБИЛЬНАЯ",
-    "userIdentity": "ИДЕНТИФИКАТОР ПОЛЬЗОВАТЕЛЯ: {id}"
+    "userIdentity": "ИДЕНТИФИКАТОР ПОЛЬЗОВАТЕЛЯ: {id}",
+    "removeFriend": "Удалить друга",
+    "blockUser": "Заблокировать",
+    "friendRemoved": "Друг удалён",
+    "userBlocked": "Пользователь заблокирован"
   },
   "messages": {
     "invalidInput": "Неверный ввод",

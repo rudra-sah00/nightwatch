@@ -102,7 +102,11 @@
     "daysActive": "アクティブ日数",
     "hrsTotal": "合計時間",
     "coreVersion": "コアバージョン: V1.0-STABLE",
-    "userIdentity": "ユーザーID：{id}"
+    "userIdentity": "ユーザーID：{id}",
+    "removeFriend": "フレンド削除",
+    "blockUser": "ブロック",
+    "friendRemoved": "フレンド削除済み",
+    "userBlocked": "ブロック済み"
   },
   "messages": {
     "invalidInput": "無効な入力",

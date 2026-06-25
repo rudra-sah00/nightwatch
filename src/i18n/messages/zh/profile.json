@@ -102,7 +102,11 @@
     "daysActive": "活跃天数",
     "hrsTotal": "总小时数",
     "coreVersion": "核心版本: V1.0-稳定版",
-    "userIdentity": "用户身份: {id}"
+    "userIdentity": "用户身份: {id}",
+    "removeFriend": "删除好友",
+    "blockUser": "屏蔽",
+    "friendRemoved": "已删除好友",
+    "userBlocked": "已屏蔽"
   },
   "messages": {
     "invalidInput": "输入无效",

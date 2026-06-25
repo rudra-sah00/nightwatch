@@ -52,6 +52,8 @@ export function RightSidebar() {
     reject,
     cancel,
     unblock,
+    block,
+    remove,
     refetch,
   } = useFriends();
   const t = useTranslations('common.friends');
@@ -200,6 +202,8 @@ export function RightSidebar() {
                       photo={f.profilePhoto}
                       isOnline
                       activity={f.activity ?? null}
+                      onBlock={block}
+                      onRemove={remove}
                     />
                   </div>
                 ))}
@@ -225,6 +229,8 @@ export function RightSidebar() {
                       photo={f.profilePhoto}
                       isOnline={false}
                       activity={null}
+                      onBlock={block}
+                      onRemove={remove}
                     />
                   </div>
                 ))}

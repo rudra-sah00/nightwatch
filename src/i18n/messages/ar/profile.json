@@ -102,7 +102,11 @@
     "daysActive": "أيام النشاط",
     "hrsTotal": "ساعات الإجمالي",
     "coreVersion": "الإصدار الأساسي: V1.0-مستقر",
-    "userIdentity": "هوية المستخدم: {id}"
+    "userIdentity": "هوية المستخدم: {id}",
+    "removeFriend": "إزالة صديق",
+    "blockUser": "حظر",
+    "friendRemoved": "تمت إزالة الصديق",
+    "userBlocked": "تم حظر المستخدم"
   },
   "messages": {
     "invalidInput": "إدخال غير صالح",
