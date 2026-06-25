@@ -3,7 +3,6 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
-import { toast } from 'sonner';
 import { useQrDeepLink } from '@/features/auth/hooks/use-qr-deep-link';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { mobileBridge } from '@/lib/mobile-bridge';
@@ -18,7 +17,7 @@ export function MobileShell() {
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
   pathnameRef.current = pathname;
-  const t = useTranslations('common.manga');
+  const _t = useTranslations('common.manga');
 
   useQrDeepLink();
 
@@ -66,13 +65,7 @@ export function MobileShell() {
     });
 
     // --- NETWORK DETECTION ---
-    const unlistenNetwork = mobileBridge.onNetworkChange((status) => {
-      if (!status.connected) {
-        toast.error(t('noInternet'));
-      } else {
-        toast.success(t('backOnline'));
-      }
-    });
+    const unlistenNetwork = mobileBridge.onNetworkChange(() => {});
 
     // --- KEYBOARD: track open state ---
     const unlistenKbShow = mobileBridge.onKeyboardShow(({ keyboardHeight }) => {
@@ -112,7 +105,7 @@ export function MobileShell() {
       unlistenKbHide();
       document.removeEventListener('touchstart', handleTapDismiss);
     };
-  }, [router, t]);
+  }, [router]);
 
   return null;
 }

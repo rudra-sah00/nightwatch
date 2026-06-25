@@ -1,10 +1,8 @@
 'use client';
 
-import { Wifi, WifiOff } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 /**
  * Monitors the browser's online/offline status and shows toast notifications
@@ -16,7 +14,7 @@ import { toast } from 'sonner';
  * @returns `null` — all feedback is delivered via `sonner` toasts.
  */
 export function OfflineIndicator() {
-  const t = useTranslations('common.offline');
+  const _t = useTranslations('common.offline');
   const [isOffline, setIsOffline] = useState(false);
   const [dismissed, _setDismissed] = useState(false);
   // Ensure we get mounted correctly on client without hydration mismatch
@@ -31,28 +29,10 @@ export function OfflineIndicator() {
 
     const handleOffline = () => {
       setIsOffline(true);
-      toast(t('toastOffline'), {
-        icon: <WifiOff className="w-4 h-4 text-neo-red" />,
-        style: {
-          backgroundColor: '#09090b',
-          color: '#ef4444',
-          border: '2px solid #ef4444',
-          fontWeight: 'bold',
-        },
-      });
     };
 
     const handleOnline = () => {
       setIsOffline(false);
-      toast(t('toastOnline'), {
-        icon: <Wifi className="w-4 h-4 text-neo-green" />,
-        style: {
-          backgroundColor: '#09090b',
-          color: '#22c55e',
-          border: '2px solid #22c55e',
-          fontWeight: 'bold',
-        },
-      });
     };
 
     window.addEventListener('offline', handleOffline);
@@ -62,7 +42,7 @@ export function OfflineIndicator() {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
     };
-  }, [t]);
+  }, []);
 
   if (!mounted) return null;
 

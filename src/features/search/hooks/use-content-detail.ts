@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -74,6 +75,7 @@ export function useContentDetail({
   fromContinueWatching = false,
 }: UseContentDetailOptions): UseContentDetailReturn {
   const t = useTranslations('common.toasts');
+  const queryClient = useQueryClient();
   // 1. Fetch Show Details
   const { show, isLoading } = useShowDetails(contentId);
 
@@ -122,6 +124,7 @@ export function useContentDetail({
         if (inWatchlist) {
           await removeFromWatchlist(show.id);
           setInWatchlist(false);
+          queryClient.invalidateQueries({ queryKey: ['watchlist'] });
           toast.success(t('removedFromWatchlist'));
         } else {
           await addToWatchlist({
@@ -132,6 +135,7 @@ export function useContentDetail({
             posterUrl: show.posterUrl,
           });
           setInWatchlist(true);
+          queryClient.invalidateQueries({ queryKey: ['watchlist'] });
           toast.success(t('addedToWatchlist'));
         }
       } catch (_error) {
