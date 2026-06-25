@@ -154,7 +154,7 @@ export function LeftSidebar() {
   // Mobile only: push-style (absolute, revealed when content pushes right)
   return (
     <aside
-      className={`md:hidden absolute top-0 left-0 bottom-0 w-[75%] z-10 bg-background flex flex-col transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      className={`md:hidden absolute top-0 left-0 bottom-0 w-[75%] z-30 bg-background flex flex-col transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
     >
       {mobileNav(closeSidebar)}
     </aside>
