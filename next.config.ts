@@ -49,7 +49,6 @@ const nextConfig: NextConfig = {
       static: 300,
     },
   },
-  cacheComponents: true,
   logging: {
     fetches: {
       fullUrl: true,

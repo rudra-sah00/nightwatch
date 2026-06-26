@@ -9,7 +9,27 @@ export const metadata: Metadata = {
   description: 'Join your friends and watch together in real-time.',
 };
 
-export default async function WatchPartyPage({
+export default function WatchPartyPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <WatchPartyLoader params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function WatchPartyLoader({
   params,
   searchParams,
 }: {
@@ -20,28 +40,6 @@ export default async function WatchPartyPage({
   const resolvedSearchParams = await searchParams;
   const roomId = resolvedParams.id.toUpperCase();
   const isNewParty = resolvedSearchParams.new === 'true';
-
-  return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-screen bg-background">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      }
-    >
-      <WatchPartyLoader roomId={roomId} isNewParty={isNewParty} />
-    </Suspense>
-  );
-}
-
-async function WatchPartyLoader({
-  roomId,
-  isNewParty,
-}: {
-  roomId: string;
-  isNewParty: boolean;
-}) {
-  // Fetch room existence on the server for instant UI feedback
   const result = await checkRoomExists(roomId);
 
   return (
