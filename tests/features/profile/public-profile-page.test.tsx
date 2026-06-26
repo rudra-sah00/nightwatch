@@ -4,6 +4,7 @@ import PublicProfilePage from '@/app/(protected)/(main)/user/[id]/page';
 
 // Mock specific lucide-react icons used in the page
 vi.mock('lucide-react', () => ({
+  ArrowLeft: () => <div data-testid="arrow-left-icon" />,
   User: () => <div data-testid="user-icon" />,
   Calendar: () => <div data-testid="calendar-icon" />,
   Home: () => <div data-testid="home-icon" />,
