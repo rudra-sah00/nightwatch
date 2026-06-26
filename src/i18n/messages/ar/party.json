@@ -194,6 +194,7 @@
     "hostRejected": "رفض المضيف طلبك",
     "hostLeftRoom": "غادر المضيف الغرفة",
     "failedCreateRoom": "فشل في إنشاء الغرفة",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "أنهى المضيف الحفلة.",
     "mediaError": "خطأ في الوسائط: {message}",
     "unknownMediaError": "حدث خطأ غير معروف"

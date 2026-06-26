@@ -11,6 +11,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { RemoveConfirmPopup } from '@/components/ui/remove-confirm-popup';
 import { recordPostView } from '@/features/explore/api';
 import type { ExplorePost } from '@/features/explore/types';
 import { useAuthStore } from '@/store/use-auth-store';
@@ -48,6 +49,7 @@ export const PostCard = memo(function PostCard({
   const user = useAuthStore((s) => s.user);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const isOwn = user?.id === post.authorId;
   const cardRef = useRef<HTMLButtonElement>(null);
@@ -168,7 +170,7 @@ export const PostCard = memo(function PostCard({
                       <button
                         type="button"
                         onClick={() => {
-                          onDelete(post.id);
+                          setShowDeleteConfirm(true);
                           setMenuOpen(false);
                         }}
                         className="flex items-center gap-2 w-full px-3 py-2 text-sm text-neo-red hover:bg-black/5 dark:hover:bg-white/5"
@@ -337,6 +339,16 @@ export const PostCard = memo(function PostCard({
           </div>
         </div>
       </div>
+
+      <RemoveConfirmPopup
+        open={showDeleteConfirm}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          onDelete(post.id);
+        }}
+        onCancel={() => setShowDeleteConfirm(false)}
+        message="Delete this post?"
+      />
     </button>
   );
 });

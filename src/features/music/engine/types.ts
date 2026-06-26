@@ -126,6 +126,8 @@ export interface EngineContext {
   sleepTimerHandle: ReturnType<typeof setTimeout> | null;
   progressInterval: ReturnType<typeof setInterval> | null;
   listeners: Set<(state: AudioEngineState) => void>;
+  /** Set true before intentional pause to suppress onpause side-effects. */
+  intentionalPause: boolean;
   // Mutators
   update(partial: Partial<AudioEngineState>): void;
   setAudio(el: HTMLAudioElement): void;

@@ -70,6 +70,7 @@
   "loginRequired": "워치 파티를 주최하려면 로그인해야 합니다.",
   "noEpisodesOffline": "오프라인에서 사용할 수 있는 에피소드가 없습니다.",
   "failedPlayback": "재생 시작 실패",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "팀 1",
   "teamFallback2": "팀 2",
   "twentyFourSevenChannel": "24/7 채널",

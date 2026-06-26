@@ -43,9 +43,11 @@ export function LinkPreviewCard({ content }: { content: string }) {
   useEffect(() => {
     if (!url) return;
     let cancelled = false;
-    cachedFetchPreview(url).then((p) => {
-      if (!cancelled) setPreview(p);
-    });
+    cachedFetchPreview(url)
+      .then((p) => {
+        if (!cancelled) setPreview(p);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -53,9 +55,13 @@ export function LinkPreviewCard({ content }: { content: string }) {
 
   if (!preview || !preview.title) return null;
 
+  const safeUrl =
+    preview.url && /^https?:\/\//i.test(preview.url) ? preview.url : undefined;
+  if (!safeUrl) return null;
+
   return (
     <a
-      href={preview.url}
+      href={safeUrl}
       target="_blank"
       rel="noopener noreferrer"
       className="mt-3 flex overflow-hidden border border-border rounded-xl hover:bg-muted/30 transition-colors group"

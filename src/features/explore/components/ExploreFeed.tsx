@@ -2,6 +2,7 @@
 
 import { Compass } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getViewCounts } from '@/features/explore/api';
 import { useExploreFeed } from '@/features/explore/hooks/use-explore-feed';
@@ -36,6 +37,7 @@ export function ExploreFeed({
     handlePollVote,
   } = usePostActions({ updatePost, removePost, prependPost });
   const [openThread, setOpenThread] = useState<string | null>(null);
+  const t = useTranslations('common');
   const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
   const viewCountsRef = useRef(viewCounts);
   viewCountsRef.current = viewCounts;
@@ -205,8 +207,8 @@ export function ExploreFeed({
         {!isLoading && posts.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-foreground/40">
             <Compass className="w-12 h-12 mb-3" />
-            <p className="font-headline font-bold">No posts yet</p>
-            <p className="text-sm mt-1">Be the first to share something!</p>
+            <p className="font-headline font-bold">{t('explore.noPosts')}</p>
+            <p className="text-sm mt-1">{t('explore.beFirst')}</p>
           </div>
         )}
 

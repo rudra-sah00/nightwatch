@@ -194,6 +194,7 @@
     "hostRejected": "โฮสต์ปฏิเสธคำขอของคุณ",
     "hostLeftRoom": "โฮสต์ออกจากห้องแล้ว",
     "failedCreateRoom": "ไม่สามารถสร้างห้องได้",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "โฮสต์ได้สิ้นสุดปาร์ตี้แล้ว",
     "mediaError": "ข้อผิดพลาดสื่อ: {message}",
     "unknownMediaError": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ"

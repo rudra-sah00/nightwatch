@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
   ssr: false,
   loading: () => (
-    <div className="w-[350px] h-[400px] bg-card rounded-lg animate-pulse" />
+    <div className="w-[320px] max-w-full h-[400px] bg-card rounded-lg animate-pulse" />
   ),
 });
 

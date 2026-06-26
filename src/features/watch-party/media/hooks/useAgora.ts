@@ -761,17 +761,6 @@ export function useAgora({
         localAudioTrackRef.current = null;
         setAudioEnabled(false);
       } else {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          stream.getTracks().forEach((t) => {
-            t.stop();
-          });
-        } catch {
-          // Fall through, handleDeviceError will catch
-        }
-
         // Auto-undeafen if the user opens their mic while deafened
         if (isDeafenedRef.current) {
           isDeafenedRef.current = false;
@@ -848,17 +837,6 @@ export function useAgora({
         localVideoTrackRef.current = null;
         setVideoEnabled(false);
       } else {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-          });
-          stream.getTracks().forEach((t) => {
-            t.stop();
-          });
-        } catch {
-          // Fall through, handleDeviceError will catch
-        }
-
         const AgoraRTC = await getAgoraRTC();
         const videoTrack = await AgoraRTC.createCameraVideoTrack({
           cameraId: selectedVideoDeviceRef.current || undefined,

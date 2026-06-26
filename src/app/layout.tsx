@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import 'material-symbols/outlined.css';
 import './globals.css';
+import { getLocale } from 'next-intl/server';
 import { Suspense } from 'react';
 import { CookieConsent } from '@/components/layout/CookieConsent';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
@@ -13,7 +14,6 @@ import { DiscordPresenceSync } from '@/platforms/desktop/DiscordPresenceSync';
 import { ElectronDragRegion } from '@/platforms/desktop/ElectronDragRegion';
 import { MobileShell } from '@/platforms/mobile/MobileShell';
 import { AuthProvider } from '@/providers/auth-provider';
-
 import { IntlProvider } from '@/providers/intl-provider';
 import { QueryProvider } from '@/providers/query-provider';
 import { SocketProvider } from '@/providers/socket-provider';
@@ -95,8 +95,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const dir = locale === 'ar' ? 'rtl' : 'ltr';
+
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         {/* JSON-LD Structured Data */}
         <script

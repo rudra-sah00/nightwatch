@@ -69,6 +69,7 @@
   "loginRequired": "You must be logged in to host a watch party.",
   "noEpisodesOffline": "No episodes available offline.",
   "failedPlayback": "Failed to start playback",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "Team 1",
   "teamFallback2": "Team 2",
   "twentyFourSevenChannel": "24/7 Channel",

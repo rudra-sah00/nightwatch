@@ -38,6 +38,7 @@ function createMockCtx(overrides: Partial<EngineContext> = {}): EngineContext {
     sleepTimerHandle: null,
     progressInterval: null,
     listeners: new Set(),
+    intentionalPause: false,
     update: (partial) => {
       Object.assign(state, partial);
     },

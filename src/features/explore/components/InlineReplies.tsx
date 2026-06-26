@@ -21,9 +21,14 @@ export function InlineReplies({ postId, replyCount }: InlineRepliesProps) {
       return;
     } // Toggle collapse
     setLoading(true);
-    const data = await getPostReplies(postId);
-    setReplies(data);
-    setLoading(false);
+    try {
+      const data = await getPostReplies(postId);
+      setReplies(data);
+    } catch {
+      // Non-fatal - just collapse loading
+    } finally {
+      setLoading(false);
+    }
   }, [postId, replies]);
 
   if (replyCount === 0) return null;

@@ -82,7 +82,7 @@ export function EmojiReactions({
         aria-expanded={showPicker}
         aria-haspopup="dialog"
       >
-        <Plus className="w-3.5 h-3.5 md:w-4 h-4 lg:w-5 h-5" />
+        <Plus className="w-3.5 h-3.5 md:w-4 md:h-4 lg:w-5 lg:h-5" />
       </button>
 
       {/* Popover */}

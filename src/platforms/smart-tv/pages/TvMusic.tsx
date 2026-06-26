@@ -18,7 +18,9 @@ import { FOCUS_KEYS } from '../lib/focus-keys';
 
 function NowPlaying() {
   const t = useTranslations('common.tv.music');
-  const { currentTrack, isPlaying, setExpanded } = useMusicStore();
+  const currentTrack = useMusicStore((s) => s.currentTrack);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const setExpanded = useMusicStore((s) => s.setExpanded);
   const { ref, focused } = useFocusable({
     focusKey: 'MUSIC_NOW_PLAYING',
     onEnterPress: () => {

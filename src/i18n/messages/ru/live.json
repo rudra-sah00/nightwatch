@@ -70,6 +70,7 @@
   "loginRequired": "Для проведения совместного просмотра необходимо войти в систему.",
   "noEpisodesOffline": "Нет эпизодов, доступных офлайн.",
   "failedPlayback": "Не удалось начать воспроизведение",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "Команда 1",
   "teamFallback2": "Команда 2",
   "twentyFourSevenChannel": "Канал 24/7",

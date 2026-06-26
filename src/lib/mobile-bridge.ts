@@ -57,9 +57,13 @@ export const mobileBridge = {
 
   // --- Clipboard ---
   /** Write {@link text} to the system clipboard. */
-  copyToClipboard: (text: string) => Clipboard.write({ string: text }),
+  copyToClipboard: (text: string) =>
+    Clipboard.write({ string: text }).catch(() => {}),
   /** Read the current clipboard text value. */
-  readClipboard: () => Clipboard.read().then((r) => r.value),
+  readClipboard: () =>
+    Clipboard.read()
+      .then((r) => r.value)
+      .catch(() => null),
 
   // --- Haptics ---
   /**
@@ -109,7 +113,11 @@ export const mobileBridge = {
 
   // --- Network ---
   /** Get the current network connection status. */
-  getNetworkStatus: () => Network.getStatus(),
+  getNetworkStatus: () =>
+    Network.getStatus().catch(() => ({
+      connected: true,
+      connectionType: 'unknown',
+    })),
   /**
    * Subscribe to network status changes.
    * @param cb - Called with `{ connected, connectionType }` on every change.
@@ -132,16 +140,16 @@ export const mobileBridge = {
    * @param opts - Share payload with optional `title`, `text`, and `url`.
    */
   share: (opts: { title?: string; text?: string; url?: string }) =>
-    Share.share(opts),
+    Share.share(opts).catch(() => {}),
 
   // --- Badge ---
   /**
    * Set the app icon badge count.
    * @param count - Number to display on the badge.
    */
-  setBadge: (count: number) => Badge.set({ count }),
+  setBadge: (count: number) => Badge.set({ count }).catch(() => {}),
   /** Clear the app icon badge. */
-  clearBadge: () => Badge.clear(),
+  clearBadge: () => Badge.clear().catch(() => {}),
 
   // --- Preferences (key-value store, like electron-store) ---
   /**
@@ -150,20 +158,25 @@ export const mobileBridge = {
    * @returns The stored string value, or `null` if not found.
    */
   storeGet: async (key: string): Promise<string | null> => {
-    const { value } = await Preferences.get({ key });
-    return value;
+    try {
+      const { value } = await Preferences.get({ key });
+      return value;
+    } catch {
+      return null;
+    }
   },
   /**
    * Write a value to the native key-value store.
    * @param key - Storage key.
    * @param value - String value to persist.
    */
-  storeSet: (key: string, value: string) => Preferences.set({ key, value }),
+  storeSet: (key: string, value: string) =>
+    Preferences.set({ key, value }).catch(() => {}),
   /**
    * Delete a key from the native key-value store.
    * @param key - Storage key to remove.
    */
-  storeDelete: (key: string) => Preferences.remove({ key }),
+  storeDelete: (key: string) => Preferences.remove({ key }).catch(() => {}),
 
   // --- Keyboard ---
   /** Programmatically hide the software keyboard. */

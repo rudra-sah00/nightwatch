@@ -108,14 +108,14 @@ describe('WatchPartyChat', () => {
     it('should render send button', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const sendButton = screen.getByRole('button', { name: '' });
+      const sendButton = screen.getByRole('button', { name: 'send' });
       expect(sendButton).toBeInTheDocument();
     });
 
     it('should render emoji button', () => {
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('addEmoji');
+      const emojiButton = screen.getByLabelText('addEmoji');
       expect(emojiButton).toBeInTheDocument();
     });
   });
@@ -557,7 +557,7 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('addEmoji');
+      const emojiButton = screen.getByLabelText('addEmoji');
       await user.click(emojiButton);
 
       expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
@@ -567,7 +567,7 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('addEmoji');
+      const emojiButton = screen.getByLabelText('addEmoji');
       await user.click(emojiButton);
 
       expect(screen.getByTestId('emoji-picker')).toBeInTheDocument();
@@ -584,7 +584,7 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('addEmoji');
+      const emojiButton = screen.getByLabelText('addEmoji');
       await user.click(emojiButton);
 
       const input = screen.getByPlaceholderText('placeholder');
@@ -602,7 +602,7 @@ describe('WatchPartyChat', () => {
       const user = userEvent.setup();
       render(<WatchPartyChat {...defaultProps} />);
 
-      const emojiButton = screen.getByTitle('addEmoji');
+      const emojiButton = screen.getByLabelText('addEmoji');
       await user.click(emojiButton);
 
       const emojiToClick = screen.getByTestId('emoji-😊');

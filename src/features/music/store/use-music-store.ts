@@ -216,6 +216,15 @@ export function connectMusicEngine(
     engine.setCrossfadeDuration(persisted.crossfadeDuration);
   }
   engine.setGapless(persisted.gapless);
+  if (persisted.shuffle) {
+    engine.toggleShuffle();
+  }
+  if (persisted.repeat !== 'off') {
+    // Cycle to the persisted mode
+    const modes: RepeatMode[] = ['off', 'all', 'one'];
+    const target = modes.indexOf(persisted.repeat);
+    for (let i = 0; i < target; i++) engine.cycleRepeat();
+  }
 
   // Subscribe to engine state changes
   let prevProgress = 0;

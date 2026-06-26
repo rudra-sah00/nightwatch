@@ -2,6 +2,7 @@
 
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { formatTime } from '@/features/music/utils';
 
 /** Props for the {@link RecordButton} component. */
 interface RecordButtonProps {
@@ -19,17 +20,6 @@ interface RecordButtonProps {
   onStart: () => void;
   /** Callback to stop the current recording. */
   onStop: () => void;
-}
-
-/**
- * Formats seconds into `m:ss` display string.
- * @param seconds - Total seconds.
- * @returns Formatted time string.
- */
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
 /**

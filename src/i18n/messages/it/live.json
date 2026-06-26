@@ -70,6 +70,7 @@
   "loginRequired": "Devi effettuare l'accesso per organizzare una watch party.",
   "noEpisodesOffline": "Nessun episodio disponibile offline.",
   "failedPlayback": "Impossibile avviare la riproduzione",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "Squadra 1",
   "teamFallback2": "Squadra 2",
   "twentyFourSevenChannel": "Canale 24/7",

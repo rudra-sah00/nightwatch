@@ -1,6 +1,7 @@
 'use client';
 
 import { Monitor } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useAvailableTvs } from '../hooks/use-available-tvs';
 
 interface PlayOnTvButtonProps {
@@ -15,6 +16,7 @@ interface PlayOnTvButtonProps {
  */
 export function PlayOnTvButton({ movieId, title }: PlayOnTvButtonProps) {
   const { tvs, castToTv } = useAvailableTvs();
+  const t = useTranslations('common');
 
   if (tvs.length === 0) return null;
 
@@ -30,7 +32,7 @@ export function PlayOnTvButton({ movieId, title }: PlayOnTvButtonProps) {
       onClick={handleCast}
     >
       <Monitor className="w-4 h-4 stroke-[2.5px]" />
-      <span>Play on {tvs[0].deviceName}</span>
+      <span>{t('remote.playOnDevice', { device: tvs[0].deviceName })}</span>
     </button>
   );
 }

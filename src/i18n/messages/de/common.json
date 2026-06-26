@@ -371,7 +371,8 @@
     "play": "Play",
     "nextEpisode": "Next Episode →",
     "playbackEnded": "Playback ended on desktop",
-    "remoteControl": "Remote control"
+    "remoteControl": "Remote control",
+    "playOnDevice": "Play on {device}"
   },
   "askAi": {
     "startConversation": "Start conversation",
@@ -528,5 +529,10 @@
     "markUnread": "Als ungelesen markieren",
     "clearConfirmTitle": "Chat löschen?",
     "clearConfirmDesc": "Alle Nachrichten werden ausgeblendet. Neue Nachrichten erscheinen weiterhin."
+  },
+  "explore": {
+    "noPosts": "No posts yet",
+    "beFirst": "Be the first to share something!",
+    "reply": "Reply"
   }
 }

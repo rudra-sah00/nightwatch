@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { RemoveConfirmPopup } from '@/components/ui/remove-confirm-popup';
 import {
   connectGoogle,
   disconnectGoogle,
@@ -21,6 +22,7 @@ export function GoogleAccountSection() {
   const { user, updateUser } = useAuth();
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
   if (!user) return null;
 
@@ -80,7 +82,7 @@ export function GoogleAccountSection() {
           type="button"
           variant="neo-outline"
           size="default"
-          onClick={handleDisconnect}
+          onClick={() => setShowDisconnectConfirm(true)}
           disabled={isDisconnecting}
           className="w-full md:w-auto shrink-0"
         >
@@ -104,6 +106,16 @@ export function GoogleAccountSection() {
           {t('google.connect')}
         </Button>
       )}
+
+      <RemoveConfirmPopup
+        open={showDisconnectConfirm}
+        onConfirm={() => {
+          setShowDisconnectConfirm(false);
+          handleDisconnect();
+        }}
+        onCancel={() => setShowDisconnectConfirm(false)}
+        message={t('google.disconnectConfirm')}
+      />
     </section>
   );
 }

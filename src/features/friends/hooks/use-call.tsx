@@ -273,8 +273,8 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
         crashLog('Voice call Agora join failed');
         if (err instanceof Error) {
           reportError(`Voice call failed: ${err.message}`);
-          toast.error(err.message);
         }
+        toast.error('Failed to connect to call');
         cleanup();
       }
     },

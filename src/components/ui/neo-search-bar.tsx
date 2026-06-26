@@ -34,6 +34,7 @@ export function NeoSearchBar({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        aria-label={placeholder}
       />
     </div>
   );

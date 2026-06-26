@@ -371,7 +371,8 @@
     "play": "Play",
     "nextEpisode": "Next Episode →",
     "playbackEnded": "Playback ended on desktop",
-    "remoteControl": "Remote control"
+    "remoteControl": "Remote control",
+    "playOnDevice": "Play on {device}"
   },
   "askAi": {
     "startConversation": "Start conversation",
@@ -528,5 +529,10 @@
     "markUnread": "未読にする",
     "clearConfirmTitle": "チャットを消去しますか？",
     "clearConfirmDesc": "すべてのメッセージが非表示になります。新しいメッセージは引き続き表示されます。"
+  },
+  "explore": {
+    "noPosts": "No posts yet",
+    "beFirst": "Be the first to share something!",
+    "reply": "Reply"
   }
 }

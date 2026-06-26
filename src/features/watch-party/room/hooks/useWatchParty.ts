@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { injectTokenIntoUrl, wrapInProxy } from '@/features/watch/utils';
 import { useAuth } from '@/providers/auth-provider';
-import { injectTokenIntoUrl, wrapInProxy } from '../../../watch/utils';
 // Modular Hooks
 import { useWatchPartyChat } from '../../chat/hooks/useWatchPartyChat';
 import { useAgoraRtm } from '../../media/hooks/useAgoraRtm';
@@ -302,16 +302,18 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   // On connect/reconnect: fetch initial messages
   useEffect(() => {
     if (isRtmConnected && requestStatus === 'joined' && room?.id) {
-      getPartyMessages(room.id).then((response) => {
-        if (response.messages) {
-          const serverMessages = response.messages;
-          chat.setMessages((prev) => {
-            const serverIds = new Set(serverMessages.map((m) => m.id));
-            const newFromRtm = prev.filter((m) => !serverIds.has(m.id));
-            return [...serverMessages, ...newFromRtm];
-          });
-        }
-      });
+      getPartyMessages(room.id)
+        .then((response) => {
+          if (response.messages) {
+            const serverMessages = response.messages;
+            chat.setMessages((prev) => {
+              const serverIds = new Set(serverMessages.map((m) => m.id));
+              const newFromRtm = prev.filter((m) => !serverIds.has(m.id));
+              return [...serverMessages, ...newFromRtm];
+            });
+          }
+        })
+        .catch(() => {});
     }
   }, [isRtmConnected, requestStatus, room?.id, chat.setMessages]);
 

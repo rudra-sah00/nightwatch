@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { RemoveConfirmPopup } from '@/components/ui/remove-confirm-popup';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { cn } from '@/lib/utils';
 import { isTV } from '@/platforms/smart-tv/lib/detection';
@@ -92,8 +93,8 @@ export function UpdateProfileForm() {
             type="button"
             onClick={handleFileClick}
             disabled={isUploading}
-            className="absolute -bottom-2 -right-2 p-3 bg-card border border-border rounded-full shadow-md text-gray-700 hover:text-primary hover:border-blue-300 transition-[color,border-color,opacity] disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            title={t('updateForm.updatePhoto')}
+            className="absolute -bottom-2 -right-2 p-3 bg-card border border-border rounded-full shadow-md text-foreground/60 hover:text-primary hover:border-ring transition-[color,border-color,opacity] disabled:opacity-50 group/btn focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            aria-label={t('updateForm.updatePhoto')}
           >
             {isUploading ? (
               <Loader2 className="w-6 h-6 animate-spin text-foreground" />
@@ -135,6 +136,7 @@ export function UpdateProfileForm() {
                       profileFormRef.current?.requestSubmit();
                     }
                   }}
+                  aria-label={t('updateForm.displayName')}
                   className="col-start-1 row-start-1 w-full text-foreground outline-none caret-primary bg-transparent border-none p-0 focus:underline focus:decoration-4 underline-offset-4 focus:bg-accent focus:text-foreground rounded-sm font-headline font-bold uppercase transition-[opacity,background-color,color] opacity-0 focus:opacity-100"
                 />
               </div>
@@ -388,27 +390,12 @@ export function UpdateProfileForm() {
         </section>
       )}
 
-      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('updateForm.signOut')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('updateForm.signOutConfirm')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-8">
-            <AlertDialogCancel
-              type="button"
-              onClick={() => setShowLogoutDialog(false)}
-            >
-              {t('dangerZone.cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => logout()}>
-              {t('updateForm.signOut')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <RemoveConfirmPopup
+        open={showLogoutDialog}
+        onConfirm={() => logout()}
+        onCancel={() => setShowLogoutDialog(false)}
+        message={t('updateForm.signOutConfirm')}
+      />
 
       <AlertDialog
         open={profileForm.showDeleteDialog}

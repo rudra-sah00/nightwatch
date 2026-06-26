@@ -11,7 +11,9 @@ async function fadeOut(ctx: EngineContext, duration = 500): Promise<void> {
     ctx.audio.volume = (i / steps) * ctx.state.volume;
     await new Promise((r) => setTimeout(r, stepTime));
   }
+  ctx.intentionalPause = true;
   ctx.audio.pause();
+  ctx.intentionalPause = false;
   ctx.audio.volume = ctx.state.volume;
 }
 

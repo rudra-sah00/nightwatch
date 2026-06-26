@@ -33,9 +33,9 @@ export function InviteSpotlight({
   const t = useTranslations('common.friends.call');
 
   useEffect(() => {
-    getFriends().then((friends) =>
-      setOnlineFriends(friends.filter((f) => f.isOnline)),
-    );
+    getFriends()
+      .then((friends) => setOnlineFriends(friends.filter((f) => f.isOnline)))
+      .catch(() => {});
   }, []);
 
   const available = onlineFriends.filter(

@@ -194,6 +194,7 @@
     "hostRejected": "होस्ट ने आपका अनुरोध अस्वीकार कर दिया",
     "hostLeftRoom": "होस्ट ने रूम छोड़ दिया",
     "failedCreateRoom": "रूम बनाने में विफल",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "होस्ट ने पार्टी समाप्त कर दी है।",
     "mediaError": "मीडिया त्रुटि: {message}",
     "unknownMediaError": "एक अज्ञात त्रुटि हुई"

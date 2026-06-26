@@ -64,6 +64,8 @@ export function useWatchPartyChat({
   const typingTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
   );
+  const lastSendTimeRef = useRef<number>(0);
+  const SEND_RATE_LIMIT_MS = 300;
 
   // Cleanup typing timeouts on unmount
   useEffect(() => {
@@ -108,6 +110,10 @@ export function useWatchPartyChat({
   const sendMessage = useCallback(
     async (content: string) => {
       if (!room?.id || !userId || !currentUserName) return;
+
+      const now = Date.now();
+      if (now - lastSendTimeRef.current < SEND_RATE_LIMIT_MS) return;
+      lastSendTimeRef.current = now;
 
       // Optimistically add to UI
       const optimisticMsg: ChatMessage = {

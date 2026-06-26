@@ -4,6 +4,7 @@ import type { Theme } from 'emoji-picker-react';
 import { ArrowLeft, MessageCircle, Send, Smile } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import {
   createPost,
@@ -45,6 +46,7 @@ function ReplyItem({
   onReplyTo: (id: string, name: string) => void;
   children?: React.ReactNode;
 }) {
+  const t = useTranslations('common');
   return (
     <div className={depth > 0 ? 'ml-4 border-l-2 border-border/40 pl-3' : ''}>
       <div className="py-2.5">
@@ -89,7 +91,7 @@ function ReplyItem({
             className="flex items-center gap-1 text-foreground/40 hover:text-primary text-xs transition-colors"
           >
             <MessageCircle className="w-3.5 h-3.5" />
-            <span>Reply</span>
+            <span>{t('explore.reply')}</span>
           </button>
         </div>
       </div>

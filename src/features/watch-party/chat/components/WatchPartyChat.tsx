@@ -57,7 +57,11 @@ export const WatchPartyChatDisabled = memo(function WatchPartyChatDisabled({
 
   return (
     <div className="flex flex-col h-full relative">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
         {messages.map((msg, index) => {
           const isMe = msg.userId === currentUserId;
           const showHeader =
@@ -148,6 +152,8 @@ export const WatchPartyChat = memo(function WatchPartyChat({
         onScroll={handleScroll}
         className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 no-scrollbar bg-background"
         style={{ contentVisibility: 'auto' }}
+        aria-live="polite"
+        aria-relevant="additions"
       >
         {/* Loading skeleton when fetching older messages */}
         {isLoadingMore ? (
@@ -269,7 +275,8 @@ export const WatchPartyChat = memo(function WatchPartyChat({
                 ? 'bg-primary text-[var(--wp-accent,var(--neo-yellow))]'
                 : 'bg-background text-foreground hover:bg-neo-yellow/80',
             )}
-            title={t('addEmoji')}
+            aria-label={t('addEmoji')}
+            aria-expanded={showEmoji}
           >
             <Smile className="w-5 h-5 stroke-[3px]" />
           </Button>
@@ -281,12 +288,14 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             onKeyDown={handleKeyDown}
             placeholder={t('placeholder')}
             maxLength={200}
+            aria-label={t('placeholder')}
             data-allow-clipboard
             className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-background text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,var(--neo-blue))] transition-colors"
           />
           <Button
             type="submit"
             disabled={!input.trim()}
+            aria-label={t('send')}
             className={cn(
               'p-2.5 rounded-md transition-colors',
               input.trim()

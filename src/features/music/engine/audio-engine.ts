@@ -81,6 +81,7 @@ export class AudioEngine {
       sleepTimerHandle: null,
       progressInterval: null,
       listeners: new Set(),
+      intentionalPause: false,
       update: (partial) => {
         this.ctx.state = { ...this.ctx.state, ...partial };
         for (const fn of this.ctx.listeners) fn(this.ctx.state);
@@ -90,6 +91,16 @@ export class AudioEngine {
         this.ctx.audio.onended = () => this.handleEnded();
         this.ctx.audio.onloadedmetadata = () => {
           this.ctx.update({ duration: this.ctx.audio.duration });
+        };
+        this.ctx.audio.onpause = () => {
+          if (
+            this.ctx.state.isPlaying &&
+            !this.ctx.crossfadeActive &&
+            !this.ctx.intentionalPause
+          ) {
+            this.stopProgressTimer();
+            this.ctx.update({ isPlaying: false });
+          }
         };
       },
       setNextAudio: (el) => {
@@ -101,6 +112,18 @@ export class AudioEngine {
     audio.onended = () => this.handleEnded();
     audio.onloadedmetadata = () =>
       this.ctx.update({ duration: audio.duration });
+
+    // Sync state when OS pauses audio externally (phone calls, Siri, audio interruptions)
+    audio.onpause = () => {
+      if (
+        this.ctx.state.isPlaying &&
+        !this.ctx.crossfadeActive &&
+        !this.ctx.intentionalPause
+      ) {
+        this.stopProgressTimer();
+        this.ctx.update({ isPlaying: false });
+      }
+    };
 
     // Load persisted settings
     try {
@@ -211,13 +234,18 @@ export class AudioEngine {
         this.ctx.setAudio(this.ctx.nextAudio);
         this.ctx.setNextAudio(null);
         if (this.ctx.audioContext?.state === 'suspended') {
-          this.ctx.audioContext.resume().then(() => connectEqualizer(this.ctx));
+          this.ctx.audioContext.resume().then(() => {
+            connectEqualizer(this.ctx);
+            this.ctx.audio
+              .play()
+              .catch(() => this.ctx.update({ isPlaying: false }));
+          });
         } else {
           connectEqualizer(this.ctx);
+          this.ctx.audio
+            .play()
+            .catch(() => this.ctx.update({ isPlaying: false }));
         }
-        this.ctx.audio
-          .play()
-          .catch(() => this.ctx.update({ isPlaying: false }));
         this.ctx.update({
           currentTrack: this.ctx.state.queue[nextIdx],
           queueIndex: nextIdx,
@@ -234,6 +262,7 @@ export class AudioEngine {
 
   async playTrack(track: MusicTrack, queue?: MusicTrack[], startAt?: number) {
     abortCrossfade(this.ctx);
+    this.ctx.audio.volume = this.ctx.state.volume;
     invalidatePreBuffer(this.ctx);
     const myPlayId = this.ctx.incrementPlayId();
 
@@ -257,10 +286,12 @@ export class AudioEngine {
   togglePlay() {
     if (!this.ctx.state.currentTrack) return;
     if (this.ctx.state.isPlaying) {
+      this.ctx.intentionalPause = true;
       this.ctx.audio.pause();
       if (this.ctx.nextAudio && this.ctx.crossfadeActive) {
         this.ctx.nextAudio.pause();
       }
+      this.ctx.intentionalPause = false;
       this.stopProgressTimer();
       this.ctx.update({ isPlaying: false });
       trackEvent('music_pause');
@@ -282,6 +313,11 @@ export class AudioEngine {
 
   seek(percent: number) {
     if (!this.ctx.audio.duration) return;
+    // Abort active crossfade if user seeks away from the end
+    if (this.ctx.crossfadeActive) {
+      abortCrossfade(this.ctx);
+      this.ctx.audio.volume = this.ctx.state.volume;
+    }
     this.ctx.audio.currentTime = (percent / 100) * this.ctx.audio.duration;
     this.ctx.update({ progress: percent });
   }
@@ -351,7 +387,10 @@ export class AudioEngine {
 
   stop() {
     abortCrossfade(this.ctx);
+    this.ctx.audio.volume = this.ctx.state.volume;
+    this.ctx.intentionalPause = true;
     this.ctx.audio.pause();
+    this.ctx.intentionalPause = false;
     this.ctx.audio.src = '';
     this.stopProgressTimer();
     this.ctx.update({

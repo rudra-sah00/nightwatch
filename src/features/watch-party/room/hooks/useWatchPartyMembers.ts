@@ -325,84 +325,81 @@ export function useWatchPartyMembers({
       return;
     }
 
+    const onReconnect = () => {
+      socket.emit('watch-party:join_room', room.id);
+    };
+
+    const onPendingUpdated = (payload: { pendingMembers?: RoomMember[] }) => {
+      if (payload?.pendingMembers) {
+        setRoom((prev) => {
+          if (!prev) return null;
+
+          const existingIds = new Set(
+            prev.pendingMembers?.map((m) => m.id) || [],
+          );
+          const incomingPending = payload.pendingMembers as RoomMember[];
+          const newPendingCount = incomingPending.filter(
+            (m) => !existingIds.has(m.id),
+          ).length;
+
+          if (newPendingCount > 0) {
+            new Audio('/room-join.mp3').play().catch(() => {});
+            toast.success(tp('newJoinRequests', { count: newPendingCount }), {
+              id: 'new-join-request',
+            });
+          }
+
+          return {
+            ...prev,
+            pendingMembers: incomingPending.map((m) => ({
+              ...m,
+              profilePhoto: m.profilePhoto ?? undefined,
+            })),
+          };
+        });
+      }
+    };
+
     const setupSocketListeners = () => {
       if (!active) return;
       socket.emit('watch-party:join_room', room.id);
-
-      // Re-join room on reconnect (socket rooms are lost on disconnect)
-      socket.on('connect', () => {
-        socket.emit('watch-party:join_room', room.id);
-      });
-
-      socket.on(
-        'PENDING_MEMBERS_UPDATED',
-        (payload: { pendingMembers?: RoomMember[] }) => {
-          if (payload?.pendingMembers) {
-            setRoom((prev) => {
-              if (!prev) return null;
-
-              const existingIds = new Set(
-                prev.pendingMembers?.map((m) => m.id) || [],
-              );
-              const incomingPending = payload.pendingMembers as RoomMember[];
-              const newPendingCount = incomingPending.filter(
-                (m) => !existingIds.has(m.id),
-              ).length;
-
-              if (newPendingCount > 0) {
-                new Audio('/room-join.mp3').play().catch(() => {});
-                toast.success(
-                  tp('newJoinRequests', { count: newPendingCount }),
-                  {
-                    id: 'new-join-request',
-                  },
-                );
-              }
-
-              return {
-                ...prev,
-                pendingMembers: incomingPending.map((m) => ({
-                  ...m,
-                  profilePhoto: m.profilePhoto ?? undefined,
-                })),
-              };
-            });
-          }
-        },
-      );
+      socket.on('connect', onReconnect);
+      socket.on('PENDING_MEMBERS_UPDATED', onPendingUpdated);
     };
 
     // Initial fetch to make sure nothing was missed before Socket.IO connects
-    fetchPendingRequests(room.id).then((response) => {
-      if (!active) return;
-      const members = response.pendingMembers;
-      if (!members) return;
+    fetchPendingRequests(room.id)
+      .then((response) => {
+        if (!active) return;
+        const members = response.pendingMembers;
+        if (!members) return;
 
-      if (members.length > 0) {
-        new Audio('/room-join.mp3').play().catch(() => {});
-        toast.success(tp('newJoinRequests', { count: members.length }), {
-          id: 'new-join-request',
+        if (members.length > 0) {
+          new Audio('/room-join.mp3').play().catch(() => {});
+          toast.success(tp('newJoinRequests', { count: members.length }), {
+            id: 'new-join-request',
+          });
+        }
+
+        setRoom((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            pendingMembers: members.map((m) => ({
+              ...m,
+              profilePhoto: m.profilePhoto ?? undefined,
+            })),
+          };
         });
-      }
-
-      setRoom((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          pendingMembers: members.map((m) => ({
-            ...m,
-            profilePhoto: m.profilePhoto ?? undefined,
-          })),
-        };
-      });
-    });
+      })
+      .catch(() => {});
 
     setupSocketListeners();
 
     return () => {
       active = false;
-      socket.off('connect');
-      socket.off('PENDING_MEMBERS_UPDATED');
+      socket.off('connect', onReconnect);
+      socket.off('PENDING_MEMBERS_UPDATED', onPendingUpdated);
       socket.emit('watch-party:leave_room', room.id);
     };
   }, [room?.id, room?.hostId, userId, setRoom, socket, tp]);

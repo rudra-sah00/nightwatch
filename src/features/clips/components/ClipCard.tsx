@@ -2,7 +2,7 @@
 
 import { Check, Loader2, Pencil, Play, Share2, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { memo, useCallback, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Clip } from '../types';
@@ -20,12 +20,16 @@ function formatDuration(seconds: number): string {
 
 /**
  * Formats an ISO date string to a short locale display (e.g. `"May 1, 2026"`).
+ * Uses the active locale from next-intl via the formatter parameter.
  * @param dateStr - ISO 8601 date string.
+ * @param format - next-intl formatter instance.
  * @returns Formatted date string.
  */
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', {
+function formatDate(
+  dateStr: string,
+  format: ReturnType<typeof useFormatter>,
+): string {
+  return format.dateTime(new Date(dateStr), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -58,6 +62,7 @@ export const ClipCard = memo(function ClipCard({
   onShare,
 }: ClipCardProps) {
   const t = useTranslations('live');
+  const format = useFormatter();
   const isReady = clip.status === 'ready';
   const isProcessing = clip.status === 'processing';
   const [editing, setEditing] = useState(false);
@@ -115,7 +120,7 @@ export const ClipCard = memo(function ClipCard({
 
         {/* Date badge */}
         <div className="absolute top-3 right-3 bg-neo-yellow border-[2px] border-border px-2 py-0.5 font-headline font-black uppercase text-xs text-foreground">
-          {formatDate(clip.createdAt)}
+          {formatDate(clip.createdAt, format)}
         </div>
 
         {/* Status badge */}
@@ -187,7 +192,7 @@ export const ClipCard = memo(function ClipCard({
                 <button
                   type="button"
                   onClick={() => onShare(clip)}
-                  className={`p-2.5 md:p-1.5 rounded-lg hover:bg-muted transition-colors ${clip.isPublic ? 'text-neo-blue' : 'text-foreground/30 hover:text-foreground'}`}
+                  className={`p-3 md:p-1.5 rounded-lg hover:bg-muted transition-colors ${clip.isPublic ? 'text-neo-blue' : 'text-foreground/30 hover:text-foreground'}`}
                   aria-label={clip.isPublic ? 'Copy share link' : 'Share clip'}
                 >
                   <Share2 className="w-5 h-5 md:w-3.5 md:h-3.5" />
@@ -196,7 +201,7 @@ export const ClipCard = memo(function ClipCard({
               <button
                 type="button"
                 onClick={startEdit}
-                className="p-2.5 md:p-1.5 rounded-lg hover:bg-muted text-foreground/30 hover:text-foreground transition-colors"
+                className="p-3 md:p-1.5 rounded-lg hover:bg-muted text-foreground/30 hover:text-foreground transition-colors"
                 aria-label={t('clipRename')}
               >
                 <Pencil className="w-5 h-5 md:w-3.5 md:h-3.5" />
@@ -204,7 +209,7 @@ export const ClipCard = memo(function ClipCard({
               <button
                 type="button"
                 onClick={() => onDelete(clip.id)}
-                className="p-2.5 md:p-1.5 rounded-lg hover:bg-destructive/10 text-foreground/30 hover:text-destructive transition-colors"
+                className="p-3 md:p-1.5 rounded-lg hover:bg-destructive/10 text-foreground/30 hover:text-destructive transition-colors"
                 aria-label={t('clipDelete')}
               >
                 <Trash2 className="w-5 h-5 md:w-3.5 md:h-3.5" />

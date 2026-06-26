@@ -64,8 +64,10 @@ export function MobileShell() {
       }
     });
 
-    // --- NETWORK DETECTION ---
-    const unlistenNetwork = mobileBridge.onNetworkChange(() => {});
+    // --- NETWORK DETECTION: bridge native events to browser online/offline ---
+    const unlistenNetwork = mobileBridge.onNetworkChange(({ connected }) => {
+      window.dispatchEvent(new Event(connected ? 'online' : 'offline'));
+    });
 
     // --- KEYBOARD: track open state ---
     const unlistenKbShow = mobileBridge.onKeyboardShow(({ keyboardHeight }) => {

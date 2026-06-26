@@ -101,6 +101,7 @@ function createMockCtx(
     sleepTimerHandle: null,
     progressInterval: null,
     listeners: new Set(),
+    intentionalPause: false,
     update: (partial) => {
       Object.assign(state, partial);
     },

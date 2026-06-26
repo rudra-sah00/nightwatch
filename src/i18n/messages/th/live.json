@@ -70,6 +70,7 @@
   "loginRequired": "คุณต้องเข้าสู่ระบบเพื่อจัดวอทช์ปาร์ตี้",
   "noEpisodesOffline": "ไม่มีตอนที่ใช้งานแบบออฟไลน์ได้",
   "failedPlayback": "ไม่สามารถเริ่มเล่นได้",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "ทีม 1",
   "teamFallback2": "ทีม 2",
   "twentyFourSevenChannel": "ช่อง 24/7",

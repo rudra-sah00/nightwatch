@@ -70,6 +70,7 @@
   "loginRequired": "İzleme partisi düzenlemek için giriş yapmalısınız.",
   "noEpisodesOffline": "Çevrimdışı kullanılabilir bölüm yok.",
   "failedPlayback": "Oynatma başlatılamadı",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "Takım 1",
   "teamFallback2": "Takım 2",
   "twentyFourSevenChannel": "7/24 Kanal",

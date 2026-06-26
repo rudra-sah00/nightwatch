@@ -194,6 +194,7 @@
     "hostRejected": "O anfitrião rejeitou sua solicitação",
     "hostLeftRoom": "O anfitrião saiu da sala",
     "failedCreateRoom": "Falha ao criar sala",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "O anfitrião encerrou a festa.",
     "mediaError": "Erro de mídia: {message}",
     "unknownMediaError": "Ocorreu um erro desconhecido"

@@ -18,7 +18,9 @@ export function TvPageGate({
   const [state, setState] = useState<'pending' | 'tv' | 'web'>('pending');
 
   useEffect(() => {
-    waitForTvFlag().then((isTV) => setState(isTV ? 'tv' : 'web'));
+    waitForTvFlag()
+      .then((isTV) => setState(isTV ? 'tv' : 'web'))
+      .catch(() => setState('web'));
   }, []);
 
   if (state === 'pending') return <TvPageSkeleton />;

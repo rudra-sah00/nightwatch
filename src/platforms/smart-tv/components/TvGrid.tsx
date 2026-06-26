@@ -16,6 +16,7 @@ export function TvGrid({ focusKey, onFocus, children }: TvGridProps) {
   const { ref, focusKey: fk } = useFocusable({
     focusKey,
     saveLastFocusedChild: true,
+    trackChildren: true,
     onFocus,
   });
 

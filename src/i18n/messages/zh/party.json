@@ -194,6 +194,7 @@
     "hostRejected": "主持人拒绝了你的请求",
     "hostLeftRoom": "主持人离开了房间",
     "failedCreateRoom": "创建房间失败",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "主持人已结束派对。",
     "mediaError": "媒体错误：{message}",
     "unknownMediaError": "发生未知错误"

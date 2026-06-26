@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   BookOpen,
@@ -29,6 +29,7 @@ import { TvMangaTitle } from '@/platforms/smart-tv/pages/TvMangaTitle';
 export default function MangaTitlePage() {
   const { titleId } = useParams<{ titleId: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [isFav, setIsFav] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
@@ -78,6 +79,10 @@ export default function MangaTitlePage() {
         });
         setIsFav(true);
       }
+      queryClient.invalidateQueries({
+        queryKey: ['manga', 'favorite', titleId],
+      });
+      queryClient.invalidateQueries({ queryKey: ['manga', 'favorites'] });
     } catch {
     } finally {
       setFavLoading(false);

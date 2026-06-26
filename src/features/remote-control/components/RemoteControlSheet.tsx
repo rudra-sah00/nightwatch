@@ -12,15 +12,9 @@ import {
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { formatTime } from '@/features/music/utils';
 import { useRemoteCommander } from '../hooks/use-remote-commander';
 import type { RemoteStreamAdvertise } from '../types';
-
-function formatTime(seconds: number): string {
-  if (!seconds || !Number.isFinite(seconds) || seconds <= 0) return '0:00';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
 
 function StreamSelector({
   streams,

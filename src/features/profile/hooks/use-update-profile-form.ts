@@ -148,9 +148,8 @@ export function useUpdateProfileForm() {
       toast.success(t('messages.accountDeleted'));
       setShowDeleteDialog(false);
       logout();
-    } catch (err) {
-      const apiError = err as ApiError;
-      toast.error(apiError.message || t('messages.accountDeleteFailed'));
+    } catch {
+      toast.error(t('messages.accountDeleteFailed'));
       setIsDeleting(false);
     }
   };

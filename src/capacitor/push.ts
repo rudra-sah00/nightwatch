@@ -80,7 +80,7 @@ export async function registerNativePush(sessionId?: string | null) {
     const url = (action as { notification?: { data?: { url?: string } } })
       .notification?.data?.url;
     trackEvent('notification_open', { url });
-    if (url) window.location.href = url;
+    if (url?.startsWith('/')) window.location.href = url;
   });
 
   try {

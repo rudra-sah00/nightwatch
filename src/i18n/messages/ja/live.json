@@ -70,6 +70,7 @@
   "loginRequired": "ウォッチパーティーを主催するにはログインが必要です。",
   "noEpisodesOffline": "オフラインで利用可能なエピソードはありません。",
   "failedPlayback": "再生の開始に失敗しました",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "チーム 1",
   "teamFallback2": "チーム 2",
   "twentyFourSevenChannel": "24時間チャンネル",

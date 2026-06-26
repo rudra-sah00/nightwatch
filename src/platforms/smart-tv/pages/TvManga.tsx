@@ -149,26 +149,36 @@ export function TvManga() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 400);
 
-  const { data: ranking, isLoading } = useQuery({
+  const { data: ranking, isLoading: loadingRanking } = useQuery({
     queryKey: ['manga', 'ranking'],
     queryFn: () => getMangaRanking(),
+    enabled: tab === 'popular',
     retry: false,
   });
-  const { data: latest } = useQuery({
+  const { data: latest, isLoading: loadingLatest } = useQuery({
     queryKey: ['manga', 'latest'],
     queryFn: () => getMangaLatest(),
+    enabled: tab === 'latest',
     retry: false,
   });
-  const { data: favorites } = useQuery({
+  const { data: favorites, isLoading: loadingFavorites } = useQuery({
     queryKey: ['manga', 'favorites'],
     queryFn: () => getMangaFavorites(),
+    enabled: tab === 'favorites',
     retry: false,
   });
-  const { data: progress } = useQuery({
+  const { data: progress, isLoading: loadingProgress } = useQuery({
     queryKey: ['manga', 'progress'],
     queryFn: () => getMangaProgress(),
+    enabled: tab === 'continue',
     retry: false,
   });
+
+  const isLoading =
+    (tab === 'popular' && loadingRanking) ||
+    (tab === 'latest' && loadingLatest) ||
+    (tab === 'favorites' && loadingFavorites) ||
+    (tab === 'continue' && loadingProgress);
   const { data: searchResults } = useQuery({
     queryKey: ['manga', 'search', debouncedSearch],
     queryFn: () => searchManga(debouncedSearch),

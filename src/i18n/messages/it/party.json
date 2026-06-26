@@ -194,6 +194,7 @@
     "hostRejected": "L'host ha rifiutato la tua richiesta",
     "hostLeftRoom": "L'host ha lasciato la stanza",
     "failedCreateRoom": "Impossibile creare la stanza",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "L'host ha terminato la festa.",
     "mediaError": "Errore media: {message}",
     "unknownMediaError": "Si è verificato un errore sconosciuto"

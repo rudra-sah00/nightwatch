@@ -128,45 +128,74 @@ function createBridge() {
 
   // Electron-backed implementations — delegates to window.electronAPI from preload.js
   const e = api();
+
+  function safeFire(fn: () => unknown): void {
+    try {
+      fn();
+    } catch {
+      // IPC call failed — main process may be unresponsive
+    }
+  }
+
+  async function safeAsync<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+    try {
+      return await fn();
+    } catch {
+      return fallback;
+    }
+  }
+
+  function safeListen(fn: () => UnlistenFn): UnlistenFn {
+    try {
+      return fn();
+    } catch {
+      return noop;
+    }
+  }
+
   return {
     updateDiscordPresence: (p: Record<string, unknown>) =>
-      e.updateDiscordPresence(p),
-    clearDiscordPresence: () => e.clearDiscordPresence(),
-    copyToClipboard: (t: string) => e.copyToClipboard(t),
-    storeGet: (k: string) => e.storeGet(k) as Promise<unknown>,
-    storeSet: (k: string, v: unknown) => e.storeSet(k, v),
-    storeDelete: (k: string) => e.storeDelete(k),
-    getAppVersion: () => e.getAppVersion() as Promise<string>,
-    setNativeTheme: (t: string) => e.setNativeTheme(t),
-    setUnreadBadge: (c: number) => e.setUnreadBadge(c),
-    setKeepAwake: (k: boolean) => e.setKeepAwake(k),
-    setCallActive: (active: boolean) => e.setCallActive(active),
-    windowMinimize: () => e.windowMinimize(),
-    windowMaximize: () => e.windowMaximize(),
-    windowClose: () => e.windowClose(),
+      safeFire(() => e.updateDiscordPresence(p)),
+    clearDiscordPresence: () => safeFire(() => e.clearDiscordPresence()),
+    copyToClipboard: (t: string) => safeFire(() => e.copyToClipboard(t)),
+    storeGet: (k: string) =>
+      safeAsync(() => e.storeGet(k) as Promise<unknown>, undefined),
+    storeSet: (k: string, v: unknown) => safeFire(() => e.storeSet(k, v)),
+    storeDelete: (k: string) => safeFire(() => e.storeDelete(k)),
+    getAppVersion: () =>
+      safeAsync(() => e.getAppVersion() as Promise<string>, ''),
+    setNativeTheme: (t: string) => safeFire(() => e.setNativeTheme(t)),
+    setUnreadBadge: (c: number) => safeFire(() => e.setUnreadBadge(c)),
+    setKeepAwake: (k: boolean) => safeFire(() => e.setKeepAwake(k)),
+    setCallActive: (active: boolean) => safeFire(() => e.setCallActive(active)),
+    windowMinimize: () => safeFire(() => e.windowMinimize()),
+    windowMaximize: () => safeFire(() => e.windowMaximize()),
+    windowClose: () => safeFire(() => e.windowClose()),
     showNotification: (p: {
       title: string;
       body: string;
       [k: string]: unknown;
-    }) => e.showNotification(p),
+    }) => safeFire(() => e.showNotification(p)),
     onNotificationAction: (cb: (p: unknown) => void) =>
-      e.onNotificationAction(cb) as UnlistenFn,
+      safeListen(() => e.onNotificationAction(cb) as UnlistenFn),
     onNotificationClick: (cb: (p: unknown) => void) =>
-      e.onNotificationClick(cb) as UnlistenFn,
-    setRunOnBoot: (enabled: boolean) => e.setRunOnBoot(enabled),
+      safeListen(() => e.onNotificationClick(cb) as UnlistenFn),
+    setRunOnBoot: (enabled: boolean) => safeFire(() => e.setRunOnBoot(enabled)),
     retryConnection: () => window.location.reload(),
     onMediaCommand: (cb: (cmd: string) => void) =>
-      e.onMediaCommand(cb) as UnlistenFn,
+      safeListen(() => e.onMediaCommand(cb) as UnlistenFn),
     toggleFullscreen: async () => {
-      await e.toggleFullscreen();
+      await safeAsync(() => e.toggleFullscreen() as Promise<void>, undefined);
     },
     onFullscreenChanged: (cb: (fs: boolean) => void) =>
-      e.onWindowFullscreenChanged(cb) as UnlistenFn,
-    onWindowBlur: (cb: () => void) => e.onWindowBlur(cb) as UnlistenFn,
-    onWindowFocus: (cb: () => void) => e.onWindowFocus(cb) as UnlistenFn,
+      safeListen(() => e.onWindowFullscreenChanged(cb) as UnlistenFn),
+    onWindowBlur: (cb: () => void) =>
+      safeListen(() => e.onWindowBlur(cb) as UnlistenFn),
+    onWindowFocus: (cb: () => void) =>
+      safeListen(() => e.onWindowFocus(cb) as UnlistenFn),
     onWindowFullscreenChanged: (cb: (fs: boolean) => void) =>
-      e.onWindowFullscreenChanged(cb) as UnlistenFn,
-    signalReady: () => e.signalReady(),
+      safeListen(() => e.onWindowFullscreenChanged(cb) as UnlistenFn),
+    signalReady: () => safeFire(() => e.signalReady()),
   };
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { type DriveStep, driver } from 'driver.js';
+import type { DriveStep } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -56,7 +56,8 @@ export function GlobalTour() {
     const desc = (text: string) =>
       `<span class="font-body text-sm font-medium" style="color:${fg};opacity:0.7">${text}</span>`;
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
+      const { driver } = await import('driver.js');
       const steps: DriveStep[] = mobile
         ? buildMobileSteps(title, desc, t, setLeftOpen, setRightOpen)
         : buildDesktopSteps(

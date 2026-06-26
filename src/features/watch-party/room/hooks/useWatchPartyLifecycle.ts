@@ -229,19 +229,25 @@ export function useWatchPartyLifecycle({
       setError(null);
       setErrorCode(null);
 
-      const response = await createPartyRoom(roomId, payload);
-      setIsLoading(false);
+      try {
+        const response = await createPartyRoom(roomId, payload);
+        setIsLoading(false);
 
-      if (response.room) {
-        const token = response.streamToken || '';
-        const normalizedRoom = normalizeRoomUrls(response.room, token);
-        setRoom(normalizedRoom);
-        setIsConnected(true);
-        setRequestStatus('joined');
-        trackEvent('party_create', { roomId });
-        return normalizedRoom;
-      } else {
-        setError(response.error || tp('failedCreateRoom'));
+        if (response.room) {
+          const token = response.streamToken || '';
+          const normalizedRoom = normalizeRoomUrls(response.room, token);
+          setRoom(normalizedRoom);
+          setIsConnected(true);
+          setRequestStatus('joined');
+          trackEvent('party_create', { roomId });
+          return normalizedRoom;
+        } else {
+          setError(response.error || tp('failedCreateRoom'));
+          return null;
+        }
+      } catch {
+        setIsLoading(false);
+        setError(tp('failedCreateRoom'));
         return null;
       }
     },
@@ -268,46 +274,53 @@ export function useWatchPartyLifecycle({
       setErrorCode(null);
       setRequestStatus('pending');
 
-      const response = await requestJoinPartyRoom(roomId, {
-        roomId,
-        name,
-        captchaToken,
-      });
-      setIsLoading(false);
+      try {
+        const response = await requestJoinPartyRoom(roomId, {
+          roomId,
+          name,
+          captchaToken,
+        });
+        setIsLoading(false);
 
-      if (response.error) {
-        setError(response.error);
+        if (response.error) {
+          setError(response.error);
+          setRequestStatus('idle');
+          return null;
+        }
+
+        if (response.status === 'pending') {
+          if (response.guestToken && typeof window !== 'undefined') {
+            sessionStorage.setItem('guest_token', response.guestToken);
+          }
+          setRequestStatus('pending');
+          return { success: true, status: 'pending' };
+        }
+
+        if (response.room) {
+          if (response.guestToken && typeof window !== 'undefined') {
+            sessionStorage.setItem('guest_token', response.guestToken);
+          }
+
+          const streamRes = await getPartyStreamToken(roomId);
+          const token = streamRes.token || '';
+          const normalizedRoom = normalizeRoomUrls(response.room, token, {
+            injectStream: true,
+          });
+
+          setRoom(normalizedRoom);
+          setIsConnected(true);
+          setRequestStatus('joined');
+          trackEvent('party_join', { roomId });
+          return { success: true, room: normalizedRoom };
+        }
+
+        return null;
+      } catch {
+        setIsLoading(false);
+        setError(tp('failedJoinRoom'));
         setRequestStatus('idle');
         return null;
       }
-
-      if (response.status === 'pending') {
-        if (response.guestToken && typeof window !== 'undefined') {
-          sessionStorage.setItem('guest_token', response.guestToken);
-        }
-        setRequestStatus('pending');
-        return { success: true, status: 'pending' };
-      }
-
-      if (response.room) {
-        if (response.guestToken && typeof window !== 'undefined') {
-          sessionStorage.setItem('guest_token', response.guestToken);
-        }
-
-        const streamRes = await getPartyStreamToken(roomId);
-        const token = streamRes.token || '';
-        const normalizedRoom = normalizeRoomUrls(response.room, token, {
-          injectStream: true,
-        });
-
-        setRoom(normalizedRoom);
-        setIsConnected(true);
-        setRequestStatus('joined');
-        trackEvent('party_join', { roomId });
-        return { success: true, room: normalizedRoom };
-      }
-
-      return null;
     },
     [
       setIsLoading,
@@ -317,6 +330,7 @@ export function useWatchPartyLifecycle({
       setRoom,
       setIsConnected,
       normalizeRoomUrls,
+      tp,
     ],
   );
 

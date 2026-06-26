@@ -112,7 +112,7 @@ export default function LiveClient() {
     if (response.room) {
       router.push(`/watch-party/${response.room.id}?new=true`);
     } else {
-      toast.error(response.error || 'Failed to create room');
+      toast.error(t('failedCreateRoom'));
     }
   };
 
@@ -282,11 +282,11 @@ export default function LiveClient() {
             {/* Count */}
             <div className="mb-6 flex items-center justify-between">
               <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
-                {total.toLocaleString()} channels
+                {total.toLocaleString()} {t('channels')}
               </span>
               {totalPages > 1 && (
                 <span className="font-headline font-bold text-sm uppercase tracking-widest text-muted-foreground">
-                  Page {page}/{totalPages}
+                  {t('page')} {page}/{totalPages}
                 </span>
               )}
             </div>

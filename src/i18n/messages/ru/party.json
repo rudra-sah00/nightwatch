@@ -194,6 +194,7 @@
     "hostRejected": "Организатор отклонил ваш запрос",
     "hostLeftRoom": "Организатор покинул комнату",
     "failedCreateRoom": "Не удалось создать комнату",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "Организатор завершил вечеринку.",
     "mediaError": "Ошибка медиа: {message}",
     "unknownMediaError": "Произошла неизвестная ошибка"

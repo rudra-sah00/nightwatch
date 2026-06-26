@@ -210,6 +210,7 @@
     "connectedAs": "Connected as {email}",
     "connect": "Connect",
     "disconnect": "Disconnect",
+    "disconnectConfirm": "Disconnect Google account?",
     "disconnected": "Google account disconnected",
     "disconnectFailed": "Failed to disconnect Google account",
     "connected": "Google account connected"

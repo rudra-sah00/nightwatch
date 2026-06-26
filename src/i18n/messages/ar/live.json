@@ -70,6 +70,7 @@
   "loginRequired": "يجب تسجيل الدخول لاستضافة حفلة مشاهدة.",
   "noEpisodesOffline": "لا توجد حلقات متاحة بدون اتصال.",
   "failedPlayback": "فشل في بدء التشغيل",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "الفريق 1",
   "teamFallback2": "الفريق 2",
   "twentyFourSevenChannel": "قناة 24/7",

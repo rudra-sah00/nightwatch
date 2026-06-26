@@ -210,6 +210,7 @@
     "hostRejected": "Host rejected your request",
     "hostLeftRoom": "Host left the room",
     "failedCreateRoom": "Failed to create room",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "The host has ended the party.",
     "mediaError": "Media Error: {message}",
     "unknownMediaError": "An unknown error occurred"

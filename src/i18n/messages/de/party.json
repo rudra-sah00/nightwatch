@@ -194,6 +194,7 @@
     "hostRejected": "Gastgeber hat deine Anfrage abgelehnt",
     "hostLeftRoom": "Gastgeber hat den Raum verlassen",
     "failedCreateRoom": "Raum konnte nicht erstellt werden",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "Der Gastgeber hat die Party beendet.",
     "mediaError": "Medienfehler: {message}",
     "unknownMediaError": "Ein unbekannter Fehler ist aufgetreten"

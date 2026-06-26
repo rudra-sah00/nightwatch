@@ -31,6 +31,15 @@ const nextConfig: NextConfig = {
       'class-variance-authority',
       'emoji-picker-react',
       'socket.io-client',
+      '@tanstack/react-query',
+      'radix-ui',
+      'firebase',
+      'react-konva',
+      'konva',
+      'zod',
+      '@noriginmedia/norigin-spatial-navigation',
+      'react-loading-skeleton',
+      '@mediapipe/tasks-vision',
     ],
     // Cache client-side router navigations to prevent full page reloads.
     // Without this, Next.js 15+ refetches the RSC payload on every navigation

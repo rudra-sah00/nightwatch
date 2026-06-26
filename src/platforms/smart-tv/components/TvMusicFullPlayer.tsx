@@ -10,13 +10,7 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { getSyncedLyrics } from '@/features/music/api';
 import { useMusicStore } from '@/features/music/store/use-music-store';
 import type { SyncedLyricLine } from '@/features/music/types';
-
-function formatTime(sec: number): string {
-  if (!Number.isFinite(sec) || sec < 0) return '0:00';
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
+import { formatTime } from '@/features/music/utils';
 
 // ─── Control Button ───
 function Btn({

@@ -2,7 +2,7 @@
 
 import { Lock, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import {
@@ -99,12 +99,14 @@ export function DMView({
   const [peerTyping, setPeerTyping] = useState(false);
   const [reactionMsgId, setReactionMsgId] = useState<string | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingEmit = useRef(0);
   const [lockPromptPeer, setLockPromptPeer] = useState<Conversation | null>(
     null,
   );
   const [clearConfirmPeer, setClearConfirmPeer] = useState<string | null>(null);
   const [pinInput, setPinInput] = useState('');
   const t = useTranslations('common.dm');
+  const format = useFormatter();
 
   const dmSearch = useDmSearch(activePeer?.peer_id || null);
   const { initiateCall } = useCall();
@@ -363,7 +365,11 @@ export function DMView({
   const handleInputChange = (text: string) => {
     setInput(text);
     if (text && activePeer && socket) {
-      socket.emit('dm:typing', { peerId: activePeer.peer_id });
+      const now = Date.now();
+      if (now - lastTypingEmit.current > 2000) {
+        lastTypingEmit.current = now;
+        socket.emit('dm:typing', { peerId: activePeer.peer_id });
+      }
     }
     const slashMatch = text.match(/^\/(\w+)\s*(.*)/);
     const validCmds: string[] = SLASH_COMMANDS.map((c) => c.command);
@@ -465,7 +471,10 @@ export function DMView({
                   className="text-xs px-2 py-1.5 rounded bg-muted/30 truncate"
                 >
                   <span className="text-foreground/40">
-                    {new Date(m.createdAt).toLocaleDateString()}{' '}
+                    {format.dateTime(new Date(m.createdAt), {
+                      month: 'short',
+                      day: 'numeric',
+                    })}{' '}
                   </span>
                   {m.content}
                 </div>
@@ -502,6 +511,8 @@ export function DMView({
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+          aria-live="polite"
+          aria-relevant="additions"
           onScroll={(e) => {
             const el = e.currentTarget;
             if (el.scrollTop < 50 && hasMoreMsgs && !loadingMore)
@@ -610,6 +621,7 @@ export function DMView({
               type="button"
               onClick={() => setReactionMsgId(null)}
               className="ml-auto p-1 text-foreground/40"
+              aria-label={t('cancel')}
             >
               <X className="w-4 h-4" />
             </button>

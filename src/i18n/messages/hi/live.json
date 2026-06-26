@@ -70,6 +70,7 @@
   "loginRequired": "वॉच पार्टी होस्ट करने के लिए आपको लॉग इन करना होगा।",
   "noEpisodesOffline": "ऑफ़लाइन कोई एपिसोड उपलब्ध नहीं है।",
   "failedPlayback": "प्लेबैक शुरू करने में विफल",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "टीम 1",
   "teamFallback2": "टीम 2",
   "twentyFourSevenChannel": "24/7 चैनल",

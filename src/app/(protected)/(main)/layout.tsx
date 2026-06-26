@@ -78,7 +78,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
   const recentTouchRef = useRef(false);
   const leftOpenRef = useRef(false);
   const rightOpenRef = useRef(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
 
   leftOpenRef.current = leftOpen;
   rightOpenRef.current = rightOpen;
@@ -251,10 +251,11 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
           className={`flex-1 flex flex-col min-h-0 transition-all duration-300 ${leftOpen ? 'max-md:translate-x-[75%] max-md:rounded-3xl max-md:overflow-hidden max-md:shadow-2xl max-md:border-l max-md:border-border' : ''}`}
         >
           <Navbar />
-          <div
+          <main
             ref={containerRef}
             id="main-content"
-            className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative"
+            tabIndex={-1}
+            className="flex-1 flex flex-row min-h-0 gap-2 p-2 overflow-hidden relative outline-none"
           >
             <LeftSidebarDesktop />
             <div className="flex-grow flex flex-col overflow-y-auto overflow-x-hidden rounded-2xl bg-card min-w-0 transition-all duration-300 [&_.container]:!max-w-full relative">
@@ -263,7 +264,7 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
             <div className="hidden md:block">
               <RightSidebar />
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </SidebarContext.Provider>
@@ -281,9 +282,11 @@ export default function MainLayout({
     if (isTV()) {
       setIsTvMode(true);
     } else {
-      waitForTvFlag().then((flag) => {
-        if (flag) setIsTvMode(true);
-      });
+      waitForTvFlag()
+        .then((flag) => {
+          if (flag) setIsTvMode(true);
+        })
+        .catch(() => {});
     }
   }, []);
 

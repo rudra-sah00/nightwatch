@@ -70,7 +70,23 @@ export function CreatePostDialog({
     }[]
   >([]);
 
-  const store = useComposerStore();
+  const content = useComposerStore((s) => s.content);
+  const tags = useComposerStore((s) => s.tags);
+  const images = useComposerStore((s) => s.images);
+  const gifs = useComposerStore((s) => s.gifs);
+  const isUploading = useComposerStore((s) => s.isUploading);
+  const setContent = useComposerStore((s) => s.setContent);
+  const addTag = useComposerStore((s) => s.addTag);
+  const addImages = useComposerStore((s) => s.addImages);
+  const removeImage = useComposerStore((s) => s.removeImage);
+  const addGif = useComposerStore((s) => s.addGif);
+  const removeGif = useComposerStore((s) => s.removeGif);
+  const removeTag = useComposerStore((s) => s.removeTag);
+  const setSubmitting = useComposerStore((s) => s.setSubmitting);
+  const setUploading = useComposerStore((s) => s.setUploading);
+  const reset = useComposerStore((s) => s.reset);
+  const canSubmit = useComposerStore((s) => s.canSubmit);
+  const getMedia = useComposerStore((s) => s.getMedia);
   const { results: tagResults, isSearching } = useTagSearch(
     slashCommand
       ? SLASH_COMMANDS.find((c) => c.command === slashCommand)?.tagType || null
@@ -82,9 +98,9 @@ export function CreatePostDialog({
     requestAnimationFrame(() => setVisible(true));
     inputRef.current?.focus();
     return () => {
-      store.reset();
+      reset();
     };
-  }, [store.reset]);
+  }, [reset]);
 
   // @mention search
   useEffect(() => {
@@ -116,7 +132,7 @@ export function CreatePostDialog({
   };
 
   const handleContentChange = (text: string) => {
-    store.setContent(text);
+    setContent(text);
     // Detect / commands
     const slashMatch = text.match(/^\/(\w+)\s*(.*)/);
     const validCmds: string[] = SLASH_COMMANDS.map((c) => c.command);
@@ -137,8 +153,8 @@ export function CreatePostDialog({
   };
 
   const handleTagSelect = (tag: PostTag) => {
-    store.addTag(tag);
-    store.setContent('');
+    addTag(tag);
+    setContent('');
     setSlashCommand(null);
     setSlashQuery('');
     trackEvent('explore_tag_select', { type: tag.type });
@@ -149,31 +165,31 @@ export function CreatePostDialog({
     username: string;
     name: string;
   }) => {
-    const newContent = store.content.replace(/@\w*$/, `@${user.username} `);
-    store.setContent(newContent);
+    const newContent = content.replace(/@\w*$/, `@${user.username} `);
+    setContent(newContent);
     setMentionActive(false);
     trackEvent('explore_mention_select', { username: user.username });
   };
 
   const handleSubmit = async () => {
-    if (!store.canSubmit()) return;
-    store.setSubmitting(true);
+    if (!canSubmit()) return;
+    setSubmitting(true);
     try {
       const post = await createPost({
-        content: store.content,
-        type: store.images.length || store.gifs.length ? 'media' : 'text',
-        tags: store.tags,
-        media: store.getMedia(),
+        content,
+        type: images.length || gifs.length ? 'media' : 'text',
+        tags,
+        media: getMedia(),
       });
       trackEvent('explore_post_create', { type: post.type });
       toast.success('Posted!');
       onCreated(post);
-      store.reset();
+      reset();
       close();
     } catch {
       toast.error('Failed to post');
     } finally {
-      store.setSubmitting(false);
+      setSubmitting(false);
     }
   };
 
@@ -181,34 +197,34 @@ export function CreatePostDialog({
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     e.target.value = '';
-    store.setUploading(true);
+    setUploading(true);
     try {
       const urls = await uploadExploreMedia(
-        files.slice(0, MAX_IMAGES - store.images.length),
+        files.slice(0, MAX_IMAGES - images.length),
       );
-      store.addImages(urls);
+      addImages(urls);
     } catch {
       toast.error('Upload failed');
     } finally {
-      store.setUploading(false);
+      setUploading(false);
     }
   };
 
   const handleGifSelect = useCallback(
     (gif: GifResult) => {
-      store.addGif(gif.url);
-      if (store.gifs.length + 1 >= MAX_GIFS) setGifOpen(false);
+      addGif(gif.url);
+      if (gifs.length + 1 >= MAX_GIFS) setGifOpen(false);
       trackEvent('explore_gif_select');
     },
-    [store],
+    [addGif, gifs.length],
   );
 
-  const showSlashMenu = store.content === '/';
+  const showSlashMenu = content === '/';
   const showAiInMentions =
     mentionActive &&
     (mentionQuery.length === 0 ||
       'nightwatch'.startsWith(mentionQuery.toLowerCase()));
-  const totalMedia = store.images.length + store.gifs.length;
+  const totalMedia = images.length + gifs.length;
 
   return (
     <div
@@ -238,10 +254,10 @@ export function CreatePostDialog({
           {/* Text input */}
           <textarea
             ref={inputRef}
-            value={slashCommand ? slashQuery : store.content}
+            value={slashCommand ? slashQuery : content}
             onChange={(e) => {
               if (slashCommand) {
-                store.setContent(`${slashCommand} ${e.target.value}`);
+                setContent(`${slashCommand} ${e.target.value}`);
                 setSlashQuery(e.target.value);
               } else {
                 handleContentChange(e.target.value);
@@ -260,7 +276,7 @@ export function CreatePostDialog({
               }
               if (e.key === 'Backspace' && slashCommand && slashQuery === '') {
                 e.preventDefault();
-                store.setContent('');
+                setContent('');
                 setSlashCommand(null);
               }
             }}
@@ -275,7 +291,7 @@ export function CreatePostDialog({
               <button
                 type="button"
                 onClick={() => {
-                  store.setContent('');
+                  setContent('');
                   setSlashCommand(null);
                 }}
                 className="text-white/30 hover:text-white"
@@ -286,9 +302,9 @@ export function CreatePostDialog({
           )}
 
           {/* Tags */}
-          {store.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {store.tags.map((tag) => (
+              {tags.map((tag) => (
                 <div
                   key={`${tag.type}-${tag.id}`}
                   className="flex items-center gap-1"
@@ -296,7 +312,7 @@ export function CreatePostDialog({
                   <TagChip tag={tag} />
                   <button
                     type="button"
-                    onClick={() => store.removeTag(tag.id, tag.type)}
+                    onClick={() => removeTag(tag.id, tag.type)}
                     className="text-white/30 hover:text-white"
                   >
                     <X className="w-3 h-3" />
@@ -311,7 +327,7 @@ export function CreatePostDialog({
             <div
               className={`grid gap-2 ${totalMedia === 1 ? 'grid-cols-1' : totalMedia === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'}`}
             >
-              {[...store.images, ...store.gifs].map((url) => (
+              {[...images, ...gifs].map((url) => (
                 <div
                   key={url}
                   className="relative rounded-xl overflow-hidden aspect-video"
@@ -326,8 +342,8 @@ export function CreatePostDialog({
                   <button
                     type="button"
                     onClick={() => {
-                      store.removeImage(url);
-                      store.removeGif(url);
+                      removeImage(url);
+                      removeGif(url);
                     }}
                     className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/70 text-white hover:bg-black/90"
                   >
@@ -378,7 +394,7 @@ export function CreatePostDialog({
                   key={cmd.command}
                   type="button"
                   onClick={() => {
-                    store.setContent(`${cmd.command} `);
+                    setContent(`${cmd.command} `);
                     setSlashCommand(cmd.command);
                     setSlashQuery('');
                   }}
@@ -495,7 +511,7 @@ export function CreatePostDialog({
               <EmojiPicker
                 theme={(isDark ? 'dark' : 'light') as Theme}
                 onEmojiClick={(d) => {
-                  store.setContent(store.content + d.emoji);
+                  setContent(content + d.emoji);
                   setEmojiOpen(false);
                 }}
                 lazyLoadEmojis
@@ -511,9 +527,9 @@ export function CreatePostDialog({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={store.isUploading || store.images.length >= MAX_IMAGES}
+              disabled={isUploading || images.length >= MAX_IMAGES}
               className="text-white/40 hover:text-white disabled:text-white/10 transition-colors"
-              title={`Images (${store.images.length}/${MAX_IMAGES})`}
+              title={`Images (${images.length}/${MAX_IMAGES})`}
             >
               <ImagePlus className="w-5 h-5" />
             </button>
@@ -523,9 +539,9 @@ export function CreatePostDialog({
                 setGifOpen(!gifOpen);
                 setEmojiOpen(false);
               }}
-              disabled={store.gifs.length >= MAX_GIFS}
+              disabled={gifs.length >= MAX_GIFS}
               className={`text-xs font-bold transition-colors ${gifOpen ? 'text-primary' : 'text-white/40 hover:text-white'} disabled:text-white/10`}
-              title={`GIFs (${store.gifs.length}/${MAX_GIFS})`}
+              title={`GIFs (${gifs.length}/${MAX_GIFS})`}
             >
               GIF
             </button>
@@ -549,15 +565,15 @@ export function CreatePostDialog({
             />
 
             <span
-              className={`ml-auto text-[11px] font-mono ${store.content.length > 450 ? 'text-red-400' : 'text-white/20'}`}
+              className={`ml-auto text-[11px] font-mono ${content.length > 450 ? 'text-red-400' : 'text-white/20'}`}
             >
-              {store.content.length}/{MAX_CONTENT_LENGTH}
+              {content.length}/{MAX_CONTENT_LENGTH}
             </span>
 
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!store.canSubmit()}
+              disabled={!canSubmit()}
               className="px-5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-headline font-bold disabled:opacity-30 hover:brightness-110 transition-all active:scale-95"
             >
               Post

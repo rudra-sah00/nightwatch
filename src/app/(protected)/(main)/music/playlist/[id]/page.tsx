@@ -8,14 +8,9 @@ import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getMusicPlaylist } from '@/features/music/api';
 import { showSongMenu } from '@/features/music/components/SongContextMenu';
 import { useMusicStore } from '@/features/music/store/use-music-store';
+import { formatTime } from '@/features/music/utils';
 import { isTV } from '@/platforms/smart-tv/lib/detection';
 import { TvMusicDetail } from '@/platforms/smart-tv/pages/TvMusicDetail';
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
 
 export default function MusicPlaylistPage() {
   const params = useParams();

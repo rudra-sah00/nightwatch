@@ -93,19 +93,25 @@ export function useLiveMatchCard(match: LiveMatch) {
       type: 'livestream',
       streamUrl: proxyUrl,
       posterUrl: match.team1.avatar,
-    }).then((response) => {
-      setIsCreatingParty(false);
-      setShowPrompt(false);
-      if (response.room) {
-        toast.success(t('creating'), { id: 'live-party-creating' });
-        router.push(`/watch-party/${response.room.id}?new=true`);
-        trackEvent('livestream_watch_party', { match_id: match.id });
-      } else {
-        toast.error(response.error || tp('failedCreateRoom'), {
-          id: 'live-party-error',
-        });
-      }
-    });
+    })
+      .then((response) => {
+        setIsCreatingParty(false);
+        setShowPrompt(false);
+        if (response.room) {
+          toast.success(t('creating'), { id: 'live-party-creating' });
+          router.push(`/watch-party/${response.room.id}?new=true`);
+          trackEvent('livestream_watch_party', { match_id: match.id });
+        } else {
+          toast.error(response.error || tp('failedCreateRoom'), {
+            id: 'live-party-error',
+          });
+        }
+      })
+      .catch(() => {
+        setIsCreatingParty(false);
+        setShowPrompt(false);
+        toast.error(tp('failedCreateRoom'), { id: 'live-party-error' });
+      });
   };
 
   return {

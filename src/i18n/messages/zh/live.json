@@ -70,6 +70,7 @@
   "loginRequired": "您必须登录才能主持观影派对。",
   "noEpisodesOffline": "没有可离线观看的剧集。",
   "failedPlayback": "播放启动失败",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "队伍 1",
   "teamFallback2": "队伍 2",
   "twentyFourSevenChannel": "24/7 频道",

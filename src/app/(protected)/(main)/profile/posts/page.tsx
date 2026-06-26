@@ -2,6 +2,7 @@
 
 import { Pencil, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import { useFormatter } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import { deletePost, editPost } from '@/features/explore/api';
@@ -16,6 +17,7 @@ export default function MyPostsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
   const user = useAuthStore((s) => s.user);
+  const format = useFormatter();
 
   useEffect(() => {
     apiFetch<{ posts: ExplorePost[] }>('/api/explore/feed?tab=foryou&limit=50')
@@ -28,19 +30,30 @@ export default function MyPostsPage() {
 
   const handleDelete = useCallback(async (postId: string) => {
     setPosts((prev) => prev.filter((p) => p.id !== postId));
-    await deletePost(postId);
+    try {
+      await deletePost(postId);
+    } catch {
+      // Revert not possible without caching removed post - fire and forget
+    }
   }, []);
 
   const handleEdit = useCallback(
     async (postId: string) => {
       if (!editContent.trim()) return;
+      const original = posts.find((p) => p.id === postId);
       setPosts((prev) =>
         prev.map((p) => (p.id === postId ? { ...p, content: editContent } : p)),
       );
       setEditingId(null);
-      await editPost(postId, editContent.trim());
+      try {
+        await editPost(postId, editContent.trim());
+      } catch {
+        if (original) {
+          setPosts((prev) => prev.map((p) => (p.id === postId ? original : p)));
+        }
+      }
     },
-    [editContent],
+    [editContent, posts],
   );
 
   return (
@@ -151,7 +164,13 @@ export default function MyPostsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3 text-[10px] text-foreground/40">
-                <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                <span>
+                  {format.dateTime(new Date(post.createdAt), {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </span>
                 <span>💬 {post.stats.replies}</span>
                 <span>🔁 {post.stats.reposts}</span>
                 <span>❤️ {post.stats.reactions}</span>

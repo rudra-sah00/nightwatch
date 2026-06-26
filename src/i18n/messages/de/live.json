@@ -70,6 +70,7 @@
   "loginRequired": "Sie müssen angemeldet sein, um eine Watch Party zu veranstalten.",
   "noEpisodesOffline": "Keine Episoden offline verfügbar.",
   "failedPlayback": "Wiedergabe konnte nicht gestartet werden",
+  "failedCreateRoom": "Failed to create room",
   "teamFallback1": "Team 1",
   "teamFallback2": "Team 2",
   "twentyFourSevenChannel": "24/7-Kanal",

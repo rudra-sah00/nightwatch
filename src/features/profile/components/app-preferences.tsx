@@ -65,9 +65,12 @@ export function AppPreferences() {
   useEffect(() => {
     if (checkIsDesktop()) {
       setIsDesktop(true);
-      desktopBridge.storeGet('runOnBoot').then((val: unknown) => {
-        if (typeof val === 'boolean') setRunOnBoot(val);
-      });
+      desktopBridge
+        .storeGet('runOnBoot')
+        .then((val: unknown) => {
+          if (typeof val === 'boolean') setRunOnBoot(val);
+        })
+        .catch(() => {});
     }
   }, []);
 

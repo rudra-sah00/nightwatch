@@ -194,6 +194,7 @@
     "hostRejected": "Ev sahibi isteğinizi reddetti",
     "hostLeftRoom": "Ev sahibi odadan ayrıldı",
     "failedCreateRoom": "Oda oluşturulamadı",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "Ev sahibi partiyi sonlandırdı.",
     "mediaError": "Medya Hatası: {message}",
     "unknownMediaError": "Bilinmeyen bir hata oluştu"

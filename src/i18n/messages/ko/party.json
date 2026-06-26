@@ -194,6 +194,7 @@
     "hostRejected": "호스트가 요청을 거절했습니다",
     "hostLeftRoom": "호스트가 방을 나갔습니다",
     "failedCreateRoom": "방 생성에 실패했습니다",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "호스트가 파티를 종료했습니다.",
     "mediaError": "미디어 오류: {message}",
     "unknownMediaError": "알 수 없는 오류가 발생했습니다"

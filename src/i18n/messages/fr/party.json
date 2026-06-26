@@ -194,6 +194,7 @@
     "hostRejected": "L'hôte a rejeté votre demande",
     "hostLeftRoom": "L'hôte a quitté le salon",
     "failedCreateRoom": "Échec de la création du salon",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "L'hôte a mis fin à la fête.",
     "mediaError": "Erreur média : {message}",
     "unknownMediaError": "Une erreur inconnue est survenue"

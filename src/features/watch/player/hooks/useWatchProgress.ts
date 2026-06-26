@@ -207,6 +207,13 @@ export function useWatchProgress({
     contextSocket,
   ]);
 
+  // Flush pending progress/activity when socket reconnects after disconnect
+  useEffect(() => {
+    if (!isConnected || !contextSocket) return;
+    flushActivity(true);
+    updateProgress();
+  }, [isConnected, contextSocket, flushActivity, updateProgress]);
+
   // Monitor playback to accumulate "watch time"
   useEffect(() => {
     if (!isPlaying || !videoRef.current) {

@@ -28,7 +28,7 @@ export function PlaybackCountdown({
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-3xl motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-reduce:animate-none pointer-events-auto select-none"
+      className="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-3xl motion-safe:animate-in motion-safe:fade-in motion-safe:duration-700 motion-reduce:animate-none pointer-events-auto select-none overflow-hidden"
       role="status"
       aria-live="polite"
       aria-label={t('aria.playbackCountdown')}

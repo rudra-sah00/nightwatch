@@ -18,9 +18,8 @@ const ROWS = [
   'ABCDEFG'.split(''),
   'HIJKLMN'.split(''),
   'OPQRSTU'.split(''),
-  'VWXYZ12'.split(''),
-  '3456789'.split(''),
-  '0'.split(''),
+  'VWXYZ'.split(''),
+  '1234567890'.split(''),
 ];
 
 function LetterKey({ char, onPress }: { char: string; onPress: () => void }) {
@@ -169,7 +168,10 @@ export function TvSearch() {
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const debouncedQuery = useDebounce(query, 400);
-  const { ref, focusKey } = useFocusable({ focusKey: 'TV_SEARCH_PAGE' });
+  const { ref, focusKey } = useFocusable({
+    focusKey: 'TV_SEARCH_PAGE',
+    trackChildren: true,
+  });
 
   const { data: results = [], isLoading } = useQuery({
     queryKey: ['tv-search', debouncedQuery],

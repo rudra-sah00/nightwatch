@@ -194,6 +194,7 @@
     "hostRejected": "ホストがリクエストを拒否しました",
     "hostLeftRoom": "ホストがルームを退出しました",
     "failedCreateRoom": "ルームの作成に失敗しました",
+    "failedJoinRoom": "Failed to join room",
     "hostEndedParty": "ホストがパーティーを終了しました。",
     "mediaError": "メディアエラー: {message}",
     "unknownMediaError": "不明なエラーが発生しました"
