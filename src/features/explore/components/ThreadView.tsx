@@ -306,7 +306,7 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
 
   return (
     <div
-      className={`absolute inset-0 z-30 bg-card flex flex-col transition-transform duration-250 ease-out ${visible ? 'translate-x-0' : 'translate-x-full'}`}
+      className={`absolute inset-0 z-30 bg-card flex flex-col transition-transform duration-250 ease-out max-h-[100dvh] ${visible ? 'translate-x-0' : 'translate-x-full'}`}
     >
       {/* Header */}
       <div className="sticky top-0 z-10 bg-card/90 backdrop-blur-lg px-4 py-3 flex items-center gap-3 border-b border-border/50">
@@ -479,7 +479,12 @@ export function ThreadView({ postId, onBack }: ThreadViewProps) {
       )}
 
       {/* Reply input */}
-      <div className="border-t border-border/50 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <div
+        className="border-t border-border/50 px-3 py-2"
+        style={{
+          paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom, 0px))',
+        }}
+      >
         {replyTo && (
           <div className="flex items-center gap-1 mb-1.5 px-1">
             <span className="text-[10px] text-foreground/50">

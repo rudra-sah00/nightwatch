@@ -445,7 +445,6 @@ export function DMView({
     return (
       <div
         className={`absolute inset-0 z-30 flex flex-col bg-card transition-transform duration-250 ease-out max-h-[100dvh] ${chatVisible ? 'translate-x-0' : 'translate-x-full'}`}
-        style={{ paddingBottom: 'var(--keyboard-height, 0px)' }}
       >
         <PageTitle title={activePeer.peer_name} href="/dm" />
         <DMChatHeader
@@ -511,6 +510,7 @@ export function DMView({
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+          style={{ paddingBottom: 'var(--keyboard-height, 16px)' }}
           aria-live="polite"
           aria-relevant="additions"
           onScroll={(e) => {
