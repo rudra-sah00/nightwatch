@@ -19,6 +19,7 @@ import {
 import { Navbar } from '@/components/layout/navbar';
 import { OfflineState } from '@/components/layout/OfflineState';
 import { RightSidebar } from '@/components/layout/right-sidebar';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { isTV, waitForTvFlag } from '@/platforms/smart-tv/lib/detection';
 
 const TvRootLayout = dynamic(
@@ -262,7 +263,9 @@ function MainLayoutInner({ children }: { children: React.ReactNode }) {
               {showOfflineBlocker ? <OfflineState /> : children}
             </div>
             <div className="hidden md:block">
-              <RightSidebar />
+              <FeatureErrorBoundary feature="Friends" silent>
+                <RightSidebar />
+              </FeatureErrorBoundary>
             </div>
           </main>
         </div>

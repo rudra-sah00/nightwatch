@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import LiveClient from './LiveClient';
 import { LiveTvGate } from './LiveTvGate';
 
@@ -13,8 +14,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function LivePage() {
   return (
-    <LiveTvGate>
-      <LiveClient />
-    </LiveTvGate>
+    <FeatureErrorBoundary feature="Livestream">
+      <LiveTvGate>
+        <LiveClient />
+      </LiveTvGate>
+    </FeatureErrorBoundary>
   );
 }

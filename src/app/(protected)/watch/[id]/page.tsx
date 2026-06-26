@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Suspense, useCallback, useRef, useState } from 'react';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { PlayOnTvButton } from '@/features/remote-control/components/PlayOnTvButton';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
@@ -228,8 +229,10 @@ function WatchContent() {
 
 export default function WatchRoutePage() {
   return (
-    <Suspense fallback={<PlayerLoadingSkeleton />}>
-      <WatchContent />
-    </Suspense>
+    <FeatureErrorBoundary feature="Watch Player">
+      <Suspense fallback={<PlayerLoadingSkeleton />}>
+        <WatchContent />
+      </Suspense>
+    </FeatureErrorBoundary>
   );
 }

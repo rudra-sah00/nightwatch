@@ -1,15 +1,16 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Loader2, Pause, Play, Radio } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import {
   getArtistAlbums,
   getArtistStation,
+  getMusicAlbum,
   getMusicArtist,
   type MusicArtistAlbum,
   type MusicTrack,
@@ -343,8 +344,23 @@ function SongRow({
 }
 
 function AlbumCard({ album }: { album: MusicArtistAlbum }) {
+  const queryClient = useQueryClient();
+  const handlePrefetch = useCallback(() => {
+    queryClient.prefetchQuery({
+      queryKey: ['music', 'album', album.id],
+      queryFn: () => getMusicAlbum(album.id),
+      staleTime: 60_000,
+    });
+  }, [queryClient, album.id]);
+
   return (
-    <Link href={`/music/album/${album.id}`} className="group">
+    <Link
+      href={`/music/album/${album.id}`}
+      className="group"
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
+    >
+      {' '}
       <div className="relative">
         <div className="absolute inset-0 bg-neo-yellow translate-x-1 translate-y-1 border-[3px] border-border" />
         <div className="relative border-[3px] border-border overflow-hidden bg-card">

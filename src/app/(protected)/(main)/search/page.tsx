@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { searchContent } from '@/features/search/api';
 import { SearchClient } from '@/features/search/components/SearchClient';
 import type { SearchResult } from '@/features/search/types';
@@ -32,12 +33,14 @@ export default async function SearchPage({
   }
 
   return (
-    <SearchTvGate>
-      <SearchClient
-        initialResults={initialResults}
-        initialQuery={query}
-        serverError={error}
-      />
-    </SearchTvGate>
+    <FeatureErrorBoundary feature="Search">
+      <SearchTvGate>
+        <SearchClient
+          initialResults={initialResults}
+          initialQuery={query}
+          serverError={error}
+        />
+      </SearchTvGate>
+    </FeatureErrorBoundary>
   );
 }

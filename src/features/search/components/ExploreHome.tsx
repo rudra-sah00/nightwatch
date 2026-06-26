@@ -1,11 +1,16 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { type ExploreData, type ExploreItem, getExploreHome } from '../api';
+import {
+  type ExploreData,
+  type ExploreItem,
+  getExploreHome,
+  getShowDetails,
+} from '../api';
 import { HeroCarousel } from './HeroCarousel';
 
 const ContentDetailModal = dynamic(
@@ -47,6 +52,18 @@ const ContentRow = memo(function ContentRow({
   sectionIndex: number;
   onItemClick: (item: ExploreItem) => void;
 }) {
+  const queryClient = useQueryClient();
+  const handlePrefetch = useCallback(
+    (id: string) => {
+      queryClient.prefetchQuery({
+        queryKey: ['show', id],
+        queryFn: () => getShowDetails(id),
+        staleTime: 60_000,
+      });
+    },
+    [queryClient],
+  );
+
   return (
     <section>
       <h2 className="font-headline font-black text-xl uppercase tracking-tight text-foreground mb-4">
@@ -58,6 +75,8 @@ const ContentRow = memo(function ContentRow({
             key={item.id}
             type="button"
             onClick={() => onItemClick(item)}
+            onMouseEnter={() => handlePrefetch(item.id)}
+            onFocus={() => handlePrefetch(item.id)}
             className="shrink-0 w-[140px] group text-left cursor-pointer"
           >
             <div className="relative aspect-[2/3] rounded-lg overflow-hidden border-2 border-border bg-secondary">

@@ -231,6 +231,16 @@ export class AudioEngine {
     if (this.ctx.state.gapless && this.ctx.nextAudio) {
       const nextIdx = getNextIndex(this.ctx);
       if (nextIdx !== null && this.ctx.state.queue[nextIdx]) {
+        const oldAudio = this.ctx.audio;
+        const oldSource = this.ctx.sourceNodes.get(oldAudio);
+        if (oldSource) {
+          try {
+            oldSource.disconnect();
+          } catch {
+            /* already disconnected */
+          }
+        }
+        oldAudio.src = '';
         this.ctx.setAudio(this.ctx.nextAudio);
         this.ctx.setNextAudio(null);
         if (this.ctx.audioContext?.state === 'suspended') {
@@ -293,6 +303,9 @@ export class AudioEngine {
       }
       this.ctx.intentionalPause = false;
       this.stopProgressTimer();
+      if (this.ctx.audioContext?.state === 'running') {
+        this.ctx.audioContext.suspend();
+      }
       this.ctx.update({ isPlaying: false });
       trackEvent('music_pause');
     } else {
@@ -393,6 +406,9 @@ export class AudioEngine {
     this.ctx.intentionalPause = false;
     this.ctx.audio.src = '';
     this.stopProgressTimer();
+    if (this.ctx.audioContext?.state === 'running') {
+      this.ctx.audioContext.suspend();
+    }
     this.ctx.update({
       currentTrack: null,
       isPlaying: false,

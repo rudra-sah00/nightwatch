@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import {
   getMangaChapter,
   getMangaDetail,
@@ -17,6 +18,14 @@ import { isTV } from '@/platforms/smart-tv/lib/detection';
 import { TvMangaReader } from '@/platforms/smart-tv/pages/TvMangaReader';
 
 export default function ChapterReaderPage() {
+  return (
+    <FeatureErrorBoundary feature="Manga Reader">
+      <ChapterReaderContent />
+    </FeatureErrorBoundary>
+  );
+}
+
+function ChapterReaderContent() {
   const { chapterId } = useParams<{ chapterId: string }>();
 
   const [currentPage, setCurrentPage] = useState(0);

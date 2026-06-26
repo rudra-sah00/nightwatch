@@ -72,21 +72,26 @@ function ChannelDetail({
   const { ref, focusKey, focusSelf } = useFocusable({
     focusKey: 'LIVE_CHANNEL_DETAIL',
     isFocusBoundary: true,
+    focusBoundaryDirections: ['up', 'down', 'left', 'right'],
   });
 
-  // Focus self on mount and handle escape
+  // Focus self on mount
   useEffect(() => {
-    const t = setTimeout(() => focusSelf(), 50);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => focusSelf(), 50);
+    return () => clearTimeout(timer);
   }, [focusSelf]);
 
-  // Handle escape to close
+  // Handle escape to close — use capture + stop propagation to prevent useTvBack
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'GoBack') onClose();
+      if (e.key === 'Escape' || e.key === 'GoBack') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.addEventListener('keydown', handler, true);
+    return () => document.removeEventListener('keydown', handler, true);
   }, [onClose]);
 
   return (

@@ -8,6 +8,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
 import { fetchIptvResolve } from '@/features/livestream/api';
@@ -19,6 +20,14 @@ import { isTV } from '@/platforms/smart-tv/lib/detection';
 import { TvWatch } from '@/platforms/smart-tv/pages/TvWatch';
 
 export default function LiveMatchPlayerPage() {
+  return (
+    <FeatureErrorBoundary feature="Livestream Player">
+      <LiveMatchPlayerContent />
+    </FeatureErrorBoundary>
+  );
+}
+
+function LiveMatchPlayerContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const matchId = params.id as string;

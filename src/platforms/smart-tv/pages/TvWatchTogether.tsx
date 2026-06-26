@@ -191,11 +191,17 @@ function JoinRequestPopup({
   onReject: (id: string) => void;
 }) {
   const t = useTranslations('common.tv.watchTogether');
-  const { ref, focusKey } = useFocusable({
+  const { ref, focusKey, focusSelf } = useFocusable({
     focusKey: 'TV_JOIN_REQUEST',
     isFocusBoundary: true,
+    focusBoundaryDirections: ['up', 'down', 'left', 'right'],
     trackChildren: true,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => focusSelf(), 50);
+    return () => clearTimeout(timer);
+  }, [focusSelf]);
 
   return (
     <FocusContext.Provider value={focusKey}>

@@ -75,20 +75,25 @@ export function useSearchInput() {
       return;
     }
 
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       setIsFetchingSuggestions(true);
       try {
-        const results = await getSearchSuggestions(query);
-        // Only keep the first suggestion for inline typeahead
-        setSuggestions(results.slice(0, 1));
+        const results = await getSearchSuggestions(query, {
+          signal: controller.signal,
+        });
+        if (!controller.signal.aborted) setSuggestions(results.slice(0, 1));
       } catch {
-        setSuggestions([]);
+        if (!controller.signal.aborted) setSuggestions([]);
       } finally {
-        setIsFetchingSuggestions(false);
+        if (!controller.signal.aborted) setIsFetchingSuggestions(false);
       }
     }, 200);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, isSearchPage]);
 
   const fetchSuggestions = async (searchTerm: string) => {

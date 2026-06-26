@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { memo, useCallback } from 'react';
 
-import { getMusicAlbum, getMusicArtist } from '../api';
+import { getMusicAlbum, getMusicArtist, getMusicPlaylist } from '../api';
 
 /**
  * Layout primitive: a titled section wrapper used on the music home page.
@@ -92,6 +92,12 @@ export const Card = memo(function Card({
       queryClient.prefetchQuery({
         queryKey: ['music', 'artist', id],
         queryFn: () => getMusicArtist(id),
+        staleTime: 60_000,
+      });
+    } else if (href.includes('/playlist/')) {
+      queryClient.prefetchQuery({
+        queryKey: ['music', 'playlist', id],
+        queryFn: () => getMusicPlaylist(id),
         staleTime: 60_000,
       });
     }

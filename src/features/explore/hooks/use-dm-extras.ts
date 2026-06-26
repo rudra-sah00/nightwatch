@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { type GifResult, searchGifs } from '@/features/explore/api';
 import { apiFetch } from '@/lib/fetch';
 
@@ -18,25 +18,34 @@ export function useDmSearch(peerId: string | null) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Message[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!peerId || !query.trim()) {
       setResults([]);
       return;
     }
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     const t = setTimeout(async () => {
       setIsSearching(true);
       try {
         const r = await apiFetch<{ messages: Message[] }>(
           `/api/messages/${peerId}/search?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal },
         );
-        setResults(r.messages);
+        if (!controller.signal.aborted) setResults(r.messages);
       } catch {
-        setResults([]);
+        if (!controller.signal.aborted) setResults([]);
       }
-      setIsSearching(false);
+      if (!controller.signal.aborted) setIsSearching(false);
     }, 400);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [peerId, query]);
 
   return { query, setQuery, results, isSearching };

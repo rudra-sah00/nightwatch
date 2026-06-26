@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
+import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import type { MangaProgress } from '@/features/manga/api';
 import {
   addMangaFavorite,
@@ -27,6 +28,14 @@ import { isTV } from '@/platforms/smart-tv/lib/detection';
 import { TvMangaTitle } from '@/platforms/smart-tv/pages/TvMangaTitle';
 
 export default function MangaTitlePage() {
+  return (
+    <FeatureErrorBoundary feature="Manga Title">
+      <MangaTitleContent />
+    </FeatureErrorBoundary>
+  );
+}
+
+function MangaTitleContent() {
   const { titleId } = useParams<{ titleId: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();

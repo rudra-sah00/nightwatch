@@ -44,6 +44,7 @@ export function FriendSearchSpotlight({ onClose }: FriendSearchSpotlightProps) {
   const [justSent, setJustSent] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!window.Capacitor?.isNativePlatform?.()) {
@@ -51,6 +52,7 @@ export function FriendSearchSpotlight({ onClose }: FriendSearchSpotlightProps) {
     }
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
     };
   }, []);
 
@@ -70,14 +72,20 @@ export function FriendSearchSpotlight({ onClose }: FriendSearchSpotlightProps) {
       return;
     }
     setIsSearching(true);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     debounceRef.current = setTimeout(async () => {
       try {
-        const data = await searchUsers(value.trim());
-        setResults(data);
+        const data = await searchUsers(value.trim(), {
+          signal: controller.signal,
+        });
+        if (!controller.signal.aborted) setResults(data);
       } catch {
-        setResults([]);
+        if (!controller.signal.aborted) setResults([]);
       } finally {
-        setIsSearching(false);
+        if (!controller.signal.aborted) setIsSearching(false);
       }
     }, 300);
   }, []);
