@@ -108,7 +108,7 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
               <OtpInput
                 id="otp"
                 name="otp"
-                placeholder="000000"
+                placeholder="······"
                 value={otp || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const val = e.target.value;

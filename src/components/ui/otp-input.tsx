@@ -31,7 +31,6 @@ export function OtpInput({
         autoComplete="one-time-code"
         pattern="\d{6}"
         maxLength={6}
-        placeholder="123456"
         className={cn(
           'text-center text-3xl tracking-[0.6em] font-headline font-black h-16 transition-[background-color,color,border-color,box-shadow,opacity,transform]',
           className,
