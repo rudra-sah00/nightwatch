@@ -61,6 +61,8 @@ export interface ShowDetails {
 export interface PlayResponse {
   success: boolean;
   type: 'movie' | 'series';
+  /** Stream format hint: tells the frontend which player engine to use */
+  streamFormat?: 'hls' | 'mp4' | 'dash';
   title: string;
   season?: number;
   episode?: number;

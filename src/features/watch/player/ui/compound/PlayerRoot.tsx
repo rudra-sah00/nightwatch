@@ -90,6 +90,8 @@ interface PlayerRootProps {
   containerStyle?: React.CSSProperties;
   /** Initial playback speed multiplier (e.g. `1.5` for 1.5×). */
   playbackRate?: number;
+  /** Stream format hint from backend — tells the player which engine to use (hls, mp4, dash) */
+  streamFormat?: 'hls' | 'mp4' | 'dash';
 }
 
 /** Default container dimensions — fills the viewport minus the Electron title bar. */
@@ -142,6 +144,7 @@ export function PlayerRoot({
   isLive = false,
   containerStyle,
   playbackRate,
+  streamFormat,
 }: PlayerRootProps) {
   const tAria = useTranslations('watch.aria');
   const resolvedReadOnly =
@@ -184,6 +187,7 @@ export function PlayerRoot({
     onBack: onBackProp,
     isLive: resolvedIsLive,
     playbackRate,
+    streamFormat,
   });
 
   const isMobile = useMobileDetection();

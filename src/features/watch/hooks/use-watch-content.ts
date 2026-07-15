@@ -96,6 +96,9 @@ export function useWatchContent() {
   const [activeTrackId, setActiveTrackId] = useState<string | null>(
     () => movieId,
   );
+  const [streamFormat, setStreamFormat] = useState<
+    'hls' | 'mp4' | 'dash' | undefined
+  >(undefined);
 
   const refetchStream = useCallback(
     async (overrideMovieId?: string) => {
@@ -142,6 +145,7 @@ export function useWatchContent() {
         if (response.success && response.masterPlaylistUrl) {
           // Unified response handling via StreamUrlService (called within useStreamUrls)
           applyResponse(response);
+          setStreamFormat(response.streamFormat);
           trackEvent('video_play', {
             contentId: overrideMovieId || movieId,
             title: decodedTitle,
@@ -349,5 +353,6 @@ export function useWatchContent() {
     activeTrackId,
     handleStreamExpired,
     refetchStream,
+    streamFormat,
   };
 }

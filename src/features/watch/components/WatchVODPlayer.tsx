@@ -66,6 +66,8 @@ interface WatchPlayerProps {
   hideBackButton?: boolean;
   /** Skip reporting watch progress to the backend (e.g. clips) */
   skipProgressHistory?: boolean;
+  /** Stream format hint from backend — tells the player which engine to use */
+  streamFormat?: 'hls' | 'mp4' | 'dash';
 }
 
 /**

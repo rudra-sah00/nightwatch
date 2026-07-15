@@ -66,6 +66,8 @@ interface PlayerRootHookProps {
   isLive?: boolean;
   playbackRate?: number;
   skipProgressHistory?: boolean;
+  /** Stream format hint from backend (avoids URL-sniffing for engine selection) */
+  streamFormat?: 'hls' | 'mp4' | 'dash';
 }
 
 export function usePlayerRoot({
@@ -91,6 +93,7 @@ export function usePlayerRoot({
   isLive = false,
   playbackRate: playbackRateProp,
   skipProgressHistory = false,
+  streamFormat,
 }: PlayerRootHookProps) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -124,6 +127,7 @@ export function usePlayerRoot({
     onStreamExpired,
     qualities,
     isLive,
+    streamFormat,
   });
 
   // Stabilise the initialAudioTracks reference — the parent may create a

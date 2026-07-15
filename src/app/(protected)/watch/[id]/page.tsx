@@ -31,6 +31,7 @@ function WatchContent() {
     activeTrackId,
     handleStreamExpired,
     refetchStream,
+    streamFormat,
   } = useWatchContent();
 
   const t = useTranslations('watch');
@@ -198,6 +199,7 @@ function WatchContent() {
         onAudioTrackChange={
           audioTracks.length > 0 ? handleAudioTrackChange : undefined
         }
+        streamFormat={streamFormat}
       />
       <section className="md:hidden px-4 py-4 space-y-3 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
         <div className="min-w-0">
