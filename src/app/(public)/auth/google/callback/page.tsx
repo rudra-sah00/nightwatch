@@ -22,8 +22,10 @@ export default function GoogleCallbackPage() {
     const state = searchParams.get('state') as
       | 'login'
       | 'connect'
+      | 'register'
       | 'desktop_login'
       | 'desktop_connect'
+      | 'desktop_register'
       | null;
     const error = searchParams.get('error');
 
@@ -33,7 +35,7 @@ export default function GoogleCallbackPage() {
     if (isDesktopFlow && !isInsideElectron) {
       const params = new URLSearchParams();
       if (code) params.set('code', code);
-      // Map desktop_login → login, desktop_connect → connect
+      // Map desktop_login → login, desktop_connect → connect, desktop_register → register
       const cleanState = state!.replace('desktop_', '');
       params.set('state', cleanState);
       if (error) params.set('error', error);
@@ -44,11 +46,24 @@ export default function GoogleCallbackPage() {
     // Normalize state for the rest of the flow
     const normalizedState = (state?.replace('desktop_', '') || 'login') as
       | 'login'
-      | 'connect';
+      | 'connect'
+      | 'register';
 
     if (error || !code) {
       toast.error(error || 'Google sign-in was cancelled');
-      router.replace(normalizedState === 'connect' ? '/profile' : '/login');
+      if (normalizedState === 'connect') {
+        router.replace('/profile');
+      } else if (normalizedState === 'register') {
+        router.replace('/signup');
+      } else {
+        router.replace('/login');
+      }
+      return;
+    }
+
+    // For registration flow, redirect to the Google signup completion page
+    if (normalizedState === 'register') {
+      router.replace(`/signup/google?code=${encodeURIComponent(code)}`);
       return;
     }
 

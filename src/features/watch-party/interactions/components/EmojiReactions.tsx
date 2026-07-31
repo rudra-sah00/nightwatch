@@ -12,7 +12,7 @@ import { useEmojiReactions } from '../hooks/use-emoji-reactions';
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
   ssr: false,
   loading: () => (
-    <div className="h-[350px] w-[300px] bg-zinc-900 rounded-xl animate-pulse" />
+    <div className="h-[350px] w-[300px] bg-muted rounded-xl animate-pulse" />
   ),
 });
 

@@ -13,6 +13,7 @@ import { OtpInput } from '@/components/ui/otp-input';
 import { PasswordInfo } from '@/components/ui/password-info';
 import type { useSignupForm } from '../hooks/use-signup-form';
 import { AuthCard } from './auth-card';
+import { GoogleSignUpButton } from './google-sign-up-button';
 
 /**
  * Multi-step signup form rendered inside an {@link AuthCard}.
@@ -267,7 +268,14 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
             >
               {t('signup.confirmIdentity')}
             </Button>
-            <div className="h-[42px] w-full shrink-0" aria-hidden="true" />
+            <div className="relative flex items-center my-1">
+              <div className="flex-grow border-t-2 border-border" />
+              <span className="px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                {t('or')}
+              </span>
+              <div className="flex-grow border-t-2 border-border" />
+            </div>
+            <GoogleSignUpButton />
           </div>
         </form>
       )}

@@ -8,7 +8,9 @@ const GOOGLE_IOS_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '';
 /**
  * Builds a Google OAuth consent URL for redirect-based flow (web/desktop).
  */
-export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
+export function getGoogleOAuthUrl(
+  mode: 'login' | 'connect' | 'register',
+): string {
   const redirectUri = `${window.location.origin}/auth/google/callback`;
   const isDesktop = 'electronAPI' in window;
   const state = isDesktop ? `desktop_${mode}` : mode;
@@ -101,6 +103,30 @@ export async function disconnectGoogle(
 ): Promise<{ user: User }> {
   return apiFetch<{ user: User }>(API_ROUTES.GOOGLE.DISCONNECT, {
     method: 'POST',
+    ...options,
+  });
+}
+
+/**
+ * Register with Google — sends auth code (web) or idToken (native) along with
+ * username and password to complete Google-based signup.
+ */
+export async function googleRegister(
+  payload: { code: string } | { idToken: string },
+  credentials: { username: string; password: string },
+  options?: RequestInit,
+): Promise<LoginResponse> {
+  const googleParams =
+    'code' in payload
+      ? {
+          code: payload.code,
+          redirectUri: `${window.location.origin}/auth/google/callback`,
+        }
+      : { idToken: payload.idToken };
+  const body = { ...googleParams, ...credentials };
+  return apiFetch<LoginResponse>(API_ROUTES.AUTH.GOOGLE_REGISTER, {
+    method: 'POST',
+    body: JSON.stringify(body),
     ...options,
   });
 }

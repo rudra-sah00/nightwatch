@@ -1,9 +1,8 @@
-import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { CaptchaHandle } from '@/components/ui/captcha';
-import { checkUsername, validateInvite } from '@/features/auth/api';
+import { checkUsername } from '@/features/auth/api';
 import { type RegisterInput, registerSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
@@ -20,33 +19,29 @@ interface FormState {
 
 /**
  * Manages the multi-step registration flow: name entry, account details with
- * real-time username availability checking, CAPTCHA, invite code validation,
- * and OTP email verification with resend countdown.
+ * real-time username availability checking, CAPTCHA, and OTP email verification
+ * with resend countdown.
  *
- * Pre-fills the invite code from the `?invite=` URL parameter and validates it
- * on mount. Integrates with `React.useActionState` for form handling.
+ * Integrates with `React.useActionState` for form handling.
  *
  * @returns An object containing form state, step controls, validation status,
- *          action handlers, and derived booleans (`isOtpStep`, `isInviteValid`).
+ *          action handlers, and derived booleans (`isOtpStep`).
  */
 export function useSignupForm() {
   const { register, verifyOtp, resendOtp } = useAuth();
   const tErr = useTranslations('auth.errors');
   const tAuth = useTranslations('auth');
-  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>('name');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<CaptchaHandle>(null);
 
-  const [isInviteValid, setIsInviteValid] = useState<boolean | null>(null);
   const [formData, setFormData] = useState<RegisterInput>({
     name: '',
     username: '',
     email: '',
     password: '',
-    inviteCode: '',
   });
 
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -85,28 +80,6 @@ export function useSignupForm() {
     return () => clearTimeout(timer);
   }, [formData.username]);
 
-  // Pre-fill invite code from URL and validate
-  useEffect(() => {
-    const invite = searchParams.get('invite');
-    if (!invite) {
-      setIsInviteValid(false);
-      return;
-    }
-
-    setFormData((prev) => ({ ...prev, inviteCode: invite }));
-
-    const checkInvite = async () => {
-      try {
-        const { valid } = await validateInvite(invite);
-        setIsInviteValid(valid);
-      } catch (_err) {
-        setIsInviteValid(false);
-      }
-    };
-
-    checkInvite();
-  }, [searchParams]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -131,7 +104,6 @@ export function useSignupForm() {
       const username = formData.get('username') as string;
       const email = formData.get('email') as string;
       const password = formData.get('password') as string;
-      const inviteCode = formData.get('inviteCode') as string;
       const confirmPassword = formData.get('confirmPassword') as string;
       const captchaToken = formData.get('captchaToken') as string;
 
@@ -151,7 +123,6 @@ export function useSignupForm() {
         username,
         email,
         password,
-        inviteCode,
         captchaToken,
       });
 
@@ -175,7 +146,6 @@ export function useSignupForm() {
           username,
           email,
           password,
-          inviteCode,
           captchaToken,
         });
 
@@ -242,14 +212,6 @@ export function useSignupForm() {
           };
         }
 
-        if (apiError?.code === 'INVALID_INVITE') {
-          setCaptchaToken(null);
-          captchaRef.current?.reset();
-          return {
-            error: tErr('inviteInvalid'),
-          };
-        }
-
         if (
           apiError?.code === 'CAPTCHA_REQUIRED' ||
           apiError?.code === 'CAPTCHA_FAILED'
@@ -271,8 +233,7 @@ export function useSignupForm() {
 
         // For all other backend errors, we must also reset the captcha widget
         // Turnstile tokens are single-use; if the backend consumed the token before
-        // another error occurred (e.g. invite code invalid), the next submission
-        // would fail with "Security verification failed" without this reset.
+        // another error occurred, the next submission would fail without this reset.
         setCaptchaToken(null);
         captchaRef.current?.reset();
 
@@ -402,6 +363,5 @@ export function useSignupForm() {
     handleResend,
     handleOtpSubmit,
     isOtpStep: step === 'otp',
-    isInviteValid,
   };
 }

@@ -165,7 +165,7 @@ export function Navbar() {
           {/* Desktop: profile link */}
           <Link
             href="/profile"
-            className="hidden md:flex flex-col items-center [-webkit-app-region:no-drag] justify-center gap-1 hover:bg-black/5 text-foreground rounded-lg px-3 py-1.5 transition-colors"
+            className="hidden md:flex flex-col items-center [-webkit-app-region:no-drag] justify-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 text-foreground rounded-lg px-3 py-1.5 transition-colors"
             title={t('profile')}
             {...profileLongPress}
           >

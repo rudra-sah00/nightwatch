@@ -27,8 +27,8 @@ export function PendingRequests({
   return (
     <div className="mx-3 mt-3 mb-2 flex-shrink-0">
       <div className="px-2 py-1.5 flex items-center gap-2">
-        <UserPlus className="w-4 h-4 text-white/60 stroke-[3px]" />
-        <span className="text-[10px] font-black font-headline text-white/60 uppercase tracking-widest">
+        <UserPlus className="w-4 h-4 text-muted-foreground stroke-[3px]" />
+        <span className="text-[10px] font-black font-headline text-muted-foreground uppercase tracking-widest">
           {t('waitingToJoin', { count: pendingMembers.length })}
         </span>
       </div>
@@ -46,15 +46,15 @@ export function PendingRequests({
                 unoptimized
               />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-black font-headline text-white uppercase">
+              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-black font-headline text-foreground uppercase">
                   {pending.name.charAt(0)}
                 </span>
               </div>
             )}
 
             {/* Name */}
-            <span className="flex-1 text-[11px] font-bold text-white truncate">
+            <span className="flex-1 text-[11px] font-bold text-foreground truncate">
               {pending.name}
             </span>
 

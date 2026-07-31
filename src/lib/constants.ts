@@ -6,6 +6,7 @@ export const API_ROUTES = {
     REGISTER: '/api/auth/register',
     REFRESH: '/api/auth/refresh',
     GOOGLE_LOGIN: '/api/auth/google/login',
+    GOOGLE_REGISTER: '/api/auth/google/register',
   },
   GOOGLE: {
     CONNECT: '/api/user/google/connect',
