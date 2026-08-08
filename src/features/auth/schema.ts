@@ -1,10 +1,20 @@
 import { z } from 'zod';
 
-// Shared password validation: 8+ chars, 1 uppercase, 1 special character
-const passwordSchema = z
+/**
+ * Shared password validation. Must stay in lockstep with the backend policy in
+ * `nightwatch-backend/src/modules/auth/auth.schema.ts` (RegisterSchema,
+ * GoogleRegisterSchema, ChangePasswordSchema, ResetPasswordSchema) — the server
+ * strips Zod field paths in production, so anything the client lets through
+ * surfaces to the user as an untargeted "Validation failed".
+ *
+ * Policy: 8+ chars, 1 lowercase, 1 uppercase, 1 number, 1 special character.
+ */
+export const passwordSchema = z
   .string()
   .min(8, 'validation.passwordMinLength')
+  .regex(/[a-z]/, 'validation.passwordLowercase')
   .regex(/[A-Z]/, 'validation.passwordUppercase')
+  .regex(/\d/, 'validation.passwordNumber')
   .regex(
     /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
     'validation.passwordSpecialChar',
@@ -110,7 +120,6 @@ export const registerSchema = z.object({
     .regex(/^[a-z0-9_]+$/i, 'validation.usernameFormat'),
   email: z.string().email('validation.invalidEmail'),
   password: passwordSchema,
-  inviteCode: z.string().optional().or(z.literal('')),
   captchaToken: z.string().optional(),
 });
 

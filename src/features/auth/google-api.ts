@@ -6,6 +6,13 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 const GOOGLE_IOS_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '';
 
 /**
+ * sessionStorage key used to carry a native Google idToken from the signup
+ * button to the `/signup/google` completion page. Session-scoped and
+ * same-origin so the token never enters the URL or browser history.
+ */
+export const GOOGLE_SIGNUP_ID_TOKEN_KEY = 'google_signup_id_token';
+
+/**
  * Builds a Google OAuth consent URL for redirect-based flow (web/desktop).
  */
 export function getGoogleOAuthUrl(

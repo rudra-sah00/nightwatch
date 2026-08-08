@@ -3,7 +3,7 @@
 import { Eye, EyeOff } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,11 @@ import { Label } from '@/components/ui/label';
 import { PasswordInfo } from '@/components/ui/password-info';
 import { checkUsername } from '@/features/auth/api';
 import { AuthCard } from '@/features/auth/components/auth-card';
-import { googleRegister } from '@/features/auth/google-api';
+import {
+  GOOGLE_SIGNUP_ID_TOKEN_KEY,
+  googleRegister,
+} from '@/features/auth/google-api';
+import { passwordSchema } from '@/features/auth/schema';
 import { trackEvent } from '@/lib/analytics';
 import { storeUser } from '@/lib/auth';
 import { setTokenExpiration } from '@/lib/fetch';
@@ -19,7 +23,14 @@ import { useAuthStore } from '@/store/use-auth-store';
 
 /**
  * Google signup completion page.
- * User already authenticated with Google — now we just need username + password.
+ *
+ * The user has already proven ownership of their Google account; all that is
+ * missing is a username and password. Two entry paths land here:
+ *
+ * - **Web / desktop** — `?code=` from the OAuth redirect, forwarded by
+ *   `/auth/google/callback`.
+ * - **Native (Capacitor)** — an idToken from the native account picker, handed
+ *   over in sessionStorage by `GoogleSignUpButton`.
  */
 export default function GoogleSignupPage() {
   const searchParams = useSearchParams();
@@ -29,6 +40,11 @@ export default function GoogleSignupPage() {
 
   const code = searchParams.get('code');
   const redirectedRef = useRef(false);
+
+  // Native idToken is read in an effect — sessionStorage is unavailable during
+  // prerender, and reading it while rendering would break hydration.
+  const [idToken, setIdToken] = useState<string | null>(null);
+  const [credentialResolved, setCredentialResolved] = useState(false);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -40,14 +56,40 @@ export default function GoogleSignupPage() {
     'idle' | 'checking' | 'available' | 'taken' | 'invalid'
   >('idle');
 
-  // Redirect if no code
   useEffect(() => {
-    if (!code && !redirectedRef.current) {
-      redirectedRef.current = true;
-      toast.error('Google authentication expired. Please try again.');
-      router.replace('/signup');
+    if (code) {
+      setCredentialResolved(true);
+      return;
     }
-  }, [code, router]);
+    try {
+      setIdToken(sessionStorage.getItem(GOOGLE_SIGNUP_ID_TOKEN_KEY));
+    } catch {
+      // sessionStorage unavailable (private mode) — treated as no credential
+    }
+    setCredentialResolved(true);
+  }, [code]);
+
+  const hasCredential = Boolean(code || idToken);
+
+  /** Abandon this attempt and send the user back to pick a signup method. */
+  const restartSignup = useCallback(
+    (message: string) => {
+      if (redirectedRef.current) return;
+      redirectedRef.current = true;
+      try {
+        sessionStorage.removeItem(GOOGLE_SIGNUP_ID_TOKEN_KEY);
+      } catch {}
+      toast.error(message);
+      router.replace('/signup');
+    },
+    [router],
+  );
+
+  // Redirect if we have neither an authorization code nor a native idToken
+  useEffect(() => {
+    if (!credentialResolved || hasCredential) return;
+    restartSignup(tErr('googleAuthExpired'));
+  }, [credentialResolved, hasCredential, restartSignup, tErr]);
 
   // Real-time username availability check
   useEffect(() => {
@@ -78,9 +120,8 @@ export default function GoogleSignupPage() {
     e.preventDefault();
     setError(null);
 
-    if (!code) {
-      toast.error('Google authentication expired. Please try again.');
-      router.replace('/signup');
+    if (!hasCredential) {
+      restartSignup(tErr('googleAuthExpired'));
       return;
     }
 
@@ -94,10 +135,16 @@ export default function GoogleSignupPage() {
       setError(t('validation.usernameFormat'));
       return;
     }
-    if (password.length < 8) {
-      setError(t('validation.passwordMinLength'));
+
+    // Same policy the backend enforces — validating locally keeps the user from
+    // hitting an untargeted "Validation failed" from the server.
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      const firstIssue = passwordResult.error.issues[0]?.message;
+      setError(firstIssue ? t(firstIssue) : tErr('detailsInvalid'));
       return;
     }
+
     if (password !== confirmPassword) {
       setError(tErr('passwordsMismatch'));
       return;
@@ -106,20 +153,32 @@ export default function GoogleSignupPage() {
     setIsLoading(true);
     try {
       const response = await googleRegister(
-        { code },
+        code ? { code } : { idToken: idToken as string },
         { username: trimmedUsername, password },
       );
 
       if (response.user) {
-        trackEvent('signup_success', { method: 'google' });
+        trackEvent('signup_complete', { method: 'google' });
+        try {
+          sessionStorage.removeItem(GOOGLE_SIGNUP_ID_TOKEN_KEY);
+        } catch {}
         storeUser(response.user);
         useAuthStore.getState().setUser(response.user);
         if (response.expiresIn) setTokenExpiration(response.expiresIn);
-        toast.success('Account created!');
+        toast.success(t('googleSignup.accountCreated'));
         router.replace('/home?tour=true');
       }
     } catch (err: unknown) {
       const apiError = err as { message?: string; code?: string };
+
+      // Google authorization codes are single-use and idTokens expire. Once the
+      // credential is spent, retrying on this page can only fail again — send
+      // the user back to restart the handshake instead.
+      if (apiError.code === 'GOOGLE_AUTH_FAILED') {
+        restartSignup(tErr('googleAuthExpired'));
+        return;
+      }
+
       const msg = apiError.message || tErr('registrationFailed');
       setError(msg);
       toast.error(msg);
@@ -128,7 +187,7 @@ export default function GoogleSignupPage() {
     }
   };
 
-  if (!code) return null;
+  if (!(credentialResolved && hasCredential)) return null;
 
   const isUsernameBlocking =
     usernameStatus === 'checking' ||

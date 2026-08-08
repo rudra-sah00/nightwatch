@@ -13,9 +13,9 @@ interface PasswordInfoProps {
 /**
  * Inline info button that opens a modal listing password requirements.
  *
- * Displays minimum character count, uppercase requirement, and special
- * character rules. Includes a note about known-breach checking via
- * Have I Been Pwned. Closes on Escape key or backdrop click.
+ * Mirrors the shared `passwordSchema` in `features/auth/schema.ts`: minimum
+ * length, lowercase, uppercase, number, and special character. Closes on
+ * Escape key or backdrop click.
  */
 export function PasswordInfo({ className }: PasswordInfoProps) {
   const t = useTranslations('common');
@@ -97,7 +97,9 @@ export function PasswordInfo({ className }: PasswordInfoProps) {
                 {/* Requirements List */}
                 <div className="space-y-3">
                   <RequirementItem text={t('passwordInfo.minChars')} />
+                  <RequirementItem text={t('passwordInfo.lowercase')} />
                   <RequirementItem text={t('passwordInfo.uppercase')} />
+                  <RequirementItem text={t('passwordInfo.number')} />
                   <RequirementItem text={t('passwordInfo.specialChar')} />
                 </div>
               </div>

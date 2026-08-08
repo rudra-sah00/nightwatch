@@ -145,8 +145,10 @@
     "requirements": "Requirements",
     "ariaLabel": "Password requirements",
     "title": "Password Requirements",
-    "minChars": "6+ characters",
+    "minChars": "8+ characters",
+    "lowercase": "Lowercase (a-z)",
     "uppercase": "Uppercase (A-Z)",
+    "number": "Number (0-9)",
     "specialChar": "Special char (!@#$%^&*)"
   },
   "actions": {

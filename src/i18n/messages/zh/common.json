@@ -145,8 +145,10 @@
     "requirements": "要求",
     "ariaLabel": "密码要求",
     "title": "密码要求",
-    "minChars": "6个以上字符",
+    "minChars": "8个以上字符",
+    "lowercase": "小写字母 (a-z)",
     "uppercase": "大写字母 (A-Z)",
+    "number": "数字 (0-9)",
     "specialChar": "特殊字符 (!@#$%^&*)"
   },
   "actions": {

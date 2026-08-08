@@ -145,8 +145,10 @@
     "requirements": "المتطلبات",
     "ariaLabel": "متطلبات كلمة المرور",
     "title": "متطلبات كلمة المرور",
-    "minChars": "6 أحرف أو أكثر",
+    "minChars": "8 أحرف أو أكثر",
+    "lowercase": "أحرف صغيرة (a-z)",
     "uppercase": "أحرف كبيرة (A-Z)",
+    "number": "رقم (0-9)",
     "specialChar": "حرف خاص (!@#$%^&*)"
   },
   "actions": {

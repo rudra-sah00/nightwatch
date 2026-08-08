@@ -25,8 +25,8 @@ import { GoogleSignUpButton } from './google-sign-up-button';
  *
  * **Step `'details'`** (Security) — password + confirm-password fields with a
  * show/hide toggle, a {@link PasswordInfo} tooltip, a Turnstile captcha, and
- * a submit button. Hidden inputs preserve name/username/email/inviteCode from
- * the previous step. A "Back" button returns to the name step.
+ * a submit button. Hidden inputs preserve name/username/email from the
+ * previous step. A "Back" button returns to the name step.
  *
  * **Step `'otp'`** (Verify) — 6-digit OTP input sent to the provided email,
  * with verify and resend (countdown timer) buttons. Identical layout to the
@@ -293,11 +293,6 @@ export function SignupForm(props: ReturnType<typeof useSignupForm>) {
             value={formData.username || ''}
           />
           <input type="hidden" name="email" value={formData.email || ''} />
-          <input
-            type="hidden"
-            name="inviteCode"
-            value={formData.inviteCode || ''}
-          />
 
           {/* TOP */}
           <div className="flex flex-col gap-3">

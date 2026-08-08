@@ -145,8 +145,10 @@
     "requirements": "Gereksinimler",
     "ariaLabel": "Şifre gereksinimleri",
     "title": "Şifre Gereksinimleri",
-    "minChars": "6+ karakter",
+    "minChars": "8+ karakter",
+    "lowercase": "Küçük harf (a-z)",
     "uppercase": "Büyük harf (A-Z)",
+    "number": "Sayı (0-9)",
     "specialChar": "Özel karakter (!@#$%^&*)"
   },
   "actions": {

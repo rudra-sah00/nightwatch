@@ -145,8 +145,10 @@
     "requirements": "要件",
     "ariaLabel": "パスワード要件",
     "title": "パスワード要件",
-    "minChars": "6文字以上",
+    "minChars": "8文字以上",
+    "lowercase": "小文字 (a-z)",
     "uppercase": "大文字 (A-Z)",
+    "number": "数字 (0-9)",
     "specialChar": "特殊文字 (!@#$%^&*)"
   },
   "actions": {

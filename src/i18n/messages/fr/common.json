@@ -145,8 +145,10 @@
     "requirements": "Exigences",
     "ariaLabel": "Exigences du mot de passe",
     "title": "Exigences du Mot de Passe",
-    "minChars": "6+ caractères",
+    "minChars": "8+ caractères",
+    "lowercase": "Minuscules (a-z)",
     "uppercase": "Majuscules (A-Z)",
+    "number": "Chiffre (0-9)",
     "specialChar": "Caractère spécial (!@#$%^&*)"
   },
   "actions": {

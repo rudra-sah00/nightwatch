@@ -6,7 +6,6 @@ import {
   registerUser,
   resendOtp,
   resetPassword,
-  validateInvite,
   verifyOtp,
 } from '@/features/auth/api';
 import * as fetchModule from '@/lib/fetch';
@@ -101,7 +100,6 @@ describe('Auth API', () => {
         username: 'testuser',
         email: 'test@example.com',
         password: 'Password123!',
-        inviteCode: 'INVITE123',
       };
 
       const result = await registerUser(registerData);
@@ -111,30 +109,6 @@ describe('Auth API', () => {
         body: JSON.stringify(registerData),
       });
       expect(result).toEqual(mockResponse);
-    });
-
-    it('should include invite code if provided', async () => {
-      const mockResponse: LoginResponse = {
-        requiresOtp: true,
-        email: 'test@example.com',
-      };
-
-      vi.mocked(fetchModule.apiFetch).mockResolvedValue(mockResponse);
-
-      const registerData = {
-        name: 'Test User',
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'Password123',
-        inviteCode: 'INVITE123',
-      };
-
-      await registerUser(registerData);
-
-      expect(fetchModule.apiFetch).toHaveBeenCalledWith('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(registerData),
-      });
     });
   });
 
@@ -203,35 +177,6 @@ describe('Auth API', () => {
         },
       );
       expect(result).toEqual(mockResponse);
-    });
-  });
-
-  describe('validateInvite', () => {
-    it('should call apiFetch with correct parameters', async () => {
-      const mockResponse = { valid: true };
-
-      vi.mocked(fetchModule.apiFetch).mockResolvedValue(mockResponse);
-
-      const result = await validateInvite('INVITE123');
-
-      expect(fetchModule.apiFetch).toHaveBeenCalledWith(
-        '/api/auth/validate-invite',
-        {
-          method: 'POST',
-          body: JSON.stringify({ inviteCode: 'INVITE123' }),
-        },
-      );
-      expect(result).toEqual(mockResponse);
-    });
-
-    it('should return false for invalid invite', async () => {
-      const mockResponse = { valid: false };
-
-      vi.mocked(fetchModule.apiFetch).mockResolvedValue(mockResponse);
-
-      const result = await validateInvite('INVALID');
-
-      expect(result.valid).toBe(false);
     });
   });
 

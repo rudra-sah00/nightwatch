@@ -113,7 +113,7 @@ describe('Register Schema', () => {
     }
   });
 
-  it('accepts password without lowercase (not required)', () => {
+  it('requires a lowercase letter', () => {
     const data = {
       name: 'John Doe',
       username: 'johndoe',
@@ -122,10 +122,15 @@ describe('Register Schema', () => {
     };
 
     const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe(
+        'validation.passwordLowercase',
+      );
+    }
   });
 
-  it('accepts password without number (not required)', () => {
+  it('requires a number', () => {
     const data = {
       name: 'John Doe',
       username: 'johndoe',
@@ -134,7 +139,10 @@ describe('Register Schema', () => {
     };
 
     const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('validation.passwordNumber');
+    }
   });
 
   it('rejects invalid email', () => {
@@ -202,14 +210,14 @@ describe('Reset Password Schema', () => {
     }
   });
 
-  it('accepts passwords without lowercase (optional)', () => {
+  it('requires a lowercase letter', () => {
     const data = {
       password: 'NEWPASS1!',
       confirmPassword: 'NEWPASS1!',
     };
 
     const result = resetPasswordSchema.safeParse(data);
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('requires uppercase letter', () => {
@@ -222,14 +230,14 @@ describe('Reset Password Schema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('accepts passwords without number (optional)', () => {
+  it('requires a number', () => {
     const data = {
       password: 'NewPasss!',
       confirmPassword: 'NewPasss!',
     };
 
     const result = resetPasswordSchema.safeParse(data);
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('requires special character', () => {

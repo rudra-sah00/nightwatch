@@ -154,7 +154,6 @@ describe('useAuthStore actions', () => {
         username: 'newuser',
         email: 'new@example.com',
         password: 'Pass123!',
-        inviteCode: 'INV1',
       });
 
       expect(result).toEqual(response);
@@ -163,7 +162,6 @@ describe('useAuthStore actions', () => {
         username: 'newuser',
         email: 'new@example.com',
         password: 'Pass123!',
-        inviteCode: 'INV1',
       });
     });
   });

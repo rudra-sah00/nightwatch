@@ -1,26 +1,68 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { getGoogleOAuthUrl } from '../google-api';
+import { checkIsMobile } from '@/lib/electron-bridge';
+import {
+  GOOGLE_SIGNUP_ID_TOKEN_KEY,
+  getGoogleOAuthUrl,
+  nativeGoogleSignIn,
+} from '../google-api';
 
 /**
- * "Sign up with Google" button that redirects to Google OAuth for registration.
+ * "Sign up with Google" button.
+ *
+ * On web and desktop this redirects to the Google consent screen; the callback
+ * page forwards to `/signup/google` with the authorization code.
+ *
+ * On Capacitor (iOS/Android) a browser redirect is not an option — Google
+ * rejects OAuth inside embedded WebViews — so the native account picker is used
+ * instead and the resulting idToken is handed to `/signup/google` through
+ * sessionStorage. The token is deliberately kept out of the URL: it is a signed
+ * JWT carrying the user's email and name, and URLs leak into history and logs.
  */
 export function GoogleSignUpButton() {
   const t = useTranslations('auth');
+  const tErr = useTranslations('auth.errors');
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = async () => {
+    if (!checkIsMobile()) {
+      window.location.href = getGoogleOAuthUrl('register');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const idToken = await nativeGoogleSignIn();
+      sessionStorage.setItem(GOOGLE_SIGNUP_ID_TOKEN_KEY, idToken);
+      router.push('/signup/google');
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : tErr('googleSignInFailed');
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Button
       type="button"
       variant="neo-outline"
       size="xl"
-      onClick={() => {
-        window.location.href = getGoogleOAuthUrl('register');
-      }}
+      onClick={handleClick}
+      isLoading={isLoading}
+      disabled={isLoading}
       className="w-full h-[42px] text-xs font-black uppercase tracking-widest font-headline shrink-0 gap-2"
     >
-      <GoogleIcon />
+      {isLoading ? null : <GoogleIcon />}
       {t('googleSignUp')}
     </Button>
   );

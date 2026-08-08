@@ -156,40 +156,37 @@ describe('Auth Schemas', () => {
     });
 
     it('should reject password without lowercase', () => {
-      const validData = {
+      const invalidData = {
         name: 'Test User',
         username: 'testuser',
         email: 'test@example.com',
         password: 'ABCDEFG!',
       };
 
-      const result = registerSchema.safeParse(validData);
-      expect(result.success).toBe(true);
+      const result = registerSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          'validation.passwordLowercase',
+        );
+      }
     });
 
-    it('should accept password without number (not required)', () => {
-      const validData = {
+    it('should reject password without a number', () => {
+      const invalidData = {
         name: 'Test User',
         username: 'testuser',
         email: 'test@example.com',
         password: 'Password!',
       };
 
-      const result = registerSchema.safeParse(validData);
-      expect(result.success).toBe(true);
-    });
-
-    it('should accept optional invite code', () => {
-      const validData = {
-        name: 'Test User',
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'Password!1',
-        inviteCode: 'INVITE123',
-      };
-
-      const result = registerSchema.safeParse(validData);
-      expect(result.success).toBe(true);
+      const result = registerSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          'validation.passwordNumber',
+        );
+      }
     });
   });
 
@@ -242,14 +239,19 @@ describe('Auth Schemas', () => {
       }
     });
 
-    it('should accept password without lowercase letter (optional)', () => {
-      const validData = {
+    it('should reject password without lowercase letter', () => {
+      const invalidData = {
         password: 'NEWPASS1!',
         confirmPassword: 'NEWPASS1!',
       };
 
-      const result = resetPasswordSchema.safeParse(validData);
-      expect(result.success).toBe(true);
+      const result = resetPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          'validation.passwordLowercase',
+        );
+      }
     });
 
     it('should reject password without uppercase letter', () => {
@@ -267,14 +269,19 @@ describe('Auth Schemas', () => {
       }
     });
 
-    it('should accept password without number (optional)', () => {
-      const validData = {
+    it('should reject password without a number', () => {
+      const invalidData = {
         password: 'NewPasss!',
         confirmPassword: 'NewPasss!',
       };
 
-      const result = resetPasswordSchema.safeParse(validData);
-      expect(result.success).toBe(true);
+      const result = resetPasswordSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe(
+          'validation.passwordNumber',
+        );
+      }
     });
 
     it('should reject password without special character', () => {

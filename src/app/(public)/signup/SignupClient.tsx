@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -111,9 +112,17 @@ export default function SignupClient() {
           {t('footer.copyright')}
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-          <p className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-neo-red text-center md:text-left">
-            {t('footer.privateAccess')}
-          </p>
+          <Link
+            href="/login"
+            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <span className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              {t('footer.alreadyMember')}
+            </span>
+            <span className="font-headline font-black uppercase text-[10px] md:text-xs tracking-widest text-neo-yellow group-hover:text-foreground underline decoration-neo-yellow/30 underline-offset-4 transition-colors">
+              {t('footer.signIn')}
+            </span>
+          </Link>
         </div>
       </footer>
     </div>

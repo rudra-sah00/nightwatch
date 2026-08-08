@@ -145,8 +145,10 @@
     "requirements": "Requisitos",
     "ariaLabel": "Requisitos de senha",
     "title": "Requisitos de Senha",
-    "minChars": "6+ caracteres",
+    "minChars": "8+ caracteres",
+    "lowercase": "Minúsculas (a-z)",
     "uppercase": "Maiúsculas (A-Z)",
+    "number": "Número (0-9)",
     "specialChar": "Caractere especial (!@#$%^&*)"
   },
   "actions": {

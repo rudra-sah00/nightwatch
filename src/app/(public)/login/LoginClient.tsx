@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -10,11 +11,7 @@ import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-f
 import { LoginForm } from '@/features/auth/components/login-form';
 import { QrLoginView } from '@/features/auth/components/qr-login-view';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
-import {
-  checkIsDesktop,
-  checkIsMobile,
-  desktopBridge,
-} from '@/lib/electron-bridge';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
 export default function LoginClient() {
@@ -25,7 +22,6 @@ export default function LoginClient() {
   const t = useTranslations('auth');
 
   const isLoading = authLoading || hookLoading;
-  const [copied, setCopied] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
   const [showQr, setShowQr] = useState(false);
@@ -65,21 +61,6 @@ export default function LoginClient() {
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, initialAuthCheck, router]);
-
-  const handleCopyEmail = () => {
-    const email = 'rudranarayanaknr@gmail.com';
-    try {
-      if (typeof window !== 'undefined' && checkIsDesktop()) {
-        desktopBridge.copyToClipboard(email);
-      } else {
-        navigator.clipboard.writeText(email);
-      }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    } catch {
-      // Failed to write to clipboard
-    }
-  };
 
   // Loading State
   if (isLoading) {
@@ -170,24 +151,17 @@ export default function LoginClient() {
           {t('footer.copyright')}
         </p>
         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-          <button
-            type="button"
-            onClick={handleCopyEmail}
+          <Link
+            href="/signup"
             className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <span className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              {t('footer.wantAccount')}
+              {t('footer.newHere')}
             </span>
-            <span
-              className={`font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest transition-colors ${copied ? 'text-success' : 'text-neo-yellow group-hover:text-foreground underline decoration-neo-yellow/30 underline-offset-4'}`}
-            >
-              {copied ? t('footer.emailCopied') : t('footer.requestEmail')}
+            <span className="font-headline font-black uppercase text-[8px] md:text-[10px] tracking-widest text-neo-yellow group-hover:text-foreground underline decoration-neo-yellow/30 underline-offset-4 transition-colors">
+              {t('footer.createAccount')}
             </span>
-          </button>
-
-          <p className="font-headline font-bold uppercase text-[8px] md:text-[10px] tracking-widest text-neo-red text-center md:text-left">
-            {t('footer.privateAccess')}
-          </p>
+          </Link>
         </div>
       </footer>
     </div>

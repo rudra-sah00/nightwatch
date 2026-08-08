@@ -57,15 +57,6 @@ export async function verifyOtp(
   });
 }
 
-export async function validateInvite(
-  inviteCode: string,
-): Promise<{ valid: boolean }> {
-  return apiFetch<{ valid: boolean }>('/api/auth/validate-invite', {
-    method: 'POST',
-    body: JSON.stringify({ inviteCode }),
-  });
-}
-
 export async function resendOtp(
   email: string,
 ): Promise<{ message: string; nextCooldown: number }> {

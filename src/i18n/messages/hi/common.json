@@ -145,8 +145,10 @@
     "requirements": "आवश्यकताएं",
     "ariaLabel": "पासवर्ड आवश्यकताएँ",
     "title": "पासवर्ड आवश्यकताएँ",
-    "minChars": "6+ अक्षर",
+    "minChars": "8+ अक्षर",
+    "lowercase": "छोटे अक्षर (a-z)",
     "uppercase": "बड़े अक्षर (A-Z)",
+    "number": "अंक (0-9)",
     "specialChar": "विशेष अक्षर (!@#$%^&*)"
   },
   "actions": {
