@@ -15,6 +15,7 @@ const h = vi.hoisted(() => ({
   toastSuccess: vi.fn(),
   nativeGoogleSignIn: vi.fn(),
   googleRegister: vi.fn(),
+  googleLogin: vi.fn(),
   checkIsMobile: vi.fn(() => false),
   setUser: vi.fn(),
   searchParams: { current: {} as Record<string, string | null> },
@@ -26,6 +27,7 @@ const {
   toastError: mockToastError,
   nativeGoogleSignIn: mockNativeGoogleSignIn,
   googleRegister: mockGoogleRegister,
+  googleLogin: mockGoogleLogin,
   checkIsMobile: mockCheckIsMobile,
   setUser: mockSetUser,
 } = h;
@@ -54,6 +56,7 @@ vi.mock('@/features/auth/google-api', async (importOriginal) => {
     ...actual,
     nativeGoogleSignIn: h.nativeGoogleSignIn,
     googleRegister: h.googleRegister,
+    googleLogin: h.googleLogin,
     getGoogleOAuthUrl: (mode: string) => `https://accounts.google.com/${mode}`,
   };
 });
@@ -304,5 +307,113 @@ describe('GoogleSignupPage submission', () => {
       await screen.findByText('Username is already taken'),
     ).toBeInTheDocument();
     expect(mockReplace).not.toHaveBeenCalledWith('/signup');
+  });
+});
+
+// An account that already exists is not a failure the user should have to
+// interpret — signing them in is what they were trying to do.
+describe('GoogleSignupPage when the account already exists', () => {
+  const existingUser = {
+    id: 'u1',
+    email: 'existing@example.com',
+    username: 'existing',
+    name: 'Existing User',
+    profilePhoto: null,
+    sessionId: 's1',
+    createdAt: new Date().toISOString(),
+  };
+
+  it.each([
+    'GOOGLE_ALREADY_REGISTERED',
+    'USER_EXISTS',
+  ])('signs the user in with the native idToken on %s', async (code) => {
+    sessionStorage.setItem(GOOGLE_SIGNUP_ID_TOKEN_KEY, 'native-id-token');
+    mockGoogleRegister.mockRejectedValue({ code, message: 'already exists' });
+    mockGoogleLogin.mockResolvedValue({ user: existingUser, expiresIn: 900 });
+
+    render(<GoogleSignupPage />);
+    await screen.findByLabelText('signup.username');
+    await fillForm();
+    submitForm();
+
+    await waitFor(() => {
+      expect(mockGoogleLogin).toHaveBeenCalledWith({
+        idToken: 'native-id-token',
+      });
+    });
+    expect(mockSetUser).toHaveBeenCalledWith(existingUser);
+    expect(mockReplace).toHaveBeenCalledWith('/home');
+    // Credential consumed — must not linger for a later signup attempt.
+    expect(sessionStorage.getItem(GOOGLE_SIGNUP_ID_TOKEN_KEY)).toBeNull();
+  });
+
+  it('restarts consent in login mode when only a spent web code is available', async () => {
+    const hrefSetter = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: {
+        get href() {
+          return '';
+        },
+        set href(v: string) {
+          hrefSetter(v);
+        },
+        origin: 'https://nightwatch.in',
+      },
+      writable: true,
+    });
+
+    h.searchParams.current = { code: 'oauth-code' };
+    mockGoogleRegister.mockRejectedValue({
+      code: 'GOOGLE_ALREADY_REGISTERED',
+      message: 'already exists',
+    });
+
+    render(<GoogleSignupPage />);
+    await screen.findByLabelText('signup.username');
+    await fillForm();
+    submitForm();
+
+    await waitFor(() => {
+      expect(hrefSetter).toHaveBeenCalledWith(
+        'https://accounts.google.com/login',
+      );
+    });
+    // No stale error left on screen — the user is being moved along, not blocked.
+    expect(mockGoogleLogin).not.toHaveBeenCalled();
+  });
+
+  it('falls back to consent when the idToken login also fails', async () => {
+    const hrefSetter = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: {
+        get href() {
+          return '';
+        },
+        set href(v: string) {
+          hrefSetter(v);
+        },
+        origin: 'https://nightwatch.in',
+      },
+      writable: true,
+    });
+
+    sessionStorage.setItem(GOOGLE_SIGNUP_ID_TOKEN_KEY, 'stale-id-token');
+    mockGoogleRegister.mockRejectedValue({
+      code: 'USER_EXISTS',
+      message: 'already exists',
+    });
+    mockGoogleLogin.mockRejectedValue(new Error('idToken expired'));
+
+    render(<GoogleSignupPage />);
+    await screen.findByLabelText('signup.username');
+    await fillForm();
+    submitForm();
+
+    await waitFor(() => {
+      expect(hrefSetter).toHaveBeenCalledWith(
+        'https://accounts.google.com/login',
+      );
+    });
+    expect(sessionStorage.getItem(GOOGLE_SIGNUP_ID_TOKEN_KEY)).toBeNull();
   });
 });

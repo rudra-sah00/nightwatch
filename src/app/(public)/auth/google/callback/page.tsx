@@ -3,7 +3,11 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { connectGoogle, googleLogin } from '@/features/auth/google-api';
+import {
+  connectGoogle,
+  getGoogleOAuthUrl,
+  googleLogin,
+} from '@/features/auth/google-api';
 import { trackEvent } from '@/lib/analytics';
 import { storeUser } from '@/lib/auth';
 import { setTokenExpiration } from '@/lib/fetch';
@@ -85,6 +89,24 @@ export default function GoogleCallbackPage() {
           }
         }
       } catch (err: unknown) {
+        const apiError = err as { code?: string; message?: string };
+
+        // Signing in with a Google account that has no Nightwatch user is not
+        // an error — it just means this person needs to sign up. Send them
+        // through the registration handshake instead of dead-ending on /login.
+        //
+        // The authorization code cannot be reused: the backend already spent it
+        // exchanging for the profile, and Google codes are single-use. So we
+        // restart consent with state=register to obtain a fresh one.
+        if (
+          apiError.code === 'GOOGLE_NOT_LINKED' &&
+          normalizedState === 'login'
+        ) {
+          toast.info('No account yet — continuing to sign up');
+          window.location.href = getGoogleOAuthUrl('register');
+          return;
+        }
+
         const msg =
           err instanceof Error ? err.message : 'Google sign-in failed';
         toast.error(msg);

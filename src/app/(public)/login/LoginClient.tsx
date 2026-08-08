@@ -24,11 +24,10 @@ export default function LoginClient() {
   const isLoading = authLoading || hookLoading;
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
+  // The email/Google form is the default surface on every platform so
+  // "Continue with Google" is reachable without a detour. QR sign-in stays one
+  // tap away via the QR icon in the card header (LoginForm's onShowQr).
   const [showQr, setShowQr] = useState(false);
-
-  useEffect(() => {
-    if (!checkIsMobile()) setShowQr(true);
-  }, []);
 
   useEffect(() => {
     // Check for flash messages (e.g., from logout/session end)

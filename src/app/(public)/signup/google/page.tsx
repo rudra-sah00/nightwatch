@@ -13,6 +13,8 @@ import { checkUsername } from '@/features/auth/api';
 import { AuthCard } from '@/features/auth/components/auth-card';
 import {
   GOOGLE_SIGNUP_ID_TOKEN_KEY,
+  getGoogleOAuthUrl,
+  googleLogin,
   googleRegister,
 } from '@/features/auth/google-api';
 import { passwordSchema } from '@/features/auth/schema';
@@ -176,6 +178,39 @@ export default function GoogleSignupPage() {
       // the user back to restart the handshake instead.
       if (apiError.code === 'GOOGLE_AUTH_FAILED') {
         restartSignup(tErr('googleAuthExpired'));
+        return;
+      }
+
+      // This Google account already has a Nightwatch user. Signing them in is
+      // what they actually wanted, so do that instead of reporting an error.
+      // The native idToken is still valid; a web code is already spent, so that
+      // path has to restart consent in login mode.
+      if (
+        apiError.code === 'GOOGLE_ALREADY_REGISTERED' ||
+        apiError.code === 'USER_EXISTS'
+      ) {
+        toast.info(t('googleAccountExists'));
+        if (idToken) {
+          try {
+            const response = await googleLogin({ idToken });
+            if (response.user) {
+              try {
+                sessionStorage.removeItem(GOOGLE_SIGNUP_ID_TOKEN_KEY);
+              } catch {}
+              storeUser(response.user);
+              useAuthStore.getState().setUser(response.user);
+              if (response.expiresIn) setTokenExpiration(response.expiresIn);
+              router.replace('/home');
+              return;
+            }
+          } catch {
+            // Fall through to the redirect below.
+          }
+        }
+        try {
+          sessionStorage.removeItem(GOOGLE_SIGNUP_ID_TOKEN_KEY);
+        } catch {}
+        window.location.href = getGoogleOAuthUrl('login');
         return;
       }
 

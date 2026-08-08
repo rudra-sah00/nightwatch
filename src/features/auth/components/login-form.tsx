@@ -1,6 +1,7 @@
 'use client';
 
 import { Eye, EyeOff, QrCode } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
 import {
+  GOOGLE_SIGNUP_ID_TOKEN_KEY,
   getGoogleOAuthUrl,
   googleLogin,
   nativeGoogleSignIn,
@@ -41,6 +43,7 @@ export function LoginForm(
 ) {
   const [showPassword, setShowPassword] = useState(false);
   const t = useTranslations('auth');
+  const router = useRouter();
   const {
     step,
     setStep,
@@ -257,8 +260,11 @@ export function LoginForm(
                 size="xl"
                 onClick={async () => {
                   if (window.Capacitor?.isNativePlatform?.()) {
+                    // Declared outside the try so the catch can reuse it for
+                    // the signup handoff below.
+                    let idToken: string | undefined;
                     try {
-                      const idToken = await nativeGoogleSignIn();
+                      idToken = await nativeGoogleSignIn();
                       const response = await googleLogin({ idToken });
                       if (response.user) {
                         const { storeUser } = await import('@/lib/auth');
@@ -275,11 +281,23 @@ export function LoginForm(
                       }
                     } catch (err: unknown) {
                       const { toast } = await import('sonner');
-                      const e = err as { message?: string };
-                      toast.error(
-                        e?.message ||
-                          'No account linked to this Google account',
-                      );
+                      const e = err as { message?: string; code?: string };
+
+                      // Not registered yet: continue into signup rather than
+                      // dead-ending. Unlike a web authorization code, the native
+                      // idToken is still valid, so signup needs no second trip
+                      // through the Google picker.
+                      if (e?.code === 'GOOGLE_NOT_LINKED' && idToken) {
+                        sessionStorage.setItem(
+                          GOOGLE_SIGNUP_ID_TOKEN_KEY,
+                          idToken,
+                        );
+                        toast.info(t('googleContinueToSignup'));
+                        router.push('/signup/google');
+                        return;
+                      }
+
+                      toast.error(e?.message || t('errors.googleSignInFailed'));
                     }
                   } else {
                     window.location.href = getGoogleOAuthUrl('login');
