@@ -245,7 +245,7 @@ export function useLoginForm() {
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!otp || otp.length !== 6) {
+    if (otp?.length !== 6) {
       setError(tErr('invalidOtp'));
       return;
     }

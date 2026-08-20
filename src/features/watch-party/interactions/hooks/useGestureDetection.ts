@@ -77,12 +77,23 @@ function interceptMediaPipeLogs() {
   };
 }
 
+/**
+ * Version of the MediaPipe WASM runtime loaded from the CDN.
+ *
+ * This MUST match the installed `@mediapipe/tasks-vision` version — a mismatched
+ * runtime breaks gesture detection at runtime with no build-time error. The
+ * constant is asserted against the installed package in
+ * `tests/features/watch-party/mediapipe-version.test.ts`, so bumping the
+ * dependency without updating this value fails the test suite.
+ */
+export const MEDIAPIPE_WASM_VERSION = '1.0.1';
+
 async function getVisionResolver(): Promise<WasmFileset> {
   if (!visionResolver) {
     interceptMediaPipeLogs();
     const { FilesetResolver } = await import('@mediapipe/tasks-vision');
     visionResolver = FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm',
+      `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_WASM_VERSION}/wasm`,
     );
   }
   return visionResolver;

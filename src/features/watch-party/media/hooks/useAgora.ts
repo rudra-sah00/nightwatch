@@ -746,7 +746,7 @@ export function useAgora({
   const toggleAudio = useCallback(async () => {
     if (isTogglingAudio.current) return;
     const client = clientRef.current;
-    if (!client || client.connectionState !== 'CONNECTED') {
+    if (client?.connectionState !== 'CONNECTED') {
       toast.error(tp('notConnectedVoice'));
       return;
     }
@@ -823,7 +823,7 @@ export function useAgora({
   const toggleVideo = useCallback(async () => {
     if (isTogglingVideo.current) return;
     const client = clientRef.current;
-    if (!client || client.connectionState !== 'CONNECTED') {
+    if (client?.connectionState !== 'CONNECTED') {
       toast.error(tp('notConnectedVideo'));
       return;
     }

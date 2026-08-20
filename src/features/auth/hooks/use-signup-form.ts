@@ -7,8 +7,14 @@ import { type RegisterInput, registerSchema } from '@/features/auth/schema';
 import { useAuth } from '@/providers/auth-provider';
 import type { ApiError } from '@/types';
 
-/** Possible steps in the multi-step signup wizard. */
-type Step = 'name' | 'details' | 'otp';
+/**
+ * Possible steps in the multi-step signup wizard.
+ *
+ * The identity fields are collected one at a time (`name` → `username` →
+ * `email`) so a single field always fits the fixed-height auth card without
+ * overflowing it.
+ */
+type Step = 'name' | 'username' | 'email' | 'details' | 'otp';
 
 /** Server action return shape for form submissions. */
 interface FormState {
@@ -319,7 +325,7 @@ export function useSignupForm() {
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!otp || otp.length !== 6) {
+    if (otp?.length !== 6) {
       const msg = tErr('invalidOtp');
       setError(msg);
       toast.error(msg);

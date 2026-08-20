@@ -200,17 +200,20 @@ describe('GoogleSignupPage password policy', () => {
     ['no uppercase', 'password1!', 'validation.passwordUppercase'],
     ['no number', 'Password!', 'validation.passwordNumber'],
     ['no special character', 'Password12', 'validation.passwordSpecialChar'],
-  ])('rejects a password with %s before calling the API', async (_label, password, expectedKey) => {
-    h.searchParams.current = { code: 'oauth-code' };
-    render(<GoogleSignupPage />);
-    await screen.findByLabelText('signup.username');
+  ])(
+    'rejects a password with %s before calling the API',
+    async (_label, password, expectedKey) => {
+      h.searchParams.current = { code: 'oauth-code' };
+      render(<GoogleSignupPage />);
+      await screen.findByLabelText('signup.username');
 
-    await fillForm(password);
-    submitForm();
+      await fillForm(password);
+      submitForm();
 
-    expect(await screen.findByText(expectedKey)).toBeInTheDocument();
-    expect(mockGoogleRegister).not.toHaveBeenCalled();
-  });
+      expect(await screen.findByText(expectedKey)).toBeInTheDocument();
+      expect(mockGoogleRegister).not.toHaveBeenCalled();
+    },
+  );
 
   it('rejects mismatched confirmation', async () => {
     h.searchParams.current = { code: 'oauth-code' };
@@ -323,29 +326,29 @@ describe('GoogleSignupPage when the account already exists', () => {
     createdAt: new Date().toISOString(),
   };
 
-  it.each([
-    'GOOGLE_ALREADY_REGISTERED',
-    'USER_EXISTS',
-  ])('signs the user in with the native idToken on %s', async (code) => {
-    sessionStorage.setItem(GOOGLE_SIGNUP_ID_TOKEN_KEY, 'native-id-token');
-    mockGoogleRegister.mockRejectedValue({ code, message: 'already exists' });
-    mockGoogleLogin.mockResolvedValue({ user: existingUser, expiresIn: 900 });
+  it.each(['GOOGLE_ALREADY_REGISTERED', 'USER_EXISTS'])(
+    'signs the user in with the native idToken on %s',
+    async (code) => {
+      sessionStorage.setItem(GOOGLE_SIGNUP_ID_TOKEN_KEY, 'native-id-token');
+      mockGoogleRegister.mockRejectedValue({ code, message: 'already exists' });
+      mockGoogleLogin.mockResolvedValue({ user: existingUser, expiresIn: 900 });
 
-    render(<GoogleSignupPage />);
-    await screen.findByLabelText('signup.username');
-    await fillForm();
-    submitForm();
+      render(<GoogleSignupPage />);
+      await screen.findByLabelText('signup.username');
+      await fillForm();
+      submitForm();
 
-    await waitFor(() => {
-      expect(mockGoogleLogin).toHaveBeenCalledWith({
-        idToken: 'native-id-token',
+      await waitFor(() => {
+        expect(mockGoogleLogin).toHaveBeenCalledWith({
+          idToken: 'native-id-token',
+        });
       });
-    });
-    expect(mockSetUser).toHaveBeenCalledWith(existingUser);
-    expect(mockReplace).toHaveBeenCalledWith('/home');
-    // Credential consumed — must not linger for a later signup attempt.
-    expect(sessionStorage.getItem(GOOGLE_SIGNUP_ID_TOKEN_KEY)).toBeNull();
-  });
+      expect(mockSetUser).toHaveBeenCalledWith(existingUser);
+      expect(mockReplace).toHaveBeenCalledWith('/home');
+      // Credential consumed — must not linger for a later signup attempt.
+      expect(sessionStorage.getItem(GOOGLE_SIGNUP_ID_TOKEN_KEY)).toBeNull();
+    },
+  );
 
   it('restarts consent in login mode when only a spent web code is available', async () => {
     const hrefSetter = vi.fn();

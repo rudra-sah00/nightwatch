@@ -53,7 +53,7 @@ export function LinkPreviewCard({ content }: { content: string }) {
     };
   }, [url]);
 
-  if (!preview || !preview.title) return null;
+  if (!preview?.title) return null;
 
   const safeUrl =
     preview.url && /^https?:\/\//i.test(preview.url) ? preview.url : undefined;

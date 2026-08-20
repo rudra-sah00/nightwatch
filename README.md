@@ -12,7 +12,7 @@
 
 Welcome to the Nightwatch frontend repository. This is a Next.js (App Router) application designed for real-time, synchronized media playback and interactive collaboration.
 
-With over 400+ modules spanning complex real-time domains, this project implements a highly optimized, edge-ready architecture mixing Server-Side Rendering (SSR) with heavy client-side Peer-to-Peer data sharing via WebRTC and Real-Time Messaging.
+With over 680 modules spanning complex real-time domains, this project implements a highly optimized, edge-ready architecture mixing Server-Side Rendering (SSR) with heavy client-side Peer-to-Peer data sharing via WebRTC and Real-Time Messaging.
 
 ## Documentation Index
 
@@ -40,10 +40,19 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Watch Party](./docs/features/WATCH_PARTY.md): Decentralized peer-to-peer event pipelines over Agora Real-Time Messaging.
 - [Friends & Voice Calls](./docs/features/FRIENDS.md): Friend system, voice calls, media ducking, and online presence.
 - [Music](./docs/features/MUSIC.md): JioSaavn streaming, AudioEngine, synced lyrics, playlists, Redis queue, gapless playback, crossfade, equalizer, sleep timer, and Spotify Connect-like device transfer.
+- [Music Discover](./docs/features/MUSIC_DISCOVER.md): Swipe-based song discovery feed with audio previews, haptic feedback, and personalized recommendation engine.
+- [Manga](./docs/features/MANGA.md): MangaPlus reader with browse/search, favorites, reading progress persistence, and Smart TV spatial-navigation support.
 - [Remote Control](./docs/features/REMOTE_CONTROL.md): Mobile-to-desktop video remote control via Socket.IO.
 - [Explore & Direct Messages](./docs/features/EXPLORE.md): Social feed with ranked timelines, polls, reactions, AI bot, and real-time 1-on-1 DM chat.
 - [Smart TV](./docs/features/SMART_TV.md): Android TV platform — spatial navigation, D-pad player, letter grid search, overscan, QR login, music full player, manga reader.
-- [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 16 native plugins, mobile bridge API, and dev workflow.
+- [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 22 native plugins, mobile bridge API, and dev workflow.
+- [Desktop Application](./docs/DESKTOP.md): Electron wrapper, system tray, Discord Rich Presence, media keys, and auto-updates.
+- [Games](./docs/features/GAMES.md): Embedded HTML5 game catalogue, asset pipeline, and in-app player.
+  - [Games Patching](./docs/features/GAMES_PATCHING.md): Patching third-party game bundles for offline/embedded use.
+  - [Games Deployment](./docs/features/GAMES_DEPLOYMENT.md): Building and shipping game assets.
+
+### Contributing
+- [Contributing Guide](./docs/CONTRIBUTING.md): Branching model, commit conventions, and review expectations.
 
 ## Technology Stack
 
@@ -118,7 +127,7 @@ You can easily trigger a new desktop build using the official [GitHub CLI (`gh`)
 # 1. Update the version in package.json
 # 2. Commit the change
 # 3. Create and push a new release tag using the gh cli
-gh release create v1.32.0 --title "v1.32.0 - Major Update" --notes "Release notes here..."
+gh release create v2.17.0 --title "v2.17.0 - Major Update" --notes "Release notes here..."
 ```
 
 As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action will spin up cloud runners, compile the Next.js + Electron binaries, and attach the installer links automatically to the GitHub Releases page.
@@ -127,9 +136,9 @@ As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action 
 
 The application includes a native mobile wrapper using Capacitor. It wraps the deployed Next.js app in a native WebView with access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, and swipe-based navigation.
 
-### Native Plugins (16)
+### Native Plugins (22)
 
-Splash Screen, Status Bar, Clipboard, Haptics, Keep Awake, Screen Orientation, Network Detection, Share, Badge, Keyboard, App Lifecycle, Preferences, Filesystem, Phone Call Notification, CallKit.
+Splash Screen, Status Bar, Clipboard, Haptics, Keep Awake, Screen Orientation, Network Detection, Share, Badge, Keyboard, App Lifecycle, Preferences, Filesystem, Device Info, Push Notifications, Phone Call Notification, CallKit (Incoming Call Kit), Social Login, Volume Buttons, Volumes, Firebase Analytics, Firebase Crashlytics.
 
 ### Local Development
 

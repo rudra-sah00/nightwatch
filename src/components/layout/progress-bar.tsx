@@ -38,7 +38,7 @@ export function ProgressBar() {
       const anchor = (e.target as HTMLElement).closest('a');
       if (!anchor) return;
       const href = anchor.getAttribute('href');
-      if (!href || !href.startsWith('/') || href.startsWith('//')) return;
+      if (!href?.startsWith('/') || href.startsWith('//')) return;
       if (anchor.target === '_blank') return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       if (href === window.location.pathname + window.location.search) return;

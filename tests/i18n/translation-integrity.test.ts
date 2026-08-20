@@ -138,25 +138,28 @@ describe('i18n Translation Integrity', () => {
 
     it.each(
       nonEnLocales.flatMap((l) => NAMESPACES.map((ns) => [l, ns] as const)),
-    )('%s/%s.json preserves all ICU placeholders from English', (locale, namespace) => {
-      const enEntries = getLeafEntries(loadJSON('en', namespace));
-      const localeData = loadJSON(locale, namespace);
-      const localeEntries = new Map(getLeafEntries(localeData));
+    )(
+      '%s/%s.json preserves all ICU placeholders from English',
+      (locale, namespace) => {
+        const enEntries = getLeafEntries(loadJSON('en', namespace));
+        const localeData = loadJSON(locale, namespace);
+        const localeEntries = new Map(getLeafEntries(localeData));
 
-      for (const [key, enValue] of enEntries) {
-        const enPlaceholders = extractPlaceholders(enValue);
-        if (enPlaceholders.length === 0) continue;
+        for (const [key, enValue] of enEntries) {
+          const enPlaceholders = extractPlaceholders(enValue);
+          if (enPlaceholders.length === 0) continue;
 
-        const localeValue = localeEntries.get(key);
-        expect(
-          localeValue,
-          `Missing key "${key}" in ${locale}/${namespace}`,
-        ).toBeDefined();
-        expect(
-          extractPlaceholders(localeValue!),
-          `Placeholder mismatch in ${locale}/${namespace} key "${key}"`,
-        ).toEqual(enPlaceholders);
-      }
-    });
+          const localeValue = localeEntries.get(key);
+          expect(
+            localeValue,
+            `Missing key "${key}" in ${locale}/${namespace}`,
+          ).toBeDefined();
+          expect(
+            extractPlaceholders(localeValue!),
+            `Placeholder mismatch in ${locale}/${namespace} key "${key}"`,
+          ).toEqual(enPlaceholders);
+        }
+      },
+    );
   });
 });
