@@ -79,7 +79,7 @@ The mic stops sending audio while the AI is speaking (matching AWS playground be
 
 Nova 2 Sonic supports native tool calling. Tools are defined with `JSON.stringify()`'d input schemas (required by the API).
 
-### Available Tools
+### Available Tools (19)
 
 | Tool | Service | Description |
 |------|---------|-------------|
@@ -87,7 +87,7 @@ Nova 2 Sonic supports native tool calling. Tools are defined with `JSON.stringif
 | `get_content_details` | ContentService | Get description, cast, rating, seasons for a specific title |
 | `get_watchlist` | WatchlistService | User's saved watchlist items |
 | `get_continue_watching` | WatchService | Unfinished content with progress percentage |
-| `get_live_streams` | LivestreamService | Currently live sports and TV channels |
+| `get_live_streams` | SportsService / IptvProvider | Live sports scores (ESPN, Redis-cached) or the live TV catalogue from the `live_channels` Postgres table when called with `sportType: "all_channels"` |
 | `get_friends_activity` | FriendsService | Online friends list |
 | `play_content` | — | Emits `ask-ai:navigate` → frontend navigates to `/watch/...` |
 | `add_to_watchlist` | WatchlistService | Adds content to user's watchlist |
@@ -96,6 +96,32 @@ Nova 2 Sonic supports native tool calling. Tools are defined with `JSON.stringif
 | `get_manga_progress` | MangaService | User's in-progress manga with chapter and page position |
 | `get_manga_favorites` | MangaService | User's saved/favorited manga titles |
 | `open_manga` | — | Emits `ask-ai:openManga` → frontend navigates to manga title or chapter |
+| `search_music` | JioSaavnProvider | Search songs by title/artist |
+| `play_music` | JioSaavnProvider | Fetches full song details, emits `ask-ai:playMusic` (falls back to minimal payload on error) |
+| `get_user_playlists` | MusicPlaylistService | User's playlists with track counts |
+| `play_user_playlist` | MusicPlaylistService | Loads playlist tracks, emits `ask-ai:playPlaylist`; errors if empty |
+| `music_control` | — | Emits `ask-ai:musicControl` with a play/pause/skip action |
+| `end_session` | — | Emits `ask-ai:endSession` to close the voice session |
+
+All tool handlers share one `try/catch` in `tools.executor.ts`; a thrown error is
+returned to the model as `{"error": "<message>"}` and logged at `warn` with the
+tool name, so the model can recover conversationally instead of the turn failing.
+
+#### `get_live_streams` routing
+
+"What's live?" is two different questions backed by two different stores, so the
+tool branches on `sportType`:
+
+| `sportType` | Source | Rationale |
+|-------------|--------|-----------|
+| `all_channels`, `channels`, `tv`, `live_tv` | `live_channels` table (Postgres, Redis-cached) | Static catalogue of 6k+ channels — indexed on `server`, `category`, `server+name` |
+| any sport keyword (`cricket`, `nba`, …) | `SportsService.getLiveScores()` → ESPN API, Redis-cached | Scores change every few seconds; there is deliberately no fixtures table to keep stale |
+| omitted | `SportsService` default league sweep (Premier League, ICC Cricket, NBA, NFL) | Reasonable answer to a bare "what's live?" |
+
+Results are capped at 8 to bound the token cost of a voice turn. When no match is
+live the tool returns an explicit `message` telling the model it can retry with
+`all_channels`, rather than returning a bare empty list the model would have to
+guess at. Channel `streamUrl` values are deliberately omitted from the payload.
 
 ### Tool Flow
 

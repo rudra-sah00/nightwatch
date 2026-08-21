@@ -2,7 +2,7 @@
 
 ## Overview
 
-Nightwatch ships a native iOS and Android app built with [Capacitor](https://capacitorjs.com/). The deployed Next.js web app (`https://nightwatch.in`) is loaded inside a native WebView, with 16 native plugins providing access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, and swipe-based navigation.
+Nightwatch ships a native iOS and Android app built with [Capacitor](https://capacitorjs.com/). The deployed Next.js web app (`https://nightwatch.in`) is loaded inside a native WebView, with 21 native plugins providing access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, and swipe-based navigation.
 
 ## Capacitor Configuration
 
@@ -48,7 +48,7 @@ Native-specific logic lives in `src/capacitor/`:
 | `firebase.ts` | Firebase Cloud Messaging initialization for Capacitor |
 | `music-service.ts` | Background music playback service (lock screen controls, now playing) |
 
-## Native Plugins (16)
+## Native Plugins (21)
 
 | # | Plugin | Package | Purpose |
 |---|--------|---------|---------|
@@ -64,8 +64,15 @@ Native-specific logic lives in `src/capacitor/`:
 | 10 | Keyboard | `@capacitor/keyboard` | Show/hide events, programmatic dismiss |
 | 11 | App Lifecycle | `@capacitor/app` | Foreground/background state, back button |
 | 12 | Preferences | `@capacitor/preferences` | Native key-value store (like `electron-store`) |
-| 14 | Phone Call Notification | `@anuradev/capacitor-phone-call-notification` | Android "call in progress" notification |
-| 15 | CallKit | `@capgo/capacitor-incoming-call-kit` | iOS incoming call UI (green pill, lock screen) |
+| 13 | Device Info | `@capacitor/device` | Device model, OS version, platform detection |
+| 14 | Push Notifications | `@capacitor/push-notifications` | FCM/APNs token registration and event handling |
+| 15 | Phone Call Notification | `@anuradev/capacitor-phone-call-notification` | Android "call in progress" notification |
+| 16 | CallKit | `@capgo/capacitor-incoming-call-kit` | iOS incoming call UI (green pill, lock screen) |
+| 17 | Social Login | `@capgo/capacitor-social-login` | Google Sign-In native flow |
+| 18 | Volume Buttons | `@capacitor-community/volume-buttons` | Physical volume button event capture |
+| 19 | Volumes | `@ottimis/capacitor-volumes` | Programmatic volume control |
+| 20 | Firebase Analytics | `@capacitor-firebase/analytics` | Event tracking and screen views |
+| 21 | Firebase Crashlytics | `@capacitor-firebase/crashlytics` | Crash reporting and diagnostics |
 
 ## Mobile Bridge API
 

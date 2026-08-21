@@ -45,7 +45,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Remote Control](./docs/features/REMOTE_CONTROL.md): Mobile-to-desktop video remote control via Socket.IO.
 - [Explore & Direct Messages](./docs/features/EXPLORE.md): Social feed with ranked timelines, polls, reactions, AI bot, and real-time 1-on-1 DM chat.
 - [Smart TV](./docs/features/SMART_TV.md): Android TV platform — spatial navigation, D-pad player, letter grid search, overscan, QR login, music full player, manga reader.
-- [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 22 native plugins, mobile bridge API, and dev workflow.
+- [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 21 native plugins, mobile bridge API, and dev workflow.
 - [Desktop Application](./docs/DESKTOP.md): Electron wrapper, system tray, Discord Rich Presence, media keys, and auto-updates.
 - [Games](./docs/features/GAMES.md): Embedded HTML5 game catalogue, asset pipeline, and in-app player.
   - [Games Patching](./docs/features/GAMES_PATCHING.md): Patching third-party game bundles for offline/embedded use.
@@ -136,9 +136,9 @@ As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action 
 
 The application includes a native mobile wrapper using Capacitor. It wraps the deployed Next.js app in a native WebView with access to device APIs: haptic feedback, status bar theming, CallKit voice calls, background music playback, lock screen media controls, native share sheet, and swipe-based navigation.
 
-### Native Plugins (22)
+### Native Plugins (21)
 
-Splash Screen, Status Bar, Clipboard, Haptics, Keep Awake, Screen Orientation, Network Detection, Share, Badge, Keyboard, App Lifecycle, Preferences, Filesystem, Device Info, Push Notifications, Phone Call Notification, CallKit (Incoming Call Kit), Social Login, Volume Buttons, Volumes, Firebase Analytics, Firebase Crashlytics.
+Splash Screen, Status Bar, Clipboard, Haptics, Keep Awake, Screen Orientation, Network Detection, Share, Badge, Keyboard, App Lifecycle, Preferences, Device Info, Push Notifications, Phone Call Notification, CallKit (Incoming Call Kit), Social Login, Volume Buttons, Volumes, Firebase Analytics, Firebase Crashlytics.
 
 ### Local Development
 
