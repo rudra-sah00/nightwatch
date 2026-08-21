@@ -277,7 +277,7 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
           <Player.MobileBottomRight>
             <Player.Fullscreen />
           </Player.MobileBottomRight>
-          <div className="md:hidden group-data-[mobile]:block">
+          <div className="max-md:block md:hidden group-data-[mobile]:!block">
             <Player.MobileSeekBar />
           </div>
         </Player.Controls>

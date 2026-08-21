@@ -59,7 +59,9 @@ export function PlayerControlRow({ children }: { children: React.ReactNode }) {
 /**
  * YouTube-style mobile top bar: settings gear top-right.
  *
- * Only visible on mobile (`md:hidden`). Receives pointer events so buttons remain tappable.
+ * Only visible on mobile — hidden from `md` up unless the root is flagged
+ * `data-mobile`, in which case `!block` re-asserts it at any width.
+ * Receives pointer events so buttons remain tappable.
  *
  * @param props.children - Typically settings and other mobile controls.
  */
@@ -69,7 +71,7 @@ export function PlayerMobileTopBar({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden group-data-[mobile]:block px-3 pt-2 landscape:pl-[max(0.75rem,env(safe-area-inset-left))] landscape:pt-[max(0.5rem,env(safe-area-inset-top))] pointer-events-auto">
+    <div className="max-md:block md:hidden group-data-[mobile]:!block px-3 pt-2 landscape:pl-[max(0.75rem,env(safe-area-inset-left))] landscape:pt-[max(0.5rem,env(safe-area-inset-top))] pointer-events-auto">
       <div className="flex items-center justify-between gap-2">{children}</div>
     </div>
   );
@@ -90,7 +92,7 @@ export function PlayerMobileCenterControls({
   const { state } = usePlayerContext();
   if (state.isLoading || state.isBuffering) return null;
   return (
-    <div className="md:hidden group-data-[mobile]:flex flex-1 items-center justify-center gap-8 pointer-events-auto">
+    <div className="max-md:flex md:hidden group-data-[mobile]:!flex flex-1 items-center justify-center gap-8 pointer-events-auto">
       {children}
     </div>
   );
@@ -118,7 +120,7 @@ export function PlayerMobileBottomRight({
   children: React.ReactNode;
 }) {
   return (
-    <div className="md:hidden group-data-[mobile]:block absolute bottom-3 right-3 landscape:right-[max(0.75rem,env(safe-area-inset-right))] pointer-events-auto">
+    <div className="max-md:block md:hidden group-data-[mobile]:!block absolute bottom-3 right-3 landscape:right-[max(0.75rem,env(safe-area-inset-right))] pointer-events-auto">
       {children}
     </div>
   );

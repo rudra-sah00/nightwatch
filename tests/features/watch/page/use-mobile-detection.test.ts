@@ -16,8 +16,35 @@ interface WindowWithTouch {
   ontouchstart?: unknown;
 }
 
+/**
+ * Stub `matchMedia` so `(pointer: coarse)` / `(hover: none)` are deterministic.
+ * Defaults to a mouse-driven desktop (fine pointer, hover capable).
+ */
+function mockPointer({ coarse = false, hover = true } = {}) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: (query: string) => ({
+      matches: query.includes('pointer: coarse')
+        ? coarse
+        : query.includes('hover: none')
+          ? !hover
+          : false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    }),
+  });
+}
+
 describe('useMobileDetection', () => {
   beforeEach(() => {
+    mockPointer();
+
     // Mock window properties
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
@@ -58,22 +85,34 @@ describe('useMobileDetection', () => {
       expect(result.current).toBe(true);
     });
 
-    it('should detect mobile when ontouchstart is present', () => {
+    it('should stay desktop when ontouchstart is present but pointer is fine', () => {
       (window as WindowWithTouch).ontouchstart = {};
 
       const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(true);
+      expect(result.current).toBe(false);
 
       // Cleanup
       delete (window as WindowWithTouch).ontouchstart;
     });
 
-    it('should detect mobile when maxTouchPoints > 0', () => {
+    it('should stay desktop when maxTouchPoints > 0 but pointer is fine', () => {
       Object.defineProperty(navigator, 'maxTouchPoints', {
         writable: true,
         configurable: true,
         value: 1,
       });
+
+      const { result } = renderHook(() => useMobileDetection());
+      expect(result.current).toBe(false);
+    });
+
+    it('should detect mobile when touch is paired with no hover capability', () => {
+      Object.defineProperty(navigator, 'maxTouchPoints', {
+        writable: true,
+        configurable: true,
+        value: 5,
+      });
+      mockPointer({ coarse: false, hover: false });
 
       const { result } = renderHook(() => useMobileDetection());
       expect(result.current).toBe(true);
@@ -148,8 +187,8 @@ describe('useMobileDetection', () => {
   });
 
   describe('Multiple detection criteria', () => {
-    it('should return true if any mobile criterion is met', () => {
-      // Width is desktop, but touch is present
+    it('should require touch to be paired with a coarse pointer, not touch alone', () => {
+      // Desktop width + touch APIs but a fine pointer => still desktop.
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
         configurable: true,
@@ -157,8 +196,14 @@ describe('useMobileDetection', () => {
       });
       (window as WindowWithTouch).ontouchstart = {};
 
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(true);
+      const { result: laptop } = renderHook(() => useMobileDetection());
+      expect(laptop.current).toBe(false);
+
+      // Same device signals, but now the primary pointer is coarse => mobile.
+      mockPointer({ coarse: true, hover: false });
+
+      const { result: tablet } = renderHook(() => useMobileDetection());
+      expect(tablet.current).toBe(true);
 
       // Cleanup
       delete (window as WindowWithTouch).ontouchstart;

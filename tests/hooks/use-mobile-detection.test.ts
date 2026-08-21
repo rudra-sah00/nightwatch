@@ -12,8 +12,35 @@ vi.mock('@/lib/electron-bridge', () => ({
 
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
 
+/**
+ * Stub `matchMedia` so `(pointer: coarse)` / `(hover: none)` are deterministic.
+ * Defaults to a mouse-driven desktop (fine pointer, hover capable).
+ */
+function mockPointer({ coarse = false, hover = true } = {}) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    configurable: true,
+    value: (query: string) => ({
+      matches: query.includes('pointer: coarse')
+        ? coarse
+        : query.includes('hover: none')
+          ? !hover
+          : false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    }),
+  });
+}
+
 describe('useMobileDetection', () => {
   beforeEach(() => {
+    mockPointer();
+
     // Reset window properties
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
@@ -55,18 +82,28 @@ describe('useMobileDetection', () => {
     expect(result.current).toBe(true);
   });
 
-  it('should return true when touch support is detected', () => {
+  it('should stay desktop when ontouchstart exists but pointer is fine (touch laptop)', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1024 });
     (window as { ontouchstart?: unknown }).ontouchstart = null;
 
     const { result } = renderHook(() => useMobileDetection());
 
-    expect(result.current).toBe(true);
+    expect(result.current).toBe(false);
   });
 
-  it('should return true when maxTouchPoints > 0', () => {
+  it('should stay desktop when maxTouchPoints > 0 but pointer is fine (2-in-1 in laptop mode)', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 1440 });
+    Object.defineProperty(window.navigator, 'maxTouchPoints', { value: 10 });
+
+    const { result } = renderHook(() => useMobileDetection());
+
+    expect(result.current).toBe(false);
+  });
+
+  it('should return true when touch is paired with a coarse pointer', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1024 });
-    Object.defineProperty(window.navigator, 'maxTouchPoints', { value: 1 });
+    Object.defineProperty(window.navigator, 'maxTouchPoints', { value: 5 });
+    mockPointer({ coarse: true, hover: false });
 
     const { result } = renderHook(() => useMobileDetection());
 
@@ -126,9 +163,10 @@ describe('useMobileDetection', () => {
     );
   });
 
-  it('should detect iPad with touch support', () => {
+  it('should detect iPad (desktop UA, touch + coarse pointer)', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1024 });
     Object.defineProperty(window.navigator, 'maxTouchPoints', { value: 5 });
+    mockPointer({ coarse: true, hover: false });
 
     const { result } = renderHook(() => useMobileDetection());
 
