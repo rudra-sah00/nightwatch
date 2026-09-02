@@ -132,6 +132,6 @@ describe('AuthProvider & Zustand Store', () => {
     });
 
     expect(useAuthStore.getState().user).toBe(null);
-    expect(window.location.href).toBe('/login');
+    expect(window.location.href).toBe('/continue');
   });
 });

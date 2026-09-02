@@ -12,7 +12,7 @@ export function LandingRedirect() {
   useEffect(() => {
     if (!isLoading && isAuthenticated) router.replace('/home');
     if (!isLoading && !isAuthenticated && (checkIsDesktop() || checkIsMobile()))
-      router.replace('/login');
+      router.replace('/continue');
   }, [isAuthenticated, isLoading, router]);
 
   return null;

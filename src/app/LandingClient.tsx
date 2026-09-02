@@ -190,7 +190,7 @@ export default function LandingPage() {
           size="none"
           className="mt-10 px-10 py-4 text-sm uppercase tracking-[0.2em] font-headline font-black group"
         >
-          <Link href="/login">
+          <Link href="/continue">
             {t('login')}
             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
           </Link>
@@ -291,7 +291,7 @@ export default function LandingPage() {
             size="none"
             className="px-10 py-4 text-sm uppercase tracking-[0.2em] font-headline font-black group"
           >
-            <Link href="/login">
+            <Link href="/continue">
               {t('login')}
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>

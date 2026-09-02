@@ -22,7 +22,7 @@ test.describe('Explore Feature E2E', () => {
     page = await context.newPage();
 
     // Authenticate
-    await page.goto('/login');
+    await page.goto('/continue');
     await page.locator('#email').fill(process.env.E2E_TEST_EMAIL ?? '');
     await page.locator('#password').fill(process.env.E2E_TEST_PASSWORD ?? '');
     await page.getByRole('button', { name: /Launch Sync/i }).click();

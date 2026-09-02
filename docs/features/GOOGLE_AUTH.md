@@ -2,14 +2,22 @@
 
 ## Overview
 
-Nightwatch supports Google as both a **sign-in** and a **sign-up** method, and as an account link that can be connected from the profile page.
+Google is the **only** way to create a Nightwatch account, and one of two ways to
+sign in. A single "Continue with Google" button covers both: the backend decides
+whether this is a login or a signup, and the client only finds out afterwards.
+
+There is no `/signup` or `/login` route. Both signing in and creating an account
+happen on a single route: **`/continue`**.
 
 **Rules:**
 - One Google account per Nightwatch user (enforced by unique constraint on `google_id`)
 - One Nightwatch account per Google account (prevents multi-linking)
 - Google email doesn't need to match Nightwatch email
 - Users can disconnect and reconnect a different Google account anytime
-- Google signup does **not** require an email OTP — Google has already verified the address — but it does require the user to pick a username and set a password
+- Signup requires no email OTP — Google has already verified the address — but it
+  does require the user to pick a username and set a password
+- The password is stored against the Google email, so every account ends up
+  reachable **both** through Google and through email + password
 
 ## Architecture
 
@@ -21,39 +29,106 @@ Nightwatch supports Google as both a **sign-in** and a **sign-up** method, and a
 
 The frontend detects native platforms via `checkIsMobile()` (`window.Capacitor?.isNativePlatform?.()`) and uses the appropriate flow. A browser redirect is never used on native: Google rejects OAuth inside embedded WebViews (`disallowed_useragent`).
 
+## The two-call handshake
+
+A Google authorization code can only be exchanged **once**, but signup needs two
+round trips: resolve the profile, then collect a username. The backend therefore
+splits the flow and parks the verified profile server-side between the two calls.
+
+```
+POST /api/auth/google/continue      { code, redirectUri } | { idToken }
+  │
+  ├─ google_id matches a user  → 200 { user, expiresIn }          ← signed in, cookies set
+  │
+  ├─ no match, email is free   → 200 { needsProfile: true,
+  │                                    ticket,
+  │                                    profile: { name, email, picture },
+  │                                    suggestedUsername }
+  │                                 ↓
+  │                              POST /api/auth/google/complete
+  │                                { ticket, username, name, password }
+  │                                 → 201 { user, expiresIn }     ← account created, cookies set
+  │
+  └─ email belongs to a password account → 409 USER_EXISTS
+```
+
+### Signup ticket
+
+| Property | Value |
+|----------|-------|
+| Redis key | `google_signup:<ticket>` |
+| Ticket | 32 random bytes, base64url (`crypto.randomBytes`) |
+| TTL | 10 minutes |
+| Payload | `{ sub, email, name, picture }` — the verified Google profile |
+
+`randomBytes` rather than a uuid: possession of a ticket authorises creating an
+account against an already-verified email, so it must not be guessable from
+sequence or timing.
+
+**The email always comes from the ticket, never from the client.** `GoogleCompleteSchema`
+has no email field and strips unknown keys, so a client cannot substitute an
+address Google never confirmed.
+
+### Why a taken username no longer costs a Google round trip
+
+The old flow exchanged the credential inside `register()`, so hitting a taken
+username spent the code and forced the user back through the account picker.
+Now `complete` deletes the ticket **only after** the account exists: a
+`USERNAME_TAKEN` rejection leaves it valid and the user just picks another name.
+Concurrent submissions still cannot create two accounts, because `users.google_id`
+is unique.
+
 ## Signup Flow
 
-Both entry paths converge on `/signup/google`, which collects the username and password and then calls `POST /api/auth/google/register`.
+Both entry paths converge on the profile step rendered inside the login card.
 
 **Web / desktop**
-1. `GoogleSignUpButton` redirects to Google with `state=register` (`desktop_register` inside Electron).
-2. `/auth/google/callback` sees the register state and forwards to `/signup/google?code=…`.
-3. The page submits `{ code, redirectUri, username, password }`.
+1. The login button redirects to Google with `state=login` (`desktop_login` inside Electron).
+2. `/auth/google/callback` calls `googleContinue({ code })`.
+3. On `needsProfile`, it parks the response in `sessionStorage` and redirects to `/continue`.
+4. `useGoogleAuth` picks the parked signup up on mount and `LoginClient` renders `GoogleCompleteForm`.
 
 **Native (iOS / Android)**
-1. `GoogleSignUpButton` calls `nativeGoogleSignIn()` to open the device account picker.
-2. The resulting idToken is stashed in `sessionStorage` under `GOOGLE_SIGNUP_ID_TOKEN_KEY` and the app routes to `/signup/google`. The token is deliberately kept out of the URL — it is a signed JWT containing the user's email and name, and URLs leak into history and logs.
-3. The page submits `{ idToken, username, password }` and clears the stored token.
+1. The button calls `nativeGoogleSignIn()` to open the device account picker.
+2. `googleContinue({ idToken })` runs in place — no navigation.
+3. On `needsProfile` the profile step renders immediately.
+
+The pending signup is mirrored to `sessionStorage` in both cases so there is only
+one code path. It holds an opaque ticket, never the Google credential.
+
+### Profile step fields
+
+| Field | Source | Editable |
+|-------|--------|----------|
+| Email | Google (verified) | **No** — displayed as read-only text, not an input |
+| Name | Google, pre-filled | Yes |
+| Username | `suggestedUsername` from the email local part, pre-filled | Yes |
+| Password | — | Required |
+
+`suggestedUsername` is sanitised to `[a-z0-9_]`, truncated to 20 chars, and checked
+for availability; a numeric suffix is tried a few times before giving up and
+returning an empty string so the field simply starts blank.
 
 ### Password policy
 
-`/signup/google` validates with the shared `passwordSchema` from `src/features/auth/schema.ts` (8+ chars, lowercase, uppercase, number, special character), which mirrors the backend `GoogleRegisterSchema`. Keeping these in lockstep matters because the backend strips Zod field paths in production — anything the client lets through surfaces as an untargeted "Validation failed".
-
-### Spent credentials
-
-Google authorization codes are single-use and idTokens expire. `GoogleAuthService.register` exchanges the credential *before* checking for a taken username or an already-registered account, so those failures consume it. On `GOOGLE_AUTH_FAILED` the page clears state and redirects to `/signup` rather than letting the user retry against a dead credential.
+The profile step validates with the shared `passwordSchema` from
+`src/features/auth/schema.ts` (8+ chars, lowercase, uppercase, number, special
+character), which mirrors the backend `GoogleCompleteSchema`. Keeping these in
+lockstep matters because the backend strips Zod field paths in production —
+anything the client lets through surfaces as an untargeted "Validation failed".
 
 ## Frontend Implementation
 
 ### Key Files
 
-- `src/features/auth/google-api.ts` — OAuth URL builder, native sign-in, API calls, `GOOGLE_SIGNUP_ID_TOKEN_KEY`
-- `src/features/auth/components/google-sign-up-button.tsx` — Sign-up button (redirect on web, native picker on Capacitor)
-- `src/features/auth/components/login-form.tsx` — Adaptive button (Google when fields empty, login when filled)
-- `src/features/profile/components/google-account-section.tsx` — Connect/disconnect on profile page
-- `src/app/(public)/auth/google/callback/page.tsx` — Handles OAuth redirect from Google
-- `src/app/(public)/signup/google/page.tsx` — Signup completion (username + password)
-- `tests/features/auth/google-signup.test.tsx` — Covers both entry paths, password policy, and spent-credential recovery
+- `src/features/auth/google-api.ts` — OAuth URL builder, native sign-in, `googleContinue`/`googleComplete`, pending-signup storage helpers
+- `src/features/auth/hooks/use-google-auth.ts` — owns `start`/`complete`/`cancel` and the pending-signup state
+- `src/features/auth/components/google-complete-form.tsx` — the profile step
+- `src/features/auth/components/login-form.tsx` — adaptive button (Google when credential fields are empty, login when filled)
+- `src/features/profile/components/google-account-section.tsx` — connect/disconnect on profile page
+- `src/app/(public)/auth/google/callback/page.tsx` — handles the OAuth redirect from Google
+- `tests/features/auth/google-continue.test.ts` — API contract, ticket storage, OAuth URL states
+- `tests/features/auth/google-complete-form.test.tsx` — profile step validation and read-only email
 
 ### Native Plugin
 
@@ -80,7 +155,7 @@ await SocialLogin.initialize({
 
 ### Key Files
 
-- `src/modules/auth/google-auth.service.ts` — Code exchange, idToken verification, login/connect/disconnect
+- `src/modules/auth/google-auth.service.ts` — Code exchange, idToken verification, `continueWithGoogle`/`completeRegistration`/connect/disconnect, signup tickets
 - `src/modules/auth/google-auth.controller.ts` — HTTP handlers with cookie-based session creation
 - `src/db/schema.ts` — `google_id` (unique) and `google_email` columns on users table
 - `drizzle/0017_add_google_oauth.sql` — Migration SQL
@@ -89,8 +164,8 @@ await SocialLogin.initialize({
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
-| POST | `/api/auth/google/login` | Public | Sign in with Google (code or idToken) |
-| POST | `/api/auth/google/register` | Public | Create an account with Google (code or idToken) + username + password |
+| POST | `/api/auth/google/continue` | Public | Sign in, or return a signup ticket (code or idToken) |
+| POST | `/api/auth/google/complete` | Public | Create the account from a ticket + username + name + password |
 | POST | `/api/user/google/connect` | Protected | Link Google to account |
 | POST | `/api/user/google/disconnect` | Protected | Unlink Google from account |
 
@@ -100,9 +175,8 @@ Both public endpoints are exempt from CSRF validation: they run before the clien
 
 | Code | Meaning |
 |------|---------|
-| `GOOGLE_NOT_LINKED` | Sign-in attempted for a Google account with no Nightwatch user — the client should route to signup |
-| `GOOGLE_ALREADY_REGISTERED` | Signup attempted for a Google account that already has a user |
-| `USER_EXISTS` | The Google email is already registered via email/password |
+| `GOOGLE_TICKET_INVALID` | Signup ticket unknown or expired — restart from "Continue with Google" |
+| `USER_EXISTS` | The Google email already belongs to a password account. Linking is done from the profile page, deliberately from an authenticated session, so holding the email is never on its own enough to take over the account |
 | `USERNAME_TAKEN` | Chosen username is taken or reserved |
 | `GOOGLE_AUTH_FAILED` | Credential invalid, expired, or already spent — restart the handshake |
 
@@ -167,7 +241,11 @@ http://localhost:3000/auth/google/callback
 ## i18n Keys
 
 ### `auth.json`
-- `googleSignIn` — "Sign in with Google"
+- `continueWithGoogle` — "Continue with Google"
+- `googleSignup.title` — profile step heading
+- `googleSignup.createAccount` — profile step submit
+- `googleSignup.fromGoogle` — badge marking the read-only email
+- `googleSignup.usernameTaken` — server-side username clash
 
 ### `profile.json` → `google`
 - `title` — "Google Account"

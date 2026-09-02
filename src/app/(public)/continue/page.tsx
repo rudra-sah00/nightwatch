@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import LoginClient from './LoginClient';
+import ContinueClient from './ContinueClient';
 import { TvLoginGate } from './TvLoginGate';
 
 export async function generateMetadata() {
@@ -10,11 +10,11 @@ export async function generateMetadata() {
   };
 }
 
-export default async function LoginPage() {
+export default async function ContinuePage() {
   return (
     <>
       <TvLoginGate />
-      <LoginClient />
+      <ContinueClient />
     </>
   );
 }

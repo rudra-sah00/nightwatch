@@ -1,7 +1,6 @@
 'use client';
 
 import { Eye, EyeOff, QrCode } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type React from 'react';
 import { useState } from 'react';
@@ -10,12 +9,6 @@ import { Captcha } from '@/components/ui/captcha';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OtpInput } from '@/components/ui/otp-input';
-import {
-  GOOGLE_SIGNUP_ID_TOKEN_KEY,
-  getGoogleOAuthUrl,
-  googleLogin,
-  nativeGoogleSignIn,
-} from '../google-api';
 import type { useLoginForm } from '../hooks/use-login-form';
 import { AuthCard } from './auth-card';
 
@@ -27,6 +20,10 @@ import { AuthCard } from './auth-card';
  * The password field has a show/hide toggle. Submission is blocked until the
  * captcha is verified and both fields are non-empty.
  *
+ * While both credential fields are empty the primary button is "Continue with
+ * Google", which covers signing in and signing up alike — there is no separate
+ * signup route. Typing a credential swaps it for the email/password submit.
+ *
  * **Step `'otp'`** — shown after the server requires email verification.
  * Displays the target email, a 6-digit OTP input, a verify button, and a
  * resend button with a countdown timer. A back button in the {@link AuthCard}
@@ -35,15 +32,19 @@ import { AuthCard } from './auth-card';
  * All form state and handlers are provided by the {@link useLoginForm} hook
  * and passed in as props (render-props pattern).
  *
- * @param props - Return value of {@link useLoginForm}.
- * @returns The login form element.
+ * @param props - Return value of {@link useLoginForm}, plus the QR and Google
+ *   entry points owned by the parent.
  */
 export function LoginForm(
-  props: ReturnType<typeof useLoginForm> & { onShowQr?: () => void },
+  props: ReturnType<typeof useLoginForm> & {
+    onShowQr?: () => void;
+    /** Starts the Google handshake — see `useGoogleAuth().start`. */
+    onContinueWithGoogle: () => void;
+    isGoogleLoading?: boolean;
+  },
 ) {
   const [showPassword, setShowPassword] = useState(false);
   const t = useTranslations('auth');
-  const router = useRouter();
   const {
     step,
     setStep,
@@ -251,62 +252,21 @@ export function LoginForm(
             />
           </div>
 
-          {/* BOTTOM: Action Button — shows Google sign-in when fields empty, login when filled */}
+          {/* BOTTOM: Action Button — "Continue with Google" while the credential
+              fields are untouched, email/password submit once they are filled. */}
           <div className="flex flex-col gap-2 pb-0.5">
             {!formData.email?.trim() && !formData.password?.trim() ? (
               <Button
                 type="button"
                 variant="neo-yellow"
                 size="xl"
-                onClick={async () => {
-                  if (window.Capacitor?.isNativePlatform?.()) {
-                    // Declared outside the try so the catch can reuse it for
-                    // the signup handoff below.
-                    let idToken: string | undefined;
-                    try {
-                      idToken = await nativeGoogleSignIn();
-                      const response = await googleLogin({ idToken });
-                      if (response.user) {
-                        const { storeUser } = await import('@/lib/auth');
-                        const { setTokenExpiration } = await import(
-                          '@/lib/fetch'
-                        );
-                        const { useAuthStore } = await import(
-                          '@/store/use-auth-store'
-                        );
-                        storeUser(response.user);
-                        useAuthStore.getState().setUser(response.user);
-                        if (response.expiresIn)
-                          setTokenExpiration(response.expiresIn);
-                      }
-                    } catch (err: unknown) {
-                      const { toast } = await import('sonner');
-                      const e = err as { message?: string; code?: string };
-
-                      // Not registered yet: continue into signup rather than
-                      // dead-ending. Unlike a web authorization code, the native
-                      // idToken is still valid, so signup needs no second trip
-                      // through the Google picker.
-                      if (e?.code === 'GOOGLE_NOT_LINKED' && idToken) {
-                        sessionStorage.setItem(
-                          GOOGLE_SIGNUP_ID_TOKEN_KEY,
-                          idToken,
-                        );
-                        toast.info(t('googleContinueToSignup'));
-                        router.push('/signup/google');
-                        return;
-                      }
-
-                      toast.error(e?.message || t('errors.googleSignInFailed'));
-                    }
-                  } else {
-                    window.location.href = getGoogleOAuthUrl('login');
-                  }
-                }}
+                isLoading={props.isGoogleLoading}
+                disabled={props.isGoogleLoading}
+                onClick={props.onContinueWithGoogle}
                 className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter gap-2"
               >
                 <GoogleIcon />
-                {t('googleSignIn')}
+                {t('continueWithGoogle')}
               </Button>
             ) : (
               <Button

@@ -43,7 +43,7 @@ export default function PostPage({ params }: Props) {
             Nightwatch
           </Link>
           <Link
-            href="/login"
+            href="/continue"
             className="px-4 py-2 bg-foreground text-background font-headline font-bold text-sm uppercase tracking-wider rounded-md hover:opacity-90 transition-opacity"
           >
             Sign In
@@ -75,7 +75,7 @@ async function PostLoader({ params }: { params: Promise<{ id: string }> }) {
           Sign in to reply, react, and join the conversation.
         </p>
         <Link
-          href="/login"
+          href="/continue"
           className="inline-block px-6 py-2.5 bg-foreground text-background font-headline font-bold text-sm uppercase tracking-wider rounded-md hover:opacity-90 transition-opacity"
         >
           Sign In to Reply

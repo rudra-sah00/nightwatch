@@ -71,7 +71,7 @@ function clearCookiesAndRedirect(message?: string) {
   sessionStorage.removeItem('guest_token');
   sessionStorage.removeItem('guest_refresh_token');
   logoutUser({ skipRefresh: true } as RequestInit).catch(() => {});
-  if (typeof window !== 'undefined') window.location.href = '/login';
+  if (typeof window !== 'undefined') window.location.href = '/continue';
 }
 
 export interface AuthState {

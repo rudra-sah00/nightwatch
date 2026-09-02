@@ -8,8 +8,7 @@ import { useDesktopApp } from '@/platforms/desktop/use-desktop-app';
 
 const ROUTE_NAMES: Record<string, string> = {
   '/home': 'Home',
-  '/login': 'Login',
-  '/signup': 'Sign Up',
+  '/continue': 'Continue',
   '/profile': 'Profile',
   '/search': 'Search',
   '/watchlist': 'Watchlist',

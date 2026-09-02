@@ -317,7 +317,7 @@ export function useWatchPartyClient({
   const handleCancelRequest = async () => {
     await cancelRequest(roomId);
     if (!user) {
-      router.push('/login');
+      router.push('/continue');
     } else {
       goBackOrHome();
     }

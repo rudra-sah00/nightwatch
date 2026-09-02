@@ -5,8 +5,9 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import {
   connectGoogle,
-  getGoogleOAuthUrl,
-  googleLogin,
+  googleContinue,
+  isProfileRequired,
+  storePendingGoogleSignup,
 } from '@/features/auth/google-api';
 import { trackEvent } from '@/lib/analytics';
 import { storeUser } from '@/lib/auth';
@@ -26,10 +27,8 @@ export default function GoogleCallbackPage() {
     const state = searchParams.get('state') as
       | 'login'
       | 'connect'
-      | 'register'
       | 'desktop_login'
       | 'desktop_connect'
-      | 'desktop_register'
       | null;
     const error = searchParams.get('error');
 
@@ -39,7 +38,7 @@ export default function GoogleCallbackPage() {
     if (isDesktopFlow && !isInsideElectron) {
       const params = new URLSearchParams();
       if (code) params.set('code', code);
-      // Map desktop_login → login, desktop_connect → connect, desktop_register → register
+      // Map desktop_login → login, desktop_connect → connect
       const cleanState = state!.replace('desktop_', '');
       params.set('state', cleanState);
       if (error) params.set('error', error);
@@ -50,24 +49,11 @@ export default function GoogleCallbackPage() {
     // Normalize state for the rest of the flow
     const normalizedState = (state?.replace('desktop_', '') || 'login') as
       | 'login'
-      | 'connect'
-      | 'register';
+      | 'connect';
 
     if (error || !code) {
       toast.error(error || 'Google sign-in was cancelled');
-      if (normalizedState === 'connect') {
-        router.replace('/profile');
-      } else if (normalizedState === 'register') {
-        router.replace('/signup');
-      } else {
-        router.replace('/login');
-      }
-      return;
-    }
-
-    // For registration flow, redirect to the Google signup completion page
-    if (normalizedState === 'register') {
-      router.replace(`/signup/google?code=${encodeURIComponent(code)}`);
+      router.replace(normalizedState === 'connect' ? '/profile' : '/continue');
       return;
     }
 
@@ -78,39 +64,34 @@ export default function GoogleCallbackPage() {
           useAuthStore.getState().updateUser(user);
           toast.success('Google account connected');
           router.replace('/profile');
-        } else {
-          const response = await googleLogin({ code });
-          if (response.user) {
-            trackEvent('login_success', { method: 'google' });
-            storeUser(response.user);
-            useAuthStore.getState().setUser(response.user);
-            if (response.expiresIn) setTokenExpiration(response.expiresIn);
-            router.replace('/home');
-          }
-        }
-      } catch (err: unknown) {
-        const apiError = err as { code?: string; message?: string };
-
-        // Signing in with a Google account that has no Nightwatch user is not
-        // an error — it just means this person needs to sign up. Send them
-        // through the registration handshake instead of dead-ending on /login.
-        //
-        // The authorization code cannot be reused: the backend already spent it
-        // exchanging for the profile, and Google codes are single-use. So we
-        // restart consent with state=register to obtain a fresh one.
-        if (
-          apiError.code === 'GOOGLE_NOT_LINKED' &&
-          normalizedState === 'login'
-        ) {
-          toast.info('No account yet — continuing to sign up');
-          window.location.href = getGoogleOAuthUrl('register');
           return;
         }
 
+        const response = await googleContinue({ code });
+
+        // No account for this Google user yet. The authorization code is now
+        // spent, but the backend parked the verified profile against a ticket,
+        // so /continue can collect a username without a second consent round trip.
+        if (isProfileRequired(response)) {
+          storePendingGoogleSignup(response);
+          router.replace('/continue');
+          return;
+        }
+
+        if (response.user) {
+          trackEvent('login_success', { method: 'google' });
+          storeUser(response.user);
+          useAuthStore.getState().setUser(response.user);
+          if (response.expiresIn) setTokenExpiration(response.expiresIn);
+          router.replace('/home');
+        }
+      } catch (err: unknown) {
         const msg =
           err instanceof Error ? err.message : 'Google sign-in failed';
         toast.error(msg);
-        router.replace(normalizedState === 'connect' ? '/profile' : '/login');
+        router.replace(
+          normalizedState === 'connect' ? '/profile' : '/continue',
+        );
       }
     };
 

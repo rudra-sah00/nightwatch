@@ -170,7 +170,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
           if (typeof window !== 'undefined') {
             sessionStorage.removeItem('guest_token');
           }
-          router.push(userId ? '/home' : '/login');
+          router.push(userId ? '/home' : '/continue');
           break;
         }
       }

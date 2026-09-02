@@ -25,7 +25,7 @@ export function DiscordPresenceSync() {
     if (typeof window === 'undefined' || !checkIsDesktop()) return;
 
     try {
-      if (!isAuthenticated || pathname === '/login' || pathname === '/signup') {
+      if (!isAuthenticated || pathname === '/continue') {
         desktopBridge.updateDiscordPresence({
           details: t('discord.readyToStream'),
           state: t('discord.atLoginScreen'),

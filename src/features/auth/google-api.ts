@@ -6,18 +6,51 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 const GOOGLE_IOS_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '';
 
 /**
- * sessionStorage key used to carry a native Google idToken from the signup
- * button to the `/signup/google` completion page. Session-scoped and
- * same-origin so the token never enters the URL or browser history.
+ * sessionStorage key holding a pending Google signup between the Google
+ * handshake and the profile step.
+ *
+ * Needed because the web flow leaves the page: Google redirects to
+ * `/auth/google/callback`, which resolves the profile and then hands back to
+ * `/continue` to collect a username. Session-scoped and same-origin, and it holds
+ * only an opaque ticket — never the Google credential itself.
  */
-export const GOOGLE_SIGNUP_ID_TOKEN_KEY = 'google_signup_id_token';
+export const GOOGLE_SIGNUP_TICKET_KEY = 'google_signup_pending';
+
+/** Verified Google profile used to pre-fill the profile step. */
+export interface GoogleProfile {
+  name: string;
+  email: string;
+  picture?: string;
+}
+
+/** `continue` outcome when no account exists yet and a profile is required. */
+export interface GoogleProfileRequired {
+  needsProfile: true;
+  ticket: string;
+  profile: GoogleProfile;
+  suggestedUsername: string;
+}
+
+/**
+ * Either half of "Continue with Google": a session for an existing user, or a
+ * ticket plus profile for someone who still needs an account.
+ */
+export type GoogleContinueResponse = LoginResponse | GoogleProfileRequired;
+
+/** Narrows a `continue` response to the signup branch. */
+export function isProfileRequired(
+  response: GoogleContinueResponse,
+): response is GoogleProfileRequired {
+  return (response as GoogleProfileRequired).needsProfile === true;
+}
 
 /**
  * Builds a Google OAuth consent URL for redirect-based flow (web/desktop).
+ *
+ * `login` covers both signing in and signing up — the backend decides which,
+ * and the callback continues into the profile step when an account is needed.
  */
-export function getGoogleOAuthUrl(
-  mode: 'login' | 'connect' | 'register',
-): string {
+export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
   const redirectUri = `${window.location.origin}/auth/google/callback`;
   const isDesktop = 'electronAPI' in window;
   const state = isDesktop ? `desktop_${mode}` : mode;
@@ -61,12 +94,16 @@ export async function nativeGoogleSignIn(): Promise<string> {
 }
 
 /**
- * Login with Google — sends auth code (web) or idToken (native) to backend.
+ * Continue with Google — sends auth code (web) or idToken (native) to backend.
+ *
+ * Resolves to a session when the Google account is already linked, or to a
+ * {@link GoogleProfileRequired} ticket when the account still has to be created.
+ * Use {@link isProfileRequired} to tell them apart.
  */
-export async function googleLogin(
+export async function googleContinue(
   payload: { code: string } | { idToken: string },
   options?: RequestInit,
-): Promise<LoginResponse> {
+): Promise<GoogleContinueResponse> {
   const body =
     'code' in payload
       ? {
@@ -74,9 +111,35 @@ export async function googleLogin(
           redirectUri: `${window.location.origin}/auth/google/callback`,
         }
       : { idToken: payload.idToken };
-  return apiFetch<LoginResponse>(API_ROUTES.AUTH.GOOGLE_LOGIN, {
+  return apiFetch<GoogleContinueResponse>(API_ROUTES.AUTH.GOOGLE_CONTINUE, {
     method: 'POST',
     body: JSON.stringify(body),
+    ...options,
+  });
+}
+
+/**
+ * Completes a Google signup against a ticket from {@link googleContinue}.
+ *
+ * The Google credential is not resent — the backend already verified it and
+ * holds the profile against the ticket. Email is intentionally not a parameter:
+ * it comes from the ticket, so it is always the address Google confirmed.
+ *
+ * A `USERNAME_TAKEN` rejection leaves the ticket valid, so the caller can let
+ * the user try a different username without another trip through Google.
+ */
+export async function googleComplete(
+  values: {
+    ticket: string;
+    username: string;
+    name: string;
+    password: string;
+  },
+  options?: RequestInit,
+): Promise<LoginResponse> {
+  return apiFetch<LoginResponse>(API_ROUTES.AUTH.GOOGLE_COMPLETE, {
+    method: 'POST',
+    body: JSON.stringify(values),
     ...options,
   });
 }
@@ -115,25 +178,29 @@ export async function disconnectGoogle(
 }
 
 /**
- * Register with Google — sends auth code (web) or idToken (native) along with
- * username and password to complete Google-based signup.
+ * Parks a pending Google signup so it survives the redirect back from Google.
  */
-export async function googleRegister(
-  payload: { code: string } | { idToken: string },
-  credentials: { username: string; password: string },
-  options?: RequestInit,
-): Promise<LoginResponse> {
-  const googleParams =
-    'code' in payload
-      ? {
-          code: payload.code,
-          redirectUri: `${window.location.origin}/auth/google/callback`,
-        }
-      : { idToken: payload.idToken };
-  const body = { ...googleParams, ...credentials };
-  return apiFetch<LoginResponse>(API_ROUTES.AUTH.GOOGLE_REGISTER, {
-    method: 'POST',
-    body: JSON.stringify(body),
-    ...options,
-  });
+export function storePendingGoogleSignup(pending: GoogleProfileRequired): void {
+  sessionStorage.setItem(GOOGLE_SIGNUP_TICKET_KEY, JSON.stringify(pending));
+}
+
+/**
+ * Reads a pending Google signup, or `null` when there is none or it is corrupt.
+ */
+export function readPendingGoogleSignup(): GoogleProfileRequired | null {
+  try {
+    const raw = sessionStorage.getItem(GOOGLE_SIGNUP_TICKET_KEY);
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw) as GoogleProfileRequired;
+    return parsed?.ticket ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Clears a pending Google signup once it is finished or abandoned. */
+export function clearPendingGoogleSignup(): void {
+  sessionStorage.removeItem(GOOGLE_SIGNUP_TICKET_KEY);
 }

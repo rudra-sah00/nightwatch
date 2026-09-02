@@ -1,37 +1,70 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { GlobalLoading } from '@/components/ui/global-loading';
-import { SignupForm } from '@/features/auth/components/signup-form';
-import { useSignupForm } from '@/features/auth/hooks/use-signup-form';
-
+import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form';
+import { GoogleCompleteForm } from '@/features/auth/components/google-complete-form';
+import { LoginForm } from '@/features/auth/components/login-form';
+import { QrLoginView } from '@/features/auth/components/qr-login-view';
+import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
+import { useLoginForm } from '@/features/auth/hooks/use-login-form';
+import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 
-export default function SignupClient() {
-  const signupHook = useSignupForm();
-  const t = useTranslations('auth');
+export default function ContinueClient() {
+  const loginHook = useLoginForm();
+  const google = useGoogleAuth();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isLoading: hookLoading } = loginHook;
+  const router = useRouter();
+  const t = useTranslations('auth');
 
+  const isLoading = authLoading || hookLoading;
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [initialAuthCheck] = useState(isAuthenticated);
-  const router = useRouter();
+  // The email/Google form is the default surface on every platform so
+  // "Continue with Google" is reachable without a detour. QR sign-in stays one
+  // tap away via the QR icon in the card header (LoginForm's onShowQr).
+  const [showQr, setShowQr] = useState(false);
+
+  useEffect(() => {
+    // Check for flash messages (e.g., from logout/session end)
+    const flash = sessionStorage.getItem('auth_flash');
+    if (flash) {
+      toast.error(flash);
+      sessionStorage.removeItem('auth_flash');
+    }
+
+    // Direct redirect if already authenticated
+    if (isAuthenticated) {
+      if (checkIsMobile()) {
+        window.location.href = '/home?tour=true';
+      } else {
+        router.replace('/home');
+      }
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     if (isAuthenticated && !initialAuthCheck) {
       setIsTransitioning(true);
       const timer = setTimeout(() => {
-        router.push('/home?tour=true');
+        if (checkIsMobile()) {
+          window.location.href = '/home?tour=true';
+        } else {
+          router.push('/home');
+        }
       }, 700);
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, initialAuthCheck, router]);
 
   // Loading State
-  if (authLoading) {
+  if (isLoading) {
     return <GlobalLoading />;
   }
 
@@ -44,7 +77,7 @@ export default function SignupClient() {
       <LanguageSwitcher className="self-end mr-4 mt-2 md:absolute md:top-[calc(1rem+env(safe-area-inset-top,0px))] md:right-[calc(1rem+var(--electron-inset-right,0px)+env(safe-area-inset-right,0px))] z-50 shrink-0" />
       <main className="flex-grow flex flex-col items-center p-1 md:p-2 justify-center overflow-hidden w-full max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-4 w-full max-w-5xl items-stretch pb-2 md:pb-0 shrink-0">
-          {/* Features Bento Box - height driven by the signup form on the right */}
+          {/* Features Bento Box - Identical to Signup for Parity */}
           <div className="hidden lg:grid lg:col-span-7 grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 lg:gap-6 lg:min-h-[440px] h-full">
             <div className="bg-primary text-primary-foreground p-4 md:p-5 border-4 border-border cursor-default select-none flex flex-col justify-between aspect-square md:aspect-auto">
               <div>
@@ -95,35 +128,44 @@ export default function SignupClient() {
               </div>
             </div>
           </div>
-          {/* Signup Card wrapper */}
+
+          {/* Login Card wrapper - Identical to Signup Card wrapper */}
           <div className="lg:col-span-5 flex items-stretch justify-center w-full h-full">
             <div className="bg-background border-4 border-border  pt-5 px-5 pb-0 flex flex-col gap-4 w-full max-w-md lg:max-w-none lg:min-h-[440px] h-full overflow-visible">
               <div className="flex-grow flex flex-col justify-start w-full h-full overflow-visible">
-                <SignupForm {...signupHook} />
+                {hookLoading ? null : google.pending ? (
+                  <GoogleCompleteForm
+                    pending={google.pending}
+                    isCompleting={google.isCompleting}
+                    usernameError={google.usernameError}
+                    clearUsernameError={google.clearUsernameError}
+                    onSubmit={google.complete}
+                    onCancel={google.cancel}
+                  />
+                ) : showQr ? (
+                  <QrLoginView onSwitchToEmail={() => setShowQr(false)} />
+                ) : loginHook.step === 'forgot' ||
+                  loginHook.step === 'forgot_success' ? (
+                  <ForgotPasswordForm {...loginHook} />
+                ) : (
+                  <LoginForm
+                    {...loginHook}
+                    onShowQr={() => setShowQr(true)}
+                    onContinueWithGoogle={google.start}
+                    isGoogleLoading={google.isStarting}
+                  />
+                )}
               </div>
             </div>
           </div>
         </div>
       </main>
-
-      {/* Footer */}
+      {/* Footer — no signup link: account creation happens inline via
+          "Continue with Google", so there is no separate signup route. */}
       <footer className="bg-background w-full border-t-4 border-border mt-auto flex flex-col md:flex-row justify-between items-center px-4 py-4 md:px-8 md:py-6 gap-4 shrink-0">
         <p className="font-headline font-medium uppercase text-[10px] md:text-xs tracking-widest md:tracking-[0.4em] text-muted-foreground opacity-80 text-left">
           {t('footer.copyright')}
         </p>
-        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-          <Link
-            href="/login"
-            className="group flex items-center gap-2 transition-transform active:scale-95 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-yellow/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            <span className="font-headline font-bold uppercase text-[10px] md:text-xs tracking-widest text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              {t('footer.alreadyMember')}
-            </span>
-            <span className="font-headline font-black uppercase text-[10px] md:text-xs tracking-widest text-neo-yellow group-hover:text-foreground underline decoration-neo-yellow/30 underline-offset-4 transition-colors">
-              {t('footer.signIn')}
-            </span>
-          </Link>
-        </div>
       </footer>
     </div>
   );

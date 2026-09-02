@@ -29,7 +29,7 @@ export default function PublicExplorePage() {
             Nightwatch
           </Link>
           <Link
-            href="/login"
+            href="/continue"
             className="px-4 py-2 bg-foreground text-background font-headline font-bold text-sm uppercase tracking-wider rounded-md hover:opacity-90 transition-opacity"
           >
             Sign In

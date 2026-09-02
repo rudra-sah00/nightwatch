@@ -8,8 +8,8 @@ Our authentication strategy is a heavily secured, token-based system managed cen
 ### 1. Route Protection (Layout Guards)
 Route protection is handled at the layout level using React Server Components. The `(protected)` route group layouts verify session cookies before rendering:
 - Checks for `refreshToken` cookie presence (NOT `accessToken` alone, since it expires every 15 min).
-- **Protected routes** → redirect to `/login?from={path}` if no session cookie exists.
-- **Auth routes** (`/login`, `/signup`) → redirect to `/home` if session exists.
+- **Protected routes** → redirect to `/continue?from={path}` if no session cookie exists.
+- **Auth route** (`/continue`) → redirect to `/home` if session exists.
 
 ### 2. Client-Side Token Refresh (`src/lib/fetch.ts`)
 The `apiFetch()` wrapper intercepts 401 responses:
@@ -24,7 +24,9 @@ The `apiFetch()` wrapper intercepts 401 responses:
 - On page visibility change / online event, `revalidateTokenOnResume()` checks if the token expired while JS timers were frozen (laptop sleep, tab background, Capacitor).
 
 ### 4. Turnstile / Bot Protection
-Registration and login flows validate a Cloudflare Turnstile token to prevent automated credential stuffing.
+The email/password login flow validates a Cloudflare Turnstile token to prevent
+automated credential stuffing. Signup needs no captcha: it is gated on a valid
+Google credential instead (see [Google OAuth](./GOOGLE_AUTH.md)).
 
 ### 5. CSRF Protection (Backend)
 Double-submit cookie pattern:
@@ -51,11 +53,20 @@ Double-submit cookie pattern:
 | `/continue-watching` | Continue watching |
 | `/ask-ai` | Voice AI assistant |
 
-### Public Routes (no auth required)
+### Account creation
+
+There is no email/password registration surface. Accounts are created only
+through "Continue with Google" on `/continue`, which collects a username, an
+editable display name, and a password, and stores that password against the
+verified Google email — so the account is afterwards reachable both ways.
+
+See [Google OAuth](./GOOGLE_AUTH.md) for the two-call ticket handshake.
+
+## Public Routes (no auth required)
 | Path | Feature |
 |------|---------|
-| `/login` | Login page (redirects to `/home` if authenticated) |
-| `/signup` | Registration page (redirects to `/home` if authenticated) |
+| `/continue` | Login **and** signup (redirects to `/home` if authenticated) |
+| `/auth/google/callback` | Google OAuth redirect target |
 | `/terms` | Terms of service |
 | `/privacy` | Privacy policy |
 | `/user/:id` | Public user profile |
@@ -67,7 +78,7 @@ Double-submit cookie pattern:
 | `/watch-party/:id` | Watch party room (supports both authenticated users and guests) |
 
 ### Root Route (`/`)
-Client-side redirect via `useRootPage()` hook — sends authenticated users to `/home`, unauthenticated to `/login`.
+Client-side redirect via `useRootPage()` hook — sends authenticated users to `/home`, unauthenticated to `/continue`.
 
 ## Token Architecture
 
@@ -104,8 +115,9 @@ Same payload plus `jti` (unique token ID for replay detection).
 - `lib/cookies.ts` — `getCookie()` helper for reading client-accessible cookies
 - `providers/auth-provider.tsx` — `AuthProvider` component (session sync, socket connect, force logout handling)
 - `store/use-auth-store.ts` — Zustand persisted auth state (user, login/logout actions)
-- `features/auth/api.ts` — Login, register, verifyOtp, resendOtp API calls
-- `features/auth/components/` — Login/Register form blocks (Radix UI + CVA)
+- `features/auth/api.ts` — Login, verifyOtp, resendOtp API calls
+- `features/auth/google-api.ts` — `googleContinue`/`googleComplete` and pending-signup storage
+- `features/auth/components/` — Login and Google profile-step form blocks (Radix UI + CVA)
 - `features/auth/hooks/` — Auth-related hooks
 
 ### Backend (`nightwatch-backend/src/`)
@@ -124,7 +136,7 @@ The desktop Electron app cannot use standard cookie-based auth because it loads 
 ### Flow
 
 1. **Desktop app** calls `POST /api/auth/desktop/initiate` → receives a `code` (UUIDv7).
-2. Desktop opens the user's default browser to `https://nightwatch.in/login?desktopCode={code}`.
+2. Desktop opens the user's default browser to `https://nightwatch.in/continue?desktopCode={code}`.
 3. User logs in normally in the browser (email + OTP).
 4. On OTP verification, the frontend passes `desktopCode` to `verifyOtp()`. The backend calls `desktopAuthorize(code, userId)`, linking the code to the authenticated user.
 5. Browser shows a "You can return to the desktop app" confirmation page.

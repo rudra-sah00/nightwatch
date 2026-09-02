@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test.describe('Profile and Settings E2E', () => {
   test.beforeEach(async ({ page }) => {
     // Shared login for all profile tests
-    await page.goto('/login');
+    await page.goto('/continue');
     await page.locator('#email').fill(process.env.E2E_TEST_EMAIL ?? '');
     await page.locator('#password').fill(process.env.E2E_TEST_PASSWORD ?? '');
     await page.getByRole('button', { name: /Launch Sync/i }).click();
@@ -63,6 +63,6 @@ test.describe('Profile and Settings E2E', () => {
     await signOutBtn.click();
 
     // Should redirect to login
-    await expect(page).toHaveURL(/\/login/i, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/continue/i, { timeout: 10000 });
   });
 });

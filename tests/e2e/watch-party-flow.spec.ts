@@ -31,7 +31,7 @@ test.describe('Watch Party Multi-User Flow', () => {
 
   test('should complete the full Host-Guest handshake perfectly', async () => {
     // --- STEP 1: HOST LOGIN ---
-    await hostPage.goto('/login');
+    await hostPage.goto('/continue');
 
     // Fill credentials
     await hostPage.locator('#email').fill(process.env.E2E_TEST_EMAIL ?? '');

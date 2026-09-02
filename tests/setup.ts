@@ -132,8 +132,11 @@ const createStorageMock = () => {
 Object.defineProperty(window, 'localStorage', { value: createStorageMock() });
 Object.defineProperty(window, 'sessionStorage', { value: createStorageMock() });
 
-// Mock electronAPI globally
+// Mock electronAPI globally.
+// Configurable so individual tests can delete it to exercise the plain-web
+// branch of platform checks like `'electronAPI' in window`.
 Object.defineProperty(window, 'electronAPI', {
+  configurable: true,
   value: {
     updateDiscordPresence: vi.fn(),
     copyToClipboard: vi.fn(),

@@ -11,10 +11,10 @@ vi.mock('next/navigation', () => ({
     replace: mockReplace,
     prefetch: vi.fn(),
     back: vi.fn(),
-    pathname: '/login',
+    pathname: '/continue',
   }),
   useSearchParams: () => ({ get: vi.fn() }),
-  usePathname: () => '/login',
+  usePathname: () => '/continue',
 }));
 
 const mockToastError = vi.fn();
@@ -51,26 +51,28 @@ vi.mock('next/dynamic', () => ({
   },
 }));
 
-// The real LoginPage is an async Server Component with a 2.5s delay which
-// the test environment cannot await. Mock it to render LoginClient directly.
-vi.mock('@/app/(public)/login/page', async () => {
-  const { default: LoginClient } = await import(
-    '@/app/(public)/login/LoginClient'
+// The real ContinuePage is an async Server Component with a 2.5s delay which
+// the test environment cannot await. Mock it to render ContinueClient directly.
+vi.mock('@/app/(public)/continue/page', async () => {
+  const { default: ContinueClient } = await import(
+    '@/app/(public)/continue/ContinueClient'
   );
-  return { default: LoginClient };
+  return { default: ContinueClient };
 });
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
-describe('LoginPage', () => {
+describe('ContinuePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionStorage.clear();
   });
 
   it('renders correctly', async () => {
-    const { default: LoginPage } = await import('@/app/(public)/login/page');
-    render(<LoginPage />);
+    const { default: ContinuePage } = await import(
+      '@/app/(public)/continue/page'
+    );
+    render(<ContinuePage />);
 
     expect(
       screen.getByRole('heading', { name: /features\.solo\.title/i }),
@@ -83,9 +85,11 @@ describe('LoginPage', () => {
       'You have been logged out from another device.',
     );
 
-    const { default: LoginPage } = await import('@/app/(public)/login/page');
+    const { default: ContinuePage } = await import(
+      '@/app/(public)/continue/page'
+    );
 
-    render(<LoginPage />);
+    render(<ContinuePage />);
 
     await waitFor(() => {
       expect(mockToastError).toHaveBeenCalledWith(
@@ -119,9 +123,11 @@ describe('LoginPage', () => {
       resendCooldown: 0,
     } as unknown);
 
-    const { default: LoginPage } = await import('@/app/(public)/login/page');
+    const { default: ContinuePage } = await import(
+      '@/app/(public)/continue/page'
+    );
 
-    render(<LoginPage />);
+    render(<ContinuePage />);
 
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith('/home');
@@ -136,9 +142,11 @@ describe('LoginPage', () => {
       user: null,
     } as unknown);
 
-    const { default: LoginPage } = await import('@/app/(public)/login/page');
+    const { default: ContinuePage } = await import(
+      '@/app/(public)/continue/page'
+    );
 
-    const { container } = render(<LoginPage />);
+    const { container } = render(<ContinuePage />);
 
     expect(screen.queryByText('Welcome Back')).toBeNull();
     expect(container.querySelector('.animate-spin')).toBeInTheDocument();
