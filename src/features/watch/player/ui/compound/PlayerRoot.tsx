@@ -86,7 +86,21 @@ interface PlayerRootProps {
   onBack?: () => void;
   /** Legacy compatibility: replaced by streamMode. */
   isLive?: boolean;
-  /** Override the default 100dvh container sizing (e.g. for YouTube-style embedded layout) */
+  /**
+   * Container sizing preset, applied via CSS so the correct box is in the first
+   * paint (see the `touch-ui:` / `pointer-ui:` variants in `globals.css`):
+   *
+   * - `fill` (default) — full viewport height minus the Electron title bar.
+   * - `immersive` — fixed overlay pinned below the Electron title bar.
+   *
+   * Touch devices always get a 16:9 inline box instead, in either preset.
+   */
+  layout?: 'fill' | 'immersive';
+  /**
+   * Escape hatch for fully custom container sizing. Inline styles win over the
+   * {@link PlayerRootProps.layout} classes **including** the touch 16:9 box, and
+   * are applied post-mount, so prefer `layout` where it fits.
+   */
   containerStyle?: React.CSSProperties;
   /** Initial playback speed multiplier (e.g. `1.5` for 1.5×). */
   playbackRate?: number;
@@ -94,11 +108,31 @@ interface PlayerRootProps {
   streamFormat?: 'hls' | 'mp4' | 'dash';
 }
 
-/** Default container dimensions — fills the viewport minus the Electron title bar. */
-const CONTAINER_STYLE = {
-  width: '100%',
-  height: 'calc(100dvh - var(--electron-titlebar-height, 0px))',
+/**
+ * Container sizing, expressed in CSS so the input mode resolved by the head
+ * script applies on the first paint.
+ *
+ * Touch devices get an inline 16:9 box; pointer devices fill the viewport minus
+ * the Electron title bar, either in flow (`fill`) or as a fixed overlay
+ * (`immersive`).
+ */
+const LAYOUT_CLASSES = {
+  fill: 'touch-ui:relative touch-ui:aspect-video pointer-ui:relative pointer-ui:h-[calc(100dvh-var(--electron-titlebar-height,0px))]',
+  immersive:
+    'touch-ui:relative touch-ui:aspect-video pointer-ui:fixed pointer-ui:right-0 pointer-ui:bottom-0 pointer-ui:left-0 pointer-ui:top-[var(--electron-titlebar-height,0px)]',
 } as const;
+
+/** Fixed viewport overlay used for YouTube-style fullscreen on touch devices. */
+const TOUCH_FULLSCREEN_STYLE: React.CSSProperties = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  width: '100%',
+  height: '100dvh',
+  zIndex: 9999,
+};
 
 /**
  * Root container for the video player.
@@ -143,6 +177,7 @@ export function PlayerRoot({
   onBack: onBackProp,
   isLive = false,
   containerStyle,
+  layout = 'fill',
   playbackRate,
   streamFormat,
 }: PlayerRootProps) {
@@ -192,23 +227,14 @@ export function PlayerRoot({
 
   const isMobile = useMobileDetection();
 
-  // YouTube-style mobile fullscreen: override container to fill viewport
-  const mobileFullscreen = isMobile && state.isFullscreen;
-  const effectiveContainerStyle: React.CSSProperties = mobileFullscreen
-    ? {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        height: '100dvh',
-        zIndex: 9999,
-      }
-    : isMobile
-      ? { position: 'relative', width: '100%', aspectRatio: '16 / 9' }
-      : (containerStyle ?? CONTAINER_STYLE);
-  // Mobile: tap to toggle controls (show/hide). Ignore taps on interactive
+  // YouTube-style touch fullscreen: fixed viewport overlay (no native
+  // Fullscreen API on iOS Safari). Only reachable after a user gesture, so
+  // resolving it from React state costs nothing on first paint.
+  const touchFullscreen = isMobile && state.isFullscreen;
+  const effectiveContainerStyle = touchFullscreen
+    ? TOUCH_FULLSCREEN_STYLE
+    : containerStyle;
+  // Touch: tap to toggle controls (show/hide). Ignore taps on interactive
   // children (buttons, inputs) so controls buttons still work normally.
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const handleContainerClick = useCallback(
@@ -237,9 +263,10 @@ export function PlayerRoot({
       <div
         ref={containerRef}
         role="application"
-        data-mobile={isMobile || undefined}
         className={cn(
-          'group video-container relative w-full bg-black overflow-hidden flex flex-col',
+          'group video-container w-full bg-black overflow-hidden flex flex-col',
+          !touchFullscreen && !containerStyle && LAYOUT_CLASSES[layout],
+          (touchFullscreen || containerStyle) && 'relative',
           'cursor-none',
           state.showControls && !resolvedHideControls && 'cursor-auto',
           className,

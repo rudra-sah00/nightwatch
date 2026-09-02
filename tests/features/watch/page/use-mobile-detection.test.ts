@@ -1,7 +1,6 @@
-import { act, renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock electron-bridge so checkIsDesktop returns false (simulating non-Electron env)
 vi.mock('@/lib/electron-bridge', () => ({
   checkIsDesktop: () => false,
   checkIsMobile: () => false,
@@ -12,13 +11,15 @@ vi.mock('@/lib/electron-bridge', () => ({
 
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
 
-interface WindowWithTouch {
-  ontouchstart?: unknown;
-}
-
 /**
- * Stub `matchMedia` so `(pointer: coarse)` / `(hover: none)` are deterministic.
- * Defaults to a mouse-driven desktop (fine pointer, hover capable).
+ * Regression suite for desktop browsers wrongly getting the phone player skin.
+ *
+ * The resolved mode is published as `data-touch-ui` on `<html>`, and the control
+ * components select their arrangement with the `touch-ui:` / `pointer-ui:` CSS
+ * variants at any viewport width. Every case below used to return `true`, which
+ * swapped a full-size desktop browser onto the mobile top bar + center controls +
+ * thin seekbar, and swapped the container from `100dvh` to a 16:9 box with
+ * CSS-overlay fullscreen instead of the Fullscreen API.
  */
 function mockPointer({ coarse = false, hover = true } = {}) {
   Object.defineProperty(window, 'matchMedia', {
@@ -41,228 +42,108 @@ function mockPointer({ coarse = false, hover = true } = {}) {
   });
 }
 
-describe('useMobileDetection', () => {
+function setUserAgent(ua: string) {
+  Object.defineProperty(window.navigator, 'userAgent', {
+    writable: true,
+    configurable: true,
+    value: ua,
+  });
+}
+
+function setTouch(points: number) {
+  Object.defineProperty(window.navigator, 'maxTouchPoints', {
+    writable: true,
+    configurable: true,
+    value: points,
+  });
+  if (points > 0) {
+    (window as { ontouchstart?: unknown }).ontouchstart = null;
+  } else {
+    delete (window as { ontouchstart?: unknown }).ontouchstart;
+  }
+}
+
+function setWidth(width: number) {
+  Object.defineProperty(window, 'innerWidth', {
+    writable: true,
+    configurable: true,
+    value: width,
+  });
+}
+
+const CHROME_WINDOWS =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+const ANDROID_TV =
+  'Mozilla/5.0 (Linux; Android 14; BRAVIA 4K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+describe('player mobile detection — desktop regressions', () => {
   beforeEach(() => {
+    localStorage.clear();
     mockPointer();
-
-    // Mock window properties
-    Object.defineProperty(window, 'innerWidth', {
-      writable: true,
-      configurable: true,
-      value: 1024,
-    });
-
-    // Delete ontouchstart if it exists
-    if ('ontouchstart' in window) {
-      delete (window as WindowWithTouch).ontouchstart;
-    }
-
-    Object.defineProperty(navigator, 'maxTouchPoints', {
-      writable: true,
-      configurable: true,
-      value: 0,
-    });
+    setUserAgent(CHROME_WINDOWS);
+    setTouch(0);
+    setWidth(1920);
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
+  it('touchscreen laptop at 1920px with no mouse attached (coarse + hover:none)', () => {
+    setTouch(10);
+    mockPointer({ coarse: true, hover: false });
+
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
   });
 
-  describe('Initial detection', () => {
-    it('should detect desktop by default (width >= 768, no touch)', () => {
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(false);
-    });
+  it('touchscreen laptop at 1920px reporting a fine pointer but hover:none', () => {
+    setTouch(10);
+    mockPointer({ coarse: false, hover: false });
 
-    it('should detect mobile when width < 768', () => {
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 767,
-      });
-
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(true);
-    });
-
-    it('should stay desktop when ontouchstart is present but pointer is fine', () => {
-      (window as WindowWithTouch).ontouchstart = {};
-
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(false);
-
-      // Cleanup
-      delete (window as WindowWithTouch).ontouchstart;
-    });
-
-    it('should stay desktop when maxTouchPoints > 0 but pointer is fine', () => {
-      Object.defineProperty(navigator, 'maxTouchPoints', {
-        writable: true,
-        configurable: true,
-        value: 1,
-      });
-
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(false);
-    });
-
-    it('should detect mobile when touch is paired with no hover capability', () => {
-      Object.defineProperty(navigator, 'maxTouchPoints', {
-        writable: true,
-        configurable: true,
-        value: 5,
-      });
-      mockPointer({ coarse: false, hover: false });
-
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(true);
-    });
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
   });
 
-  describe('Resize detection', () => {
-    it('should update on window resize from desktop to mobile', () => {
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(false);
+  it('touchscreen laptop at 1920px reporting a coarse pointer but hover capable', () => {
+    setTouch(10);
+    mockPointer({ coarse: true, hover: true });
 
-      act(() => {
-        Object.defineProperty(window, 'innerWidth', {
-          writable: true,
-          configurable: true,
-          value: 500,
-        });
-        window.dispatchEvent(new Event('resize'));
-      });
-
-      expect(result.current).toBe(true);
-    });
-
-    it('should update on window resize from mobile to desktop', () => {
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 500,
-      });
-
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(true);
-
-      act(() => {
-        Object.defineProperty(window, 'innerWidth', {
-          writable: true,
-          configurable: true,
-          value: 1024,
-        });
-        window.dispatchEvent(new Event('resize'));
-      });
-
-      expect(result.current).toBe(false);
-    });
-
-    it('should handle rapid resize events', () => {
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(false);
-
-      act(() => {
-        Object.defineProperty(window, 'innerWidth', {
-          writable: true,
-          configurable: true,
-          value: 500,
-        });
-        window.dispatchEvent(new Event('resize'));
-      });
-
-      expect(result.current).toBe(true);
-
-      act(() => {
-        Object.defineProperty(window, 'innerWidth', {
-          writable: true,
-          configurable: true,
-          value: 1024,
-        });
-        window.dispatchEvent(new Event('resize'));
-      });
-
-      expect(result.current).toBe(false);
-    });
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
   });
 
-  describe('Multiple detection criteria', () => {
-    it('should require touch to be paired with a coarse pointer, not touch alone', () => {
-      // Desktop width + touch APIs but a fine pointer => still desktop.
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 1024,
-      });
-      (window as WindowWithTouch).ontouchstart = {};
+  it('mouse-only desktop with the window narrowed to 700px', () => {
+    setWidth(700);
 
-      const { result: laptop } = renderHook(() => useMobileDetection());
-      expect(laptop.current).toBe(false);
-
-      // Same device signals, but now the primary pointer is coarse => mobile.
-      mockPointer({ coarse: true, hover: false });
-
-      const { result: tablet } = renderHook(() => useMobileDetection());
-      expect(tablet.current).toBe(true);
-
-      // Cleanup
-      delete (window as WindowWithTouch).ontouchstart;
-    });
-
-    it('should return false only when all criteria indicate desktop', () => {
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 1024,
-      });
-      if ('ontouchstart' in window)
-        delete (window as WindowWithTouch).ontouchstart;
-      Object.defineProperty(navigator, 'maxTouchPoints', {
-        writable: true,
-        configurable: true,
-        value: 0,
-      });
-
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(false);
-    });
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
   });
 
-  describe('Cleanup', () => {
-    it('should remove resize listener on unmount', () => {
-      const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
-      const { unmount } = renderHook(() => useMobileDetection());
+  it('mouse-only desktop at 175% browser zoom (effective 731px)', () => {
+    setWidth(731);
 
-      unmount();
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        'resize',
-        expect.any(Function),
-      );
-    });
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
   });
 
-  describe('Edge cases', () => {
-    it('should handle exactly 768px width as desktop', () => {
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 768,
-      });
+  it('touchscreen laptop windowed to 1000px (coarse pointer under 1024px)', () => {
+    setWidth(1000);
+    setTouch(10);
+    mockPointer({ coarse: true, hover: true });
 
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(false);
-    });
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
+  });
 
-    it('should handle 767px width as mobile', () => {
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 767,
-      });
+  it('Android TV WebView at 1920px with no touchscreen', () => {
+    setUserAgent(ANDROID_TV);
 
-      const { result } = renderHook(() => useMobileDetection());
-      expect(result.current).toBe(true);
-    });
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
+  });
+
+  it('leftover DevTools touch emulation on a desktop tab', () => {
+    setTouch(1);
+    mockPointer({ coarse: false, hover: true });
+
+    const { result } = renderHook(() => useMobileDetection());
+    expect(result.current).toBe(false);
   });
 });

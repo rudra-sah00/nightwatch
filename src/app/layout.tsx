@@ -13,6 +13,7 @@ import { SplashScreen } from '@/components/ui/splash-screen';
 import { DiscordPresenceSync } from '@/platforms/desktop/DiscordPresenceSync';
 import { ElectronDragRegion } from '@/platforms/desktop/ElectronDragRegion';
 import { MobileShell } from '@/platforms/mobile/MobileShell';
+import { TOUCH_UI_INLINE_SCRIPT } from '@/platforms/mobile/touch-ui-script';
 import { AuthProvider } from '@/providers/auth-provider';
 import { IntlProvider } from '@/providers/intl-provider';
 import { QueryProvider } from '@/providers/query-provider';
@@ -152,6 +153,9 @@ export default async function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('neo-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')}catch(e){}})()`,
           }}
         />
+        {/* Blocking script to resolve touch vs pointer input before first paint —
+            prevents phones painting the desktop player controls for one frame */}
+        <script dangerouslySetInnerHTML={{ __html: TOUCH_UI_INLINE_SCRIPT }} />
         <script
           dangerouslySetInnerHTML={{
             __html: `document.addEventListener('contextmenu',function(e){e.preventDefault()});['copy','cut','paste'].forEach(function(t){document.addEventListener(t,function(e){if(e.target.closest('[data-allow-clipboard]'))return;e.preventDefault()})})`,

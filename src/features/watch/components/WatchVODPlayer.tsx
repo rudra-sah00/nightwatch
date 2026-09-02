@@ -115,13 +115,7 @@ export const WatchVODPlayer = memo(function WatchVODPlayer(
   return (
     <Player.Root
       {...props}
-      containerStyle={{
-        position: 'fixed',
-        top: 'var(--electron-titlebar-height, 0px)',
-        right: 0,
-        bottom: 0,
-        left: 0,
-      }}
+      layout="immersive"
       streamMode="vod"
       onBack={handleBack}
       onNavigate={props.onNavigate || ((url) => router.replace(url))}
@@ -250,25 +244,25 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
             <MobileSkipForward />
           </Player.MobileCenterControls>
           {/* Desktop layout: seekbar then control row */}
-          <div className="hidden md:contents group-data-[mobile]:!hidden">
+          <div className="hidden pointer-ui:contents">
             <Player.SeekBar />
           </div>
           <Player.ControlRow>
             <Player.PlayPause />
             <Player.SkipButtons />
             <Player.Volume />
-            <div className="hidden md:contents group-data-[mobile]:!hidden">
+            <div className="hidden pointer-ui:contents">
               <Player.TimeDisplay />
             </div>
             <Player.Spacer />
-            <div className="hidden md:contents group-data-[mobile]:!hidden">
+            <div className="hidden pointer-ui:contents">
               <Player.EpisodePanelTrigger />
             </div>
-            <div className="hidden md:contents group-data-[mobile]:!hidden">
+            <div className="hidden pointer-ui:contents">
               <Player.AudioSubtitleSelectors />
             </div>
             <Player.SettingsMenu />
-            <div className="hidden md:contents group-data-[mobile]:!hidden">
+            <div className="hidden pointer-ui:contents">
               <Player.CastButton />
             </div>
             <Player.Fullscreen />
@@ -277,7 +271,7 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
           <Player.MobileBottomRight>
             <Player.Fullscreen />
           </Player.MobileBottomRight>
-          <div className="max-md:block md:hidden group-data-[mobile]:!block">
+          <div className="hidden touch-ui:block">
             <Player.MobileSeekBar />
           </div>
         </Player.Controls>

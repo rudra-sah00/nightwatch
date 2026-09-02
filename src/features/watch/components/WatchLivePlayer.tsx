@@ -81,13 +81,7 @@ export const WatchLivePlayer = memo(function WatchLivePlayer(
     <Player.Root
       {...props}
       skipProgressHistory={true}
-      containerStyle={{
-        position: 'fixed',
-        top: 'var(--electron-titlebar-height, 0px)',
-        right: 0,
-        bottom: 0,
-        left: 0,
-      }}
+      layout="immersive"
       streamMode="live"
       onBack={handleBack}
       onNavigate={(url) => router.push(url)}
@@ -230,7 +224,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
           <MobileSkipForward />
         </Player.MobileCenterControls>
         {/* Desktop: DVR seek bar */}
-        <div className="hidden md:contents group-data-[mobile]:!hidden">
+        <div className="hidden pointer-ui:contents">
           <Player.SeekBar />
         </div>
         <Player.ControlRow>
@@ -238,10 +232,10 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
           <Player.Volume />
           <Player.LiveBadge />
           <Player.Spacer />
-          <div className="hidden min-[380px]:contents md:contents group-data-[mobile]:!hidden">
+          <div className="hidden pointer-ui:contents">
             <Player.SettingsMenu />
           </div>
-          <div className="hidden md:contents group-data-[mobile]:!hidden">
+          <div className="hidden pointer-ui:contents">
             <Player.CastButton />
           </div>
           <Player.Fullscreen />
@@ -250,7 +244,7 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         <Player.MobileBottomRight>
           <Player.Fullscreen />
         </Player.MobileBottomRight>
-        <div className="max-md:block md:hidden group-data-[mobile]:!block">
+        <div className="hidden touch-ui:block">
           <Player.MobileSeekBar />
         </div>
       </Player.Controls>

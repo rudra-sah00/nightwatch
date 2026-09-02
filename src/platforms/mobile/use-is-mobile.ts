@@ -7,14 +7,20 @@ import { checkIsMobile } from '@/lib/electron-bridge';
 const MOBILE_BREAKPOINT = 768;
 
 /**
- * Detects whether the current device should be treated as mobile.
+ * Detects whether the current **viewport** should be treated as mobile.
  *
  * Returns `true` when the viewport is narrower than {@link MOBILE_BREAKPOINT}
  * **or** when running inside a Capacitor native mobile shell (even on tablets).
  *
+ * This is a layout breakpoint — it is `true` for a narrow desktop window, which
+ * is correct for swapping navigation and grid layouts. For anything that depends
+ * on the *input device* (touch gestures, tap targets, the player control skin)
+ * use `useIsTouchUi` from `./use-touch-ui` instead: a narrow window on a laptop
+ * is still mouse-driven.
+ *
  * Hydration-safe: starts as `false` on the server and updates after mount.
  *
- * @returns `true` if the device is considered mobile.
+ * @returns `true` if the viewport is considered mobile.
  */
 export function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(false);

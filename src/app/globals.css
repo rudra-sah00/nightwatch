@@ -5,6 +5,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Input-mode variants — driven by `data-touch-ui` on <html>, which is set by a
+ * blocking script in the document head (see `platforms/mobile/touch-ui-script`)
+ * and corrected after mount by `useIsTouchUi`.
+ *
+ * These select the player's control *arrangement*. Viewport width must never do
+ * that job: a narrow desktop window is still mouse-driven. Width/container size
+ * is only for density within an arrangement.
+ *
+ * `pointer-ui` deliberately matches when the attribute is missing, so a failed
+ * or blocked script falls back to the desktop arrangement instead of rendering
+ * no controls at all. Both variants are anchored to `html` — anchoring to any
+ * ancestor would make `pointer-ui` match through <body>, which never carries
+ * the attribute.
+ */
+@custom-variant touch-ui (&:is(html[data-touch-ui="touch"] *));
+@custom-variant pointer-ui (&:is(html:not([data-touch-ui="touch"]) *));
+
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
 

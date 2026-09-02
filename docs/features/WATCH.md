@@ -331,6 +331,53 @@ Next episode discovery:
 
 ## Mobile-Specific Features
 
+### Device detection
+
+The touch skin is selected in **CSS**, not React. A blocking script in the
+document head (`@/platforms/mobile/touch-ui-script`) resolves the input mode
+before the first paint and writes `data-touch-ui="touch" | "pointer"` on `<html>`;
+control components then key off the `touch-ui:` / `pointer-ui:` Tailwind variants
+declared in `globals.css`. Doing it pre-paint means a phone never paints the
+pointer control row for a frame first.
+
+`useIsTouchUi` (`@/platforms/mobile/use-touch-ui`, also re-exported as the
+deprecated `useMobileDetection`) re-runs the same rules after mount, corrects the
+attribute if the script guessed wrong, and drives player *behaviour* — tap zones,
+tap-to-toggle, the fullscreen strategy. Layout is CSS, behaviour is React.
+
+`pointer-ui` deliberately also matches when the attribute is **missing**, so a
+blocked or failed script degrades to the desktop arrangement rather than
+rendering no controls at all.
+
+Detection keys off device capability only, never viewport width:
+
+| Signal | Result |
+|--------|--------|
+| Electron / Android TV | pointer (desktop control row) |
+| Capacitor native shell | touch |
+| Phone UA (`iPhone`, `Android … Mobile`, …) | touch |
+| Desktop OS UA (`Windows NT`, `X11`, `Linux x86_64`, `CrOS`) | pointer, even with a touchscreen |
+| macOS UA | touch only when `maxTouchPoints > 0` (iPadOS reports a macOS UA) |
+| Anything else | touch when touch API **and** `pointer: coarse` **and** `hover: none` |
+
+Viewport width is not a signal. A narrow desktop window — split screen, 175%
+zoom — keeps the full pointer control row, desktop container sizing and the native
+Fullscreen API, because it is still mouse-driven. Width-based `md:` / `lg:`
+classes survive only *inside* an arrangement, to scale padding and gaps.
+Pointer/hover changes (plugging a mouse into a tablet) are picked up via
+`matchMedia` `change` listeners.
+
+Container sizing follows the same split: `Player.Root` takes `layout="fill"`
+(default — viewport height minus the Electron title bar) or `layout="immersive"`
+(fixed overlay pinned below the title bar), each expressed as `touch-ui:` /
+`pointer-ui:` classes so the right box is in the first paint. Touch devices get an
+inline 16:9 box in either preset. The `containerStyle` prop remains as an inline
+escape hatch and overrides both.
+
+Escape hatch for hardware that reports misleading pointer media queries:
+`localStorage.setItem('nightwatch:touch-ui', 'pointer' | 'touch')`, or
+`removeItem` to return to auto-detection.
+
 | Feature | Implementation |
 |---------|---------------|
 | **Tap-to-toggle** | `handleVideoClick` in `usePlayerHandlers` toggles play/pause |
