@@ -7,14 +7,19 @@ describe('Constants', () => {
       expect(API_ROUTES.AUTH).toBeDefined();
       expect(API_ROUTES.AUTH.LOGIN).toBe('/api/auth/login');
       expect(API_ROUTES.AUTH.LOGOUT).toBe('/api/auth/logout');
-      expect(API_ROUTES.AUTH.REGISTER).toBe('/api/auth/register');
       expect(API_ROUTES.AUTH.REFRESH).toBe('/api/auth/refresh');
     });
 
     it('should have all expected AUTH routes', () => {
       expect(typeof API_ROUTES.AUTH).toBe('object');
       expect(Object.keys(API_ROUTES.AUTH)).toEqual(
-        expect.arrayContaining(['LOGIN', 'LOGOUT', 'REGISTER', 'REFRESH']),
+        expect.arrayContaining([
+          'LOGIN',
+          'LOGOUT',
+          'REFRESH',
+          'GOOGLE_CONTINUE',
+          'GOOGLE_COMPLETE',
+        ]),
       );
     });
   });

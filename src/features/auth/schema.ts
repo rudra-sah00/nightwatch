@@ -112,19 +112,6 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-export const registerSchema = z.object({
-  name: z.string().min(2, 'validation.nameMinLength'),
-  username: z
-    .string()
-    .min(3, 'validation.usernameMinLength')
-    .regex(/^[a-z0-9_]+$/i, 'validation.usernameFormat'),
-  email: z.string().email('validation.invalidEmail'),
-  password: passwordSchema,
-  captchaToken: z.string().optional(),
-});
-
-export type RegisterInput = z.infer<typeof registerSchema>;
-
 export const forgotPasswordSchema = z
   .object({
     email: z

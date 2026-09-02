@@ -1,7 +1,7 @@
 import { API_ROUTES } from '@/lib/constants';
 import { apiFetch } from '@/lib/fetch';
 import type { LoginResponse, LogoutResponse } from '@/types';
-import type { ForgotPasswordInput, LoginInput, RegisterInput } from './schema';
+import type { ForgotPasswordInput, LoginInput } from './schema';
 
 /**
  * Login user with email and password
@@ -27,26 +27,15 @@ export async function logoutUser(
 }
 
 /**
- * Register new user
- */
-export async function registerUser(
-  data: RegisterInput,
-  options?: RequestInit,
-): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>(API_ROUTES.AUTH.REGISTER, {
-    method: 'POST',
-    body: JSON.stringify(data),
-    ...options,
-  });
-}
-
-/**
- * Verify OTP for Login or Registration
+ * Verify the login OTP — second factor of email/password sign-in.
+ *
+ * Only login issues an OTP. Account creation goes through Google, which needs
+ * no OTP because Google has already verified the email address.
  */
 export async function verifyOtp(
   email: string,
   otp: string,
-  context: 'login' | 'register',
+  context: 'login',
   mobileState?: string,
   options?: RequestInit,
 ): Promise<LoginResponse> {

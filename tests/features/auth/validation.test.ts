@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   forgotPasswordSchema,
   loginSchema,
-  registerSchema,
   resetPasswordSchema,
 } from '@/features/auth/schema';
 
@@ -45,127 +44,6 @@ describe('Login Schema', () => {
     };
 
     const result = loginSchema.safeParse(data);
-    expect(result.success).toBe(false);
-  });
-});
-
-describe('Register Schema', () => {
-  it('accepts valid registration data', () => {
-    const validData = {
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'Password!1',
-    };
-
-    const result = registerSchema.safeParse(validData);
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects password without uppercase', () => {
-    const data = {
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'password!1',
-    };
-
-    const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
-        'validation.passwordUppercase',
-      );
-    }
-  });
-
-  it('rejects password without special character', () => {
-    const data = {
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'Password12',
-    };
-
-    const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
-        'validation.passwordSpecialChar',
-      );
-    }
-  });
-
-  it('rejects short password (under 8 chars)', () => {
-    const data = {
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'Pa!1xx',
-    };
-
-    const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
-        'validation.passwordMinLength',
-      );
-    }
-  });
-
-  it('requires a lowercase letter', () => {
-    const data = {
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'ABCDEFGH!',
-    };
-
-    const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe(
-        'validation.passwordLowercase',
-      );
-    }
-  });
-
-  it('requires a number', () => {
-    const data = {
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'Password!',
-    };
-
-    const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues[0].message).toBe('validation.passwordNumber');
-    }
-  });
-
-  it('rejects invalid email', () => {
-    const data = {
-      name: 'John Doe',
-      username: 'johndoe',
-      email: 'notanemail',
-      password: 'Password!1',
-    };
-
-    const result = registerSchema.safeParse(data);
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects short name', () => {
-    const data = {
-      name: 'J',
-      username: 'johndoe',
-      email: 'john@example.com',
-      password: 'Password!1',
-    };
-
-    const result = registerSchema.safeParse(data);
     expect(result.success).toBe(false);
   });
 });

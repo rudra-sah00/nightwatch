@@ -3,7 +3,6 @@ import {
   forgotPassword,
   loginUser,
   logoutUser,
-  registerUser,
   resendOtp,
   resetPassword,
   verifyOtp,
@@ -85,33 +84,6 @@ describe('Auth API', () => {
     });
   });
 
-  describe('registerUser', () => {
-    it('should call apiFetch with correct parameters', async () => {
-      const mockResponse: LoginResponse = {
-        requiresOtp: true,
-        email: 'test@example.com',
-        message: 'OTP sent',
-      };
-
-      vi.mocked(fetchModule.apiFetch).mockResolvedValue(mockResponse);
-
-      const registerData = {
-        name: 'Test User',
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'Password123!',
-      };
-
-      const result = await registerUser(registerData);
-
-      expect(fetchModule.apiFetch).toHaveBeenCalledWith('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(registerData),
-      });
-      expect(result).toEqual(mockResponse);
-    });
-  });
-
   describe('verifyOtp', () => {
     it('should call apiFetch with correct parameters for login', async () => {
       const mockResponse: LoginResponse = {
@@ -163,7 +135,7 @@ describe('Auth API', () => {
 
       vi.mocked(fetchModule.apiFetch).mockResolvedValue(mockResponse);
 
-      const result = await verifyOtp('test@example.com', '123456', 'register');
+      const result = await verifyOtp('test@example.com', '123456', 'login');
 
       expect(fetchModule.apiFetch).toHaveBeenCalledWith(
         '/api/auth/verify-otp',
@@ -172,7 +144,7 @@ describe('Auth API', () => {
           body: JSON.stringify({
             email: 'test@example.com',
             otp: '123456',
-            context: 'register',
+            context: 'login',
           }),
         },
       );
