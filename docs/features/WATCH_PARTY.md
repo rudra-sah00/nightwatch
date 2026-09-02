@@ -308,6 +308,35 @@ Multi-sample clock offset calibration: collects multiple RTM message timestamps 
 
 Container-level fullscreen with Safari/WebKit vendor-prefix fallbacks. In Electron, delegates to native `BrowserWindow` fullscreen via `desktopBridge`.
 
+## URL Normalization
+
+`room/utils.ts` → `normalizeRoomUrls(room, token, { injectStream })`
+
+Every join path runs the room through this before setting state, so a member can
+actually fetch the host's URLs using the shared stream token:
+
+| Field | Treatment |
+|-------|-----------|
+| `streamUrl` | Token re-injected — only when `injectStream` is set, and **never for `type: 'livestream'`** |
+| `captionUrl`, `spriteVtt`, `subtitleTracks[].src` | Wrapped in the CDN proxy (relative paths only; absolute URLs are already final) |
+| `qualities[].url` | Passed through — already CDN proxy URLs valid for the shared token |
+
+Livestreams are excluded from stream-token injection because their URLs are
+upstream IPTV/CDN URLs, not our `/api/stream/hls/TOKEN/ID` shape.
+`injectTokenIntoUrl` matches on any `hls` or `cdn` path segment and overwrites the
+segment after it, which mangles upstream URLs:
+
+| Upstream URL | After injection | Lost |
+|--------------|-----------------|------|
+| `…/v1/stitch/embed/hls/channel/<id>/master.m3u8` | `…/v1/stitch/embed/hls/TOKEN/<id>/master.m3u8` | `channel` |
+| `…/hls/<id>/index.m3u8` | `…/hls/TOKEN/index.m3u8` | `<id>` |
+
+Either shape 404s, and the channel then buffers forever in a party while playing
+fine solo. Live TV has no per-member
+token anyway; the backend marks these rooms with the `LIVESTREAM` sentinel and
+resolves the playable URL server-side at room creation (see
+`nightwatch-backend/docs/architecture/livestream.md` → Shared resolution).
+
 ## Component Hooks
 
 | Hook | File | Purpose |

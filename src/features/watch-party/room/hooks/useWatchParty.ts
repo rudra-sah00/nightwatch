@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { injectTokenIntoUrl, wrapInProxy } from '@/features/watch/utils';
 import { useAuth } from '@/providers/auth-provider';
 // Modular Hooks
 import { useWatchPartyChat } from '../../chat/hooks/useWatchPartyChat';
@@ -16,39 +15,11 @@ import {
   getPartyStreamToken,
 } from '../services/watch-party.api';
 import type { PartyStateUpdate, RoomMember, WatchPartyRoom } from '../types';
+import { normalizeRoomUrls } from '../utils';
 import { useClockSync } from './useClockSync';
 import { useWatchPartyLifecycle } from './useWatchPartyLifecycle';
 import { useWatchPartyMembers } from './useWatchPartyMembers';
 import { useWatchPartySync } from './useWatchPartySync';
-
-/**
- * Normalize room URLs by wrapping captions, sprites, and subtitle tracks through proxy.
- */
-function normalizeRoomUrls(
-  room: WatchPartyRoom,
-  token: string,
-  { injectStream = false }: { injectStream?: boolean } = {},
-): WatchPartyRoom {
-  return {
-    ...room,
-    ...(injectStream && {
-      streamUrl: injectTokenIntoUrl(room.streamUrl, token) || room.streamUrl,
-    }),
-    captionUrl: room.captionUrl
-      ? wrapInProxy(room.captionUrl, token)
-      : room.captionUrl,
-    spriteVtt: room.spriteVtt
-      ? wrapInProxy(room.spriteVtt, token)
-      : room.spriteVtt,
-    subtitleTracks: (room.subtitleTracks || []).map((track) => ({
-      ...track,
-      src: wrapInProxy(track.src, token),
-    })),
-    // Quality URLs are CDN proxy URLs stored with the host token — pass through
-    // unchanged so each member can use the shared stream token to access them.
-    qualities: room.qualities,
-  };
-}
 
 interface UseWatchPartyOptions {
   onStateUpdate?: (state: PartyStateUpdate) => void;
