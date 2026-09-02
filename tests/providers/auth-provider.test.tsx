@@ -50,6 +50,7 @@ vi.mock('@/lib/auth', () => {
 
 vi.mock('@/lib/fetch', () => ({
   setTokenExpiration: vi.fn(),
+  setDeliberateLogout: vi.fn(),
 }));
 
 const mockUser = {

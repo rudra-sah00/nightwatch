@@ -14,6 +14,7 @@ import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
+import { AUTH_FLASH_KEY, type AuthFlash } from '@/store/use-auth-store';
 
 export default function ContinueClient() {
   const loginHook = useLoginForm();
@@ -22,6 +23,7 @@ export default function ContinueClient() {
   const { isLoading: hookLoading } = loginHook;
   const router = useRouter();
   const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
 
   const isLoading = authLoading || hookLoading;
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -32,11 +34,25 @@ export default function ContinueClient() {
   const [showQr, setShowQr] = useState(false);
 
   useEffect(() => {
-    // Check for flash messages (e.g., from logout/session end)
-    const flash = sessionStorage.getItem('auth_flash');
-    if (flash) {
-      toast.error(flash);
-      sessionStorage.removeItem('auth_flash');
+    // One-shot message from the redirect that landed us here — a sign-out
+    // confirmation, or the reason a session ended.
+    const raw = sessionStorage.getItem(AUTH_FLASH_KEY);
+    if (raw) {
+      sessionStorage.removeItem(AUTH_FLASH_KEY);
+      let text = raw;
+      let level: 'error' | 'success' = 'error';
+      try {
+        const flash: AuthFlash = JSON.parse(raw);
+        if (flash && typeof flash === 'object') {
+          level = flash.level ?? 'error';
+          text = flash.key ? tCommon(flash.key) : (flash.text ?? '');
+        }
+      } catch {
+        // Pre-existing plain-string flash from an older tab — show it as-is.
+      }
+      if (text) {
+        toast[level](text);
+      }
     }
 
     // Direct redirect if already authenticated
@@ -47,7 +63,7 @@ export default function ContinueClient() {
         router.replace('/home');
       }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, tCommon]);
 
   useEffect(() => {
     if (isAuthenticated && !initialAuthCheck) {

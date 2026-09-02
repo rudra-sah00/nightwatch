@@ -58,7 +58,8 @@
     "partyFinished": "派对已结束",
     "messageFailed": "发送消息失败",
     "partyTimeLimit": "观看派对已达到3小时限制，即将结束。",
-    "startFailed": "播放启动失败"
+    "startFailed": "播放启动失败",
+    "signedOut": "已成功退出登录"
   },
   "tour": {
     "welcome": {

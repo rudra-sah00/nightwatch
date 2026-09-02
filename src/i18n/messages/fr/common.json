@@ -58,7 +58,8 @@
     "partyFinished": "Fête terminée",
     "messageFailed": "Échec de l'envoi du message",
     "partyTimeLimit": "La fête a atteint la limite de 3 heures et va maintenant se terminer.",
-    "startFailed": "Échec du démarrage de la lecture"
+    "startFailed": "Échec du démarrage de la lecture",
+    "signedOut": "Déconnexion réussie"
   },
   "tour": {
     "welcome": {

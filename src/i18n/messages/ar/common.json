@@ -58,7 +58,8 @@
     "partyFinished": "انتهت الحفلة",
     "messageFailed": "فشل إرسال الرسالة",
     "partyTimeLimit": "وصلت حفلة المشاهدة إلى حد 3 ساعات وستنتهي الآن.",
-    "startFailed": "فشل بدء التشغيل"
+    "startFailed": "فشل بدء التشغيل",
+    "signedOut": "تم تسجيل الخروج بنجاح"
   },
   "tour": {
     "welcome": {

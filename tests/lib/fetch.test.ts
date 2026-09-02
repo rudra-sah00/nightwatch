@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiFetch, resetAuthFetchState, setTokenExpiration } from '@/lib/fetch';
+import {
+  apiFetch,
+  resetAuthFetchState,
+  setDeliberateLogout,
+  setTokenExpiration,
+} from '@/lib/fetch';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -652,5 +657,74 @@ describe('scheduleTokenRefresh edge cases', () => {
     // This hits: if (!tokenExpiresAt) return;
     setTokenExpiration(NaN);
     expect(true).toBe(true);
+  });
+});
+
+describe('deliberate sign-out', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetAuthFetchState();
+  });
+
+  afterEach(() => {
+    resetAuthFetchState();
+  });
+
+  /** Queues a 401 on the request plus a failed refresh, the shape sign-out hits. */
+  function mock401WithFailedRefresh() {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({ message: 'Unauthorized' }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({ message: 'Invalid refresh token' }),
+      } as Response);
+  }
+
+  // Regression: signing out fires requests against a session being torn down.
+  // Those 401s were read as an expired session, so the user landed on the login
+  // screen with "Session expired. Please login again." instead of a sign-out
+  // confirmation.
+  it('does not report an expired session for a 401 during sign-out', async () => {
+    const onExpired = vi.fn();
+    window.addEventListener('auth:expired', onExpired);
+    setDeliberateLogout(true);
+    mock401WithFailedRefresh();
+
+    await expect(
+      apiFetch('/api/auth/logout', { method: 'POST' }),
+    ).rejects.toThrow('SESSION_EXPIRED');
+
+    expect(onExpired).not.toHaveBeenCalled();
+    window.removeEventListener('auth:expired', onExpired);
+  });
+
+  it('still reports an expired session when the user did not ask to sign out', async () => {
+    const onExpired = vi.fn();
+    window.addEventListener('auth:expired', onExpired);
+    mock401WithFailedRefresh();
+
+    await expect(apiFetch('/api/protected')).rejects.toThrow('SESSION_EXPIRED');
+
+    expect(onExpired).toHaveBeenCalledTimes(1);
+    window.removeEventListener('auth:expired', onExpired);
+  });
+
+  it('is cleared by resetAuthFetchState so the suppression cannot leak', async () => {
+    setDeliberateLogout(true);
+    resetAuthFetchState();
+
+    const onExpired = vi.fn();
+    window.addEventListener('auth:expired', onExpired);
+    mock401WithFailedRefresh();
+
+    await expect(apiFetch('/api/protected')).rejects.toThrow('SESSION_EXPIRED');
+
+    expect(onExpired).toHaveBeenCalledTimes(1);
+    window.removeEventListener('auth:expired', onExpired);
   });
 });

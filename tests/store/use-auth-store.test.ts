@@ -22,6 +22,7 @@ vi.mock('@/lib/electron-bridge', () => ({
 
 vi.mock('@/lib/fetch', () => ({
   setTokenExpiration: vi.fn(),
+  setDeliberateLogout: vi.fn(),
 }));
 
 vi.mock('@/features/music/store/use-music-store', () => ({
@@ -31,7 +32,6 @@ vi.mock('@/features/music/store/use-music-store', () => ({
 vi.mock('@/features/auth/api', () => ({
   loginUser: vi.fn(),
   logoutUser: vi.fn().mockResolvedValue(undefined),
-  registerUser: vi.fn(),
   verifyOtp: vi.fn(),
   resendOtp: vi.fn(),
   unregisterPushToken: vi.fn().mockResolvedValue(undefined),
@@ -41,10 +41,14 @@ vi.mock('@/lib/device-id', () => ({
   getDeviceId: () => 'test-device-id',
 }));
 
-import { loginUser, registerUser, verifyOtp } from '@/features/auth/api';
+import { loginUser, verifyOtp } from '@/features/auth/api';
 import { storeUser } from '@/lib/auth';
-import { setTokenExpiration } from '@/lib/fetch';
-import { useAuthStore } from '@/store/use-auth-store';
+import { setDeliberateLogout, setTokenExpiration } from '@/lib/fetch';
+import {
+  AUTH_FLASH_KEY,
+  type AuthFlash,
+  useAuthStore,
+} from '@/store/use-auth-store';
 import type { LoginResponse, User } from '@/types';
 
 const mockUser: User = {
@@ -141,31 +145,6 @@ describe('useAuthStore actions', () => {
     });
   });
 
-  describe('register', () => {
-    it('delegates to registerUser API', async () => {
-      const response: LoginResponse = {
-        requiresOtp: true,
-        email: 'new@example.com',
-      };
-      vi.mocked(registerUser).mockResolvedValue(response);
-
-      const result = await useAuthStore.getState().register({
-        name: 'New User',
-        username: 'newuser',
-        email: 'new@example.com',
-        password: 'Pass123!',
-      });
-
-      expect(result).toEqual(response);
-      expect(registerUser).toHaveBeenCalledWith({
-        name: 'New User',
-        username: 'newuser',
-        email: 'new@example.com',
-        password: 'Pass123!',
-      });
-    });
-  });
-
   describe('updateUser', () => {
     it('merges partial data into existing user', () => {
       act(() => {
@@ -218,5 +197,45 @@ describe('useAuthStore actions', () => {
       });
       expect(useAuthStore.getState().isAuthenticated).toBe(false);
     });
+  });
+});
+
+describe('logout', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+  });
+
+  // Regression: signing out showed "Session expired. Please login again."
+  // The tear-down requests (push-token unregister, POST /auth/logout) 401
+  // against the session being killed, and the generic 401 handler read that as
+  // an expired session. The flag tells apiFetch this 401 was expected.
+  it('marks the sign-out as deliberate so 401s are not read as an expired session', async () => {
+    await act(async () => {
+      await useAuthStore.getState().logout();
+    });
+
+    expect(setDeliberateLogout).toHaveBeenCalledWith(true);
+  });
+
+  it('leaves a success flash, not an error, for the login screen to show', async () => {
+    await act(async () => {
+      await useAuthStore.getState().logout();
+    });
+
+    const flash: AuthFlash = JSON.parse(
+      sessionStorage.getItem(AUTH_FLASH_KEY) as string,
+    );
+    expect(flash.level).toBe('success');
+    expect(flash.key).toBe('toasts.signedOut');
+  });
+
+  it('clears the user from the store', async () => {
+    await act(async () => {
+      await useAuthStore.getState().logout();
+    });
+
+    expect(useAuthStore.getState().user).toBeNull();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
   });
 });

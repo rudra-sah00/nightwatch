@@ -58,7 +58,8 @@
     "partyFinished": "パーティーが終了しました",
     "messageFailed": "メッセージの送信に失敗しました",
     "partyTimeLimit": "ウォッチパーティーが3時間の制限に達しました。終了します。",
-    "startFailed": "再生の開始に失敗しました"
+    "startFailed": "再生の開始に失敗しました",
+    "signedOut": "ログアウトしました"
   },
   "tour": {
     "welcome": {

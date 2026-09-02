@@ -58,7 +58,8 @@
     "partyFinished": "Party finished",
     "messageFailed": "Failed to send message",
     "partyTimeLimit": "Watch party has reached 3-hour limit and will now end.",
-    "startFailed": "Failed to start playback"
+    "startFailed": "Failed to start playback",
+    "signedOut": "Signed out successfully"
   },
   "tour": {
     "welcome": {

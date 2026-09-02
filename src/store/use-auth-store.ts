@@ -4,12 +4,12 @@ import {
   persist,
   type StateStorage,
 } from 'zustand/middleware';
-import { loginUser, logoutUser, registerUser } from '@/features/auth/api';
-import type { LoginInput, RegisterInput } from '@/features/auth/schema';
+import { loginUser, logoutUser } from '@/features/auth/api';
+import type { LoginInput } from '@/features/auth/schema';
 import { trackEvent } from '@/lib/analytics';
 import { clearStoredUser, storeUser } from '@/lib/auth';
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
-import { setTokenExpiration } from '@/lib/fetch';
+import { setDeliberateLogout, setTokenExpiration } from '@/lib/fetch';
 import type { LoginResponse, User } from '@/types';
 
 // Persistent Native Caching Wrapper that automatically synchronizes the user's
@@ -53,10 +53,27 @@ export function setQueryClientRef(qc: QueryClient) {
   _queryClient = qc;
 }
 
-function clearCookiesAndRedirect(message?: string) {
-  if (message) {
+/**
+ * One-shot message shown on `/continue` after an auth redirect.
+ *
+ * `key` is a `common` translation key, resolved on the login screen — the store
+ * has no translator. `text` carries an already-localised string (e.g. a reason
+ * sent by the server with a force-logout).
+ */
+export interface AuthFlash {
+  key?: string;
+  text?: string;
+  level?: 'error' | 'success';
+}
+
+export const AUTH_FLASH_KEY = 'auth_flash';
+
+function clearCookiesAndRedirect(flash?: string | AuthFlash) {
+  if (flash) {
     try {
-      sessionStorage.setItem('auth_flash', message);
+      const payload: AuthFlash =
+        typeof flash === 'string' ? { text: flash, level: 'error' } : flash;
+      sessionStorage.setItem(AUTH_FLASH_KEY, JSON.stringify(payload));
     } catch {}
   }
   _queryClient?.clear();
@@ -83,11 +100,10 @@ export interface AuthState {
   setIsLoading: (isLoading: boolean) => void;
 
   login: (data: LoginInput) => Promise<LoginResponse>;
-  register: (data: RegisterInput) => Promise<LoginResponse>;
   verifyOtp: (
     email: string,
     otp: string,
-    context: 'login' | 'register',
+    context: 'login',
     mobileState?: string,
   ) => Promise<LoginResponse>;
   resendOtp: (email: string) => Promise<void>;
@@ -118,11 +134,6 @@ export const useAuthStore = create<AuthState>()(
         return response;
       },
 
-      register: async (data: RegisterInput) => {
-        trackEvent('signup_start');
-        return registerUser(data);
-      },
-
       verifyOtp: async (email, otp, context, mobileState) => {
         const { verifyOtp: apiVerifyOtp } = await import('@/features/auth/api');
         const response = await apiVerifyOtp(email, otp, context, mobileState);
@@ -136,16 +147,19 @@ export const useAuthStore = create<AuthState>()(
             setTokenExpiration(response.expiresIn);
           }
           set({ user: response.user, isAuthenticated: true });
-          trackEvent(
-            context === 'register' ? 'signup_complete' : 'login_success',
-            { method: 'otp' },
-          );
+          trackEvent('login_success', { method: 'otp' });
         }
         return response;
       },
 
       logout: async () => {
         trackEvent('logout');
+        // Mark this as intentional before firing anything that can 401. Both
+        // the unregister below and POST /auth/logout run against a session
+        // being torn down, and would otherwise be reported to the user as
+        // "Session expired. Please login again."
+        setDeliberateLogout(true);
+
         // Unregister push notification token before logging out
         try {
           const { getDeviceId } = await import('@/lib/device-id');
@@ -161,7 +175,10 @@ export const useAuthStore = create<AuthState>()(
           sessionStorage.removeItem('guest_token');
           sessionStorage.removeItem('guest_refresh_token');
           set({ user: null, isAuthenticated: false, isLoading: false });
-          clearCookiesAndRedirect();
+          clearCookiesAndRedirect({
+            key: 'toasts.signedOut',
+            level: 'success',
+          });
         }
       },
 

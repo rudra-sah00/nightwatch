@@ -58,7 +58,8 @@
     "partyFinished": "Party beendet",
     "messageFailed": "Nachricht konnte nicht gesendet werden",
     "partyTimeLimit": "Watch Party hat das 3-Stunden-Limit erreicht und wird jetzt beendet.",
-    "startFailed": "Wiedergabe konnte nicht gestartet werden"
+    "startFailed": "Wiedergabe konnte nicht gestartet werden",
+    "signedOut": "Erfolgreich abgemeldet"
   },
   "tour": {
     "welcome": {

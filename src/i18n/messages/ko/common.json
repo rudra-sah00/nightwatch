@@ -58,7 +58,8 @@
     "partyFinished": "파티 종료",
     "messageFailed": "메시지 전송 실패",
     "partyTimeLimit": "워치 파티가 3시간 제한에 도달하여 종료됩니다.",
-    "startFailed": "재생 시작 실패"
+    "startFailed": "재생 시작 실패",
+    "signedOut": "로그아웃되었습니다"
   },
   "tour": {
     "welcome": {

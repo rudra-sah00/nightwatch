@@ -26,10 +26,30 @@ export function resetAuthFetchState() {
   isRefreshing = false;
   refreshPromise = null;
   tokenExpiresAt = null;
+  deliberateLogout = false;
   if (refreshTimerId) {
     clearTimeout(refreshTimerId);
     refreshTimerId = null;
   }
+}
+
+/**
+ * Set while the user is intentionally signing out.
+ *
+ * Sign-out fires requests that legitimately 401 — `POST /auth/logout` and the
+ * push-token unregister both run against a session that is being torn down, and
+ * the access token has usually already expired (15 min TTL). Without this flag
+ * the generic 401 handler reads those as an expired session and fires
+ * `auth:expired`, which redirects with a "Session expired. Please login again."
+ * toast instead of a sign-out confirmation.
+ *
+ * Not reset on completion: sign-out ends in a hard navigation, which reloads
+ * this module. Tests reset it explicitly.
+ */
+let deliberateLogout = false;
+
+export function setDeliberateLogout(value: boolean) {
+  deliberateLogout = value;
 }
 
 /**
@@ -256,9 +276,11 @@ export async function apiFetch<T>(
       // (tokenExpiresAt cleared by 401/403 from refresh endpoint).
       // Transient errors (5xx, network) keep tokenExpiresAt set.
       // Also skip logout if the device is offline — the session may still be
-      // valid once connectivity returns.
+      // valid once connectivity returns, and skip it entirely when the user is
+      // already signing out on purpose (see {@link setDeliberateLogout}).
       if (
         !tokenExpiresAt &&
+        !deliberateLogout &&
         typeof window !== 'undefined' &&
         navigator.onLine !== false
       ) {

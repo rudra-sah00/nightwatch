@@ -58,7 +58,8 @@
     "partyFinished": "Festa terminata",
     "messageFailed": "Invio messaggio fallito",
     "partyTimeLimit": "La festa ha raggiunto il limite di 3 ore e terminerà ora.",
-    "startFailed": "Avvio riproduzione fallito"
+    "startFailed": "Avvio riproduzione fallito",
+    "signedOut": "Disconnessione effettuata"
   },
   "tour": {
     "welcome": {

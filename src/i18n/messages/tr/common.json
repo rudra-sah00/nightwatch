@@ -58,7 +58,8 @@
     "partyFinished": "Parti sona erdi",
     "messageFailed": "Mesaj gönderilemedi",
     "partyTimeLimit": "İzleme partisi 3 saatlik sınıra ulaştı ve şimdi sona erecek.",
-    "startFailed": "Oynatma başlatılamadı"
+    "startFailed": "Oynatma başlatılamadı",
+    "signedOut": "Başarıyla çıkış yapıldı"
   },
   "tour": {
     "welcome": {
