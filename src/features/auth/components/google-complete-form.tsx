@@ -108,7 +108,7 @@ export function GoogleCompleteForm({
         <button
           type="button"
           onClick={onCancel}
-          className="font-headline font-black uppercase text-xs tracking-widest text-foreground/40 hover:text-foreground transition-colors"
+          className="shrink-0 whitespace-nowrap font-headline font-black uppercase text-xs tracking-widest text-foreground/40 hover:text-foreground transition-colors"
         >
           {t('otp.back')}
         </button>
@@ -231,14 +231,17 @@ export function GoogleCompleteForm({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 pb-0.5 mt-auto pt-4">
+        {/* The card is a fixed 440px: four 62px field blocks leave just enough
+            room for a 44px action row, so the button stays inside the card
+            instead of being clipped at the bottom edge. */}
+        <div className="flex flex-col gap-2 pb-0.5 mt-auto pt-3">
           <Button
             type="submit"
             variant="neo-yellow"
             size="xl"
             isLoading={isCompleting}
             disabled={isCompleting}
-            className="w-full h-[52px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
+            className="w-full h-[44px] text-sm font-black uppercase italic font-headline shrink-0 tracking-tighter"
           >
             {t('googleSignup.createAccount')}
           </Button>
