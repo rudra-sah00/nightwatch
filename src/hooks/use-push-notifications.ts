@@ -70,14 +70,7 @@ export function usePushNotifications() {
         let route = '/';
 
         if (data.type === 'dm') {
-          route = data.senderId ? `/dm?peer=${data.senderId}` : '/dm';
-        } else if (
-          data.type === 'explore_reply' ||
-          data.type === 'explore_ai_reply' ||
-          data.type === 'explore_mention'
-        ) {
-          const threadId = data.threadId || data.postId;
-          route = threadId ? `/explore?thread=${threadId}` : '/explore';
+          route = '/home';
         } else if (data.url) {
           route = data.url;
         }

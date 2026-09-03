@@ -3,7 +3,6 @@
 import {
   BookOpen,
   Bot,
-  Compass,
   Gamepad2,
   History,
   Home,
@@ -17,27 +16,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import React from 'react';
 import { useSidebar } from '@/app/(protected)/(main)/layout';
-import { useExploreNotifications } from '@/features/explore/hooks/use-explore-notifications';
 import { useAuthStore } from '@/store/use-auth-store';
 
 export function LeftSidebar() {
   const { leftOpen: open, setLeftOpen } = useSidebar();
   const pathname = usePathname();
   const t = useTranslations('common.nav');
-  const { unreadCount, clearBadge } = useExploreNotifications();
   const user = useAuthStore((s) => s.user);
 
   const isActive = (href: string) => pathname?.startsWith(href);
 
-  React.useEffect(() => {
-    if (pathname?.startsWith('/explore')) clearBadge();
-  }, [pathname, clearBadge]);
-
   const primaryLinks = [
     { href: '/home', label: t('home'), icon: Home },
-    { href: '/explore', label: t('explore'), icon: Compass },
     { href: '/continue-watching', label: t('continue'), icon: History },
     { href: '/live', label: t('live'), icon: Radio },
     { href: '/watchlist', label: t('watchlist'), icon: Plus },
@@ -67,9 +58,6 @@ export function LeftSidebar() {
           <Link key={href} href={href} className={linkClass(href)}>
             <span className="relative shrink-0">
               <Icon className="w-5 h-5 stroke-[2.5px]" />
-              {href === '/explore' && unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-neo-red rounded-full border-2 border-card" />
-              )}
             </span>
             {label}
           </Link>
@@ -124,9 +112,6 @@ export function LeftSidebar() {
             >
               <span className="relative shrink-0">
                 <Icon className="w-6 h-6" />
-                {href === '/explore' && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-neo-red rounded-full border-2 border-card" />
-                )}
               </span>
               {label}
             </Link>
@@ -166,13 +151,11 @@ export function LeftSidebarDesktop() {
   const { leftOpen: open } = useSidebar();
   const pathname = usePathname();
   const t = useTranslations('common.nav');
-  const { unreadCount } = useExploreNotifications();
 
   const isActive = (href: string) => pathname?.startsWith(href);
 
   const links = [
     { href: '/home', label: t('home'), icon: Home },
-    { href: '/explore', label: t('explore'), icon: Compass },
     { href: '/continue-watching', label: t('continue'), icon: History },
     { href: '/live', label: t('live'), icon: Radio },
     { href: '/watchlist', label: t('watchlist'), icon: Plus },
@@ -203,9 +186,6 @@ export function LeftSidebarDesktop() {
               <Link key={href} href={href} className={linkClass(href)}>
                 <span className="relative shrink-0">
                   <Icon className="w-5 h-5 stroke-[2.5px]" />
-                  {href === '/explore' && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-neo-red rounded-full border-2 border-card" />
-                  )}
                 </span>
                 {label}
               </Link>

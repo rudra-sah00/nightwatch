@@ -49,7 +49,6 @@ export function AppPreferences() {
   const [themeOpen, setThemeOpen] = useState(false);
   const [gaplessEnabled, setGaplessEnabled] = useState(true);
   const [crossfadeSec, setCrossfadeSec] = useState(0);
-  const [exploreOnHome, setExploreOnHome] = useState(false);
 
   useEffect(() => {
     try {
@@ -57,8 +56,6 @@ export function AppPreferences() {
       if (c !== null) setCrossfadeSec(Number(c) || 0);
       const g = localStorage.getItem('nightwatch:gapless');
       if (g !== null) setGaplessEnabled(g !== 'false');
-      const e = localStorage.getItem('nightwatch:exploreOnHome');
-      if (e !== null) setExploreOnHome(e === 'true');
     } catch {}
   }, []);
 
@@ -230,41 +227,6 @@ export function AppPreferences() {
         </div>
 
         <div className="h-px bg-border w-full" />
-
-        {/* Explore on Home */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
-              <Monitor className="w-4 h-4 text-neo-red" />
-              Explore on Home
-            </span>
-            <p className="text-muted-foreground font-body text-sm max-w-sm">
-              Show trending movies, genres, and curated sections on your home
-              page
-            </p>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={exploreOnHome}
-            onClick={() => {
-              const next = !exploreOnHome;
-              setExploreOnHome(next);
-              localStorage.setItem('nightwatch:exploreOnHome', String(next));
-            }}
-            className={cn(
-              'relative inline-flex h-8 w-16 items-center rounded-full transition-colors shrink-0',
-              exploreOnHome ? 'bg-neo-blue' : 'bg-secondary',
-            )}
-          >
-            <span
-              className={cn(
-                'inline-flex h-6 w-6 transform rounded-full bg-background shadow transition-transform',
-                exploreOnHome ? 'translate-x-9' : 'translate-x-1',
-              )}
-            />
-          </button>
-        </div>
 
         {/* Desktop Only Settings */}
         {isDesktop && (
