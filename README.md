@@ -43,7 +43,6 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Music Discover](./docs/features/MUSIC_DISCOVER.md): Swipe-based song discovery feed with audio previews, haptic feedback, and personalized recommendation engine.
 - [Manga](./docs/features/MANGA.md): MangaPlus reader with browse/search, favorites, reading progress persistence, and Smart TV spatial-navigation support.
 - [Remote Control](./docs/features/REMOTE_CONTROL.md): Mobile-to-desktop video remote control via Socket.IO.
-- [Explore & Direct Messages](./docs/features/EXPLORE.md): Social feed with ranked timelines, polls, reactions, AI bot, and real-time 1-on-1 DM chat.
 - [Smart TV](./docs/features/SMART_TV.md): Android TV platform — spatial navigation, D-pad player, letter grid search, overscan, QR login, music full player, manga reader.
 - [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 21 native plugins, mobile bridge API, and dev workflow.
 - [Desktop Application](./docs/DESKTOP.md): Electron wrapper, system tray, Discord Rich Presence, media keys, and auto-updates.
