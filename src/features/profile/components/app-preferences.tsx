@@ -3,6 +3,7 @@
 import {
   Activity,
   Check,
+  Compass,
   Globe,
   Keyboard,
   Monitor,
@@ -36,8 +37,9 @@ const THEME_META = [
  * Application preferences panel for the profile page.
  *
  * Provides theme selection (light/dark/system), language switching, keyboard
- * shortcuts reference, and desktop-only settings (launch on startup).
- * Desktop settings are persisted via the Electron bridge store.
+ * shortcuts reference, the "Explore on Home" switch, and desktop-only settings
+ * (launch on startup). Desktop settings are persisted via the Electron bridge
+ * store.
  */
 export function AppPreferences() {
   const t = useTranslations('profile');
@@ -49,6 +51,7 @@ export function AppPreferences() {
   const [themeOpen, setThemeOpen] = useState(false);
   const [gaplessEnabled, setGaplessEnabled] = useState(true);
   const [crossfadeSec, setCrossfadeSec] = useState(0);
+  const [exploreOnHome, setExploreOnHome] = useState(false);
 
   useEffect(() => {
     try {
@@ -56,6 +59,8 @@ export function AppPreferences() {
       if (c !== null) setCrossfadeSec(Number(c) || 0);
       const g = localStorage.getItem('nightwatch:gapless');
       if (g !== null) setGaplessEnabled(g !== 'false');
+      const e = localStorage.getItem('nightwatch:exploreOnHome');
+      if (e !== null) setExploreOnHome(e === 'true');
     } catch {}
   }, []);
 
@@ -227,6 +232,45 @@ export function AppPreferences() {
         </div>
 
         <div className="h-px bg-border w-full" />
+
+        {/* Explore on Home — the only control for `nightwatch:exploreOnHome`,
+            which HomeClient and ExploreHome both read to decide whether /home
+            shows the discovery sections or the search hero. */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <span className="font-headline font-bold uppercase tracking-widest text-muted-foreground text-sm flex items-center gap-2">
+              <Compass className="w-4 h-4 text-neo-red" />
+              Explore on Home
+            </span>
+            <p className="text-muted-foreground font-body text-sm max-w-sm">
+              Show trending movies, genres, and curated sections on your home
+              page
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={exploreOnHome}
+            onClick={() => {
+              const next = !exploreOnHome;
+              setExploreOnHome(next);
+              try {
+                localStorage.setItem('nightwatch:exploreOnHome', String(next));
+              } catch {}
+            }}
+            className={cn(
+              'relative inline-flex h-8 w-16 items-center rounded-full transition-colors shrink-0',
+              exploreOnHome ? 'bg-neo-blue' : 'bg-secondary',
+            )}
+          >
+            <span
+              className={cn(
+                'inline-flex h-6 w-6 transform rounded-full bg-background shadow transition-transform',
+                exploreOnHome ? 'translate-x-9' : 'translate-x-1',
+              )}
+            />
+          </button>
+        </div>
 
         {/* Desktop Only Settings */}
         {isDesktop && (
