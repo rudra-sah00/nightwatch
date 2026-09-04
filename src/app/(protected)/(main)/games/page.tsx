@@ -3,11 +3,20 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getGames } from '@/features/games/api';
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function GamesPage() {
   const t = useTranslations('common.gamesPage');
@@ -19,7 +28,10 @@ export default function GamesPage() {
     queryFn: getGames,
   });
 
-  const filtered = games.filter(
+  // Shuffle once when games data changes (new fetch), not on every render
+  const shuffled = useMemo(() => shuffle(games), [games]);
+
+  const filtered = shuffled.filter(
     (g) =>
       g.title.toLowerCase().includes(search.toLowerCase()) ||
       g.description.toLowerCase().includes(search.toLowerCase()),
