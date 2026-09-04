@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { GlobalLoading } from '@/components/ui/global-loading';
@@ -12,6 +12,10 @@ import { LoginForm } from '@/features/auth/components/login-form';
 import { QrLoginView } from '@/features/auth/components/qr-login-view';
 import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
+import {
+  DEFAULT_POST_LOGIN_PATH,
+  resolvePostLoginPath,
+} from '@/features/auth/lib/post-login-redirect';
 import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { AUTH_FLASH_KEY, type AuthFlash } from '@/store/use-auth-store';
@@ -22,8 +26,20 @@ export default function ContinueClient() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLoading: hookLoading } = loginHook;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations('auth');
   const tCommon = useTranslations('common');
+
+  // `proxy.ts` sets ?from={path} when it bounces a signed-out visitor, so a
+  // deep link survives the login detour. Sanitised — it comes from the URL.
+  const destination = useMemo(
+    () => resolvePostLoginPath(searchParams.get('from')),
+    [searchParams],
+  );
+  // The first-run tour only makes sense when landing on the default home page,
+  // not when returning to a deep link the user originally asked for.
+  const mobileDestination =
+    destination === DEFAULT_POST_LOGIN_PATH ? '/home?tour=true' : destination;
 
   const isLoading = authLoading || hookLoading;
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -58,26 +74,32 @@ export default function ContinueClient() {
     // Direct redirect if already authenticated
     if (isAuthenticated) {
       if (checkIsMobile()) {
-        window.location.href = '/home?tour=true';
+        window.location.href = mobileDestination;
       } else {
-        router.replace('/home');
+        router.replace(destination);
       }
     }
-  }, [isAuthenticated, router, tCommon]);
+  }, [isAuthenticated, router, tCommon, destination, mobileDestination]);
 
   useEffect(() => {
     if (isAuthenticated && !initialAuthCheck) {
       setIsTransitioning(true);
       const timer = setTimeout(() => {
         if (checkIsMobile()) {
-          window.location.href = '/home?tour=true';
+          window.location.href = mobileDestination;
         } else {
-          router.push('/home');
+          router.push(destination);
         }
       }, 700);
       return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, initialAuthCheck, router]);
+  }, [
+    isAuthenticated,
+    initialAuthCheck,
+    router,
+    destination,
+    mobileDestination,
+  ]);
 
   // Loading State
   if (isLoading) {
