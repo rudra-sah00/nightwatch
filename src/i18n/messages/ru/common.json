@@ -383,7 +383,17 @@
     "listening": "Listening...",
     "speaking": "Speaking...",
     "you": "You",
-    "ai": "AI"
+    "ai": "AI",
+    "conversation": "Conversation",
+    "emptyConversation": "Start talking and your conversation will appear here.",
+    "clearHistory": "Clear",
+    "errors": {
+      "micDenied": "Microphone access denied. Enable it in your device settings and try again.",
+      "micUnavailable": "No microphone is available on this device.",
+      "notConnected": "Not connected. Check your connection and try again.",
+      "startFailed": "Could not start the assistant. Please try again.",
+      "serverError": "The assistant ran into a problem. Please try again."
+    }
   },
   "recording": {
     "started": "Recording started",

@@ -2,77 +2,127 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type AudioCapture,
+  startAudioCapture,
+} from '@/features/ask-ai/lib/audio-capture';
+import {
+  type AudioPlayback,
+  startAudioPlayback,
+} from '@/features/ask-ai/lib/audio-playback';
+import {
+  appendMessage,
+  isInterruption,
+  isSpeculative,
+} from '@/features/ask-ai/lib/conversation';
+import type {
+  AskAiError,
+  AskAiMessage,
+  AskAiState,
+} from '@/features/ask-ai/types';
 import { reportError, trackEvent } from '@/lib/analytics';
 import { useSocket } from '@/providers/socket-provider';
 
 /**
- * Ask AI hook — follows official AWS Nova Sonic sample pattern exactly.
+ * Ask AI hook — bidirectional voice session against Nova Sonic.
  *
  * Uses the main app socket (via SocketProvider) for auth and reconnection.
- * Ask AI events are namespaced (ask-ai:*) so there's no conflict with
+ * Ask AI events are namespaced (ask-ai:*) so there is no conflict with
  * friends/presence/calls on the same connection.
+ *
+ * Audio lives in ./lib/audio-capture and ./lib/audio-playback; this hook owns
+ * the session lifecycle, the transcript state and the tool-event wiring.
  */
 
-type State = 'idle' | 'listening' | 'speaking';
-
-const TARGET_SAMPLE_RATE = 16000;
-const isFirefox =
-  typeof navigator !== 'undefined' &&
-  navigator.userAgent.toLowerCase().includes('firefox');
+/** Maps a getUserMedia / startup failure onto a translatable code. */
+function toStartError(err: unknown): AskAiError {
+  if (err instanceof DOMException) {
+    if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+      return { code: 'micDenied' };
+    }
+    if (
+      err.name === 'NotFoundError' ||
+      err.name === 'NotReadableError' ||
+      err.name === 'OverconstrainedError'
+    ) {
+      return { code: 'micUnavailable' };
+    }
+  }
+  // Capacitor WebViews without a mic bridge throw on the undefined API itself.
+  if (err instanceof TypeError) return { code: 'micUnavailable' };
+  return {
+    code: 'startFailed',
+    detail: err instanceof Error ? err.message : String(err),
+  };
+}
 
 export function useAskAi() {
   const router = useRouter();
-  const [state, setState] = useState<State>('idle');
-  const [transcript, setTranscript] = useState('');
-  const [userTranscript, setUserTranscript] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const { socket } = useSocket();
+
+  const [state, setState] = useState<AskAiState>('idle');
+  const [messages, setMessages] = useState<AskAiMessage[]>([]);
+  const [liveUserText, setLiveUserText] = useState('');
+  const [liveAssistantText, setLiveAssistantText] = useState('');
+  const [error, setError] = useState<AskAiError | null>(null);
 
   const activeRef = useRef(false);
-  const streamRef = useRef<MediaStream | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const captureRef = useRef<AudioCapture | null>(null);
+  const playbackRef = useRef<AudioPlayback | null>(null);
 
-  const playQueueRef = useRef<Float32Array[]>([]);
-  const nextPlayTimeRef = useRef(0);
-
-  // Playback refs
-  const playCtxRef = useRef<AudioContext | null>(null);
-
-  const socketRef = useRef<ReturnType<typeof useSocket>['socket']>(null);
-
-  const roleRef = useRef('');
-  const displayAssistantTextRef = useRef(false);
+  const roleRef = useRef<'USER' | 'ASSISTANT' | ''>('');
+  const speculativeRef = useRef(false);
   const speakingRef = useRef(false);
+  const pendingUserRef = useRef('');
+  const pendingAssistantRef = useRef('');
 
-  // --- Base64 ↔ Float32 conversion (from official sample) ---
-  const base64ToFloat32 = useCallback((b64: string): Float32Array => {
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) {
-      bytes[i] = bin.charCodeAt(i);
-    }
-    const int16 = new Int16Array(bytes.buffer);
-    const float32 = new Float32Array(int16.length);
-    for (let i = 0; i < int16.length; i++) {
-      float32[i] = int16[i] / 32768.0;
-    }
-    return float32;
+  const setDucked = useCallback((duck: boolean) => {
+    window.dispatchEvent(new CustomEvent('ask-ai:duck', { detail: { duck } }));
   }, []);
 
-  // --- Use the main app socket (already authenticated via SocketProvider) ---
-  // A dedicated socket would need its own session validation and reconnection
-  // handling. The main socket already handles auth, force_logout, and reconnection.
-  // Ask AI events are namespaced (ask-ai:*) so there's no conflict.
-  const { socket: appSocket } = useSocket();
+  /** Moves whichever turn just ended out of the live caption and into history. */
+  const finalizeTurn = useCallback(() => {
+    if (roleRef.current === 'USER' && pendingUserRef.current) {
+      const content = pendingUserRef.current;
+      pendingUserRef.current = '';
+      setLiveUserText('');
+      setMessages((prev) => appendMessage(prev, 'user', content));
+    } else if (roleRef.current === 'ASSISTANT' && pendingAssistantRef.current) {
+      const content = pendingAssistantRef.current;
+      pendingAssistantRef.current = '';
+      setLiveAssistantText('');
+      setMessages((prev) => appendMessage(prev, 'assistant', content));
+    }
+  }, []);
 
-  useEffect(() => {
-    socketRef.current = appSocket;
-  }, [appSocket]);
+  /** Cuts assistant audio immediately, keeping the mic open. */
+  const bargeIn = useCallback(() => {
+    playbackRef.current?.flush();
+    if (speakingRef.current) {
+      speakingRef.current = false;
+      setDucked(false);
+    }
+    if (activeRef.current) setState('listening');
+  }, [setDucked]);
 
-  // --- Socket event handlers (matching official main.js) ---
+  const releaseAudio = useCallback(async () => {
+    activeRef.current = false;
+    const capture = captureRef.current;
+    const playback = playbackRef.current;
+    captureRef.current = null;
+    playbackRef.current = null;
+    await Promise.allSettled([capture?.close(), playback?.close()]);
+    if (speakingRef.current) {
+      speakingRef.current = false;
+      setDucked(false);
+    }
+  }, [setDucked]);
+
+  // --- Socket events ---
+  // Depends on `socket` directly: SocketProvider starts at null and connects
+  // asynchronously, so reading it from a ref meant that opening this page
+  // before the socket was ready left the listeners permanently unregistered.
   useEffect(() => {
-    const socket = socketRef.current;
     if (!socket) return;
 
     const onContentStart = (data: {
@@ -81,113 +131,111 @@ export function useAskAi() {
       additionalModelFields?: string;
     }) => {
       if (data.type === 'TEXT') {
-        roleRef.current = data.role || '';
-        if (data.role === 'ASSISTANT' && data.additionalModelFields) {
-          try {
-            const fields = JSON.parse(data.additionalModelFields);
-            displayAssistantTextRef.current =
-              fields.generationStage === 'SPECULATIVE';
-          } catch {
-            displayAssistantTextRef.current = false;
-          }
-        }
+        roleRef.current = (data.role as 'USER' | 'ASSISTANT') || '';
+        speculativeRef.current =
+          data.role === 'ASSISTANT'
+            ? isSpeculative(data.additionalModelFields)
+            : false;
       } else if (data.type === 'AUDIO' && data.role === 'ASSISTANT') {
         speakingRef.current = true;
         setState('speaking');
-        window.dispatchEvent(
-          new CustomEvent('ask-ai:duck', { detail: { duck: true } }),
-        );
+        setDucked(true);
       }
     };
 
     const onTextOutput = (data: { role?: string; content?: string }) => {
       if (!data.content) return;
+
+      // Nova Sonic reports mid-turn barge-in as a sentinel payload.
+      if (isInterruption({ content: data.content })) {
+        bargeIn();
+        return;
+      }
+
       if (roleRef.current === 'USER') {
-        setUserTranscript(data.content);
-      } else if (
-        roleRef.current === 'ASSISTANT' &&
-        displayAssistantTextRef.current
-      ) {
-        setTranscript(data.content);
+        pendingUserRef.current = data.content;
+        setLiveUserText(data.content);
+      } else if (roleRef.current === 'ASSISTANT') {
+        pendingAssistantRef.current = data.content;
+        // Only the SPECULATIVE draft streams into the live caption; the FINAL
+        // copy is what gets committed to history on contentEnd.
+        if (speculativeRef.current) setLiveAssistantText(data.content);
       }
     };
 
     const onAudioOutput = (data: { content?: string }) => {
-      if (!data.content || !playCtxRef.current) return;
-      const samples = base64ToFloat32(data.content);
-      playQueueRef.current.push(samples);
-
-      // Schedule playback
-      const ctx = playCtxRef.current;
-      if (nextPlayTimeRef.current < ctx.currentTime) {
-        nextPlayTimeRef.current = ctx.currentTime + 0.05;
-      }
-      while (playQueueRef.current.length > 0) {
-        const chunk = playQueueRef.current.shift();
-        if (!chunk) break;
-        const buf = ctx.createBuffer(1, chunk.length, 24000);
-        buf.getChannelData(0).set(chunk);
-        const src = ctx.createBufferSource();
-        src.buffer = buf;
-        src.connect(ctx.destination);
-        src.start(nextPlayTimeRef.current);
-        nextPlayTimeRef.current += buf.duration;
-      }
+      if (data.content) playbackRef.current?.enqueue(data.content);
     };
 
-    const onContentEnd = () => {
+    const onContentEnd = (data: { stopReason?: string; type?: string }) => {
+      if (isInterruption({ stopReason: data?.stopReason })) {
+        finalizeTurn();
+        bargeIn();
+        return;
+      }
+
+      finalizeTurn();
+
       if (speakingRef.current) {
         speakingRef.current = false;
-        window.dispatchEvent(
-          new CustomEvent('ask-ai:duck', { detail: { duck: false } }),
-        );
-        if (activeRef.current) {
-          setState('listening');
-        }
+        setDucked(false);
+        if (activeRef.current) setState('listening');
       }
     };
 
     const onError = (data: unknown) => {
-      const msg = typeof data === 'string' ? data : JSON.stringify(data);
-      setError(msg);
-      reportError(`[AskAI] ${msg}`);
+      const detail = typeof data === 'string' ? data : JSON.stringify(data);
+      setError({ code: 'serverError', detail });
+      reportError(`[AskAI] ${detail}`);
     };
 
-    const onStreamComplete = () => {
+    const endLocally = () => {
+      finalizeTurn();
       activeRef.current = false;
       setState('idle');
     };
 
-    const onSessionClosed = () => {
-      activeRef.current = false;
-      setState('idle');
-    };
-
-    const onNavigate = (url: string) => {
-      activeRef.current = false;
-      playQueueRef.current = [];
-      nextPlayTimeRef.current = 0;
-      processorRef.current?.disconnect();
-      sourceRef.current?.disconnect();
-      audioCtxRef.current?.close();
-      playCtxRef.current?.close();
-      streamRef.current?.getTracks().forEach((t) => {
-        t.stop();
+    /** Tool-driven navigation: close the session, then route. */
+    const leaveTo = (url: string) => {
+      finalizeTurn();
+      void releaseAudio().finally(() => {
+        socket.emit('ask-ai:stop');
+        setState('idle');
+        router.push(url);
       });
-      socket.emit('ask-ai:stop');
-      router.push(url);
+    };
+
+    const onNavigate = (url: string) => leaveTo(url);
+
+    const onOpenManga = (data: {
+      titleId?: number;
+      chapterId?: number;
+      url?: string;
+    }) => {
+      const url =
+        data.url ||
+        (data.chapterId
+          ? `/manga/chapter/${data.chapterId}`
+          : `/manga/title/${data.titleId}`);
+      leaveTo(url);
+    };
+
+    const onEndSession = () => {
+      finalizeTurn();
+      void releaseAudio().finally(() => {
+        socket.emit('ask-ai:stop');
+        setState('idle');
+      });
     };
 
     const onPlayMusic = (data: { track?: unknown; songId?: string }) => {
       if (data.track) {
-        // Full track data from backend — play directly, no API call needed
         window.dispatchEvent(
           new CustomEvent('ask-ai:play-music', {
             detail: { track: data.track },
           }),
         );
       } else if (data.songId) {
-        // Fallback: fetch song data
         window.dispatchEvent(
           new CustomEvent('ask-ai:play-music', {
             detail: { songId: data.songId },
@@ -202,50 +250,10 @@ export function useAskAi() {
       );
     };
 
-    const onEndSession = () => {
-      activeRef.current = false;
-      playQueueRef.current = [];
-      nextPlayTimeRef.current = 0;
-      processorRef.current?.disconnect();
-      sourceRef.current?.disconnect();
-      audioCtxRef.current?.close();
-      playCtxRef.current?.close();
-      streamRef.current?.getTracks().forEach((t) => {
-        t.stop();
-      });
-      socket.emit('ask-ai:stop');
-      setState('idle');
-    };
-
     const onMusicControl = (data: { action: string }) => {
       window.dispatchEvent(
         new CustomEvent('ask-ai:music-control', { detail: data }),
       );
-    };
-
-    const onOpenManga = (data: {
-      titleId?: number;
-      chapterId?: number;
-      url?: string;
-    }) => {
-      const url =
-        data.url ||
-        (data.chapterId
-          ? `/manga/chapter/${data.chapterId}`
-          : `/manga/title/${data.titleId}`);
-      // Stop session and navigate
-      activeRef.current = false;
-      playQueueRef.current = [];
-      nextPlayTimeRef.current = 0;
-      processorRef.current?.disconnect();
-      sourceRef.current?.disconnect();
-      audioCtxRef.current?.close();
-      playCtxRef.current?.close();
-      streamRef.current?.getTracks().forEach((t) => {
-        t.stop();
-      });
-      socket.emit('ask-ai:stop');
-      router.push(url);
     };
 
     socket.on('ask-ai:contentStart', onContentStart);
@@ -253,8 +261,8 @@ export function useAskAi() {
     socket.on('ask-ai:audioOutput', onAudioOutput);
     socket.on('ask-ai:contentEnd', onContentEnd);
     socket.on('ask-ai:error', onError);
-    socket.on('ask-ai:streamComplete', onStreamComplete);
-    socket.on('ask-ai:sessionClosed', onSessionClosed);
+    socket.on('ask-ai:streamComplete', endLocally);
+    socket.on('ask-ai:sessionClosed', endLocally);
     socket.on('ask-ai:navigate', onNavigate);
     socket.on('ask-ai:playMusic', onPlayMusic);
     socket.on('ask-ai:playPlaylist', onPlayPlaylist);
@@ -268,8 +276,8 @@ export function useAskAi() {
       socket.off('ask-ai:audioOutput', onAudioOutput);
       socket.off('ask-ai:contentEnd', onContentEnd);
       socket.off('ask-ai:error', onError);
-      socket.off('ask-ai:streamComplete', onStreamComplete);
-      socket.off('ask-ai:sessionClosed', onSessionClosed);
+      socket.off('ask-ai:streamComplete', endLocally);
+      socket.off('ask-ai:sessionClosed', endLocally);
       socket.off('ask-ai:navigate', onNavigate);
       socket.off('ask-ai:playMusic', onPlayMusic);
       socket.off('ask-ai:playPlaylist', onPlayPlaylist);
@@ -277,57 +285,41 @@ export function useAskAi() {
       socket.off('ask-ai:musicControl', onMusicControl);
       socket.off('ask-ai:openManga', onOpenManga);
     };
-  }, [base64ToFloat32, router]);
+  }, [socket, router, bargeIn, finalizeTurn, releaseAudio, setDucked]);
 
-  // --- Start (matching official startStreaming + initializeSession) ---
   const start = useCallback(async () => {
-    const socket = socketRef.current;
-    if (!socket?.connected || activeRef.current) return;
+    if (activeRef.current) return;
+    if (!socket?.connected) {
+      setError({ code: 'notConnected' });
+      return;
+    }
+
     setError(null);
-    setTranscript('');
-    setUserTranscript('');
+    setLiveUserText('');
+    setLiveAssistantText('');
+    pendingUserRef.current = '';
+    pendingAssistantRef.current = '';
 
     try {
-      // 1. Check mic permission first (required for iOS Capacitor WebView)
+      // Surface a denied permission before prompting, which iOS Capacitor
+      // WebViews otherwise fail on silently.
       if (navigator.permissions?.query) {
         try {
           const perm = await navigator.permissions.query({
             name: 'microphone' as PermissionName,
           });
           if (perm.state === 'denied') {
-            setError('Microphone access denied. Please enable it in Settings.');
+            setError({ code: 'micDenied' });
             setState('idle');
             return;
           }
         } catch {
-          // permissions.query not supported for microphone in some browsers — continue
+          // Not queryable for microphone in some browsers — continue.
         }
       }
 
-      // 2. Get mic
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      streamRef.current = stream;
+      playbackRef.current = await startAudioPlayback();
 
-      // 2. Set up audio capture context — capture at 16kHz directly (matching official sample)
-      //    Firefox doesn't allow AudioContext sampleRate different from device, so use native + downsample
-      const audioCtx = isFirefox
-        ? new AudioContext()
-        : new AudioContext({ sampleRate: TARGET_SAMPLE_RATE });
-      audioCtxRef.current = audioCtx;
-      const samplingRatio = audioCtx.sampleRate / TARGET_SAMPLE_RATE;
-
-      // 3. Set up playback context
-      const playCtx = new AudioContext({ sampleRate: 24000 });
-      playCtxRef.current = playCtx;
-
-      // 4. Initialize session on server (matching official: init → promptStart → systemPrompt → audioStart)
       await new Promise<void>((resolve, reject) => {
         socket.emit(
           'ask-ai:init',
@@ -342,116 +334,56 @@ export function useAskAi() {
       socket.emit('ask-ai:systemPrompt');
       socket.emit('ask-ai:audioStart');
 
-      // 5. Start streaming immediately — no audioReady wait (matching official sample)
       activeRef.current = true;
       setState('listening');
       trackEvent('ask_ai_start');
 
-      // 6. Start streaming mic audio (matching official: ScriptProcessor → base64 → socket)
-      const source = audioCtx.createMediaStreamSource(stream);
-      sourceRef.current = source;
-      const processor = audioCtx.createScriptProcessor(512, 1, 1);
-      processorRef.current = processor;
-
-      processor.onaudioprocess = (e) => {
-        if (!activeRef.current) return;
-        const input = e.inputBuffer.getChannelData(0);
-
-        // On Chrome: already at 16kHz, no downsample needed. On Firefox: downsample.
-        const numSamples = Math.round(input.length / samplingRatio);
-        const pcm = new Int16Array(numSamples);
-        if (isFirefox) {
-          for (let i = 0; i < numSamples; i++) {
-            pcm[i] =
-              Math.max(-1, Math.min(1, input[Math.round(i * samplingRatio)])) *
-              0x7fff;
-          }
-        } else {
-          for (let i = 0; i < input.length; i++) {
-            pcm[i] = Math.max(-1, Math.min(1, input[i])) * 0x7fff;
-          }
-        }
-
-        // Convert to base64
-        const bytes = new Uint8Array(pcm.buffer);
-        let binary = '';
-        for (let i = 0; i < bytes.length; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        socket.emit('ask-ai:audioInput', btoa(binary));
-      };
-
-      source.connect(processor);
-      processor.connect(audioCtx.destination);
+      // The mic stays open while the assistant speaks — that is what lets the
+      // service detect an interruption. Echo cancellation keeps it from
+      // hearing itself through the speakers.
+      captureRef.current = await startAudioCapture((base64) => {
+        if (activeRef.current) socket.emit('ask-ai:audioInput', base64);
+      });
     } catch (err) {
-      let msg: string;
-      if (err instanceof DOMException && err.name === 'NotAllowedError') {
-        msg =
-          'Microphone access denied. Please allow microphone in your device Settings.';
-      } else if (
-        err instanceof TypeError ||
-        (err instanceof Error && err.message.includes('undefined'))
-      ) {
-        msg =
-          'Microphone is not available on this device. Try using the app from a browser or check your permissions in Settings.';
-      } else {
-        msg = err instanceof Error ? err.message : 'Failed to start';
-      }
-      setError(msg);
-      reportError(`[AskAI] Start failed: ${msg}`);
+      const mapped = toStartError(err);
+      setError(mapped);
+      reportError(`[AskAI] Start failed: ${mapped.detail ?? mapped.code}`);
+      await releaseAudio();
       setState('idle');
-      activeRef.current = false;
     }
-  }, []);
+  }, [socket, releaseAudio]);
 
-  // --- Stop (matching official stopStreaming) ---
-  const stop = useCallback(() => {
-    activeRef.current = false;
-
-    // Release audio ducking if AI was speaking
-    if (speakingRef.current) {
-      speakingRef.current = false;
-      window.dispatchEvent(
-        new CustomEvent('ask-ai:duck', { detail: { duck: false } }),
-      );
-    }
-
-    // Barge-in: clear playback buffer
-    playQueueRef.current = [];
-    nextPlayTimeRef.current = 0;
-
-    // Disconnect mic
-    processorRef.current?.disconnect();
-    sourceRef.current?.disconnect();
-    processorRef.current = null;
-    sourceRef.current = null;
-
-    // Close audio contexts
-    audioCtxRef.current?.close();
-    audioCtxRef.current = null;
-    playCtxRef.current?.close();
-    playCtxRef.current = null;
-
-    // Stop mic tracks
-    streamRef.current?.getTracks().forEach((t) => {
-      t.stop();
-    });
-    streamRef.current = null;
-
-    // Tell server to stop
-    socketRef.current?.emit('ask-ai:stop');
+  const stop = useCallback(async () => {
+    finalizeTurn();
+    await releaseAudio();
+    socket?.emit('ask-ai:stop');
     trackEvent('ask_ai_end');
     setState('idle');
+  }, [socket, finalizeTurn, releaseAudio]);
+
+  const clearHistory = useCallback(() => {
+    setMessages([]);
+    setLiveUserText('');
+    setLiveAssistantText('');
+    pendingUserRef.current = '';
+    pendingAssistantRef.current = '';
   }, []);
 
-  // Cleanup on unmount
+  // Release the mic if the page unmounts mid-session.
   useEffect(() => {
     return () => {
-      if (activeRef.current) {
-        stop();
-      }
+      if (activeRef.current) void releaseAudio();
     };
-  }, [stop]);
+  }, [releaseAudio]);
 
-  return { state, transcript, userTranscript, error, start, stop };
+  return {
+    state,
+    messages,
+    liveUserText,
+    liveAssistantText,
+    error,
+    start,
+    stop,
+    clearHistory,
+  };
 }

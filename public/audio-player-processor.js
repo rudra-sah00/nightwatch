@@ -2,9 +2,17 @@
  * AudioWorklet Processor for Nova Sonic playback
  * Ported from official AWS sample: AudioPlayerProcessor.worklet.js
  *
- * Uses an expandable ring buffer with initial buffering (1 second)
- * to ensure smooth, gap-free audio playback.
+ * Uses an expandable ring buffer so playback stays gap-free even when socket
+ * chunks arrive unevenly.
+ *
+ * The AWS sample pre-buffers a full second before starting. That is safe but
+ * adds a second of dead air before the assistant's first word, which is a lot
+ * for a voice assistant, so the default here is lower and tunable at runtime
+ * via a `config` message.
  */
+
+/** 24 kHz output — 0.2 s of pre-buffering. */
+const DEFAULT_INITIAL_BUFFER_LENGTH = 4800;
 
 class ExpandableBuffer {
   constructor() {
@@ -12,7 +20,7 @@ class ExpandableBuffer {
     this.readIndex = 0;
     this.writeIndex = 0;
     this.isInitialBuffering = true;
-    this.initialBufferLength = 24000; // Buffer 1 second before playing
+    this.initialBufferLength = DEFAULT_INITIAL_BUFFER_LENGTH;
   }
 
   write(samples) {
@@ -72,6 +80,11 @@ class AudioPlayerProcessor extends AudioWorkletProcessor {
         this.playbackBuffer.write(event.data.audioData);
       } else if (event.data.type === 'barge-in') {
         this.playbackBuffer.clear();
+      } else if (event.data.type === 'config') {
+        const len = Number(event.data.initialBufferLength);
+        if (Number.isFinite(len) && len >= 0) {
+          this.playbackBuffer.initialBufferLength = len;
+        }
       }
     };
   }

@@ -2,23 +2,53 @@
 
 import { useFocusable } from '@noriginmedia/norigin-spatial-navigation';
 import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 import { useAskAi } from '@/features/ask-ai/hooks/use-ask-ai';
 import { useTvFocus } from '../hooks/use-tv-focus';
 
 /**
  * TV Ask AI - large orb button, voice transcripts.
  * Press Enter to start/stop. AI responds via speaker.
+ *
+ * Shows only the latest exchange rather than the full scrollback the web view
+ * renders: there is no comfortable way to scroll a transcript with a D-pad, and
+ * this is read from across a room.
  */
 export function TvAskAi() {
   const t = useTranslations('common.tv.askAi');
-  const { state, transcript, userTranscript, error, start, stop } = useAskAi();
+  const tAsk = useTranslations('common.askAi');
+  const {
+    state,
+    messages,
+    liveUserText,
+    liveAssistantText,
+    error,
+    start,
+    stop,
+  } = useAskAi();
   const isActive = state !== 'idle';
+
+  // Prefer the in-progress caption, otherwise the most recent finalised turn.
+  const userTranscript = useMemo(
+    () =>
+      liveUserText ||
+      [...messages].reverse().find((m) => m.role === 'user')?.content ||
+      '',
+    [liveUserText, messages],
+  );
+  const transcript = useMemo(
+    () =>
+      liveAssistantText ||
+      [...messages].reverse().find((m) => m.role === 'assistant')?.content ||
+      '',
+    [liveAssistantText, messages],
+  );
 
   useTvFocus('tv-ask-ai', 'TV_ASK_AI_ORB');
 
   const { ref, focused } = useFocusable({
     focusKey: 'TV_ASK_AI_ORB',
-    onEnterPress: () => (isActive ? stop() : start()),
+    onEnterPress: () => (isActive ? void stop() : void start()),
   });
 
   return (
@@ -53,14 +83,23 @@ export function TvAskAi() {
       </div>
 
       {/* Status */}
-      <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-sm font-bold uppercase tracking-widest text-muted-foreground"
+      >
         {state === 'idle' && t('pressEnter')}
         {state === 'listening' && t('listening')}
         {state === 'speaking' && t('speaking')}
       </p>
 
       {/* Transcripts */}
-      <div className="w-full max-w-lg space-y-4 min-h-[80px]">
+      <div
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        className="w-full max-w-lg space-y-4 min-h-[80px]"
+      >
         {userTranscript && (
           <div className="text-right">
             <span className="text-xs text-muted-foreground uppercase tracking-wider">
@@ -81,7 +120,11 @@ export function TvAskAi() {
         )}
       </div>
 
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && (
+        <p role="alert" className="text-red-400 text-xs">
+          {tAsk(`errors.${error.code}`)}
+        </p>
+      )}
     </div>
   );
 }
