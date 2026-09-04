@@ -268,7 +268,6 @@
   },
   "landing": {
     "brand": "Nightwatch",
-    "badge": "Invite Only Beta",
     "heroTitle1": "Watch Anything",
     "heroTitle2": "Together",
     "heroSubtitle": "Synchronized playback, real-time watch parties, live streaming, voice calls, and messaging — all in one place.",
@@ -292,7 +291,7 @@
       },
       "secure": {
         "title": "Private & Secure",
-        "desc": "Encrypted sessions with invite-only access."
+        "desc": "Encrypted sessions and private rooms you control."
       }
     },
     "bentoTitle": "Everything You Need",
@@ -321,7 +320,7 @@
     "downloadTitle": "Download the App",
     "downloadDesc": "Available on all major platforms. Get the native experience.",
     "ctaTitle": "Ready to Watch?",
-    "ctaDesc": "Nightwatch is currently invite-only. Log in with your account to get started.",
+    "ctaDesc": "Log in with your account to get started.",
     "footer": {
       "disclaimer": "Nightwatch does not host, store, upload, or distribute any media content. All content is sourced externally by users. The platform serves solely as a synchronization and communication layer. We are not responsible for any third-party content accessed through the platform.",
       "terms": "Terms",

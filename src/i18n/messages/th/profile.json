@@ -175,8 +175,7 @@
     "preferences": "Preferences",
     "security": "Security",
     "devices": "Devices",
-    "activity": "Activity",
-    "posts": "My Posts"
+    "activity": "Activity"
   },
   "devices": {
     "title": "Active Devices",

@@ -58,8 +58,8 @@ export default function TermsPage() {
             <p>
               By accessing or using Nightwatch, you agree to be bound by these
               Terms of Service. If you do not agree to these terms, do not use
-              the platform. Nightwatch is a private, invite-only platform and
-              access may be revoked at any time without notice.
+              the platform. Access may be suspended or revoked at any time
+              without notice.
             </p>
           </section>
 

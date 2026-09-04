@@ -164,15 +164,11 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative z-10 flex flex-col items-center justify-center min-h-[100dvh] px-6 text-center">
-        <div className="mb-8">
+        <div className="mb-12">
           <span className="font-headline font-black italic text-3xl md:text-4xl uppercase tracking-tighter">
             {t('brand')}
           </span>
         </div>
-
-        <span className="inline-block bg-neo-yellow text-foreground font-headline font-black text-[9px] md:text-[10px] uppercase tracking-[0.35em] px-4 py-1 border-4 border-border mb-10">
-          {t('badge')}
-        </span>
 
         <h1 className="font-headline font-black text-[clamp(2.8rem,8vw,7rem)] uppercase tracking-tighter leading-[0.85] max-w-4xl">
           {t('heroTitle1')}
