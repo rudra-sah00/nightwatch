@@ -146,7 +146,7 @@ export function WatchPartySettings({
     <>
       <button
         type="button"
-        className="p-1.5 text-white/80 hover:text-white transition-colors"
+        className="p-1.5 text-foreground/80 hover:text-foreground transition-colors"
         title={t('settings.roomAccessPermissions')}
         onClick={() => setIsOpen(true)}
       >
@@ -155,7 +155,7 @@ export function WatchPartySettings({
 
       {isOpen ? (
         <div
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/40"
+          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/70"
           onClick={() => setIsOpen(false)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setIsOpen(false);

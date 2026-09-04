@@ -200,7 +200,9 @@ export function WatchPartySketch() {
                   onClick={() => handleToolClick(tool.id)}
                   className={cn(
                     'flex items-center justify-center p-2',
-                    isActive ? 'text-white' : 'text-white/40 hover:text-white',
+                    isActive
+                      ? 'text-foreground'
+                      : 'text-foreground/40 hover:text-foreground',
                   )}
                 >
                   <Icon className="w-5 h-5 stroke-[3px]" />
@@ -243,7 +245,7 @@ export function WatchPartySketch() {
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 px-4 py-2 font-bold text-xs transition-colors rounded-lg',
                   isFilled
-                    ? 'bg-white/20 text-foreground dark:text-white'
+                    ? 'bg-foreground/15 text-foreground dark:bg-white/20 dark:text-white'
                     : 'text-foreground/60 hover:bg-foreground/10 dark:text-white/60 dark:hover:bg-white/10',
                 )}
               >

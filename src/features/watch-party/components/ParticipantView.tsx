@@ -60,7 +60,7 @@ export function ParticipantView({
       {isCurrentUser ? (
         <div
           className={cn(
-            'absolute top-2 left-2 z-20 px-2 py-0.5 text-[9px] font-bold text-yellow-300 drop-shadow-md',
+            'absolute top-2 left-2 z-20 px-2 py-0.5 rounded bg-black/55 backdrop-blur-sm text-[9px] font-bold text-yellow-300 drop-shadow-md',
             participant.isSpeaking && 'left-7', // Shift if speaking to not overlap
           )}
         >
@@ -173,8 +173,8 @@ function ParticipantOverlay({
       <div className="absolute bottom-2 left-2 flex items-center gap-1.5 pointer-events-none">
         {/* Name Tag */}
         {!isCurrentUser && (
-          <div className="px-1.5">
-            <span className="text-[9px] font-bold tracking-wide text-white/90 truncate max-w-[100px] drop-shadow-md">
+          <div className="px-1.5 py-0.5 rounded bg-black/55 backdrop-blur-sm">
+            <span className="text-[9px] font-bold tracking-wide text-white truncate max-w-[100px] drop-shadow-md">
               {name}
             </span>
           </div>
@@ -182,7 +182,7 @@ function ParticipantOverlay({
       </div>
 
       {/* Mic Status */}
-      <div className="absolute bottom-2 right-2 p-0.5 pointer-events-none">
+      <div className="absolute bottom-2 right-2 p-1 rounded bg-black/55 backdrop-blur-sm pointer-events-none">
         {isMicEnabled ? (
           <Mic className="w-2.5 h-2.5 text-green-400 stroke-[3px] drop-shadow-md" />
         ) : (
