@@ -111,5 +111,9 @@
     "play": "Play",
     "addToPlaylist": "Add to playlist",
     "like": "Like"
+  },
+  "disc": {
+    "nowPlaying": "Now playing: {title}. Tap to open, hold to close.",
+    "holdToClose": "Hold to close the player"
   }
 }
