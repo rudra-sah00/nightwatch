@@ -153,7 +153,7 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
   return (
     <div
       className={cn(
-        'w-full bg-background overflow-hidden flex flex-col h-full relative border-l-[4px] border-border theme-wp-sidebar',
+        'w-full bg-background overflow-hidden flex flex-col h-full relative border-l-[4px] border-border',
         className,
       )}
     >

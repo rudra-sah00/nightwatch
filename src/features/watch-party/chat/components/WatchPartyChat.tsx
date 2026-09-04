@@ -207,7 +207,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
         {typingUsers.length > 0 ? (
           <div className="flex items-center gap-2 px-2 py-1 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-200 motion-reduce:animate-none">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,var(--neo-yellow))] flex items-center justify-center">
+              <div className="w-6 h-6 border-[2px] border-border bg-neo-yellow flex items-center justify-center">
                 <span className="text-[10px] font-black font-headline uppercase text-foreground">
                   {typingUsers[0].userName.charAt(0)}
                 </span>
@@ -272,7 +272,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             className={cn(
               'p-2.5 rounded-md transition-colors',
               showEmoji
-                ? 'bg-primary text-[var(--wp-accent,var(--neo-yellow))]'
+                ? 'bg-primary text-neo-yellow'
                 : 'bg-background text-foreground hover:bg-neo-yellow/80',
             )}
             aria-label={t('addEmoji')}
@@ -290,7 +290,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             maxLength={200}
             aria-label={t('placeholder')}
             data-allow-clipboard
-            className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-background text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-[var(--wp-send-btn,var(--neo-blue))] transition-colors"
+            className="flex-1 text-foreground placeholder:text-foreground/50 px-4 py-2.5 rounded-md bg-background text-sm font-bold font-headline tracking-wide focus:outline-none focus:border-neo-blue transition-colors"
           />
           <Button
             type="submit"
@@ -299,7 +299,7 @@ export const WatchPartyChat = memo(function WatchPartyChat({
             className={cn(
               'p-2.5 rounded-md transition-colors',
               input.trim()
-                ? 'bg-[var(--wp-send-btn,var(--neo-blue))] text-primary-foreground '
+                ? 'bg-neo-blue text-primary-foreground '
                 : 'bg-background text-foreground/30 cursor-not-allowed',
             )}
           >
@@ -361,7 +361,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
       {/* Avatar/Name Header */}
       {!isMe && showHeader ? (
         <div className="flex items-center gap-2 mb-1 pl-1">
-          <div className="w-6 h-6 border-[2px] border-border bg-[var(--wp-send-btn,var(--neo-yellow))] flex items-center justify-center">
+          <div className="w-6 h-6 border-[2px] border-border bg-neo-yellow flex items-center justify-center">
             <span className="text-[10px] font-black font-headline uppercase text-foreground">
               {message.userName.charAt(0)}
             </span>
@@ -388,8 +388,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
           isMe
             ? cn(
                 'mr-1',
-                !isSingleEmoji &&
-                  'bg-[var(--wp-send-btn,var(--neo-blue))] text-primary-foreground ',
+                !isSingleEmoji && 'bg-neo-blue text-primary-foreground ',
               )
             : cn('ml-1', !isSingleEmoji && 'bg-background text-foreground '),
         )}
@@ -405,9 +404,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
                 rel="noopener noreferrer"
                 className={cn(
                   'inline-flex items-center gap-1 underline font-bold hover:bg-primary hover:text-primary-foreground px-1 transition-colors',
-                  isMe
-                    ? 'text-primary-foreground'
-                    : 'text-[var(--wp-send-btn,var(--neo-blue))]',
+                  isMe ? 'text-primary-foreground' : 'text-neo-blue',
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
