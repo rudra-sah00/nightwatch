@@ -48,3 +48,22 @@ overrides:
   '@babel/core@<7.29.6': '>=7.29.6'
   # next-intl
   icu-minify@<=4.9.1: '>=4.9.2'
+  # Smart TV spatial navigation — correctness pin, not a security advisory.
+  #
+  # @noriginmedia/norigin-spatial-navigation@3.2.0 is a meta package that only
+  # does `export * from '<core>'` + `export * from '<react>'`. It asks for
+  # core@^3.2.0 but react@^3.2.0, and that react range floats up to 3.3.0,
+  # which itself depends on core@^4.1.0. The result is two copies of core, so
+  # `init()` configures the SpatialNavigation singleton in core@3.2.0 while
+  # `useFocusable()` registers focusables against the never-initialised
+  # singleton in core@4.1.0 — which throws
+  # "Cannot read properties of undefined (reading 'measureLayout')" on every
+  # focusable mount in TV mode.
+  #
+  # Pinning react to 3.2.0 (the last release that depends on core@^3.2.0) puts
+  # both halves back on a single core instance. Do not widen this to ^3.2.0:
+  # 3.2.1 already moved to core@^4.0.0. The alternative is upgrading the meta
+  # package to 3.3.0, which is internally consistent on core@4.1.x, but core 4
+  # replaced the `useGetBoundingClientRect` init option with an adapter API and
+  # would need initSpatialNavigation() rewritten.
+  '@noriginmedia/norigin-spatial-navigation-react': '3.2.0'

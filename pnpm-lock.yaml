@@ -17,6 +17,7 @@ overrides:
   sharp@<0.35.0: '>=0.35.0'
   '@babel/core@<7.29.6': '>=7.29.6'
   icu-minify@<=4.9.1: '>=4.9.2'
+  '@noriginmedia/norigin-spatial-navigation-react': 3.2.0
 
 patchedDependencies:
   '@ottimis/capacitor-volumes':
@@ -1715,11 +1716,8 @@ packages:
   '@noriginmedia/norigin-spatial-navigation-core@3.2.0':
     resolution: {integrity: sha512-5CfrnKXSc0zuHeocIANVNZzcOTriTdlMYWU4VrJqEgF7Vd0H1IFXA0gonGMfrXtATUIn9Cx/S4DmrtEQ6kqT9g==}
 
-  '@noriginmedia/norigin-spatial-navigation-core@4.1.0':
-    resolution: {integrity: sha512-Z7Q1qWPNcx1KqabdEF5FiDOr2INCqrytsUbBOmLbQX6fOkC3VJmwwzzg2Pufr6lxwqAGgiuYFKA9cVdIUjTKWA==}
-
-  '@noriginmedia/norigin-spatial-navigation-react@3.3.0':
-    resolution: {integrity: sha512-YmiXFkczmfRTz6vmVmQoNhryi0j/09Ez77RPdCM2/VmXo7XcTVIYhrrQIqXkslLe2BzM2/k6ITqwTGhl2B/GTg==}
+  '@noriginmedia/norigin-spatial-navigation-react@3.2.0':
+    resolution: {integrity: sha512-EZovjCeIjCPlt5G9PctCm6wTiMNiDuQ44WlFmGtKpTxX064mE0+ULTf4rRbwgR/uENmwnj6Muii6Gf95O1F22g==}
     peerDependencies:
       react: '>=16.8.0'
 
@@ -8331,20 +8329,16 @@ snapshots:
     dependencies:
       lodash-es: 4.18.1
 
-  '@noriginmedia/norigin-spatial-navigation-core@4.1.0':
+  '@noriginmedia/norigin-spatial-navigation-react@3.2.0(react@19.2.7)':
     dependencies:
-      lodash-es: 4.18.1
-
-  '@noriginmedia/norigin-spatial-navigation-react@3.3.0(react@19.2.7)':
-    dependencies:
-      '@noriginmedia/norigin-spatial-navigation-core': 4.1.0
+      '@noriginmedia/norigin-spatial-navigation-core': 3.2.0
       lodash-es: 4.18.1
       react: 19.2.7
 
   '@noriginmedia/norigin-spatial-navigation@3.2.0(react@19.2.7)':
     dependencies:
       '@noriginmedia/norigin-spatial-navigation-core': 3.2.0
-      '@noriginmedia/norigin-spatial-navigation-react': 3.3.0(react@19.2.7)
+      '@noriginmedia/norigin-spatial-navigation-react': 3.2.0(react@19.2.7)
     transitivePeerDependencies:
       - react
 
