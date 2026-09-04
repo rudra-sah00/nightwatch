@@ -17,8 +17,6 @@ import { AskAiView } from '@/features/ask-ai/components/AskAiView';
 interface Overrides {
   state?: 'idle' | 'listening' | 'speaking';
   messages?: AskAiMessage[];
-  liveUserText?: string;
-  liveAssistantText?: string;
   error?: AskAiError | null;
 }
 
@@ -26,8 +24,6 @@ function setup(overrides: Overrides = {}) {
   mockUseAskAi.mockReturnValue({
     state: 'idle',
     messages: [],
-    liveUserText: '',
-    liveAssistantText: '',
     error: null,
     start: vi.fn(),
     stop: vi.fn(),
@@ -76,9 +72,19 @@ describe('AskAiView — conversation history', () => {
   it('renders every turn, not just the latest', () => {
     setup({
       messages: [
-        { id: '1', role: 'user', content: 'play something upbeat' },
-        { id: '2', role: 'assistant', content: 'Playing it now.' },
-        { id: '3', role: 'user', content: 'next' },
+        {
+          id: 'user-1',
+          turnKey: 'user-1',
+          role: 'user',
+          content: 'play something upbeat',
+        },
+        {
+          id: 'assistant-2',
+          turnKey: 'assistant-2',
+          role: 'assistant',
+          content: 'Playing it now.',
+        },
+        { id: 'user-3', turnKey: 'user-3', role: 'user', content: 'next' },
       ],
     });
 
@@ -92,10 +98,22 @@ describe('AskAiView — conversation history', () => {
     expect(screen.getByText('askAi.emptyConversation')).toBeInTheDocument();
   });
 
-  it('renders in-progress captions alongside history', () => {
+  it('renders every turn including the one still streaming', () => {
     setup({
-      messages: [{ id: '1', role: 'user', content: 'earlier turn' }],
-      liveAssistantText: 'still speak',
+      messages: [
+        {
+          id: 'user-1',
+          turnKey: 'user-1',
+          role: 'user',
+          content: 'earlier turn',
+        },
+        {
+          id: 'assistant-2',
+          turnKey: 'assistant-2',
+          role: 'assistant',
+          content: 'still speak',
+        },
+      ],
     });
     expect(screen.getByText('earlier turn')).toBeInTheDocument();
     expect(screen.getByText('still speak')).toBeInTheDocument();
@@ -108,7 +126,11 @@ describe('AskAiView — conversation history', () => {
     setup();
     expect(screen.queryByText('askAi.clearHistory')).not.toBeInTheDocument();
 
-    setup({ messages: [{ id: '1', role: 'user', content: 'hi' }] });
+    setup({
+      messages: [
+        { id: 'user-1', turnKey: 'user-1', role: 'user', content: 'hi' },
+      ],
+    });
     expect(screen.getByText('askAi.clearHistory')).toBeInTheDocument();
   });
 });

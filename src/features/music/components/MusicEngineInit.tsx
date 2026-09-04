@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { createAskAiSuspension } from '@/features/music/lib/ask-ai-suspension';
 import { useSocket } from '@/providers/socket-provider';
 import type { MusicTrack } from '../api';
 import { getSong } from '../api';
@@ -71,8 +72,16 @@ export function MusicEngineInit() {
   // Ask AI music events
   const duckVolRef = useRef(-1);
   useEffect(() => {
+    // Rules live in ./lib/ask-ai-suspension so they can be tested directly.
+    const suspension = createAskAiSuspension({
+      isPlaying: () => engineRef.current?.getState().isPlaying ?? false,
+      togglePlay: () => engineRef.current?.togglePlay(),
+    });
+
     const handleSong = (e: Event) => {
       const detail = (e as CustomEvent).detail;
+      // Ask AI chose new music, so there is nothing to restore afterwards.
+      suspension.forget();
       if (detail.track) {
         engineRef.current?.playTrack(detail.track, [detail.track]);
       } else if (detail.songId) {
@@ -85,8 +94,17 @@ export function MusicEngineInit() {
     };
     const handlePlaylist = (e: Event) => {
       const { tracks } = (e as CustomEvent).detail as { tracks: MusicTrack[] };
+      suspension.forget();
       if (tracks?.length) engineRef.current?.playTrack(tracks[0], tracks);
     };
+    /**
+     * Pauses playback for the duration of an Ask AI session.
+     *
+     * Ducking to 15% is not enough here: the mic stays open for barge-in, so
+     * audible music leaks back in and the service can mistake it for speech.
+     */
+    const handleSuspend = () => suspension.suspend();
+    const handleResume = () => suspension.resume();
     const handleControl = (e: Event) => {
       const { action } = (e as CustomEvent).detail as { action: string };
       const engine = engineRef.current;
@@ -124,11 +142,15 @@ export function MusicEngineInit() {
     window.addEventListener('ask-ai:play-music', handleSong);
     window.addEventListener('ask-ai:play-playlist', handlePlaylist);
     window.addEventListener('ask-ai:music-control', handleControl);
+    window.addEventListener('ask-ai:music-suspend', handleSuspend);
+    window.addEventListener('ask-ai:music-resume', handleResume);
     window.addEventListener('ask-ai:duck', handleDuck);
     return () => {
       window.removeEventListener('ask-ai:play-music', handleSong);
       window.removeEventListener('ask-ai:play-playlist', handlePlaylist);
       window.removeEventListener('ask-ai:music-control', handleControl);
+      window.removeEventListener('ask-ai:music-suspend', handleSuspend);
+      window.removeEventListener('ask-ai:music-resume', handleResume);
       window.removeEventListener('ask-ai:duck', handleDuck);
     };
   }, []);

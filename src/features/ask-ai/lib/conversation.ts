@@ -3,56 +3,66 @@ import type { AskAiMessage, AskAiRole } from '../types';
 /**
  * Conversation history accumulation.
  *
- * Nova Sonic streams assistant text twice per turn: a SPECULATIVE draft that
- * updates live, then a FINAL settled version. Only finalised turns belong in
- * history, while the draft drives the live caption.
+ * Nova Sonic streams text in pieces and sends assistant text twice per turn: a
+ * SPECULATIVE draft that updates as it generates, then a FINAL settled version.
+ * Appending each payload produced duplicate bubbles — exact repeats could be
+ * deduped, but a FINAL copy that differs from the draft by so much as a comma
+ * could not, so the same line showed twice.
  *
- * Kept pure so the append/dedupe rules can be tested without a socket.
+ * Instead each turn carries a key, and text for a key already at the tail of the
+ * history replaces it rather than appending. Streaming updates the last bubble
+ * in place, and the FINAL copy overwrites the draft.
+ *
+ * Kept pure so these rules can be tested without a socket.
  */
 
 /** Upper bound on retained turns, so a long session cannot grow without limit. */
 export const MAX_HISTORY = 100;
 
-let counter = 0;
-
-/** Monotonic id — history entries are append-only, so a counter is enough. */
-function nextId(): string {
-  counter += 1;
-  return `askai-${counter}`;
-}
-
-/** Resets the id counter. Test helper. */
-export function __resetIdCounter(): void {
-  counter = 0;
-}
-
 /**
- * Appends a finalised turn.
+ * Inserts or updates the text for a turn.
  *
- * Ignores blank content, and collapses a repeat of the previous turn from the
- * same role. Nova Sonic can emit the same finalised text more than once (for
- * example when a turn ends and the transcript is re-sent), and duplicated
- * bubbles are worse than a missed one.
+ * Appends when `turnKey` is new; replaces the tail when it matches, which is
+ * what makes streaming and the draft→final transition idempotent.
  */
-export function appendMessage(
+export function upsertTurn(
   history: readonly AskAiMessage[],
   role: AskAiRole,
   content: string,
+  turnKey: string,
 ): AskAiMessage[] {
   const trimmed = content.trim();
   if (!trimmed) return history as AskAiMessage[];
 
   const last = history.at(-1);
-  if (last && last.role === role && last.content === trimmed) {
-    return history as AskAiMessage[];
+  if (last && last.turnKey === turnKey && last.role === role) {
+    if (last.content === trimmed) return history as AskAiMessage[];
+    const next = history.slice(0, -1);
+    next.push({ ...last, content: trimmed });
+    return next;
   }
 
-  const next = [...history, { id: nextId(), role, content: trimmed }];
+  const next = [...history, { id: turnKey, turnKey, role, content: trimmed }];
   return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
 }
 
 /**
- * True when an assistant text event is the settled version of a turn.
+ * Builds a turn key, starting a new one whenever the speaker changes.
+ *
+ * Consecutive content blocks from the same role — the SPECULATIVE and FINAL
+ * halves of one reply — share a key and therefore one bubble.
+ */
+export function nextTurn(
+  previous: { role: AskAiRole | null; sequence: number },
+  role: AskAiRole,
+): { role: AskAiRole; sequence: number; key: string } {
+  const sequence =
+    previous.role === role ? previous.sequence : previous.sequence + 1;
+  return { role, sequence, key: `${role}-${sequence}` };
+}
+
+/**
+ * True when an assistant text event is a draft rather than the settled turn.
  *
  * `additionalModelFields` arrives as a JSON string on contentStart. Anything
  * other than an explicit SPECULATIVE stage is treated as final, so a missing or

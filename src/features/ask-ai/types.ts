@@ -4,9 +4,11 @@ export type AskAiState = 'idle' | 'listening' | 'speaking';
 
 export type AskAiRole = 'user' | 'assistant';
 
-/** A finalised turn in the conversation. */
+/** A turn in the conversation. Streaming text updates it in place. */
 export interface AskAiMessage {
   id: string;
+  /** Groups the content blocks that make up one turn. */
+  turnKey: string;
   role: AskAiRole;
   content: string;
 }

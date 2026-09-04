@@ -11,13 +11,15 @@ import {
   startAudioPlayback,
 } from '@/features/ask-ai/lib/audio-playback';
 import {
-  appendMessage,
   isInterruption,
   isSpeculative,
+  nextTurn,
+  upsertTurn,
 } from '@/features/ask-ai/lib/conversation';
 import type {
   AskAiError,
   AskAiMessage,
+  AskAiRole,
   AskAiState,
 } from '@/features/ask-ai/types';
 import { reportError, trackEvent } from '@/lib/analytics';
@@ -62,37 +64,38 @@ export function useAskAi() {
 
   const [state, setState] = useState<AskAiState>('idle');
   const [messages, setMessages] = useState<AskAiMessage[]>([]);
-  const [liveUserText, setLiveUserText] = useState('');
-  const [liveAssistantText, setLiveAssistantText] = useState('');
   const [error, setError] = useState<AskAiError | null>(null);
 
   const activeRef = useRef(false);
   const captureRef = useRef<AudioCapture | null>(null);
   const playbackRef = useRef<AudioPlayback | null>(null);
 
-  const roleRef = useRef<'USER' | 'ASSISTANT' | ''>('');
   const speculativeRef = useRef(false);
   const speakingRef = useRef(false);
-  const pendingUserRef = useRef('');
-  const pendingAssistantRef = useRef('');
+  // Turn bookkeeping: content blocks from the same speaker share a key, so the
+  // SPECULATIVE and FINAL halves of one reply land in a single bubble instead of
+  // two near-identical ones.
+  const turnRef = useRef<{ role: AskAiRole | null; sequence: number }>({
+    role: null,
+    sequence: 0,
+  });
+  const turnKeyRef = useRef('');
 
   const setDucked = useCallback((duck: boolean) => {
     window.dispatchEvent(new CustomEvent('ask-ai:duck', { detail: { duck } }));
   }, []);
 
-  /** Moves whichever turn just ended out of the live caption and into history. */
-  const finalizeTurn = useCallback(() => {
-    if (roleRef.current === 'USER' && pendingUserRef.current) {
-      const content = pendingUserRef.current;
-      pendingUserRef.current = '';
-      setLiveUserText('');
-      setMessages((prev) => appendMessage(prev, 'user', content));
-    } else if (roleRef.current === 'ASSISTANT' && pendingAssistantRef.current) {
-      const content = pendingAssistantRef.current;
-      pendingAssistantRef.current = '';
-      setLiveAssistantText('');
-      setMessages((prev) => appendMessage(prev, 'assistant', content));
-    }
+  /**
+   * Pauses or restores background music around a session.
+   *
+   * The mic stays open for barge-in, so music playing out of the same speakers
+   * leaks back in and the service can read it as speech. Ducking to 15% is not
+   * enough — playback is suspended outright for the duration.
+   */
+  const setMusicSuspended = useCallback((suspended: boolean) => {
+    window.dispatchEvent(
+      new Event(suspended ? 'ask-ai:music-suspend' : 'ask-ai:music-resume'),
+    );
   }, []);
 
   /** Cuts assistant audio immediately, keeping the mic open. */
@@ -116,7 +119,9 @@ export function useAskAi() {
       speakingRef.current = false;
       setDucked(false);
     }
-  }, [setDucked]);
+    // No-op if Ask AI started new music, which clears the suspend flag.
+    setMusicSuspended(false);
+  }, [setDucked, setMusicSuspended]);
 
   // --- Socket events ---
   // Depends on `socket` directly: SocketProvider starts at null and connects
@@ -131,7 +136,10 @@ export function useAskAi() {
       additionalModelFields?: string;
     }) => {
       if (data.type === 'TEXT') {
-        roleRef.current = (data.role as 'USER' | 'ASSISTANT') || '';
+        const role: AskAiRole = data.role === 'USER' ? 'user' : 'assistant';
+        const turn = nextTurn(turnRef.current, role);
+        turnRef.current = { role: turn.role, sequence: turn.sequence };
+        turnKeyRef.current = turn.key;
         speculativeRef.current =
           data.role === 'ASSISTANT'
             ? isSpeculative(data.additionalModelFields)
@@ -152,15 +160,10 @@ export function useAskAi() {
         return;
       }
 
-      if (roleRef.current === 'USER') {
-        pendingUserRef.current = data.content;
-        setLiveUserText(data.content);
-      } else if (roleRef.current === 'ASSISTANT') {
-        pendingAssistantRef.current = data.content;
-        // Only the SPECULATIVE draft streams into the live caption; the FINAL
-        // copy is what gets committed to history on contentEnd.
-        if (speculativeRef.current) setLiveAssistantText(data.content);
-      }
+      const role: AskAiRole = data.role === 'USER' ? 'user' : 'assistant';
+      const turnKey = turnKeyRef.current || `${role}-0`;
+      const content = data.content;
+      setMessages((prev) => upsertTurn(prev, role, content, turnKey));
     };
 
     const onAudioOutput = (data: { content?: string }) => {
@@ -169,12 +172,9 @@ export function useAskAi() {
 
     const onContentEnd = (data: { stopReason?: string; type?: string }) => {
       if (isInterruption({ stopReason: data?.stopReason })) {
-        finalizeTurn();
         bargeIn();
         return;
       }
-
-      finalizeTurn();
 
       if (speakingRef.current) {
         speakingRef.current = false;
@@ -190,22 +190,20 @@ export function useAskAi() {
     };
 
     const endLocally = () => {
-      finalizeTurn();
       activeRef.current = false;
       setState('idle');
     };
 
-    /** Tool-driven navigation: close the session, then route. */
-    const leaveTo = (url: string) => {
-      finalizeTurn();
+    /** Closes the session, optionally routing somewhere afterwards. */
+    const closeSession = (url?: string) => {
       void releaseAudio().finally(() => {
         socket.emit('ask-ai:stop');
         setState('idle');
-        router.push(url);
+        if (url) router.push(url);
       });
     };
 
-    const onNavigate = (url: string) => leaveTo(url);
+    const onNavigate = (url: string) => closeSession(url);
 
     const onOpenManga = (data: {
       titleId?: number;
@@ -217,17 +215,15 @@ export function useAskAi() {
         (data.chapterId
           ? `/manga/chapter/${data.chapterId}`
           : `/manga/title/${data.titleId}`);
-      leaveTo(url);
+      closeSession(url);
     };
 
-    const onEndSession = () => {
-      finalizeTurn();
-      void releaseAudio().finally(() => {
-        socket.emit('ask-ai:stop');
-        setState('idle');
-      });
-    };
+    const onEndSession = () => closeSession();
 
+    // Handing off to the music player ends the conversation, the same way
+    // play_content does. Leaving the session open kept the mic hot and the
+    // billable Bedrock stream alive while music played into it, which the
+    // service could mistake for speech.
     const onPlayMusic = (data: { track?: unknown; songId?: string }) => {
       if (data.track) {
         window.dispatchEvent(
@@ -241,15 +237,20 @@ export function useAskAi() {
             detail: { songId: data.songId },
           }),
         );
+      } else {
+        return;
       }
+      closeSession();
     };
 
     const onPlayPlaylist = (data: { tracks: unknown[]; name: string }) => {
       window.dispatchEvent(
         new CustomEvent('ask-ai:play-playlist', { detail: data }),
       );
+      closeSession();
     };
 
+    // Transport control is not a hand-off — the user may keep talking.
     const onMusicControl = (data: { action: string }) => {
       window.dispatchEvent(
         new CustomEvent('ask-ai:music-control', { detail: data }),
@@ -285,7 +286,7 @@ export function useAskAi() {
       socket.off('ask-ai:musicControl', onMusicControl);
       socket.off('ask-ai:openManga', onOpenManga);
     };
-  }, [socket, router, bargeIn, finalizeTurn, releaseAudio, setDucked]);
+  }, [socket, router, bargeIn, releaseAudio, setDucked]);
 
   const start = useCallback(async () => {
     if (activeRef.current) return;
@@ -295,10 +296,11 @@ export function useAskAi() {
     }
 
     setError(null);
-    setLiveUserText('');
-    setLiveAssistantText('');
-    pendingUserRef.current = '';
-    pendingAssistantRef.current = '';
+    turnRef.current = { role: null, sequence: 0 };
+    turnKeyRef.current = '';
+
+    // Silence background music before the mic opens, not after.
+    setMusicSuspended(true);
 
     try {
       // Surface a denied permission before prompting, which iOS Capacitor
@@ -351,22 +353,19 @@ export function useAskAi() {
       await releaseAudio();
       setState('idle');
     }
-  }, [socket, releaseAudio]);
+  }, [socket, releaseAudio, setMusicSuspended]);
 
   const stop = useCallback(async () => {
-    finalizeTurn();
     await releaseAudio();
     socket?.emit('ask-ai:stop');
     trackEvent('ask_ai_end');
     setState('idle');
-  }, [socket, finalizeTurn, releaseAudio]);
+  }, [socket, releaseAudio]);
 
   const clearHistory = useCallback(() => {
     setMessages([]);
-    setLiveUserText('');
-    setLiveAssistantText('');
-    pendingUserRef.current = '';
-    pendingAssistantRef.current = '';
+    turnRef.current = { role: null, sequence: 0 };
+    turnKeyRef.current = '';
   }, []);
 
   // Release the mic if the page unmounts mid-session.
@@ -379,8 +378,6 @@ export function useAskAi() {
   return {
     state,
     messages,
-    liveUserText,
-    liveAssistantText,
     error,
     start,
     stop,

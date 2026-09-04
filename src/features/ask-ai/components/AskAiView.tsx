@@ -17,16 +17,7 @@ import type { AskAiMessage } from '@/features/ask-ai/types';
  */
 export function AskAiView() {
   const t = useTranslations('common');
-  const {
-    state,
-    messages,
-    liveUserText,
-    liveAssistantText,
-    error,
-    start,
-    stop,
-    clearHistory,
-  } = useAskAi();
+  const { state, messages, error, start, stop, clearHistory } = useAskAi();
 
   const isActive = state !== 'idle';
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -37,17 +28,14 @@ export function AskAiView() {
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
-
-    const hasContent =
-      messages.length > 0 || liveUserText !== '' || liveAssistantText !== '';
-    if (!hasContent) return;
+    if (messages.length === 0) return;
 
     const distanceFromBottom =
       container.scrollHeight - container.scrollTop - container.clientHeight;
     if (distanceFromBottom < 120) {
       endRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
     }
-  }, [messages, liveUserText, liveAssistantText]);
+  }, [messages]);
 
   const statusLabel =
     state === 'listening'
@@ -56,8 +44,7 @@ export function AskAiView() {
         ? t('askAi.speaking')
         : t('askAi.tapToTalk');
 
-  const hasConversation =
-    messages.length > 0 || Boolean(liveUserText) || Boolean(liveAssistantText);
+  const hasConversation = messages.length > 0;
 
   return (
     <div className="flex-1 flex flex-col items-center gap-6 px-4 py-10 w-full">
@@ -141,36 +128,16 @@ export function AskAiView() {
             </p>
           )}
 
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             <Turn
               key={message.id}
               message={message}
               youLabel={t('askAi.you')}
               aiLabel={t('askAi.ai')}
+              // The tail updates in place while text streams in.
+              pending={isActive && index === messages.length - 1}
             />
           ))}
-
-          {/* In-progress turns, replaced by history entries once finalised */}
-          {liveUserText && (
-            <Turn
-              message={{ id: 'live-user', role: 'user', content: liveUserText }}
-              youLabel={t('askAi.you')}
-              aiLabel={t('askAi.ai')}
-              pending
-            />
-          )}
-          {liveAssistantText && (
-            <Turn
-              message={{
-                id: 'live-assistant',
-                role: 'assistant',
-                content: liveAssistantText,
-              }}
-              youLabel={t('askAi.you')}
-              aiLabel={t('askAi.ai')}
-              pending
-            />
-          )}
 
           <div ref={endRef} />
         </div>

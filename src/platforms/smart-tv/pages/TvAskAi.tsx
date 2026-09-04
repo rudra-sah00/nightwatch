@@ -17,31 +17,19 @@ import { useTvFocus } from '../hooks/use-tv-focus';
 export function TvAskAi() {
   const t = useTranslations('common.tv.askAi');
   const tAsk = useTranslations('common.askAi');
-  const {
-    state,
-    messages,
-    liveUserText,
-    liveAssistantText,
-    error,
-    start,
-    stop,
-  } = useAskAi();
+  const { state, messages, error, start, stop } = useAskAi();
   const isActive = state !== 'idle';
 
-  // Prefer the in-progress caption, otherwise the most recent finalised turn.
+  // Latest turn per speaker. Streaming updates these in place.
   const userTranscript = useMemo(
-    () =>
-      liveUserText ||
-      [...messages].reverse().find((m) => m.role === 'user')?.content ||
-      '',
-    [liveUserText, messages],
+    () => [...messages].reverse().find((m) => m.role === 'user')?.content || '',
+    [messages],
   );
   const transcript = useMemo(
     () =>
-      liveAssistantText ||
       [...messages].reverse().find((m) => m.role === 'assistant')?.content ||
       '',
-    [liveAssistantText, messages],
+    [messages],
   );
 
   useTvFocus('tv-ask-ai', 'TV_ASK_AI_ORB');
