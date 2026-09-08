@@ -7,19 +7,14 @@ import { ProfileBackButton } from '@/features/profile/components/profile-back-bu
 import { apiFetch } from '@/lib/fetch';
 
 interface NotifPrefs {
-  dmMessages: boolean;
-  exploreReplies: boolean;
-  exploreMentions: boolean;
-  exploreReactions: boolean;
   friendRequests: boolean;
+  /** Promotional / discovery suggestions — capped at 3 per day server-side. */
+  suggestions: boolean;
 }
 
 const DEFAULT_PREFS: NotifPrefs = {
-  dmMessages: true,
-  exploreReplies: true,
-  exploreMentions: true,
-  exploreReactions: false,
   friendRequests: true,
+  suggestions: true,
 };
 
 export default function NotificationPreferencesPage() {
@@ -68,7 +63,7 @@ export default function NotificationPreferencesPage() {
 
         {loading ? (
           <div className="space-y-4">
-            {Array.from({ length: 5 }, (_, i) => `notif-skel-${i}`).map(
+            {Array.from({ length: 2 }, (_, i) => `notif-skel-${i}`).map(
               (key) => (
                 <div
                   key={key}
@@ -80,34 +75,16 @@ export default function NotificationPreferencesPage() {
         ) : (
           <div className="space-y-2">
             <PrefToggle
-              label="Direct Messages"
-              description="New messages from friends"
-              checked={prefs.dmMessages}
-              onChange={() => toggle('dmMessages')}
-            />
-            <PrefToggle
-              label="Replies"
-              description="When someone replies to your post"
-              checked={prefs.exploreReplies}
-              onChange={() => toggle('exploreReplies')}
-            />
-            <PrefToggle
-              label="Mentions"
-              description="When someone @mentions you"
-              checked={prefs.exploreMentions}
-              onChange={() => toggle('exploreMentions')}
-            />
-            <PrefToggle
-              label="Reactions"
-              description="When someone reacts to your post"
-              checked={prefs.exploreReactions}
-              onChange={() => toggle('exploreReactions')}
-            />
-            <PrefToggle
               label="Friend Requests"
               description="New friend requests"
               checked={prefs.friendRequests}
               onChange={() => toggle('friendRequests')}
+            />
+            <PrefToggle
+              label="Suggestions"
+              description="Music, movie and manga picks — at most 3 a day"
+              checked={prefs.suggestions}
+              onChange={() => toggle('suggestions')}
             />
           </div>
         )}
