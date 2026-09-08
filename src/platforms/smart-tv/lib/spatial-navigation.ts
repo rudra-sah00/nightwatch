@@ -1,6 +1,10 @@
 'use client';
 
-import { init, setKeyMap } from '@noriginmedia/norigin-spatial-navigation';
+import {
+  GetBoundingClientRectAdapter,
+  init,
+  setKeyMap,
+} from '@noriginmedia/norigin-spatial-navigation';
 
 let initialized = false;
 
@@ -17,7 +21,12 @@ export function initSpatialNavigation() {
     visualDebug: false,
     throttle: 150,
     throttleKeypresses: true,
-    useGetBoundingClientRect: true,
+    // core 4 deprecated the `useGetBoundingClientRect: true` flag in favour of
+    // the layoutAdapter API. GetBoundingClientRectAdapter is the shipped
+    // equivalent: it extends BaseWebAdapter and measures via
+    // element.getBoundingClientRect(), which is what we relied on before.
+    // Passing the class (not an instance) — core accepts a constructor.
+    layoutAdapter: GetBoundingClientRectAdapter,
     shouldFocusDOMNode: true,
     domNodeFocusOptions: { preventScroll: true },
     distanceCalculationMethod: 'center',

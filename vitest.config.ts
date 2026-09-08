@@ -8,6 +8,10 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./tests/setup.ts'],
+    // Vitest 5 flipped `clearMocks` to default true, which clears mock call
+    // history before every test. Our setup file registers module mocks whose
+    // recorded calls some suites assert on, so keep the v4 behaviour.
+    clearMocks: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

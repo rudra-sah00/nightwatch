@@ -45,7 +45,7 @@ export function useClips(filters?: ClipFilters) {
   }, [queryClient, filterKey]);
 
   const removeMutation = useMutation({
-    mutationFn: deleteClip,
+    mutationFn: (clipId: string) => deleteClip(clipId),
     onSuccess: (_, clipId) => {
       trackEvent('clip_delete', { clip_id: clipId });
       queryClient.invalidateQueries({ queryKey: ['clips'] });

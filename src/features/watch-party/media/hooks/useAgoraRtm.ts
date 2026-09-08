@@ -16,6 +16,51 @@ type RtmConnectionState =
   | 'RECONNECTING'
   | 'DISCONNECTING';
 
+/**
+ * Agora RTM SDK 2.3.0 removed the `status` event (which reported
+ * `{ state, reason }`) and replaced it with `linkState`, which reports
+ * `{ currentState, previousState, operation, reason, reasonCode, ... }` using a
+ * different state enum.
+ *
+ * Mapping is not one-to-one, because the new enum splits "not connected" into
+ * recovering and non-recovering states. Per Agora's connection-state docs:
+ *
+ * - `CONNECTED`    — usable.
+ * - `CONNECTING`   — login (or a reconnect attempt) in flight.
+ * - `DISCONNECTED` — *temporary*. The SDK retries at 2, 4, 8... seconds for up
+ *                    to 2 minutes, then transitions to `SUSPENDED`.
+ * - `SUSPENDED`    — long-term disconnect. The SDK keeps retrying every 30s.
+ * - `IDLE`         — before login, or after an explicit `logout`.
+ * - `FAILED`       — unrecoverable (invalid/expired token, banned user ID,
+ *                    invalid app ID). The SDK does *not* retry; the caller
+ *                    must call `login` again.
+ *
+ * So `DISCONNECTED` and `SUSPENDED` both mean "the SDK is recovering on its
+ * own", which is what the old `status` event called `RECONNECTING`. Only
+ * `IDLE` and `FAILED` are genuinely not-recovering.
+ *
+ * @param linkState - the SDK's `currentState` value
+ * @returns the equivalent internal connection state
+ * @see https://docs.agora.io/en/realtime-media/rtm/build/connect-and-authenticate/connection/connection-state-transitions
+ */
+export function mapLinkStateToConnectionState(
+  linkState: string,
+): RtmConnectionState {
+  switch (linkState) {
+    case 'CONNECTED':
+      return 'CONNECTED';
+    case 'CONNECTING':
+      return 'CONNECTING';
+    case 'DISCONNECTED':
+    case 'SUSPENDED':
+      // The SDK is still retrying by itself — no user action needed.
+      return 'RECONNECTING';
+    default:
+      // IDLE, FAILED, and any future state: not connected, not recovering.
+      return 'DISCONNECTED';
+  }
+}
+
 // Export RTMMessage so other hooks can type their handlers
 export type { RTMMessage };
 
@@ -172,10 +217,11 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
           }
         };
 
-        // Connection state changes
-        const handleStatus = (event: { state: string; reason: string }) => {
+        // Connection state changes.
+        // SDK >= 2.3.0 emits `linkState` instead of the removed `status` event.
+        const handleLinkState = (event: { currentState: string }) => {
           if (cleaned) return;
-          const state = event.state as RtmConnectionState;
+          const state = mapLinkStateToConnectionState(event.currentState);
           setConnectionState(state);
           setIsConnected(state === 'CONNECTED');
 
@@ -186,7 +232,9 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
             });
           } else if (state === 'CONNECTED') {
             toast.dismiss('rtm-connection');
-          } else if (state === 'DISCONNECTED' && event.reason !== 'LOGOUT') {
+          } else if (event.currentState === 'FAILED') {
+            // Only FAILED is a real error the user must know about. IDLE is
+            // the normal resting state before login and after logout.
             toast.error(tp('disconnectedSignaling'), {
               id: 'rtm-connection',
             });
@@ -219,7 +267,7 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
         };
 
         client.addEventListener('message', handleMessage);
-        client.addEventListener('status', handleStatus);
+        client.addEventListener('linkState', handleLinkState);
         client.addEventListener('presence', handlePresence);
 
         // Token renewal — refresh before expiry to avoid disconnection
@@ -246,7 +294,7 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
         fallbackCleanup = () => {
           if (!client) return;
           client.removeEventListener('message', handleMessage);
-          client.removeEventListener('status', handleStatus);
+          client.removeEventListener('linkState', handleLinkState);
           client.removeEventListener('presence', handlePresence);
           (
             client as unknown as {

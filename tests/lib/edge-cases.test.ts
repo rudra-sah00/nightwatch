@@ -1,20 +1,22 @@
 import { describe, expect, it, vi } from 'vitest';
 
+// Must be top level: `vi.mock` is hoisted and runs before anything else in the
+// file, so declaring it inside a test never reflected real execution order.
+// Vitest 5 throws on nested hoisted calls instead of warning.
+vi.mock('@/lib/env', () => ({
+  env: {
+    BACKEND_URL: 'http://default-backend',
+    WS_URL: 'ws://default-ws',
+    NEXT_PUBLIC_AGORA_APP_ID: 'mock-agora-id',
+  },
+}));
+
 describe('Edge Case Branch Coverage', () => {
   it('covers SSR branches in fetch.ts, socket.ts, and storage-cache.ts', async () => {
     // Save original window
     const originalWindow = global.window;
     // @ts-expect-error
     delete global.window;
-
-    // Mock env to avoid errors during module load
-    vi.mock('@/lib/env', () => ({
-      env: {
-        BACKEND_URL: 'http://default-backend',
-        WS_URL: 'ws://default-ws',
-        NEXT_PUBLIC_AGORA_APP_ID: 'mock-agora-id',
-      },
-    }));
 
     // Save original env
     const originalNextEnv = process.env.NEXT_PUBLIC_BACKEND_URL;

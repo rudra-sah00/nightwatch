@@ -45,7 +45,9 @@ export function useContinueWatching({
   }, [isLoading, items.length]);
 
   const removeMutation = useMutation({
-    mutationFn: deleteWatchProgress,
+    // Wrapped so TanStack Query's MutationFunctionContext (passed as the 2nd
+    // argument since v5.90) is not forwarded into the optional `callback` param.
+    mutationFn: (progressId: string) => deleteWatchProgress(progressId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['continue-watching'] });
     },

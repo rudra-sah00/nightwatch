@@ -19,7 +19,7 @@ export function useWatchlist() {
   });
 
   const removeMutation = useMutation({
-    mutationFn: removeFromWatchlist,
+    mutationFn: (contentId: string) => removeFromWatchlist(contentId),
     onMutate: async (contentId) => {
       await queryClient.cancelQueries({ queryKey: ['watchlist'] });
       const previous = queryClient.getQueryData<WatchlistItem[]>(['watchlist']);
