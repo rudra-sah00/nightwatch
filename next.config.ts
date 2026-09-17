@@ -134,7 +134,13 @@ const nextConfig: NextConfig = {
               `connect-src 'self' data: wss: ws: https: http: http://localhost:9000 ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
               "frame-src 'self' https: http://localhost:9000 http://minio:9000 blob: data: about: https://challenges.cloudflare.com",
               "worker-src 'self' blob: https:",
-              `media-src 'self' blob: data: https: http://localhost:9000 ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,
+              // http://127.0.0.1:* / http://localhost:* are required by the Android
+              // on-device loopback media forwarder (NWMediaProxyPlugin). It listens on
+              // an ephemeral port, so the port cannot be pinned here. Without these the
+              // <video> element is refused with
+              // "MEDIA_ELEMENT_ERROR: Media load rejected by URL safety check".
+              // Loopback only — this grants nothing to any remote origin.
+              `media-src 'self' blob: data: https: http://localhost:9000 http://127.0.0.1:* http://localhost:* ${backendOrigin}${cfWorkerOrigin ? ` ${cfWorkerOrigin}` : ''}`,
               "object-src 'none'",
               // Prevent this page from being embedded in external iframes (clickjacking)
               "frame-ancestors 'self'",

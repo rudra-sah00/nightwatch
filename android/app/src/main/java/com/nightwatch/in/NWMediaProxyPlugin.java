@@ -271,7 +271,20 @@ public class NWMediaProxyPlugin extends Plugin {
             conn.setRequestProperty("Accept", "*/*");
             if (range != null) conn.setRequestProperty("Range", range);
 
-            int status = conn.getResponseCode();
+            int status;
+            try {
+                status = conn.getResponseCode();
+            } catch (IOException e) {
+                // Reaching the CDN can fail for reasons that are not bugs — no network,
+                // or Android Doze cutting background network so DNS returns "No address
+                // associated with hostname". Answer 502 rather than dropping the socket:
+                // a silent close surfaces in the player as an opaque failure with nothing
+                // in the logs tying it to the upstream.
+                Log.w(TAG, "upstream fetch failed for " + url.getHost() + ": " + e.getMessage());
+                conn.disconnect();
+                writeStatusOnly(out, 502, "Bad Gateway");
+                return;
+            }
 
             if (status == 301 || status == 302 || status == 303 || status == 307 || status == 308) {
                 String location = conn.getHeaderField("Location");
