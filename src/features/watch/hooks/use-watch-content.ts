@@ -3,6 +3,7 @@
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { applyMediaProxy } from '@/capacitor/media-proxy';
 import { playVideo, stopVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import {
@@ -147,6 +148,11 @@ export function useWatchContent() {
             movieId: overrideMovieId || movieId || undefined,
           });
         }
+
+        // Android streams direct from the CDN, but the WebView cannot attach the
+        // Referer the CDN requires, so route the raw URLs through the on-device
+        // loopback forwarder first. No-op on web/Electron and on proxied responses.
+        response = await applyMediaProxy(response);
 
         if (response.success && response.masterPlaylistUrl) {
           // Unified response handling via StreamUrlService (called within useStreamUrls)
