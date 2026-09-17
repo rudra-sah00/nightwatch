@@ -84,6 +84,12 @@ export function useWatchContent() {
 
   const [isRefetching, setIsRefetching] = useState(() => !streamParam);
   const [refetchError, setRefetchError] = useState<string | null>(null);
+  /**
+   * Set when the backend reports PLAYBACK_REQUIRES_APP: this client (a browser)
+   * cannot supply the Referer the CDN demands, so playback is unavailable here
+   * and the UI should point at the desktop/mobile apps instead.
+   */
+  const [requiresApp, setRequiresApp] = useState(false);
   const coldStartRetried = useRef(false);
   const [_isReplacingSession, setIsReplacingSession] = useState(false);
   const replacingSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -167,11 +173,20 @@ export function useWatchContent() {
           setRefetchError('Failed to load stream');
         }
       } catch (err) {
-        console.error('[NW-Play] VOD: stream error', err);
-        reportError(
-          `[Watch] Stream load failed: ${(err as { status?: number })?.status || 'unknown'}`,
-        );
         const httpStatus = (err as { status?: number })?.status;
+        const errorCode = (err as { code?: string })?.code;
+
+        // Web cannot play this content: the CDN requires an allow-listed Referer and
+        // browsers cannot send one. Surface it as its own state so the UI can offer the
+        // desktop/mobile apps rather than showing a generic failure. Not an error worth
+        // reporting to analytics — it is the expected outcome on web.
+        if (httpStatus === 403 && errorCode === 'PLAYBACK_REQUIRES_APP') {
+          setRequiresApp(true);
+          return;
+        }
+
+        console.error('[NW-Play] VOD: stream error', err);
+        reportError(`[Watch] Stream load failed: ${httpStatus || 'unknown'}`);
         if (
           (httpStatus === 500 || httpStatus === 503) &&
           !coldStartRetried.current
@@ -354,5 +369,6 @@ export function useWatchContent() {
     handleStreamExpired,
     refetchStream,
     streamFormat,
+    requiresApp,
   };
 }

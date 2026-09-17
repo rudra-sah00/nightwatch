@@ -5,6 +5,7 @@ import { Suspense, useCallback, useRef, useState } from 'react';
 import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { PlayOnTvButton } from '@/features/remote-control/components/PlayOnTvButton';
+import { PlaybackRequiresApp } from '@/features/watch/components/PlaybackRequiresApp';
 import { WatchVODPlayer } from '@/features/watch/components/WatchVODPlayer';
 import { useWatchContent } from '@/features/watch/hooks/use-watch-content';
 import { useMobileDetection } from '@/features/watch/player/hooks/useMobileDetection';
@@ -32,6 +33,7 @@ function WatchContent() {
     handleStreamExpired,
     refetchStream,
     streamFormat,
+    requiresApp,
   } = useWatchContent();
 
   const t = useTranslations('watch');
@@ -65,6 +67,12 @@ function WatchContent() {
     }
     swipeRef.current = null;
   }, [swipeY, router]);
+
+  // Playback is unavailable in a browser for this content. Checked before the generic
+  // no-stream branch so users get the app prompt rather than a red error screen.
+  if (requiresApp) {
+    return <PlaybackRequiresApp title={metadata?.title} />;
+  }
 
   // No stream URL after refetch has settled
   if (!isRefetching && !streamUrl) {
