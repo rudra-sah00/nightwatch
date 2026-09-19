@@ -34,7 +34,7 @@ export function SearchIdle() {
     query && suggestion?.toLowerCase().startsWith(query.toLowerCase());
 
   return (
-    <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 relative min-h-[calc(100dvh-160px)] w-full overflow-hidden">
+    <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-8 pb-32 sm:pb-36 relative min-h-[calc(100dvh-160px)] w-full overflow-hidden">
       {/* Bauhaus background shapes */}
       <div className="absolute top-20 left-10 w-32 h-32 border-[3px] border-border opacity-20 -z-10 rotate-12" />
       <div className="absolute bottom-20 right-10 w-48 h-48 bg-neo-red opacity-10 -z-10 rounded-full" />
@@ -121,6 +121,21 @@ export function SearchIdle() {
               <span className={`w-3 h-3 border-2 border-border ${swatch}`} />
               <span>{t(key)}</span>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Decorative marquee strip. Duplicated four times so the -50% shift loops
+          seamlessly; hidden from assistive tech since it carries no information. */}
+      <div
+        aria-hidden="true"
+        className="absolute bottom-6 md:bottom-8 inset-x-4 md:inset-x-8 lg:inset-x-12 flex overflow-hidden border-[3px] border-border py-4 bg-primary text-primary-foreground font-headline font-black uppercase text-xl md:text-2xl tracking-[0.3em] md:tracking-[0.5em] whitespace-nowrap z-10"
+      >
+        <div className="flex animate-marquee w-max">
+          {['a', 'b', 'c', 'd'].map((id) => (
+            <span key={id} className="pr-8">
+              {t('marquee')}
+            </span>
           ))}
         </div>
       </div>

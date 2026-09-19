@@ -143,4 +143,32 @@ describe('SearchIdle', () => {
       expect(button).toBeEnabled();
     });
   });
+
+  /**
+   * Part of the landing's identity, and it was dropped once already when the hero moved
+   * here from /home. The track repeats the phrase four times because the animation
+   * shifts by -50%: with fewer copies the loop visibly jumps.
+   */
+  describe('marquee strip', () => {
+    it('renders the phrase four times for a seamless loop', () => {
+      render(<SearchIdle />);
+
+      expect(screen.getAllByText('marquee')).toHaveLength(4);
+    });
+
+    it('animates via the shared class rather than an injected style tag', () => {
+      const { container } = render(<SearchIdle />);
+
+      expect(container.querySelector('.animate-marquee')).not.toBeNull();
+      expect(container.querySelector('style')).toBeNull();
+    });
+
+    it('is hidden from assistive tech, carrying no information', () => {
+      const { container } = render(<SearchIdle />);
+
+      const strip = container.querySelector('.animate-marquee')?.parentElement;
+
+      expect(strip).toHaveAttribute('aria-hidden', 'true');
+    });
+  });
 });

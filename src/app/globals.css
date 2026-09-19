@@ -646,6 +646,29 @@ button {
   border-color: var(--color-border) !important;
 }
 
+/* Marquee strip on the search landing. Lives here rather than in an inline <style>
+   tag, which is where it used to sit — the component re-injected the keyframes on
+   every mount. The track holds the phrase four times and shifts by -50%, so the
+   second pair lands exactly where the first started and the loop is seamless. */
+@keyframes marquee {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 15s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
 /* Shared entry animations.
    `.animate-in` and `.slide-in-from-bottom-2` intentionally shadow the
    tailwindcss-animate plugin utilities of the same name — components across auth,
