@@ -5,7 +5,6 @@ import {
   fetchIptvCategories,
   fetchIptvChannels,
   fetchIptvResolve,
-  fetchLiveMatchDetail,
 } from '@/features/livestream/api';
 import { apiFetch } from '@/lib/fetch';
 
@@ -14,34 +13,6 @@ const mockApiFetch = vi.mocked(apiFetch);
 describe('livestream/api', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('fetchLiveMatchDetail', () => {
-    it('returns match data', async () => {
-      const match = { id: 'abc', title: 'Final' };
-      mockApiFetch.mockResolvedValue({ match });
-
-      const result = await fetchLiveMatchDetail('abc');
-
-      expect(mockApiFetch).toHaveBeenCalledWith('/api/livestream/match/abc');
-      expect(result).toEqual(match);
-    });
-
-    it('returns null on error', async () => {
-      mockApiFetch.mockRejectedValue(new Error('Network error'));
-
-      const result = await fetchLiveMatchDetail('abc');
-
-      expect(result).toBeNull();
-    });
-
-    it('returns null when match is missing', async () => {
-      mockApiFetch.mockResolvedValue({});
-
-      const result = await fetchLiveMatchDetail('abc');
-
-      expect(result).toBeNull();
-    });
   });
 
   describe('fetchIptvChannels', () => {

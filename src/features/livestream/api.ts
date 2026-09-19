@@ -1,26 +1,4 @@
 import { apiFetch } from '@/lib/fetch';
-import type { LiveMatch, LivestreamMatchResponse } from './types';
-
-export type { CricketMatchInfo, LiveMatch } from './types';
-
-/**
- * Fetches detailed information for a single live match.
- *
- * @param id - Unique match identifier.
- * @returns The match details, or `null` if not found or on error.
- */
-export const fetchLiveMatchDetail = async (
-  id: string,
-): Promise<LiveMatch | null> => {
-  try {
-    const data = await apiFetch<LivestreamMatchResponse>(
-      `/api/livestream/match/${id}`,
-    );
-    return data?.match || null;
-  } catch {
-    return null;
-  }
-};
 
 // === IPTV ===
 

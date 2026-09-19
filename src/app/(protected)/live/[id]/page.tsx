@@ -1,19 +1,16 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Calendar, Loader2, Trophy } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useFormatter, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { PlayerLoadingSkeleton } from '@/components/ui/PlayerLoadingSkeleton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
 import { fetchIptvResolve } from '@/features/livestream/api';
-import { useLiveMatch } from '@/features/livestream/hooks/use-livestreams';
-import { playVideo } from '@/features/watch/api';
 import { WatchLivePlayer } from '@/features/watch/components/WatchLivePlayer';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import { isTV } from '@/platforms/smart-tv/lib/detection';
@@ -22,160 +19,59 @@ import { TvWatch } from '@/platforms/smart-tv/pages/TvWatch';
 export default function LiveMatchPlayerPage() {
   return (
     <FeatureErrorBoundary feature="Livestream Player">
-      <LiveMatchPlayerContent />
+      <LiveChannelPlayerContent />
     </FeatureErrorBoundary>
   );
 }
 
-function LiveMatchPlayerContent() {
+/**
+ * Live channel player.
+ *
+ * The route id is an IPTV channel id, resolved to a stream URL on demand because the
+ * upstream URLs are short-lived. Both callers — LiveClient's "Watch Solo" and TvLive —
+ * pass `?type=iptv&title=…`, and `poster` when the channel has an icon.
+ *
+ * This page used to branch on that `type` param, with the other half rendering a
+ * sports-match scoreboard fed by `/api/livestream/match/:id`. That route was removed
+ * from the backend along with the rest of the sports endpoints, so the branch resolved
+ * to null forever — and no caller could reach it anyway, since both always pass
+ * `type=iptv`. A URL without the param now resolves as a channel and falls through to
+ * the unavailable state, rather than rendering a match page that could never load.
+ */
+function LiveChannelPlayerContent() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const matchId = params.id as string;
+  const channelId = params.id as string;
   const titleFromRoute = searchParams.get('title')?.trim() ?? '';
-  const isIptv = searchParams.get('type') === 'iptv';
-  const iptvPoster = searchParams.get('poster') ?? null;
-  const { match, isLoading, error } = useLiveMatch(isIptv ? '' : matchId);
+  const poster = searchParams.get('poster') ?? null;
   const t = useTranslations('live');
-  const format = useFormatter();
 
-  // IPTV resolve state (always declared, only used when isIptv)
   const { data: resolvedUrl = null, isLoading: resolving } = useQuery({
-    queryKey: ['live', 'iptv-resolve', matchId],
-    queryFn: () => fetchIptvResolve(matchId),
-    enabled: isIptv,
+    queryKey: ['live', 'iptv-resolve', channelId],
+    queryFn: () => fetchIptvResolve(channelId),
   });
 
-  const [sessionUrl, setSessionUrl] = useState<string | null>(null);
-  const [sessionLoading, setSessionLoading] = useState(false);
-  const [sessionError, setSessionError] = useState<string | null>(null);
+  const title = titleFromRoute || 'Live TV';
 
-  // Clip recording for TV
   const clip = useClipRecorder({
-    matchId,
+    matchId: channelId,
     title: titleFromRoute || 'Live Clip',
     streamToken: null,
-    streamUrl: resolvedUrl || sessionUrl,
+    streamUrl: resolvedUrl,
   });
 
-  useEffect(() => {
-    if (isIptv) return;
-    if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
-      return;
+  if (resolving) return <PlayerLoadingSkeleton />;
 
-    const initSession = async () => {
-      if (!match?.playPath || sessionUrl || sessionLoading || sessionError)
-        return;
-
-      setSessionLoading(true);
-      try {
-        const response = await playVideo({
-          type: 'livestream',
-          title: `${match.team1.name} vs ${match.team2.name}`,
-          movieId: match.playPath!,
-        });
-
-        if (response.success && response.masterPlaylistUrl) {
-          setSessionUrl(response.masterPlaylistUrl);
-        } else {
-          setSessionError('failed_stream_session');
-        }
-      } catch (_err) {
-        setSessionError('error_stream_server');
-      } finally {
-        setSessionLoading(false);
-      }
-    };
-
-    initSession();
-  }, [match, sessionUrl, sessionLoading, sessionError, isIptv]);
-
-  // === IPTV Render ===
-  if (isIptv) {
-    if (resolving) return <PlayerLoadingSkeleton />;
-    if (!resolvedUrl) {
-      return (
-        <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
-          <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
-            {t('streamUnavailableHeading')}
-          </h2>
-          <Link href="/live">
-            <Button
-              variant="default"
-              className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest"
-            >
-              <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
-              {t('backToSchedule')}
-            </Button>
-          </Link>
-        </div>
-      );
-    }
-
-    const metadata: VideoMetadata = {
-      movieId: matchId,
-      title: titleFromRoute || 'Live TV',
-      type: 'livestream',
-      posterUrl: iptvPoster || undefined,
-    };
-
-    if (isTV()) {
-      return (
-        <TvWatch
-          streamUrl={resolvedUrl}
-          title={titleFromRoute || 'Live TV'}
-          isLive
-          isClipping={clip.isRecording}
-          clipDuration={clip.duration}
-          onClipStart={clip.start}
-          onClipStop={clip.stop}
-        />
-      );
-    }
-
-    return (
-      <div className="min-h-screen bg-background">
-        <title>{`${titleFromRoute || 'Live TV'} — Nightwatch`}</title>
-        <WatchLivePlayer
-          streamUrl={resolvedUrl}
-          metadata={metadata}
-          secondaryPosterUrl={null}
-        />
-        <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="text-lg font-black font-headline uppercase tracking-tight truncate">
-                {titleFromRoute || 'Live TV'}
-              </h1>
-              <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1">
-                IPTV
-              </p>
-            </div>
-            <Badge variant="red" className="animate-pulse shrink-0">
-              {t('liveStream')}
-            </Badge>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return <PlayerLoadingSkeleton />;
-  }
-
-  if (error || !match) {
+  if (!resolvedUrl) {
     return (
       <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
         <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
           {t('streamUnavailableHeading')}
         </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 text-center max-w-md">
-          {error?.message || t('matchNotFoundDesc')}
-        </p>
         <Link href="/live">
           <Button
             variant="default"
-            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
+            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest"
           >
             <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
             {t('backToSchedule')}
@@ -185,183 +81,11 @@ function LiveMatchPlayerContent() {
     );
   }
 
-  // Guaranteed non-null from here
-  const activeMatch = match;
-
-  const isLivestream = activeMatch.id.startsWith('live-netmirror');
-  const isEffectivelyLive = activeMatch.status === 'MatchIng' || isLivestream;
-
-  if (activeMatch.status === 'MatchNotStart' && !isLivestream) {
-    return (
-      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
-        <Calendar className="w-20 h-20 text-muted-foreground mb-6 stroke-[3px]" />
-        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2 text-center px-4">
-          {t('matchNotStarted')}
-        </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 max-w-sm text-center px-4">
-          {t('matchNotStartedDesc')}
-        </p>
-        <Link href="/live">
-          <Button
-            variant="default"
-            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
-          >
-            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
-            {t('backToSchedule')}
-          </Button>
-        </Link>
-      </div>
-    );
-  }
-
-  if (!activeMatch.playPath && activeMatch.status === 'MatchIng') {
-    return (
-      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
-        <Loader2 className="w-16 h-16 text-muted-foreground animate-spin mb-6 stroke-[3px]" />
-        <h2 className="text-3xl font-black font-headline uppercase tracking-tighter mb-2">
-          {t('waitingForFeed')}
-        </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground max-w-xs text-center">
-          {t('waitingForFeedDesc')}
-        </p>
-      </div>
-    );
-  }
-
-  if (activeMatch.status === 'MatchEnded') {
-    return (
-      <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center text-foreground">
-        <Trophy className="w-20 h-20 text-neo-yellow mb-6 stroke-[3px]" />
-        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-2">
-          {t('matchConcluded')}
-        </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 max-w-md text-center px-4">
-          {activeMatch.matchResult ||
-            t('matchEndedDefault', {
-              team1: activeMatch.team1.name,
-              team2: activeMatch.team2.name,
-            })}
-        </p>
-        <Link href="/live">
-          <Button
-            variant="default"
-            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
-          >
-            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
-            {t('backToSchedule')}
-          </Button>
-        </Link>
-      </div>
-    );
-  }
-
-  if (!sessionLoading && sessionError) {
-    const sessionErrorMessages: Record<string, string> = {
-      failed_stream_session: t('failedStreamSession'),
-      error_stream_server: t('errorStreamServer'),
-    };
-
-    return (
-      <div className="flex flex-col h-screen w-full items-center justify-center bg-background text-foreground px-4">
-        <h2 className="text-4xl font-black font-headline uppercase tracking-tighter mb-4 text-neo-red">
-          {t('accessDenied')}
-        </h2>
-        <p className="font-headline font-bold uppercase tracking-widest text-muted-foreground mb-8 text-center max-w-md">
-          {sessionErrorMessages[sessionError] || sessionError}
-        </p>
-        <Link href="/live">
-          <Button
-            variant="default"
-            className="px-8 py-4 h-auto text-lg font-bold font-headline uppercase tracking-widest transition-colors"
-          >
-            <ArrowLeft className="mr-3 w-5 h-5 stroke-[4px]" />{' '}
-            {t('backToSchedule')}
-          </Button>
-        </Link>
-      </div>
-    );
-  }
-
-  const team1Name = activeMatch.team1.name;
-  const team2Name = activeMatch.team2.name;
-  const normalizedTeam1 = team1Name.trim().toUpperCase();
-  const normalizedTeam2 = team2Name.trim().toUpperCase();
-  const normalizedTeam2Lower = team2Name.trim().toLowerCase();
-  const isGenericLivePair =
-    normalizedTeam1 === 'LIVE' &&
-    (normalizedTeam2 === 'STREAM' ||
-      normalizedTeam2 === 'LIVE STREAM' ||
-      normalizedTeam2 === '');
-  const channelLabelCandidates = [
-    activeMatch.channelName,
-    titleFromRoute,
-    activeMatch.league,
-    activeMatch.timeDesc,
-  ]
-    .map((value) => value?.trim())
-    .filter((value): value is string => {
-      if (!value) return false;
-      const normalized = value.toUpperCase();
-      return (
-        normalized !== 'LIVE' &&
-        normalized !== 'STREAM' &&
-        normalized !== 'LIVE STREAM'
-      );
-    });
-  const channelLabel = channelLabelCandidates[0] ?? '';
-  const isChannelCard =
-    activeMatch.contentKind === 'channel' ||
-    activeMatch.type === 'all_channels' ||
-    normalizedTeam2 === 'STREAM' ||
-    normalizedTeam2Lower === 'live stream' ||
-    normalizedTeam2 === '' ||
-    normalizedTeam2 === 'TBA' ||
-    normalizedTeam2Lower === 'team 2' ||
-    isGenericLivePair;
-
-  const channelDisplayName = channelLabel || team1Name || t('liveStream');
-
-  let displayTitle = '';
-
-  if (isChannelCard) {
-    displayTitle = channelDisplayName;
-  } else if (
-    team1Name.toUpperCase() === 'LIVE' &&
-    team2Name.toUpperCase() === 'STREAM'
-  ) {
-    displayTitle = channelLabel || t('liveStream');
-  } else {
-    const isChannelOrEvent =
-      !team2Name ||
-      team2Name.toLowerCase() === 'team 2' ||
-      team2Name.toUpperCase() === 'TBA' ||
-      team2Name.toUpperCase() === 'STREAM' ||
-      team1Name === team2Name;
-
-    displayTitle = isChannelOrEvent
-      ? team1Name
-      : `${team1Name} vs ${team2Name}`;
-  }
-
-  const metadata: VideoMetadata = {
-    movieId: matchId,
-    title: displayTitle,
-    type: 'livestream',
-    posterUrl: activeMatch.team1.avatar,
-  };
-
-  const startLabel = format.dateTime(new Date(activeMatch.startTime), {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
-  if (isTV() && sessionUrl) {
+  if (isTV()) {
     return (
       <TvWatch
-        streamUrl={sessionUrl}
-        title={displayTitle}
+        streamUrl={resolvedUrl}
+        title={title}
         isLive
         isClipping={clip.isRecording}
         clipDuration={clip.duration}
@@ -371,98 +95,35 @@ function LiveMatchPlayerContent() {
     );
   }
 
+  const metadata: VideoMetadata = {
+    movieId: channelId,
+    title,
+    type: 'livestream',
+    posterUrl: poster || undefined,
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <title>{`${displayTitle} — Nightwatch`}</title>
+      <title>{`${title} — Nightwatch`}</title>
       <WatchLivePlayer
-        streamUrl={sessionUrl}
+        streamUrl={resolvedUrl}
         metadata={metadata}
-        secondaryPosterUrl={activeMatch.team2.avatar || null}
+        secondaryPosterUrl={null}
       />
-
       <section className="md:hidden px-4 py-4 space-y-4 bg-background text-foreground border-t border-border/60 min-h-[60vh]">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-lg font-black font-headline uppercase tracking-tight truncate">
-              {displayTitle}
+              {title}
             </h1>
-            <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1 truncate">
-              {activeMatch.league} · {startLabel}
+            <p className="text-xs text-muted-foreground font-headline uppercase tracking-widest mt-1">
+              IPTV
             </p>
           </div>
-          {isEffectivelyLive ? (
-            <Badge variant="red" className="animate-pulse shrink-0">
-              {t('liveStream')}
-            </Badge>
-          ) : null}
+          <Badge variant="red" className="animate-pulse shrink-0">
+            {t('liveStream')}
+          </Badge>
         </div>
-
-        <div className="bg-card border border-border rounded-md p-3 shadow-[0_1px_0_0_rgba(0,0,0,0.06)]">
-          {isChannelCard ? (
-            <div className="flex items-center gap-3 min-w-0">
-              {activeMatch.team1.avatar ? (
-                <img
-                  src={activeMatch.team1.avatar}
-                  alt={channelDisplayName}
-                  className="w-9 h-9 rounded-sm border border-border shrink-0"
-                />
-              ) : (
-                <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border shrink-0">
-                  {channelDisplayName.charAt(0)}
-                </span>
-              )}
-              <span className="text-sm font-black font-headline uppercase truncate">
-                {channelDisplayName}
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
-                {activeMatch.team1.avatar ? (
-                  <img
-                    src={activeMatch.team1.avatar}
-                    alt={activeMatch.team1.name}
-                    className="w-9 h-9 rounded-sm border border-border"
-                  />
-                ) : (
-                  <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
-                    {activeMatch.team1.name.charAt(0)}
-                  </span>
-                )}
-                <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
-                  {activeMatch.team1.name}
-                </span>
-              </div>
-
-              <span className="font-black font-headline text-sm uppercase tracking-widest text-muted-foreground">
-                {t('vs')}
-              </span>
-
-              <div className="flex flex-col items-center gap-2 min-w-0 flex-1">
-                {activeMatch.team2.avatar ? (
-                  <img
-                    src={activeMatch.team2.avatar}
-                    alt={activeMatch.team2.name}
-                    className="w-9 h-9 rounded-sm border border-border"
-                  />
-                ) : (
-                  <span className="w-9 h-9 flex items-center justify-center text-[11px] font-black bg-muted rounded-sm border border-border">
-                    {activeMatch.team2.name.charAt(0)}
-                  </span>
-                )}
-                <span className="text-sm font-black font-headline uppercase truncate max-w-[120px] text-center">
-                  {activeMatch.team2.name}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {activeMatch.matchResult ? (
-          <p className="text-xs text-muted-foreground font-headline uppercase tracking-wider leading-relaxed">
-            {activeMatch.matchResult}
-          </p>
-        ) : null}
       </section>
     </div>
   );
