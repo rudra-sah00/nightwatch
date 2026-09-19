@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Início",
-    "explore": "Explore",
     "continue": "Continuar",
     "live": "Ao Vivo",
     "watchlist": "Lista",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "Identidade do Criador",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "Continuar assistindo",
-      "trending": "Em alta"
+      "empty": "Seu histórico está vazio",
+      "emptyHint": "Comece a assistir algo e aparecerá aqui"
     },
     "search": {
       "placeholder": "Buscar filmes, séries...",
@@ -541,10 +537,5 @@
     "markUnread": "Marcar como não lida",
     "clearConfirmTitle": "Limpar este chat?",
     "clearConfirmDesc": "Todas as mensagens serão ocultadas. Novas mensagens continuarão aparecendo."
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

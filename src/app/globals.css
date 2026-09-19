@@ -646,16 +646,10 @@ button {
   border-color: var(--color-border) !important;
 }
 
-/* Explore feature animations */
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* Shared entry animations.
+   `.animate-in` and `.slide-in-from-bottom-2` intentionally shadow the
+   tailwindcss-animate plugin utilities of the same name — components across auth,
+   profile and the music players rely on this timing. */
 @keyframes slide-in-from-bottom {
   from {
     transform: translateY(4px);
@@ -665,10 +659,6 @@ button {
     transform: translateY(0);
     opacity: 1;
   }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 3s linear infinite;
 }
 
 .animate-in {

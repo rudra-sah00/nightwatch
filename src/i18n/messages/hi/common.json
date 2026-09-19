@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "होम",
-    "explore": "Explore",
     "continue": "जारी रखें",
     "live": "लाइव",
     "watchlist": "वॉचलिस्ट",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "निर्माता पहचान",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "देखना जारी रखें",
-      "trending": "ट्रेंडिंग"
+      "empty": "आपका देखने का इतिहास खाली है",
+      "emptyHint": "कुछ देखना शुरू करें और यह यहाँ दिखाई देगा"
     },
     "search": {
       "placeholder": "फ़िल्में, शो खोजें...",
@@ -541,10 +537,5 @@
     "markUnread": "अपठित के रूप में चिह्नित करें",
     "clearConfirmTitle": "यह चैट साफ़ करें?",
     "clearConfirmDesc": "सभी संदेश छिपा दिए जाएंगे। नए संदेश अभी भी दिखाई देंगे।"
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

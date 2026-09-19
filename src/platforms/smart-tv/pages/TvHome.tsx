@@ -5,52 +5,36 @@ import {
   FocusContext,
   useFocusable,
 } from '@noriginmedia/norigin-spatial-navigation';
-import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback } from 'react';
-import { type ExploreItem, getExploreHome } from '@/features/search/api';
 import { useContinueWatching } from '@/features/watch/hooks/use-continue-watching';
 import { TvCard } from '../components/TvCard';
-import { TvHero } from '../components/TvHero';
 import { TvRow } from '../components/TvRow';
 import { TvPageSkeleton } from '../components/TvSkeleton';
 import { useTvFocus } from '../hooks/use-tv-focus';
 import { FOCUS_KEYS } from '../lib/focus-keys';
 
+/**
+ * Smart TV home screen.
+ *
+ * Shows Continue Watching only. The curated hero, trending row and genre rows
+ * that used to fill this screen were fed by the Explore feed, which has been
+ * removed — so there is no browse surface here and search is the way in until a
+ * provider-native discovery feed replaces it.
+ */
 export function TvHome() {
   const router = useRouter();
   const t = useTranslations('common.tv.home');
   const { ref, focusKey } = useFocusable({ focusKey: 'TV_HOME_PAGE' });
-  const { items: continueWatching } = useContinueWatching({});
-  const { data: explore, isLoading: exploreLoading } = useQuery({
-    queryKey: ['explore', 'home'],
-    queryFn: getExploreHome,
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-  });
+  const { items: continueWatching, isLoading } = useContinueWatching({});
   useTvFocus('tv-home', FOCUS_KEYS.CONTENT);
 
-  const openContent = useCallback(
-    (item: ExploreItem) => {
-      router.push(`/content/${item.id}`);
-    },
-    [router],
-  );
-
-  if (exploreLoading && continueWatching.length === 0)
-    return <TvPageSkeleton />;
+  if (isLoading && continueWatching.length === 0) return <TvPageSkeleton />;
 
   return (
     <FocusContext.Provider value={focusKey}>
       <div ref={ref} className="py-6">
-        {/* Hero Banner — auto-sliding trending content */}
-        {explore?.trending && explore.trending.length > 0 && (
-          <TvHero banner={explore.banner ?? []} trending={explore.trending} />
-        )}
-
-        {/* Continue Watching */}
-        {continueWatching.length > 0 && (
+        {continueWatching.length > 0 ? (
           <TvRow title={t('continueWatching')} focusKey="ROW_CONTINUE">
             {(onChildFocus: (l: FocusableComponentLayout) => void) =>
               continueWatching.map((item) => (
@@ -67,51 +51,16 @@ export function TvHome() {
               ))
             }
           </TvRow>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-3 py-32 text-center">
+            <p className="font-headline text-3xl font-bold uppercase tracking-widest text-foreground">
+              {t('empty')}
+            </p>
+            <p className="font-body text-lg text-muted-foreground">
+              {t('emptyHint')}
+            </p>
+          </div>
         )}
-
-        {/* Trending Row */}
-        {explore?.trending && explore.trending.length > 0 && (
-          <TvRow title={t('trending')} focusKey="ROW_TRENDING">
-            {(onChildFocus: (l: FocusableComponentLayout) => void) =>
-              explore.trending
-                .slice(0, 15)
-                .map((item) => (
-                  <TvCard
-                    key={item.id}
-                    title={item.title}
-                    image={item.cover}
-                    href={`/content/${item.id}`}
-                    onPress={() => openContent(item)}
-                    onFocus={onChildFocus}
-                  />
-                ))
-            }
-          </TvRow>
-        )}
-
-        {/* Explore Sections */}
-        {explore?.sections?.slice(0, 5).map((section, i) => (
-          <TvRow
-            key={section.title}
-            title={section.title}
-            focusKey={`ROW_SECTION_${i}`}
-          >
-            {(onChildFocus: (l: FocusableComponentLayout) => void) =>
-              section.items
-                .slice(0, 15)
-                .map((item) => (
-                  <TvCard
-                    key={item.id}
-                    title={item.title}
-                    image={item.cover}
-                    href={`/content/${item.id}`}
-                    onPress={() => openContent(item)}
-                    onFocus={onChildFocus}
-                  />
-                ))
-            }
-          </TvRow>
-        ))}
       </div>
     </FocusContext.Provider>
   );

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { ExploreHome } from '@/features/search/components/ExploreHome';
 import { HomeClient } from '@/features/search/components/HomeClient';
 import { TvHomeGate } from './TvHomeGate';
 import { WebHomeGate } from './WebHomeGate';
@@ -19,7 +18,6 @@ export default async function HomePage() {
       <TvHomeGate />
       <WebHomeGate>
         <HomeClient />
-        <ExploreHome />
       </WebHomeGate>
     </>
   );

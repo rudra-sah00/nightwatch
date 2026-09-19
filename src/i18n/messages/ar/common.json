@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "الرئيسية",
-    "explore": "Explore",
     "continue": "متابعة",
     "live": "مباشر",
     "watchlist": "قائمة المشاهدة",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "هوية المنشئ",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "متابعة المشاهدة",
-      "trending": "رائج"
+      "empty": "سجل المشاهدة فارغ",
+      "emptyHint": "ابدأ بمشاهدة شيء وسيظهر هنا"
     },
     "search": {
       "placeholder": "ابحث عن أفلام، مسلسلات...",
@@ -541,10 +537,5 @@
     "markUnread": "تحديد كغير مقروء",
     "clearConfirmTitle": "مسح هذه المحادثة؟",
     "clearConfirmDesc": "سيتم إخفاء جميع الرسائل. ستستمر الرسائل الجديدة في الظهور."
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

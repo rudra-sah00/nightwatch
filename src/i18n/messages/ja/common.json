@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "ホーム",
-    "explore": "Explore",
     "continue": "続きを見る",
     "live": "ライブ",
     "watchlist": "ウォッチリスト",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "クリエイター情報",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "視聴を続ける",
-      "trending": "トレンド"
+      "empty": "視聴履歴は空です",
+      "emptyHint": "何かを見始めると、ここに表示されます"
     },
     "search": {
       "placeholder": "映画、番組を検索...",
@@ -541,10 +537,5 @@
     "markUnread": "未読にする",
     "clearConfirmTitle": "チャットを消去しますか？",
     "clearConfirmDesc": "すべてのメッセージが非表示になります。新しいメッセージは引き続き表示されます。"
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

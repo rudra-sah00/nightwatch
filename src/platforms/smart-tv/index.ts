@@ -8,7 +8,6 @@ export { TvCard } from './components/TvCard';
 export { TvEmojiBar, TvEmojiOverlay } from './components/TvEmojiReactions';
 export { TvErrorBoundary } from './components/TvErrorBoundary';
 export { TvGrid } from './components/TvGrid';
-export { TvHero } from './components/TvHero';
 export { TvMusicCommandHandler } from './components/TvMusicCommandHandler';
 export { TvMusicFullPlayer } from './components/TvMusicFullPlayer';
 export { TvMusicMiniPlayer } from './components/TvMusicMiniPlayer';

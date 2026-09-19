@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "首页",
-    "explore": "Explore",
     "continue": "继续",
     "live": "直播",
     "watchlist": "观看列表",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "创作者身份",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "继续观看",
-      "trending": "热门"
+      "empty": "观看历史为空",
+      "emptyHint": "开始观看内容后将显示在此处"
     },
     "search": {
       "placeholder": "搜索电影、剧集...",
@@ -541,10 +537,5 @@
     "markUnread": "标记为未读",
     "clearConfirmTitle": "清除此聊天？",
     "clearConfirmDesc": "所有消息将被隐藏。新消息仍会显示。"
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

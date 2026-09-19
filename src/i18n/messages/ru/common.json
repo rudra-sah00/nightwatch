@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Главная",
-    "explore": "Explore",
     "continue": "Продолжить",
     "live": "Прямой эфир",
     "watchlist": "Список просмотра",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "Личность создателя",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "Продолжить просмотр",
-      "trending": "В тренде"
+      "empty": "История просмотра пуста",
+      "emptyHint": "Начните смотреть что-нибудь, и оно появится здесь"
     },
     "search": {
       "placeholder": "Поиск фильмов, сериалов...",
@@ -541,10 +537,5 @@
     "markUnread": "Отметить непрочитанным",
     "clearConfirmTitle": "Очистить чат?",
     "clearConfirmDesc": "Все сообщения будут скрыты. Новые сообщения продолжат появляться."
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

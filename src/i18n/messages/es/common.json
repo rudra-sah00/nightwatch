@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Inicio",
-    "explore": "Explore",
     "continue": "Continuar",
     "live": "En vivo",
     "watchlist": "Mi lista",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "Identidad del Creador",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "Seguir viendo",
-      "trending": "Tendencias"
+      "empty": "Tu historial de visualización está vacío",
+      "emptyHint": "Empieza a ver algo y aparecerá aquí"
     },
     "search": {
       "placeholder": "Buscar películas, series...",
@@ -541,10 +537,5 @@
     "markUnread": "Marcar como no leído",
     "clearConfirmTitle": "¿Borrar este chat?",
     "clearConfirmDesc": "Todos los mensajes se ocultarán. Los nuevos mensajes seguirán apareciendo."
-  },
-  "explore": {
-    "noPosts": "Aún no hay publicaciones",
-    "beFirst": "¡Sé el primero en compartir algo!",
-    "reply": "Responder"
   }
 }

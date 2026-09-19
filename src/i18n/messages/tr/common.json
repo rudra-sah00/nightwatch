@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Ana Sayfa",
-    "explore": "Explore",
     "continue": "Devam",
     "live": "Canlı",
     "watchlist": "İzleme Listesi",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "Yaratıcı Kimliği",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "İzlemeye devam et",
-      "trending": "Popüler"
+      "empty": "İzleme geçmişiniz boş",
+      "emptyHint": "Bir şey izlemeye başlayın ve burada görünecek"
     },
     "search": {
       "placeholder": "Film, dizi ara...",
@@ -541,10 +537,5 @@
     "markUnread": "Okunmadı olarak işaretle",
     "clearConfirmTitle": "Bu sohbeti temizle?",
     "clearConfirmDesc": "Tüm mesajlar gizlenecek. Yeni mesajlar görünmeye devam edecek."
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

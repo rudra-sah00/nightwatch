@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "홈",
-    "explore": "Explore",
     "continue": "이어보기",
     "live": "라이브",
     "watchlist": "관심목록",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "크리에이터 정보",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "이어서 보기",
-      "trending": "인기"
+      "empty": "시청 기록이 비어 있습니다",
+      "emptyHint": "무언가를 보기 시작하면 여기에 표시됩니다"
     },
     "search": {
       "placeholder": "영화, 시리즈 검색...",
@@ -541,10 +537,5 @@
     "markUnread": "읽지 않음으로 표시",
     "clearConfirmTitle": "채팅을 지우시겠습니까?",
     "clearConfirmDesc": "모든 메시지가 숨겨집니다. 새 메시지는 계속 표시됩니다."
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppPreferences } from '@/features/profile/components/app-preferences';
 
@@ -29,43 +29,50 @@ vi.mock('@/features/profile/components/keyboard-shortcuts', () => ({
   KeyboardShortcuts: () => <div data-testid="keyboard-shortcuts" />,
 }));
 
-const exploreSwitch = () =>
-  screen
-    .getByText('Explore on Home')
-    .closest('div.flex-col')
-    ?.parentElement?.querySelector('[role="switch"]') as HTMLElement;
-
-describe('AppPreferences — Explore on Home', () => {
+describe('AppPreferences', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
   });
 
-  it('renders the toggle, off by default', () => {
+  it('renders its remaining controls', () => {
     render(<AppPreferences />);
 
-    expect(screen.getByText('Explore on Home')).toBeInTheDocument();
-    expect(exploreSwitch()).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('language-switcher')).toBeInTheDocument();
+    expect(screen.getByTestId('keyboard-shortcuts')).toBeInTheDocument();
   });
 
-  it('persists the flag that /home reads when switched on', () => {
-    render(<AppPreferences />);
+  /**
+   * The Explore feed was removed, and this switch was its only control. It wrote
+   * `nightwatch:exploreOnHome`, which HomeClient read to blank itself out — so a
+   * leftover `true` from before the removal would have hidden the search hero and
+   * left /home empty. Neither the control nor any read of that key may come back.
+   */
+  describe('Explore on Home removal', () => {
+    it('no longer renders the toggle', () => {
+      render(<AppPreferences />);
 
-    fireEvent.click(exploreSwitch());
+      expect(screen.queryByText('Explore on Home')).not.toBeInTheDocument();
+    });
 
-    expect(localStorage.getItem('nightwatch:exploreOnHome')).toBe('true');
-    expect(exploreSwitch()).toHaveAttribute('aria-checked', 'true');
-  });
+    it('renders no switch that writes the explore preference', () => {
+      render(<AppPreferences />);
 
-  it('reflects a previously stored preference on mount', () => {
-    localStorage.setItem('nightwatch:exploreOnHome', 'true');
+      for (const el of screen.queryAllByRole('switch')) {
+        el.click();
+      }
 
-    render(<AppPreferences />);
+      expect(localStorage.getItem('nightwatch:exploreOnHome')).toBeNull();
+    });
 
-    expect(exploreSwitch()).toHaveAttribute('aria-checked', 'true');
+    it('ignores a stale preference left over from before the removal', () => {
+      localStorage.setItem('nightwatch:exploreOnHome', 'true');
 
-    fireEvent.click(exploreSwitch());
+      render(<AppPreferences />);
 
-    expect(localStorage.getItem('nightwatch:exploreOnHome')).toBe('false');
+      // Still renders normally — the value is not read, so it cannot gate anything.
+      expect(screen.getByTestId('language-switcher')).toBeInTheDocument();
+      expect(screen.queryByText('Explore on Home')).not.toBeInTheDocument();
+    });
   });
 });

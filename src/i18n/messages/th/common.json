@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "หน้าแรก",
-    "explore": "Explore",
     "continue": "ดูต่อ",
     "live": "สด",
     "watchlist": "รายการดู",
@@ -132,11 +131,7 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!",
-    "explore": {
-      "title": "Explore",
-      "description": "Social feed with posts, reactions, polls, and DMs. Connect with friends in real-time."
-    }
+    "doneBtn": "Let's Go!"
   },
   "creatorFooter": {
     "title": "ตัวตนผู้สร้าง",
@@ -419,7 +414,8 @@
   "tv": {
     "home": {
       "continueWatching": "ดูต่อ",
-      "trending": "กำลังนิยม"
+      "empty": "ประวัติการดูว่างเปล่า",
+      "emptyHint": "เริ่มดูอะไรสักอย่างแล้วจะปรากฏที่นี่"
     },
     "search": {
       "placeholder": "ค้นหาหนัง ซีรีส์...",
@@ -541,10 +537,5 @@
     "markUnread": "ทำเครื่องหมายยังไม่อ่าน",
     "clearConfirmTitle": "ล้างแชทนี้?",
     "clearConfirmDesc": "ข้อความทั้งหมดจะถูกซ่อน ข้อความใหม่จะยังคงปรากฏ"
-  },
-  "explore": {
-    "noPosts": "No posts yet",
-    "beFirst": "Be the first to share something!",
-    "reply": "Reply"
   }
 }
