@@ -27,7 +27,7 @@ describe('livestream/api', () => {
       const result = await fetchLivestreamSchedule();
 
       expect(mockApiFetch).toHaveBeenCalledWith(
-        '/api/livestream/schedule?sportType=basketball&daysBackward=0&daysForward=3&server=server1',
+        '/api/livestream/schedule?sportType=basketball&daysBackward=0&daysForward=3&server=netmirror',
         { signal: undefined },
       );
       expect(result).toEqual(items);
@@ -40,7 +40,7 @@ describe('livestream/api', () => {
       await fetchLivestreamSchedule('football', 1, 5, controller.signal);
 
       expect(mockApiFetch).toHaveBeenCalledWith(
-        '/api/livestream/schedule?sportType=football&daysBackward=1&daysForward=5&server=server1',
+        '/api/livestream/schedule?sportType=football&daysBackward=1&daysForward=5&server=netmirror',
         { signal: controller.signal },
       );
     });

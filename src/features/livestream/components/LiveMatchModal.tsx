@@ -159,7 +159,7 @@ function LiveMatchModalContent({
   const isLive = match.status === 'MatchIng';
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
-  const isLivestream = match.id.startsWith('live-server1');
+  const isLivestream = match.id.startsWith('live-netmirror');
   const providerName = isLivestream ? t('liveTV') : t('sportsToday');
   const canWatch =
     (isLive || isLivestream) &&

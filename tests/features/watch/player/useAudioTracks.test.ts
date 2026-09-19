@@ -15,7 +15,7 @@ vi.mock('@/features/watch/api', () => ({
 const BASE_PROPS = {
   type: 'movie' as const,
   title: 'Test Movie',
-  movieId: 's1:movie::123',
+  movieId: 'nm:movie::123',
   onStreamChange: vi.fn(),
   onRefetch: vi.fn(),
 };
@@ -25,11 +25,11 @@ function makePlayResponse(overrides: Partial<PlayResponse> = {}): PlayResponse {
     success: true,
     type: 'movie',
     title: 'Test Movie',
-    movieId: 's1:movie::123',
+    movieId: 'nm:movie::123',
     masterPlaylistUrl: 'https://cdn.example.com/movie.mp4',
     audioTracks: [
-      { language: 'en', label: 'English', streamUrl: 's1:en::123' },
-      { language: 'ru', label: 'Russian', streamUrl: 's1:ru::456' },
+      { language: 'en', label: 'English', streamUrl: 'nm:en::123' },
+      { language: 'ru', label: 'Russian', streamUrl: 'nm:ru::456' },
     ],
     ...overrides,
   };
@@ -42,7 +42,7 @@ describe('useAudioTracks', () => {
     vi.clearAllMocks();
   });
 
-  it('returns empty tracks for s1', () => {
+  it('returns empty tracks for nm', () => {
     const { result } = renderHook(() => useAudioTracks({ ...BASE_PROPS }));
     expect(result.current.audioTracks).toHaveLength(0);
   });
@@ -98,8 +98,8 @@ describe('useAudioTracks', () => {
       useAudioTracks({ ...BASE_PROPS, onRefetch }),
     );
     await waitFor(() => expect(result.current.audioTracks).toHaveLength(2));
-    act(() => result.current.handleAudioTrackChange('s1:ru::456'));
-    expect(onRefetch).toHaveBeenCalledWith('s1:ru::456');
+    act(() => result.current.handleAudioTrackChange('nm:ru::456'));
+    expect(onRefetch).toHaveBeenCalledWith('nm:ru::456');
   });
 
   it('responds to track change for direct url', async () => {

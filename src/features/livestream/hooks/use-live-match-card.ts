@@ -31,7 +31,7 @@ export function useLiveMatchCard(match: LiveMatch) {
   const isEnded = match.status === 'MatchEnded';
   const isUpcoming = match.status === 'MatchNotStart';
   const isLivestream =
-    match.id.startsWith('live-server1') || match.id.startsWith('lt:');
+    match.id.startsWith('live-netmirror') || match.id.startsWith('lt:');
   const canWatch =
     match.channelStatus !== 'offline' &&
     (isLive || isLivestream) &&

@@ -126,7 +126,7 @@ export function useWatchContent() {
           // When overrideMovieId is a dub content ID (s1: prefixed), it represents
           // a standalone content entry for that language. Fetch it as a movie so
           // the backend resolves the exact dub, not the default language.
-          if (overrideMovieId?.startsWith('s1:')) {
+          if (overrideMovieId?.startsWith('nm:')) {
             response = await playVideo({
               type: 'movie',
               title: decodedTitle,

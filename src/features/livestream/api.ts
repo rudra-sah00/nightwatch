@@ -20,7 +20,7 @@ export const fetchLivestreamSchedule = async (
   signal?: AbortSignal,
 ): Promise<LiveMatch[]> => {
   const data = await apiFetch<LivestreamScheduleResponse>(
-    `/api/livestream/schedule?sportType=${sportType}&daysBackward=${daysBackward}&daysForward=${daysForward}&server=server1`,
+    `/api/livestream/schedule?sportType=${sportType}&daysBackward=${daysBackward}&daysForward=${daysForward}&server=netmirror`,
     { signal },
   );
   return data?.items || [];

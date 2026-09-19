@@ -188,7 +188,7 @@ function LiveMatchPlayerContent() {
   // Guaranteed non-null from here
   const activeMatch = match;
 
-  const isLivestream = activeMatch.id.startsWith('live-server1');
+  const isLivestream = activeMatch.id.startsWith('live-netmirror');
   const isEffectivelyLive = activeMatch.status === 'MatchIng' || isLivestream;
 
   if (activeMatch.status === 'MatchNotStart' && !isLivestream) {

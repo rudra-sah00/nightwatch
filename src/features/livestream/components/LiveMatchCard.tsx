@@ -63,7 +63,7 @@ export function LiveMatchCard({ match, compact }: LiveMatchCardProps) {
   const t = useTranslations('live');
 
   const isLivestream =
-    match.id.startsWith('live-server1') || match.id.startsWith('lt:');
+    match.id.startsWith('live-netmirror') || match.id.startsWith('lt:');
   const isChannelCard =
     match.contentKind === 'channel' ||
     match.type === 'all_channels' ||

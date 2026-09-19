@@ -178,7 +178,7 @@ export function useAudioTracks({
       const track = audioTracks.find((t) => t.id === trackId);
       if (!track) return;
 
-      if (track.streamUrl.startsWith('s1:')) {
+      if (track.streamUrl.startsWith('nm:')) {
         // Dub stored as a separate content entry → full refetch needed.
         onRefetch(track.streamUrl);
       } else {

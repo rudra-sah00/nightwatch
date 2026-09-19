@@ -82,7 +82,7 @@ export function useWatchPartyVideoArea(room: WatchPartyRoom) {
     (trackId: string) => {
       const track = initialAudioTracks.find((t) => t.id === trackId);
       if (!track) return;
-      if (track.streamUrl.startsWith('s1:')) {
+      if (track.streamUrl.startsWith('nm:')) {
         handleRefetch(track.streamUrl);
       } else {
         handleStreamChange(track.streamUrl);
