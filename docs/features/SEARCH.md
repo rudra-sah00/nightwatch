@@ -10,7 +10,7 @@ src/features/search/
 ├── schema.ts                       # Zod validation for search query
 ├── types.ts                        # SearchResult, ShowDetails, Episode, Season, ContentType
 ├── components/
-│   ├── HomeClient.tsx              # Landing page with hero search bar
+│   ├── SearchIdle.tsx              # /search landing — hero search bar, no query yet
 │   ├── SearchClient.tsx            # Search results page
 │   ├── search-results.tsx          # Results grid
 │   ├── content-detail-modal.tsx    # Full-screen content detail overlay
@@ -19,6 +19,8 @@ src/features/search/
 │   ├── episode-card.tsx            # Single episode card
 │   ├── episode-list.tsx            # Episode list container
 │   └── EpisodeSkeleton.tsx         # Loading placeholder
+├── lib/
+│   └── catalog-badge.ts            # Per-catalogue badge colours for result posters
 ├── hooks/
 │   ├── use-search-input.ts         # Global search input + typeahead
 │   ├── use-search-results.ts       # Deduplication
@@ -49,17 +51,24 @@ Validates the `q` URL search parameter before triggering API calls.
 
 ## Components
 
-### HomeClient
+### SearchIdle
 
-`components/HomeClient.tsx`
+`components/SearchIdle.tsx`
 
-Landing page with a Bauhaus-inspired hero layout:
+The landing state of `/search`, shown whenever there is no query and no search in flight
+— which is where the hub's "Movies & Web Series" tile arrives. Bauhaus-inspired hero:
 - Large headline with neo-brutalist styling
 - Search bar with **inline typeahead ghost text** — shows the first suggestion as transparent text behind the input
 - **Tab-to-complete** — pressing Tab fills the suggestion
 - Enter or button click navigates to `/search?q=...`
+- Reports its own pending state on the button, because the router transition belongs to
+  its own `useSearchInput` instance and the results layout cannot observe it
 - Decorative animated marquee strip at the bottom
 - Three stat indicators (red/blue/yellow dots)
+
+Opts into typeahead explicitly via `useSearchInput({ enableSuggestions: true })`: the hook
+suppresses suggestions on `/search` so the compact results header does not autocomplete
+over a query already run, which is the wrong behaviour for a landing input on that route.
 
 ### SearchClient
 
@@ -79,9 +88,37 @@ Search results page with an inline-editable query:
 
 Grid of content cards with:
 - Poster images via `next/image` with optimized URLs
-- Content type badge (Movie/Series)
+- **Year badge**, top-right
+- **Catalogue badge**, bottom-left — see below
 - Loading skeleton grid
 - Click handler for content selection
+
+#### Catalogue badges
+
+One search returns every NetMirror catalogue merged together, so each poster is badged
+with where the title came from. Without it the posters are indistinguishable — a Netflix
+hit and a Prime Video hit look identical.
+
+| `source` | Label | Colour |
+|---|---|---|
+| `nf` | Netflix | `bg-neo-red` |
+| `nr` | New Releases | `bg-neo-green` |
+| `pv` | Prime Video | `bg-neo-blue` |
+| `hs` | JioHotstar | `bg-neo-orange` |
+
+`lib/catalog-badge.ts` owns the mapping and falls back to a neutral colour for an
+unrecognised `source`, so a catalogue added backend-side still renders.
+
+Two things to know:
+
+- Palette colours are used rather than brand colours. The badge sits on an arbitrary
+  poster and has to stay legible, which brand navy-on-black would not.
+- **Disney+ titles are badged "JioHotstar".** They share an API namespace and id space
+  upstream with nothing to tell them apart, so the distinction is not available at search
+  time. See the backend's `providers/netmirror.md`.
+
+Both badges are optional and render only when the field is present, so responses cached
+before the field existed still display.
 
 ### content-detail-modal
 
@@ -227,7 +264,7 @@ Minimal hook tracking image error state for a single episode card.
 
 ## Data Flow: Search → Play
 
-1. User types in `HomeClient` → `useSearchInput` manages input + suggestions
+1. User types in `SearchIdle` → `useSearchInput` manages input + suggestions
 2. Enter press → `router.push('/search?q=...')` via `useTransition`
 3. `SearchClient` reads `?q=` → `useHomeClient` validates and fetches results
 4. User clicks result → `ContentDetailModal` opens

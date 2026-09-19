@@ -119,6 +119,16 @@ export interface SearchResult {
   contentType: ContentType;
   poster: string;
   year?: number;
+  /**
+   * Catalogue the result came from — `nf`, `nr`, `pv` or `hs`.
+   *
+   * A NetMirror account spans several catalogues and one search returns them together,
+   * so a result is only meaningful next to where it came from. Optional because older
+   * cached responses predate it.
+   */
+  source?: string;
+  /** Human-readable form of {@link SearchResult.source}, e.g. "Prime Video". */
+  sourceLabel?: string;
 }
 
 export interface PlayMovieParams {

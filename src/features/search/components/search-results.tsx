@@ -5,11 +5,12 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import { SearchSkeleton } from '@/components/ui/skeletons';
-import { getOptimizedImageUrl } from '@/lib/utils';
+import { cn, getOptimizedImageUrl } from '@/lib/utils';
 import {
   useSearchResultItem,
   useSearchResults,
 } from '../hooks/use-search-results';
+import { catalogBadgeClass } from '../lib/catalog-badge';
 import type { SearchResult } from '../types';
 
 /** Props for {@link SearchResults}. */
@@ -134,6 +135,20 @@ const SearchResultItem = React.memo(function SearchResultItem({
         {result.year ? (
           <div className="absolute top-2 right-2 bg-neo-yellow border-[2px] border-border px-1.5 py-0.5 font-headline font-black text-[10px] text-foreground">
             {result.year}
+          </div>
+        ) : null}
+
+        {/* Catalogue badge — which service the title came from. Bottom-left so it never
+            collides with the year badge, and colour-coded per catalogue so the origin is
+            recognisable at a glance across a dense grid. */}
+        {result.sourceLabel ? (
+          <div
+            className={cn(
+              'absolute bottom-2 left-2 right-2 border-[2px] border-border px-1.5 py-0.5 font-headline font-black text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground truncate',
+              catalogBadgeClass(result.source),
+            )}
+          >
+            {result.sourceLabel}
           </div>
         ) : null}
       </div>
