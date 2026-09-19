@@ -68,5 +68,15 @@
     "seasonEpisodePrefix": "م{season}:ح{episode}",
     "minutesSuffix": "{runtime}د"
   },
-  "marquee": "الشكل يتبع الوظيفة • البساطة هي الحقيقة • بلا تشتيت • فقط أفلام •"
+  "marquee": "الشكل يتبع الوظيفة • البساطة هي الحقيقة • بلا تشتيت • فقط أفلام •",
+  "idle": {
+    "headline1": "ابحث عن",
+    "headline2": "فيلمك",
+    "searchPlaceholder": "ابحث عن أفلام، مسلسلات، أو سينما...",
+    "searchButton": "بحث",
+    "searchAriaLabel": "البحث عن أفلام، مسلسلات، أو سينما",
+    "stat1": "+12 ألف عنوان",
+    "stat2": "4K Ultra Raw",
+    "stat3": "تركيز مستقل"
+  }
 }

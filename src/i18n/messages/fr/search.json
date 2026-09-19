@@ -68,5 +68,15 @@
     "seasonEpisodePrefix": "S{season}:É{episode}",
     "minutesSuffix": "{runtime}M"
   },
-  "marquee": "LA FORME SUIT LA FONCTION • LE MINIMALISME EST VÉRITÉ • AUCUNE DISTRACTION • JUSTE DU CINÉMA •"
+  "marquee": "LA FORME SUIT LA FONCTION • LE MINIMALISME EST VÉRITÉ • AUCUNE DISTRACTION • JUSTE DU CINÉMA •",
+  "idle": {
+    "headline1": "TROUVEZ VOTRE",
+    "headline2": "FILM",
+    "searchPlaceholder": "RECHERCHER DES FILMS, SÉRIES OU CINÉMA...",
+    "searchButton": "RECHERCHER",
+    "searchAriaLabel": "Rechercher des films, séries ou cinéma",
+    "stat1": "12k+ Titres",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Cinéma Indé"
+  }
 }

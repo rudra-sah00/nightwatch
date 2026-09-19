@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+import { SearchIdle } from '@/features/search/components/SearchIdle';
 import { SearchResults } from '@/features/search/components/search-results';
 import type { SearchResult } from '@/features/search/types';
 import { useHomeClient } from '../hooks/use-home-client';
@@ -64,6 +65,20 @@ export function SearchClient({
 
   if (isLoading) {
     return <GlobalLoading />;
+  }
+
+  // No query means there is nothing to report on. The results layout would render a
+  // "Results:" label over an empty input, "0 Films Found" and then dead space — which
+  // is what the hub's Movies & Web Series tile used to land on. Show the search
+  // landing instead.
+  const isIdle = !(hasSearched || isTransitioning || isPending);
+
+  if (isIdle) {
+    return (
+      <div className="w-full">
+        <SearchIdle />
+      </div>
+    );
   }
 
   // isPending goes true the instant the user presses Enter (router transition

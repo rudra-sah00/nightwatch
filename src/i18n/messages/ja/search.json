@@ -68,5 +68,15 @@
     "seasonEpisodePrefix": "S{season}:E{episode}",
     "minutesSuffix": "{runtime}分"
   },
-  "marquee": "形態は機能に従う • ミニマリズムは真実 • 気を散らすものなし • ただ映画を •"
+  "marquee": "形態は機能に従う • ミニマリズムは真実 • 気を散らすものなし • ただ映画を •",
+  "idle": {
+    "headline1": "あなたの",
+    "headline2": "映画を見つけよう",
+    "searchPlaceholder": "映画、番組、シネマを検索...",
+    "searchButton": "検索",
+    "searchAriaLabel": "映画、番組、シネマを検索",
+    "stat1": "12k+ タイトル",
+    "stat2": "4K ウルトラ ロー",
+    "stat3": "インディーフォーカス"
+  }
 }

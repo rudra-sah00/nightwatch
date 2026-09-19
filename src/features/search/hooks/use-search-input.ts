@@ -9,15 +9,30 @@ import { getSearchSuggestions } from '@/features/search/api';
  * Hook that manages the global search input, inline typeahead suggestions,
  * recent-search history (localStorage), and URL-driven navigation.
  *
- * Suggestions are fetched from the API with a 200 ms debounce
- * and are disabled on the `/search` results page. The user must press
- * Enter or select a suggestion to trigger navigation; auto-search on
- * keystroke is intentionally disabled.
+ * Suggestions are fetched from the API with a 200 ms debounce and are disabled on the
+ * `/search` results page, where the compact header input should not autocomplete over
+ * a query the user has already run. The idle state of that same page is a different
+ * surface — it is the search landing — so it opts back in via
+ * {@link UseSearchInputOptions.enableSuggestions}.
+ *
+ * The user must press Enter or select a suggestion to trigger navigation; auto-search
+ * on keystroke is intentionally disabled.
  *
  * @returns Refs, query state, suggestion data, keyboard/focus handlers,
  *          and derived display flags.
  */
-export function useSearchInput() {
+export interface UseSearchInputOptions {
+  /**
+   * Force typeahead on even where the pathname would otherwise suppress it. Used by
+   * the search page's idle hero, which behaves like the landing input rather than the
+   * results header.
+   */
+  enableSuggestions?: boolean;
+}
+
+export function useSearchInput({
+  enableSuggestions = false,
+}: UseSearchInputOptions = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -52,8 +67,9 @@ export function useSearchInput() {
     );
   };
 
-  // Suggestions are disabled on the search results page per user request
-  const isSearchPage = pathname === '/search';
+  // Suggestions are disabled on the search results page, except for callers that
+  // explicitly opt in (the idle hero on that same route).
+  const isSearchPage = pathname === '/search' && !enableSuggestions;
 
   // Sync query when URL changes (e.g., browser back/forward) — only when not typing
   const urlQuery = searchParams.get('q') || '';

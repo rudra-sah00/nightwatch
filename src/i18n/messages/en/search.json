@@ -68,5 +68,15 @@
     "seasonEpisodePrefix": "S{season}:E{episode}",
     "minutesSuffix": "{runtime}M"
   },
-  "marquee": "FORM FOLLOWS FUNCTION • MINIMALISM IS TRUTH • NO DISTRACTIONS • JUST FILM •"
+  "marquee": "FORM FOLLOWS FUNCTION • MINIMALISM IS TRUTH • NO DISTRACTIONS • JUST FILM •",
+  "idle": {
+    "headline1": "FIND YOUR",
+    "headline2": "FILM",
+    "searchPlaceholder": "SEARCH MOVIES, SHOWS, OR CINEMA...",
+    "searchButton": "SEARCH",
+    "searchAriaLabel": "Search movies, shows, or cinema",
+    "stat1": "12k+ Titles",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Indie Focus"
+  }
 }

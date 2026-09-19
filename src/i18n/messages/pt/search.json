@@ -68,5 +68,15 @@
     "seasonEpisodePrefix": "T{season}:E{episode}",
     "minutesSuffix": "{runtime}M"
   },
-  "marquee": "A FORMA SEGUE A FUNÇÃO • MINIMALISMO É VERDADE • SEM DISTRAÇÕES • APENAS CINEMA •"
+  "marquee": "A FORMA SEGUE A FUNÇÃO • MINIMALISMO É VERDADE • SEM DISTRAÇÕES • APENAS CINEMA •",
+  "idle": {
+    "headline1": "ENCONTRE SEU",
+    "headline2": "FILME",
+    "searchPlaceholder": "BUSCAR FILMES, SÉRIES OU CINEMA...",
+    "searchButton": "BUSCAR",
+    "searchAriaLabel": "Buscar filmes, séries ou cinema",
+    "stat1": "12k+ Títulos",
+    "stat2": "4K Ultra Raw",
+    "stat3": "Foco Indie"
+  }
 }
