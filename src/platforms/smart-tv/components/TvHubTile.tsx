@@ -10,10 +10,13 @@ interface TvHubTileProps {
   icon: LucideIcon;
   /** Tailwind background class for the icon plate. */
   accent: string;
+  /** Called before navigation, so the gate can record that the choice was made. */
+  onPick?: () => void;
   /**
-   * Set on the first tile so it resolves `FOCUS_KEYS.CONTENT`. Nothing else in the
-   * app registers that key, which left `useTvFocus`'s default-focus path a silent
-   * no-op — it guards on `doesFocusableExist` and so never fired.
+   * Lets the grid point a well-known key at the first tile — `FOCUS_KEYS.CONTENT` on
+   * the home page, or the gate's own entry key. Nothing else in the app registers
+   * `FOCUS_KEYS.CONTENT`, which left `useTvFocus`'s default-focus path a silent no-op:
+   * it guards on `doesFocusableExist` and so never fired.
    */
   focusKey?: string;
 }
@@ -34,12 +37,16 @@ export function TvHubTile({
   label,
   icon: Icon,
   accent,
+  onPick,
   focusKey,
 }: TvHubTileProps) {
   const router = useRouter();
   const { ref, focused } = useFocusable({
     focusKey,
-    onEnterPress: () => router.push(href),
+    onEnterPress: () => {
+      onPick?.();
+      router.push(href);
+    },
     onFocus: () => router.prefetch(href),
   });
 

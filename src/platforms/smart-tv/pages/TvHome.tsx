@@ -7,10 +7,9 @@ import {
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { hubDestinationsFor } from '@/features/hub/lib/destinations';
 import { useContinueWatching } from '@/features/watch/hooks/use-continue-watching';
 import { TvCard } from '../components/TvCard';
-import { TvHubTile } from '../components/TvHubTile';
+import { TvHubGrid } from '../components/TvHubGrid';
 import { TvRow } from '../components/TvRow';
 import { useTvFocus } from '../hooks/use-tv-focus';
 import { FOCUS_KEYS } from '../lib/focus-keys';
@@ -18,11 +17,14 @@ import { FOCUS_KEYS } from '../lib/focus-keys';
 /**
  * Smart TV home — the entry hub.
  *
- * Asks what the user wants to explore and routes into one of the app's domains,
- * then shows Continue Watching underneath when there is something to resume. The
- * curated hero and genre rows that used to fill this screen came from the Explore
- * feed, which was removed; the hub replaces it with an explicit choice rather than
- * a feed, so there is no catalogue to keep fresh.
+ * Asks what the user wants to explore and routes into one of the app's domains, then
+ * shows Continue Watching underneath when there is something to resume. The curated
+ * hero and genre rows that used to fill this screen came from the Explore feed, which
+ * was removed; the hub replaces it with an explicit choice rather than a feed, so there
+ * is no catalogue to keep fresh.
+ *
+ * Continue Watching lives here because TvNavbar has no entry for it — unlike the web
+ * sidebar, this is the only route to it.
  *
  * Destinations are shared with the web hub. Games is excluded on TV — see
  * `HubDestination.onTv`.
@@ -32,7 +34,6 @@ export function TvHome() {
   const t = useTranslations('common');
   const { ref, focusKey } = useFocusable({ focusKey: 'TV_HOME_PAGE' });
   const { items: continueWatching } = useContinueWatching({});
-  const destinations = hubDestinationsFor('tv');
   useTvFocus('tv-home', FOCUS_KEYS.CONTENT);
 
   return (
@@ -42,18 +43,8 @@ export function TvHome() {
           {t('hub.title')}
         </h1>
 
-        <div className="px-12 grid grid-cols-5 gap-6 mb-12">
-          {destinations.map(({ id, href, icon, labelKey, accent }, i) => (
-            <TvHubTile
-              key={id}
-              href={href}
-              label={t(labelKey)}
-              icon={icon}
-              accent={accent}
-              // Gives useTvFocus a real target to restore focus to on entry.
-              focusKey={i === 0 ? FOCUS_KEYS.CONTENT : undefined}
-            />
-          ))}
+        <div className="px-12 mb-12">
+          <TvHubGrid registerContentKey />
         </div>
 
         {continueWatching.length > 0 && (

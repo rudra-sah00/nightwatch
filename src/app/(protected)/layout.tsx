@@ -5,6 +5,7 @@ import { ScreenTracker } from '@/components/layout/ScreenTracker';
 import { FeatureErrorBoundary } from '@/components/ui/feature-error-boundary';
 import { CallOverlay } from '@/features/friends/components/CallOverlay';
 import { CallProvider } from '@/features/friends/hooks/use-call';
+import { HubGate } from '@/features/hub/components/HubGate';
 import { FloatingDisc } from '@/features/music/components/FloatingDisc';
 import { MobileAppLifecycle } from '@/platforms/mobile/MobileAppLifecycle';
 
@@ -50,6 +51,10 @@ export default function ProtectedLayout({
           <div className="h-full bg-background flex flex-col overflow-hidden">
             <main className="flex-1 w-full min-h-0">{children}</main>
           </div>
+          {/* Last child so it paints over the layout chrome rendered by (main). */}
+          <FeatureErrorBoundary feature="Hub" silent>
+            <HubGate />
+          </FeatureErrorBoundary>
         </FeatureErrorBoundary>
       </CallProvider>
     </FeatureErrorBoundary>
