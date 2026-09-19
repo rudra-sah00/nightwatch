@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "Continuer à regarder",
-      "empty": "Votre historique de visionnage est vide",
-      "emptyHint": "Commencez à regarder quelque chose et cela apparaîtra ici"
+      "continueWatching": "Continuer à regarder"
     },
     "search": {
       "placeholder": "Rechercher films, séries...",
@@ -537,5 +535,11 @@
     "markUnread": "Marquer comme non lu",
     "clearConfirmTitle": "Effacer ce chat ?",
     "clearConfirmDesc": "Tous les messages seront masqués. Les nouveaux messages apparaîtront toujours."
+  },
+  "hub": {
+    "title": "Que voulez-vous explorer ?",
+    "subtitle": "Choisissez par où commencer",
+    "liveChannels": "Chaînes en direct",
+    "moviesAndSeries": "Films et séries"
   }
 }

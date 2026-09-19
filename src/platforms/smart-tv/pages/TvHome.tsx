@@ -7,35 +7,57 @@ import {
 } from '@noriginmedia/norigin-spatial-navigation';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { hubDestinationsFor } from '@/features/hub/lib/destinations';
 import { useContinueWatching } from '@/features/watch/hooks/use-continue-watching';
 import { TvCard } from '../components/TvCard';
+import { TvHubTile } from '../components/TvHubTile';
 import { TvRow } from '../components/TvRow';
-import { TvPageSkeleton } from '../components/TvSkeleton';
 import { useTvFocus } from '../hooks/use-tv-focus';
 import { FOCUS_KEYS } from '../lib/focus-keys';
 
 /**
- * Smart TV home screen.
+ * Smart TV home — the entry hub.
  *
- * Shows Continue Watching only. The curated hero, trending row and genre rows
- * that used to fill this screen were fed by the Explore feed, which has been
- * removed — so there is no browse surface here and search is the way in until a
- * provider-native discovery feed replaces it.
+ * Asks what the user wants to explore and routes into one of the app's domains,
+ * then shows Continue Watching underneath when there is something to resume. The
+ * curated hero and genre rows that used to fill this screen came from the Explore
+ * feed, which was removed; the hub replaces it with an explicit choice rather than
+ * a feed, so there is no catalogue to keep fresh.
+ *
+ * Destinations are shared with the web hub. Games is excluded on TV — see
+ * `HubDestination.onTv`.
  */
 export function TvHome() {
   const router = useRouter();
-  const t = useTranslations('common.tv.home');
+  const t = useTranslations('common');
   const { ref, focusKey } = useFocusable({ focusKey: 'TV_HOME_PAGE' });
-  const { items: continueWatching, isLoading } = useContinueWatching({});
+  const { items: continueWatching } = useContinueWatching({});
+  const destinations = hubDestinationsFor('tv');
   useTvFocus('tv-home', FOCUS_KEYS.CONTENT);
-
-  if (isLoading && continueWatching.length === 0) return <TvPageSkeleton />;
 
   return (
     <FocusContext.Provider value={focusKey}>
-      <div ref={ref} className="py-6">
-        {continueWatching.length > 0 ? (
-          <TvRow title={t('continueWatching')} focusKey="ROW_CONTINUE">
+      <div ref={ref} className="py-8">
+        <h1 className="px-12 font-headline text-4xl font-black uppercase tracking-tighter text-foreground mb-8">
+          {t('hub.title')}
+        </h1>
+
+        <div className="px-12 grid grid-cols-5 gap-6 mb-12">
+          {destinations.map(({ id, href, icon, labelKey, accent }, i) => (
+            <TvHubTile
+              key={id}
+              href={href}
+              label={t(labelKey)}
+              icon={icon}
+              accent={accent}
+              // Gives useTvFocus a real target to restore focus to on entry.
+              focusKey={i === 0 ? FOCUS_KEYS.CONTENT : undefined}
+            />
+          ))}
+        </div>
+
+        {continueWatching.length > 0 && (
+          <TvRow title={t('tv.home.continueWatching')} focusKey="ROW_CONTINUE">
             {(onChildFocus: (l: FocusableComponentLayout) => void) =>
               continueWatching.map((item) => (
                 <TvCard
@@ -51,15 +73,6 @@ export function TvHome() {
               ))
             }
           </TvRow>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-3 py-32 text-center">
-            <p className="font-headline text-3xl font-bold uppercase tracking-widest text-foreground">
-              {t('empty')}
-            </p>
-            <p className="font-body text-lg text-muted-foreground">
-              {t('emptyHint')}
-            </p>
-          </div>
         )}
       </div>
     </FocusContext.Provider>

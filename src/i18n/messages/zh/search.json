@@ -1,14 +1,4 @@
 {
-  "home": {
-    "headline1": "寻找你的",
-    "headline2": "电影",
-    "searchPlaceholder": "搜索电影、剧集或影院...",
-    "searchButton": "搜索",
-    "searchAriaLabel": "搜索电影、剧集或影院",
-    "stat1": "12k+ 片源",
-    "stat2": "4K Ultra Raw",
-    "stat3": "独立电影"
-  },
   "results": {
     "searching": "搜索中：",
     "resultsLabel": "结果：",

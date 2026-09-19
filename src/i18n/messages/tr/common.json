@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "İzlemeye devam et",
-      "empty": "İzleme geçmişiniz boş",
-      "emptyHint": "Bir şey izlemeye başlayın ve burada görünecek"
+      "continueWatching": "İzlemeye devam et"
     },
     "search": {
       "placeholder": "Film, dizi ara...",
@@ -537,5 +535,11 @@
     "markUnread": "Okunmadı olarak işaretle",
     "clearConfirmTitle": "Bu sohbeti temizle?",
     "clearConfirmDesc": "Tüm mesajlar gizlenecek. Yeni mesajlar görünmeye devam edecek."
+  },
+  "hub": {
+    "title": "Ne keşfetmek istersin?",
+    "subtitle": "Nereden başlayacağını seç",
+    "liveChannels": "Canlı Kanallar",
+    "moviesAndSeries": "Filmler ve Diziler"
   }
 }

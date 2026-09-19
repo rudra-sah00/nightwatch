@@ -1,14 +1,4 @@
 {
-  "home": {
-    "headline1": "अपनी",
-    "headline2": "फ़िल्म खोजें",
-    "searchPlaceholder": "फ़िल्में, शो, या सिनेमा खोजें...",
-    "searchButton": "खोजें",
-    "searchAriaLabel": "फ़िल्में, शो, या सिनेमा खोजें",
-    "stat1": "12k+ शीर्षक",
-    "stat2": "4K अल्ट्रा रॉ",
-    "stat3": "इंडी फोकस"
-  },
   "results": {
     "searching": "खोज रहे हैं:",
     "resultsLabel": "परिणाम:",

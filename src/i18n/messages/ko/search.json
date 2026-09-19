@@ -1,14 +1,4 @@
 {
-  "home": {
-    "headline1": "당신의",
-    "headline2": "영화를 찾으세요",
-    "searchPlaceholder": "영화, 프로그램 또는 시네마 검색...",
-    "searchButton": "검색",
-    "searchAriaLabel": "영화, 프로그램 또는 시네마 검색",
-    "stat1": "12k+ 타이틀",
-    "stat2": "4K 울트라 로",
-    "stat3": "인디 포커스"
-  },
   "results": {
     "searching": "검색 중:",
     "resultsLabel": "결과:",

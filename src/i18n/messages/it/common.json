@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "Continua a guardare",
-      "empty": "La cronologia è vuota",
-      "emptyHint": "Inizia a guardare qualcosa e apparirà qui"
+      "continueWatching": "Continua a guardare"
     },
     "search": {
       "placeholder": "Cerca film, serie...",
@@ -537,5 +535,11 @@
     "markUnread": "Segna come non letto",
     "clearConfirmTitle": "Cancellare questa chat?",
     "clearConfirmDesc": "Tutti i messaggi saranno nascosti. I nuovi messaggi appariranno comunque."
+  },
+  "hub": {
+    "title": "Cosa vuoi esplorare?",
+    "subtitle": "Scegli da dove iniziare",
+    "liveChannels": "Canali live",
+    "moviesAndSeries": "Film e serie"
   }
 }

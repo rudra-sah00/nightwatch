@@ -1,14 +1,4 @@
 {
-  "home": {
-    "headline1": "FİLMİNİ",
-    "headline2": "BUL",
-    "searchPlaceholder": "FİLM, DİZİ VEYA SİNEMA ARA...",
-    "searchButton": "ARA",
-    "searchAriaLabel": "Film, dizi veya sinema ara",
-    "stat1": "12k+ Başlık",
-    "stat2": "4K Ultra Raw",
-    "stat3": "Bağımsız Odak"
-  },
   "results": {
     "searching": "Aranıyor:",
     "resultsLabel": "Sonuçlar:",

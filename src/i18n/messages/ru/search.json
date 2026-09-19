@@ -1,14 +1,4 @@
 {
-  "home": {
-    "headline1": "НАЙДИ СВОЙ",
-    "headline2": "ФИЛЬМ",
-    "searchPlaceholder": "ПОИСК ФИЛЬМОВ, СЕРИАЛОВ ИЛИ КИНО...",
-    "searchButton": "ПОИСК",
-    "searchAriaLabel": "Поиск фильмов, сериалов или кино",
-    "stat1": "12k+ Наименований",
-    "stat2": "4K Ultra Raw",
-    "stat3": "Инди-фокус"
-  },
   "results": {
     "searching": "Поиск:",
     "resultsLabel": "Результаты:",

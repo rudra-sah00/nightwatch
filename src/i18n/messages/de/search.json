@@ -1,14 +1,4 @@
 {
-  "home": {
-    "headline1": "FINDE DEINEN",
-    "headline2": "FILM",
-    "searchPlaceholder": "FILME, SERIEN ODER KINO SUCHEN...",
-    "searchButton": "SUCHEN",
-    "searchAriaLabel": "Filme, Serien oder Kino suchen",
-    "stat1": "12k+ Titel",
-    "stat2": "4K Ultra Raw",
-    "stat3": "Indie-Fokus"
-  },
   "results": {
     "searching": "Suche:",
     "resultsLabel": "Ergebnisse:",

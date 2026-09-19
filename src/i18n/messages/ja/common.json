@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "視聴を続ける",
-      "empty": "視聴履歴は空です",
-      "emptyHint": "何かを見始めると、ここに表示されます"
+      "continueWatching": "視聴を続ける"
     },
     "search": {
       "placeholder": "映画、番組を検索...",
@@ -537,5 +535,11 @@
     "markUnread": "未読にする",
     "clearConfirmTitle": "チャットを消去しますか？",
     "clearConfirmDesc": "すべてのメッセージが非表示になります。新しいメッセージは引き続き表示されます。"
+  },
+  "hub": {
+    "title": "何を楽しみますか？",
+    "subtitle": "始める場所を選んでください",
+    "liveChannels": "ライブチャンネル",
+    "moviesAndSeries": "映画＆ドラマ"
   }
 }

@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "Continue Watching",
-      "empty": "Your watch history is empty",
-      "emptyHint": "Start watching something and it will appear here"
+      "continueWatching": "Continue Watching"
     },
     "search": {
       "placeholder": "Search movies, shows...",
@@ -537,5 +535,11 @@
     "markUnread": "Mark as Unread",
     "clearConfirmTitle": "Clear this chat?",
     "clearConfirmDesc": "All messages will be hidden. New messages will still appear."
+  },
+  "hub": {
+    "title": "What do you want to explore?",
+    "subtitle": "Pick where to start",
+    "liveChannels": "Live Channels",
+    "moviesAndSeries": "Movies & Web Series"
   }
 }

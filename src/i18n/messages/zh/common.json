@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "继续观看",
-      "empty": "观看历史为空",
-      "emptyHint": "开始观看内容后将显示在此处"
+      "continueWatching": "继续观看"
     },
     "search": {
       "placeholder": "搜索电影、剧集...",
@@ -537,5 +535,11 @@
     "markUnread": "标记为未读",
     "clearConfirmTitle": "清除此聊天？",
     "clearConfirmDesc": "所有消息将被隐藏。新消息仍会显示。"
+  },
+  "hub": {
+    "title": "想看什么？",
+    "subtitle": "选择开始的地方",
+    "liveChannels": "直播频道",
+    "moviesAndSeries": "电影和剧集"
   }
 }

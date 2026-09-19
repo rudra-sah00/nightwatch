@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "متابعة المشاهدة",
-      "empty": "سجل المشاهدة فارغ",
-      "emptyHint": "ابدأ بمشاهدة شيء وسيظهر هنا"
+      "continueWatching": "متابعة المشاهدة"
     },
     "search": {
       "placeholder": "ابحث عن أفلام، مسلسلات...",
@@ -537,5 +535,11 @@
     "markUnread": "تحديد كغير مقروء",
     "clearConfirmTitle": "مسح هذه المحادثة؟",
     "clearConfirmDesc": "سيتم إخفاء جميع الرسائل. ستستمر الرسائل الجديدة في الظهور."
+  },
+  "hub": {
+    "title": "ماذا تريد أن تستكشف؟",
+    "subtitle": "اختر من أين تبدأ",
+    "liveChannels": "القنوات المباشرة",
+    "moviesAndSeries": "أفلام ومسلسلات"
   }
 }

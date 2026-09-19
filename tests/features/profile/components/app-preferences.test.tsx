@@ -44,9 +44,9 @@ describe('AppPreferences', () => {
 
   /**
    * The Explore feed was removed, and this switch was its only control. It wrote
-   * `nightwatch:exploreOnHome`, which HomeClient read to blank itself out — so a
-   * leftover `true` from before the removal would have hidden the search hero and
-   * left /home empty. Neither the control nor any read of that key may come back.
+   * `nightwatch:exploreOnHome`, which the old /home read to blank itself out — so a
+   * leftover `true` from before the removal would have hidden the page content and
+   * left nothing behind. Neither the control nor any read of that key may come back.
    */
   describe('Explore on Home removal', () => {
     it('no longer renders the toggle', () => {

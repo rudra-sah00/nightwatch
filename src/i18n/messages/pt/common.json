@@ -413,9 +413,7 @@
   },
   "tv": {
     "home": {
-      "continueWatching": "Continuar assistindo",
-      "empty": "Seu histórico está vazio",
-      "emptyHint": "Comece a assistir algo e aparecerá aqui"
+      "continueWatching": "Continuar assistindo"
     },
     "search": {
       "placeholder": "Buscar filmes, séries...",
@@ -537,5 +535,11 @@
     "markUnread": "Marcar como não lida",
     "clearConfirmTitle": "Limpar este chat?",
     "clearConfirmDesc": "Todas as mensagens serão ocultadas. Novas mensagens continuarão aparecendo."
+  },
+  "hub": {
+    "title": "O que você quer explorar?",
+    "subtitle": "Escolha por onde começar",
+    "liveChannels": "Canais ao vivo",
+    "moviesAndSeries": "Filmes e séries"
   }
 }

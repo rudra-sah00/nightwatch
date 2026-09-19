@@ -1,14 +1,4 @@
 {
-  "home": {
-    "headline1": "ابحث عن",
-    "headline2": "فيلمك",
-    "searchPlaceholder": "ابحث عن أفلام، مسلسلات، أو سينما...",
-    "searchButton": "بحث",
-    "searchAriaLabel": "البحث عن أفلام، مسلسلات، أو سينما",
-    "stat1": "+12 ألف عنوان",
-    "stat2": "4K Ultra Raw",
-    "stat3": "تركيز مستقل"
-  },
   "results": {
     "searching": "جارٍ البحث:",
     "resultsLabel": "النتائج:",
