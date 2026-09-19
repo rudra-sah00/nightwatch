@@ -2,7 +2,17 @@
 
 import type HlsType from 'hls.js';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
+import { reportError, trackEvent } from '@/lib/analytics';
 import type { AudioTrack, PlayerAction, Quality } from '../context/types';
+
+/**
+ * Fatal MEDIA_ERROR recoveries allowed before giving up on a source.
+ *
+ * Two, because the escalation only has two rungs: rebuild the MediaSource, then rebuild
+ * it with the alternate audio codec. A third attempt repeats the second with no new
+ * information while re-downloading the buffer again.
+ */
+const MAX_MEDIA_RECOVERY_ATTEMPTS = 2;
 
 interface ManualQualityOption {
   label: string;
@@ -54,9 +64,38 @@ export function useHls({
   const hlsRef = useRef<HlsType | null>(null);
   const unauthorizedRetryCountRef = useRef(0);
   const manualQualitiesRef = useRef<ManualQualityOption[]>([]);
+  /**
+   * Fatal MEDIA_ERROR recoveries attempted for the current source.
+   *
+   * `recoverMediaError()` tears down and rebuilds the MediaSource, then reloads from
+   * `currentTime` — refilling up to `maxBufferLength` seconds of video and audio. Left
+   * uncapped it loops: the same decode failure recurs, we recover again, and each cycle
+   * re-requests the whole buffer. That is a request flood with no exit, so cap it and
+   * surface a real error instead.
+   */
+  const mediaRecoveryCountRef = useRef(0);
+  /** Set when the page was restored from the back/forward cache — see the MEDIA_ERROR handler. */
+  const restoredFromBfcacheRef = useRef(false);
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
+
+  /**
+   * hls.js raises `mediaSourceRequiresReset` when the browser closes the MediaSource
+   * while media is still attached, and flags it fatal only once `video.error` has been
+   * set `appendErrorMaxRetry` times — i.e. a genuine decode failure, not a buffer
+   * hiccup. One of its documented causes is bfcache restoration on WebKit, which is
+   * indistinguishable from a codec fault unless we record that it happened.
+   */
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        restoredFromBfcacheRef.current = true;
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
 
   useEffect(() => {
     const manualQualities = (_manualQualities || [])
@@ -99,6 +138,8 @@ export function useHls({
 
     // Clear any previous errors when loading new stream
     dispatch({ type: 'SET_ERROR', error: null });
+    // Fresh source — the previous source's recovery budget must not carry over.
+    mediaRecoveryCountRef.current = 0;
     dispatch({ type: 'SET_LOADING', isLoading: true });
     unauthorizedRetryCountRef.current = 0;
 
@@ -337,18 +378,80 @@ export function useHls({
         hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
           const level = hls.levels[data.level];
           if (level) {
-            import('@/lib/analytics').then(({ trackEvent }) =>
-              trackEvent('video_quality_switch', {
-                height: level.height,
-                auto: hls.autoLevelEnabled,
-              }),
-            );
+            // Static import (see reportPlaybackError): quality switches recur throughout
+            // playback, and the module is already a static dependency of this file.
+            trackEvent('video_quality_switch', {
+              height: level.height,
+              auto: hls.autoLevelEnabled,
+            });
             dispatch({
               type: 'SET_CURRENT_QUALITY',
               quality: `${level.height}p`,
             });
           }
         });
+
+        /**
+         * Record a fatal playback failure to the console and to analytics.
+         *
+         * Previously only the `default:` branch reported, so fatal MEDIA_ERROR and
+         * NETWORK_ERROR — the two that actually occur in the field — were invisible in
+         * error dashboards. A single console line on one device cannot show whether a
+         * failure is platform-specific, title-specific or session-length-specific.
+         *
+         * `video.error` is the decisive field and was previously omitted: hls.js only
+         * marks `mediaSourceRequiresReset` fatal once the element has reported a decode
+         * error, so its code and message name the underlying fault. `audioTrack` and the
+         * bfcache/visibility flags separate the three known causes — a codec mismatch
+         * after a track switch, a WebKit bfcache restore, and buffer eviction while
+         * backgrounded.
+         *
+         * @param data - The hls.js error payload.
+         * @param action - What we did about it, so the console and analytics agree on
+         *   whether this attempt recovered or gave up.
+         */
+        const reportPlaybackError = (
+          data: { type: string; details: unknown; fatal?: boolean },
+          action: string,
+        ) => {
+          const diagnostics = {
+            type: data.type,
+            details: data.details,
+            action,
+            // The reason hls.js escalated to fatal — absent for non-decode failures.
+            mediaErrorCode: video.error?.code,
+            mediaErrorMessage: video.error?.message,
+            audioTrack: hls.audioTrack,
+            audioTrackCount: hls.audioTracks?.length,
+            currentLevel: hls.currentLevel,
+            videoReadyState: video.readyState,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            currentTime: Math.round(video.currentTime),
+            buffered: video.buffered.length,
+            restoredFromBfcache: restoredFromBfcacheRef.current,
+            visibility:
+              typeof document === 'undefined'
+                ? undefined
+                : document.visibilityState,
+            isLive,
+          };
+
+          console.warn(`[NW-HLS] Fatal ${data.type} (${action}):`, diagnostics);
+
+          // Statically imported rather than dynamically: this path can fire repeatedly
+          // during a recovery sequence, and analytics is already a static dependency
+          // elsewhere. It lazy-loads the Firebase SDKs internally, so there is nothing
+          // heavy to defer here.
+          try {
+            reportError(
+              `[HLS Fatal] ${data.type}: ${String(data.details)} (${action})`,
+            );
+            trackEvent('video_error', { ...diagnostics, fatal: true });
+          } catch {
+            // Analytics must never mask the playback failure it is describing.
+          }
+        };
 
         hls.on(Hls.Events.ERROR, (_, data) => {
           // Ignore all errors after cleanup has started (cancelled flag is set
@@ -426,34 +529,41 @@ export function useHls({
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
                 // All other fatal network errors — retry
+                reportPlaybackError(data, 'retry');
                 dispatch({ type: 'SET_BUFFERING', isBuffering: true });
                 hls.startLoad();
                 break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                console.warn(
-                  '[NW-HLS] Fatal MEDIA_ERROR, attempting recovery:',
-                  {
-                    details: data.details,
-                    videoReadyState: video.readyState,
-                    videoWidth: video.videoWidth,
-                    videoHeight: video.videoHeight,
-                    currentTime: video.currentTime,
-                  },
-                );
+              case Hls.ErrorTypes.MEDIA_ERROR: {
+                mediaRecoveryCountRef.current += 1;
+                const attempt = mediaRecoveryCountRef.current;
+
+                if (attempt > MAX_MEDIA_RECOVERY_ATTEMPTS) {
+                  reportPlaybackError(data, 'gave-up');
+                  dispatch({
+                    type: 'SET_ERROR',
+                    error: 'Playback failed — the media could not be decoded.',
+                  });
+                  hls.destroy();
+                  break;
+                }
+
+                reportPlaybackError(data, `recover-${attempt}`);
                 dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+
+                // Second attempt: the usual cause of a decode error that survives one
+                // MediaSource rebuild is an audio codec the current SourceBuffer cannot
+                // take — typically after switching between tracks that were encoded
+                // differently. swapAudioCodec() flips hls.js to the alternate codec
+                // before rebuilding, which is the documented escalation and does
+                // nothing useful on the first attempt.
+                if (attempt === 2) {
+                  hls.swapAudioCodec();
+                }
                 hls.recoverMediaError();
                 break;
+              }
               default:
-                import('@/lib/analytics').then(
-                  ({ reportError, trackEvent }) => {
-                    reportError(`[HLS Fatal] ${data.type}: ${data.details}`);
-                    trackEvent('video_error', {
-                      type: data.type,
-                      details: data.details,
-                      fatal: true,
-                    });
-                  },
-                );
+                reportPlaybackError(data, 'gave-up');
                 dispatch({
                   type: 'SET_ERROR',
                   error: 'Playback error occurred',

@@ -13,6 +13,7 @@ const { mockHls, eventHandlers, MockHlsClass } = vi.hoisted(() => {
     attachMedia: vi.fn(),
     startLoad: vi.fn(),
     recoverMediaError: vi.fn(),
+    swapAudioCodec: vi.fn(),
     destroy: vi.fn(),
     on: vi.fn((event: string, handler: EventHandler) => {
       const handlers = eventHandlers.get(event) || [];
@@ -25,6 +26,7 @@ const { mockHls, eventHandlers, MockHlsClass } = vi.hoisted(() => {
     ],
     currentLevel: -1,
     audioTrack: -1,
+    audioTracks: [] as unknown[],
   };
 
   // Use a proper function so `new MockHlsClass()` works correctly
@@ -71,6 +73,16 @@ const { mockHls, eventHandlers, MockHlsClass } = vi.hoisted(() => {
   };
 });
 
+const { mockReportError, mockTrackEvent } = vi.hoisted(() => ({
+  mockReportError: vi.fn(),
+  mockTrackEvent: vi.fn(),
+}));
+
+vi.mock('@/lib/analytics', () => ({
+  reportError: mockReportError,
+  trackEvent: mockTrackEvent,
+}));
+
 vi.mock('hls.js', () => ({
   default: MockHlsClass,
 }));
@@ -107,6 +119,7 @@ describe('useHls', () => {
     // Reset mutable properties
     mockHls.currentLevel = -1;
     mockHls.audioTrack = -1;
+    mockHls.audioTracks = [];
     mockHls.levels = [
       { height: 1080, bitrate: 5000000 },
       { height: 720, bitrate: 2500000 },
@@ -377,6 +390,186 @@ describe('useHls', () => {
     });
 
     expect(mockHls.recoverMediaError).toHaveBeenCalled();
+  });
+
+  /**
+   * `recoverMediaError()` rebuilds the MediaSource and reloads from `currentTime`,
+   * refilling the whole buffer. Uncapped, a decode error that survives the rebuild loops
+   * forever and each cycle re-requests every segment — the request flood observed in
+   * production alongside `mediaSourceRequiresReset`.
+   */
+  describe('fatal MEDIA_ERROR recovery budget', () => {
+    const renderPlayer = (streamUrl = 'https://example.com/stream.m3u8') => {
+      const videoRef = createVideoRef();
+      const hook = renderHook(
+        ({ url }: { url: string }) =>
+          useHls({ videoRef, streamUrl: url, dispatch: mockDispatch }),
+        { initialProps: { url: streamUrl } },
+      );
+      return hook;
+    };
+
+    const raiseMediaError = () =>
+      act(() => {
+        triggerEvent('hlsError', {
+          fatal: true,
+          type: 'mediaError',
+          details: 'mediaSourceRequiresReset',
+        });
+      });
+
+    const waitForHandler = async () =>
+      await vi.waitFor(() => {
+        expect(eventHandlers.has('hlsError')).toBe(true);
+      });
+
+    it('rebuilds the MediaSource on the first failure', async () => {
+      renderPlayer();
+      await waitForHandler();
+
+      raiseMediaError();
+
+      expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(1);
+      expect(mockHls.swapAudioCodec).not.toHaveBeenCalled();
+      expect(mockHls.destroy).not.toHaveBeenCalled();
+    });
+
+    /**
+     * A decode error surviving one rebuild is usually an audio codec the SourceBuffer
+     * cannot accept, so hls.js's documented escalation is to swap codec before retrying.
+     */
+    it('swaps the audio codec on the second failure', async () => {
+      renderPlayer();
+      await waitForHandler();
+
+      raiseMediaError();
+      raiseMediaError();
+
+      expect(mockHls.swapAudioCodec).toHaveBeenCalledTimes(1);
+      expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(2);
+      expect(mockHls.destroy).not.toHaveBeenCalled();
+    });
+
+    it('gives up after the budget instead of looping', async () => {
+      renderPlayer();
+      await waitForHandler();
+
+      raiseMediaError();
+      raiseMediaError();
+      raiseMediaError();
+
+      // Third failure must not trigger a third rebuild.
+      expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(2);
+      expect(mockHls.destroy).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SET_ERROR',
+        error: 'Playback failed — the media could not be decoded.',
+      });
+    });
+
+    it('does not keep rebuilding once it has given up', async () => {
+      renderPlayer();
+      await waitForHandler();
+
+      for (let i = 0; i < 6; i++) {
+        raiseMediaError();
+      }
+
+      expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(2);
+    });
+
+    /**
+     * Only the `default:` branch used to report, so fatal MEDIA_ERROR and NETWORK_ERROR
+     * — the two that actually happen in the field — never reached analytics. A lone
+     * console line cannot show whether a failure is platform, title or session specific.
+     */
+    it('reports every fatal media error to analytics', async () => {
+      renderPlayer();
+      await waitForHandler();
+
+      raiseMediaError();
+
+      await vi.waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledWith(
+          'video_error',
+          expect.objectContaining({
+            type: 'mediaError',
+            details: 'mediaSourceRequiresReset',
+            action: 'recover-1',
+            fatal: true,
+          }),
+        );
+      });
+      expect(mockReportError).toHaveBeenCalled();
+    });
+
+    it('distinguishes a recovery attempt from giving up', async () => {
+      renderPlayer();
+      await waitForHandler();
+
+      raiseMediaError();
+      raiseMediaError();
+      raiseMediaError();
+
+      await vi.waitFor(() => {
+        const actions = mockTrackEvent.mock.calls.map(
+          ([, params]) => params?.action,
+        );
+        expect(actions).toContain('recover-1');
+        expect(actions).toContain('recover-2');
+        expect(actions).toContain('gave-up');
+      });
+    });
+
+    /**
+     * `video.error` is why hls.js escalated to fatal at all, and it was the one field the
+     * original log omitted — without it the three known causes are indistinguishable.
+     */
+    it('captures the diagnostics needed to tell the causes apart', async () => {
+      renderPlayer();
+      await waitForHandler();
+
+      raiseMediaError();
+
+      await vi.waitFor(() => {
+        expect(mockTrackEvent).toHaveBeenCalledWith(
+          'video_error',
+          expect.objectContaining({
+            audioTrack: expect.anything(),
+            currentLevel: expect.anything(),
+            videoReadyState: expect.anything(),
+            currentTime: expect.anything(),
+            restoredFromBfcache: false,
+          }),
+        );
+      });
+      const params = mockTrackEvent.mock.calls.at(-1)?.[1] as Record<
+        string,
+        unknown
+      >;
+      expect(params).toHaveProperty('mediaErrorCode');
+      expect(params).toHaveProperty('visibility');
+    });
+
+    /** A new title must start with a full budget, not inherit the previous one. */
+    it('resets the budget when a new source loads', async () => {
+      const { rerender } = renderPlayer();
+      await waitForHandler();
+
+      raiseMediaError();
+      raiseMediaError();
+      raiseMediaError();
+      expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(2);
+
+      mockHls.recoverMediaError.mockClear();
+      eventHandlers.clear();
+      rerender({ url: 'https://example.com/other.m3u8' });
+      await waitForHandler();
+
+      raiseMediaError();
+
+      expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('should retry on fatal NETWORK_ERROR', async () => {
