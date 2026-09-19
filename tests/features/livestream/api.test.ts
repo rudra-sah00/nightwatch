@@ -2,13 +2,10 @@ vi.mock('@/lib/fetch');
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  fetchChannels,
   fetchIptvCategories,
   fetchIptvChannels,
   fetchIptvResolve,
   fetchLiveMatchDetail,
-  fetchLivestreamSchedule,
-  fetchSports,
 } from '@/features/livestream/api';
 import { apiFetch } from '@/lib/fetch';
 
@@ -17,41 +14,6 @@ const mockApiFetch = vi.mocked(apiFetch);
 describe('livestream/api', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('fetchLivestreamSchedule', () => {
-    it('returns items with default params', async () => {
-      const items = [{ id: '1', title: 'Match 1' }];
-      mockApiFetch.mockResolvedValue({ items });
-
-      const result = await fetchLivestreamSchedule();
-
-      expect(mockApiFetch).toHaveBeenCalledWith(
-        '/api/livestream/schedule?sportType=basketball&daysBackward=0&daysForward=3&server=netmirror',
-        { signal: undefined },
-      );
-      expect(result).toEqual(items);
-    });
-
-    it('passes custom params and signal', async () => {
-      mockApiFetch.mockResolvedValue({ items: [] });
-      const controller = new AbortController();
-
-      await fetchLivestreamSchedule('football', 1, 5, controller.signal);
-
-      expect(mockApiFetch).toHaveBeenCalledWith(
-        '/api/livestream/schedule?sportType=football&daysBackward=1&daysForward=5&server=netmirror',
-        { signal: controller.signal },
-      );
-    });
-
-    it('returns empty array when data is null', async () => {
-      mockApiFetch.mockResolvedValue(null);
-
-      const result = await fetchLivestreamSchedule();
-
-      expect(result).toEqual([]);
-    });
   });
 
   describe('fetchLiveMatchDetail', () => {
@@ -79,73 +41,6 @@ describe('livestream/api', () => {
       const result = await fetchLiveMatchDetail('abc');
 
       expect(result).toBeNull();
-    });
-  });
-
-  describe('fetchChannels', () => {
-    it('returns channels with defaults', async () => {
-      const response = {
-        channels: [{ id: '1' }],
-        total: 1,
-        page: 1,
-        limit: 30,
-        totalPages: 1,
-      };
-      mockApiFetch.mockResolvedValue(response);
-
-      const result = await fetchChannels();
-
-      expect(mockApiFetch).toHaveBeenCalledWith(
-        '/api/livestream/channels?page=1&limit=30',
-        { signal: undefined },
-      );
-      expect(result).toEqual(response);
-    });
-
-    it('includes search param when provided', async () => {
-      mockApiFetch.mockResolvedValue({
-        channels: [],
-        total: 0,
-        page: 1,
-        limit: 30,
-        totalPages: 0,
-      });
-
-      await fetchChannels(2, 10, 'sports');
-
-      expect(mockApiFetch).toHaveBeenCalledWith(
-        '/api/livestream/channels?page=2&limit=10&search=sports',
-        { signal: undefined },
-      );
-    });
-
-    it('returns fallback when data is null', async () => {
-      mockApiFetch.mockResolvedValue(null);
-
-      const result = await fetchChannels();
-
-      expect(result).toEqual({
-        channels: [],
-        total: 0,
-        page: 1,
-        limit: 30,
-        totalPages: 0,
-      });
-    });
-  });
-
-  describe('fetchSports', () => {
-    it('fetches and caches sports list', async () => {
-      const sports = [{ id: 'football', label: 'Football' }];
-      mockApiFetch.mockResolvedValue({ data: sports });
-
-      const result1 = await fetchSports();
-      const result2 = await fetchSports();
-
-      expect(result1).toEqual(sports);
-      expect(result2).toEqual(sports);
-      // Second call uses cache — no additional fetch
-      expect(mockApiFetch).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -1,34 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchLiveMatchDetail, fetchLivestreamSchedule } from '../api';
-
-/**
- * Fetches and manages the livestream schedule for a given sport type.
- * Uses TanStack Query for caching.
- */
-export function useLivestreams(sportType = 'basketball') {
-  const {
-    data: schedule = [],
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['live', 'channels', sportType],
-    queryFn: async () => {
-      const data = await fetchLivestreamSchedule(sportType, 0, 3);
-      const unique = Array.from(
-        new Map(data.map((item) => [item.id, item])).values(),
-      );
-      return unique.toSorted((a, b) => a.startTime - b.startTime);
-    },
-  });
-
-  return {
-    schedule,
-    isLoading,
-    error: error as Error | null,
-    refresh: refetch,
-  };
-}
+import { fetchLiveMatchDetail } from '../api';
 
 /**
  * Fetches and polls a single live match by ID.

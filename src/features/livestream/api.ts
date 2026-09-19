@@ -1,30 +1,7 @@
 import { apiFetch } from '@/lib/fetch';
-import type {
-  LiveMatch,
-  LivestreamMatchResponse,
-  LivestreamScheduleResponse,
-} from './types';
+import type { LiveMatch, LivestreamMatchResponse } from './types';
 
-export type {
-  CricketMatchInfo,
-  LiveMatch,
-} from './types';
-
-/**
- * Fetches the livestream schedule for a given sport type.
- */
-export const fetchLivestreamSchedule = async (
-  sportType = 'basketball',
-  daysBackward = 0,
-  daysForward = 3,
-  signal?: AbortSignal,
-): Promise<LiveMatch[]> => {
-  const data = await apiFetch<LivestreamScheduleResponse>(
-    `/api/livestream/schedule?sportType=${sportType}&daysBackward=${daysBackward}&daysForward=${daysForward}&server=netmirror`,
-    { signal },
-  );
-  return data?.items || [];
-};
+export type { CricketMatchInfo, LiveMatch } from './types';
 
 /**
  * Fetches detailed information for a single live match.
@@ -43,91 +20,6 @@ export const fetchLiveMatchDetail = async (
   } catch {
     return null;
   }
-};
-
-/** A live TV channel entry. */
-export interface Channel {
-  /** Unique channel identifier. */
-  id: string;
-  /** Provider-specific identifier. */
-  providerId: string;
-  /** Display name of the channel. */
-  name: string;
-  /** Channel category (e.g. sports, news), or `null`. */
-  category: string | null;
-  /** URL of the channel icon, or `null`. */
-  icon: string | null;
-  /** Whether the channel is currently online or offline. */
-  status?: 'online' | 'offline';
-  /** Current viewer count. */
-  viewers?: number;
-}
-
-/** Paginated response from the channels API. */
-export interface ChannelsResponse {
-  /** Array of channels for the current page. */
-  channels: Channel[];
-  /** Total number of channels matching the query. */
-  total: number;
-  /** Current page number. */
-  page: number;
-  /** Number of items per page. */
-  limit: number;
-  /** Total number of available pages. */
-  totalPages: number;
-}
-
-/**
- * Fetches a paginated list of live TV channels.
- *
- * @param page - Page number (default `1`).
- * @param limit - Items per page (default `30`).
- * @param search - Optional search query to filter channels by name.
- * @param signal - Optional `AbortSignal` for request cancellation.
- * @returns Paginated channels response.
- */
-export const fetchChannels = async (
-  page = 1,
-  limit = 30,
-  search = '',
-  signal?: AbortSignal,
-): Promise<ChannelsResponse> => {
-  const query = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-    ...(search && { search }),
-  });
-
-  const data = await apiFetch<ChannelsResponse>(
-    `/api/livestream/channels?${query.toString()}`,
-    { signal },
-  );
-  return data || { channels: [], total: 0, page: 1, limit, totalPages: 0 };
-};
-
-// Sports list is essentially static — cache for 30 minutes.
-let _sportsCache: {
-  data: { id: string; label: string }[];
-  expiry: number;
-} | null = null;
-
-/**
- * Fetches the list of available sport categories for the livestream schedule.
- *
- * @param signal - Optional `AbortSignal` for request cancellation.
- * @returns Array of sport objects with `id` and `label`.
- */
-export const fetchSports = async (signal?: AbortSignal) => {
-  if (_sportsCache && _sportsCache.expiry > Date.now())
-    return _sportsCache.data;
-
-  const data = await apiFetch<{ data: { id: string; label: string }[] }>(
-    `/api/livestream/sports`,
-    { signal },
-  );
-  const sports = data?.data || [];
-  _sportsCache = { data: sports, expiry: Date.now() + 30 * 60 * 1000 };
-  return sports;
 };
 
 // === IPTV ===

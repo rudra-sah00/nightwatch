@@ -40,12 +40,6 @@ export interface LiveMatch {
   channelStatus?: 'online' | 'offline';
 }
 
-export interface LivestreamScheduleResponse {
-  success: boolean;
-  count: number;
-  items: LiveMatch[];
-}
-
 export interface LivestreamMatchResponse {
   success: boolean;
   match: LiveMatch;
