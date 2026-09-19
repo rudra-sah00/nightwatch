@@ -1,6 +1,6 @@
 # Watchlist
 
-Server-aware saved content list with optimistic UI, search filtering, and integration with the content-detail modal.
+Server-backed saved content list with optimistic UI, search filtering, and integration with the content-detail modal.
 
 ## Directory Structure
 
@@ -27,7 +27,7 @@ All functions use `apiFetch` (cookie-authenticated HTTP client).
 | `removeFromWatchlist(contentId, providerId?)` | DELETE | `/api/user/watchlist` | Remove by content ID |
 | `checkInWatchlist(contentId, providerId?)` | GET | `/api/user/watchlist/status` | Check if content is in watchlist |
 
-The `checkInWatchlist` function auto-derives `providerId` from the content ID prefix (e.g. `s2:12345` → `'s2'`). Caching of watchlist status is handled by TanStack Query via query keys — no manual client-side TTL cache is needed.
+The `checkInWatchlist` function checks whether a given content ID is in the user's watchlist. Caching of watchlist status is handled by TanStack Query via query keys — no manual client-side TTL cache is needed.
 
 ## Types
 
@@ -51,7 +51,6 @@ function useWatchlist(): {
 ```
 
 Key behaviors:
-- **Server-aware fetching**: Query key includes `activeServer` from `useServer()` — auto-refetches on server change
 - **TanStack Query caching**: Uses `useQuery` with stale-while-revalidate for watchlist data
 - **Optimistic removal**: `useMutation` with `onMutate` calls `queryClient.setQueryData` to immediately filter the item from the cached list before the API responds; `onError` rolls back via the snapshot saved in `onMutate`
 

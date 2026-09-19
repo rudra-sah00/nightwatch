@@ -50,7 +50,6 @@ z.object({
   name: z.string().min(2, 'validation.nameMinLength').optional(),
   username: z.string().min(3, 'validation.usernameMinLength')
     .regex(/^\w+$/, 'validation.usernameFormat').optional(),
-  preferredServer: z.enum(['s1', 's2', 's3']).optional(),
 })
 ```
 
@@ -101,7 +100,6 @@ Profile editing form with:
 - **Avatar section** — clickable image with camera overlay, file input trigger, upload progress indicator
 - **Inline-editable name** — large neo-brutalist input, auto-saves on blur/Enter via hidden form submit
 - **Username field** — with debounced availability check (green check / red X indicator)
-- **Server selection** — radio group for s1/s2/s3 with `preferredServer` persistence
 - **Public profile link** — copy-to-clipboard button (uses `desktopBridge.copyToClipboard` on Electron)
 - **Danger zone** — account deletion with `AlertDialog` confirmation
 - **Logout button**

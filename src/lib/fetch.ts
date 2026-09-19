@@ -1,6 +1,5 @@
 import type { ApiError } from '@/types';
 import { reportError } from './analytics';
-import { CLIENT_PLATFORM_HEADER, getClientPlatform } from './client-platform';
 import { getCookie } from './cookies';
 import { getDeviceInfo } from './device-id';
 import { env } from './env';
@@ -244,11 +243,6 @@ export async function apiFetch<T>(
           : { 'Content-Type': 'application/json' }),
         ...(typeof window !== 'undefined'
           ? { 'x-device-info': getDeviceInfo() }
-          : {}),
-        // Tells the backend whether this shell can inject CDN request headers,
-        // which decides whether VOD playback is allowed at all. See lib/client-platform.
-        ...(typeof window !== 'undefined'
-          ? { [CLIENT_PLATFORM_HEADER]: getClientPlatform() }
           : {}),
         ...(typeof window !== 'undefined' &&
         sessionStorage.getItem('guest_token') &&

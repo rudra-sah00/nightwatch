@@ -118,7 +118,7 @@ Dropdown for selecting a season in series content. Click-outside dismissal via `
 `hooks/use-search-input.ts`
 
 Global search input management:
-- **Typeahead suggestions**: Fetched from Server 1 API with 200ms debounce, disabled on `/search` page
+- **Typeahead suggestions**: Fetched from the backend suggestions API with 200ms debounce, disabled on `/search` page
 - **Recent search history**: Persisted in `localStorage` (`wr_recent_searches`, max 5 entries)
 - **URL sync**: Query syncs with `?q=` URL param via `useSearchParams`
 - **Tab-to-complete**: Fills the first suggestion on Tab press

@@ -197,59 +197,6 @@ const startElectronApp = async () => {
     backendOrigin = 'http://localhost:4000';
   }
 
-  // --- DIRECT-FROM-CDN PLAYBACK (desktop only) ---
-  //
-  // The VOD CDN (bcdnxw.hakunaymatata.com -> enacdn.net) is an Alibaba OSS bucket
-  // behind an nginx hotlink guard. It serves media only when the request carries one
-  // of its allow-listed Referer values, and returns 429 otherwise. Browsers cannot
-  // satisfy that: Referer is a forbidden header, so no fetch option, referrerPolicy
-  // or Service Worker can set it — which is why web playback is disabled server-side.
-  //
-  // Electron can, via onBeforeSendHeaders. So the desktop app streams straight from
-  // the CDN: no proxy hop, no backend bandwidth, full quality. The backend sends the
-  // exact headers to use in the play response as `playbackHeaders`; the values below
-  // must stay in sync with PLAY_REFERER_ORIGIN / the provider's headers server-side.
-  //
-  // Scoped to the media CDN hosts only, so our own API, Cloudflare workers and every
-  // other origin keep their normal headers.
-  const CDN_REFERER_HOSTS = ['hakunaymatata.com', 'aoneroom.com'];
-  const CDN_REFERER = 'https://123movienow.cc/';
-  const CDN_USER_AGENT =
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:135.0) Gecko/20100101 Firefox/135.0';
-
-  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    let host = '';
-    try {
-      host = new URL(details.url).hostname;
-    } catch {
-      callback({ requestHeaders: details.requestHeaders });
-      return;
-    }
-
-    const needsCdnHeaders = CDN_REFERER_HOSTS.some(
-      (d) => host === d || host.endsWith(`.${d}`),
-    );
-
-    if (!needsCdnHeaders) {
-      callback({ requestHeaders: details.requestHeaders });
-      return;
-    }
-
-    const requestHeaders = { ...details.requestHeaders };
-    // Drop any casing variant the WebView already set before adding ours,
-    // otherwise the CDN can receive two Referer headers and reject the request.
-    for (const key of Object.keys(requestHeaders)) {
-      const lower = key.toLowerCase();
-      if (lower === 'referer' || lower === 'origin' || lower === 'user-agent') {
-        delete requestHeaders[key];
-      }
-    }
-    requestHeaders.Referer = CDN_REFERER;
-    requestHeaders['User-Agent'] = CDN_USER_AGENT;
-
-    callback({ requestHeaders });
-  });
-
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     // Only modify headers for our backend — leave third-party CDN/Cloudflare headers untouched
     const isBackendRequest =

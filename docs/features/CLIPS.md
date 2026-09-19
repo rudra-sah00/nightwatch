@@ -27,11 +27,11 @@ src/features/clips/
 - **Clip Player** (`/clip/[id]`): Plays clips in the core VOD player.
 - **Socket.IO**: `clip:ready` event via Redis pub/sub for real-time status updates.
 
-## Dual-Mode Recording (Server 1 vs Server 1)
+## Recording
 
-### Unified Recording (All Servers)
+### Unified Recording
 
-Both Server 1 and Server 1 use the same recording approach via MediaRecorder + captureStream.
+Recording uses a unified approach via MediaRecorder + captureStream for all streams.
 
 ```
 User clicks Record
@@ -118,8 +118,8 @@ services/clip-processor/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/clips/start` | Start recording `{ matchId, title, streamUrl }` → `{ clipId }` |
-| `POST` | `/api/clips/:id/segment` | Push segment URL (Server 1) `{ url, startTime, duration }` → 204 |
-| `POST` | `/api/clips/:id/segment-data` | Push segment bytes (Server 1) `Content-Type: application/octet-stream` → 204 |
+| `POST` | `/api/clips/:id/segment` | Push segment URL `{ url, startTime, duration }` → 204 |
+| `POST` | `/api/clips/:id/segment-data` | Push segment bytes `Content-Type: application/octet-stream` → 204 |
 | `POST` | `/api/clips/:id/finalize` | Stop recording, enqueue processing → 202 |
 | `GET` | `/api/clips` | User's clips (paginated, filterable) |
 | `PATCH` | `/api/clips/:id` | Rename clip `{ title }` |

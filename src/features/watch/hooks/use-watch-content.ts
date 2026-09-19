@@ -3,7 +3,6 @@
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { applyMediaProxy } from '@/capacitor/media-proxy';
 import { playVideo, stopVideo } from '@/features/watch/api';
 import type { VideoMetadata } from '@/features/watch/player/context/types';
 import {
@@ -85,12 +84,6 @@ export function useWatchContent() {
 
   const [isRefetching, setIsRefetching] = useState(() => !streamParam);
   const [refetchError, setRefetchError] = useState<string | null>(null);
-  /**
-   * Set when the backend reports PLAYBACK_REQUIRES_APP: this client (a browser)
-   * cannot supply the Referer the CDN demands, so playback is unavailable here
-   * and the UI should point at the desktop/mobile apps instead.
-   */
-  const [requiresApp, setRequiresApp] = useState(false);
   const coldStartRetried = useRef(false);
   const [_isReplacingSession, setIsReplacingSession] = useState(false);
   const replacingSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -152,7 +145,6 @@ export function useWatchContent() {
         // Android streams direct from the CDN, but the WebView cannot attach the
         // Referer the CDN requires, so route the raw URLs through the on-device
         // loopback forwarder first. No-op on web/Electron and on proxied responses.
-        response = await applyMediaProxy(response);
 
         if (response.success && response.masterPlaylistUrl) {
           // Unified response handling via StreamUrlService (called within useStreamUrls)
@@ -180,16 +172,6 @@ export function useWatchContent() {
         }
       } catch (err) {
         const httpStatus = (err as { status?: number })?.status;
-        const errorCode = (err as { code?: string })?.code;
-
-        // Web cannot play this content: the CDN requires an allow-listed Referer and
-        // browsers cannot send one. Surface it as its own state so the UI can offer the
-        // desktop/mobile apps rather than showing a generic failure. Not an error worth
-        // reporting to analytics — it is the expected outcome on web.
-        if (httpStatus === 403 && errorCode === 'PLAYBACK_REQUIRES_APP') {
-          setRequiresApp(true);
-          return;
-        }
 
         console.error('[NW-Play] VOD: stream error', err);
         reportError(`[Watch] Stream load failed: ${httpStatus || 'unknown'}`);
@@ -375,6 +357,5 @@ export function useWatchContent() {
     handleStreamExpired,
     refetchStream,
     streamFormat,
-    requiresApp,
   };
 }

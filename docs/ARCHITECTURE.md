@@ -106,7 +106,7 @@ export function checkIsDesktop(): boolean { ... }
 
 ## 6. Mobile Platform Layer (Capacitor)
 
-The mobile app wraps the deployed Next.js app in a native WebView via Capacitor, with 16 native plugins providing device API access. The frontend communicates through `src/lib/mobile-bridge.ts`, which mirrors the `desktopBridge` pattern.
+The mobile app wraps the deployed Next.js app in a native WebView via Capacitor, with 21 native plugins providing device API access. The frontend communicates through `src/lib/mobile-bridge.ts`, which mirrors the `desktopBridge` pattern.
 
 ### Bridge Pattern
 

@@ -1,6 +1,6 @@
 # Watch Content
 
-VOD and live video playback system built on a compound component player architecture. Supports HLS (Server 1/3) and direct MP4 (Server 1) streams, with mobile-specific inline PiP, swipe-to-dismiss, portrait seekbar, and fullscreen orientation locking.
+VOD and live video playback system built on a compound component player architecture. Supports HLS and direct MP4 streams via a unified backend CDN proxy, with mobile-specific inline PiP, swipe-to-dismiss, portrait seekbar, and fullscreen orientation locking.
 
 ## Directory Structure
 
@@ -274,7 +274,7 @@ Centralizes all player control handlers with a 3-second auto-hide timer:
 - `handleSeek`, `handleSkip`, `handleVolumeChange`, `handleMuteToggle`
 - `handleQualityChange` — resolves label to HLS level index
 - `handlePlaybackRateChange` — sets `video.playbackRate`
-- `handleAudioChange` — switches track + notifies parent for S2 URL swaps
+- `handleAudioChange` — switches track + notifies parent for audio track URL swaps
 - `handleSubtitleChange`, `handleRetry`
 
 ### useKeyboard
@@ -304,7 +304,7 @@ Also listens for Electron desktop media key commands (`MediaPlayPause`, `MediaNe
 `player/services/WatchProgressService.ts`
 
 Socket-based progress syncing:
-- `prepareProgressPayload` — builds the progress update payload with S2 duration fallback, progress delta calculation
+- `prepareProgressPayload` — builds the progress update payload with `apiDurationSeconds` fallback, progress delta calculation
 - `syncProgress` — emits `watch:update_progress` via socket, invalidates caches on success
 - `syncActivity` — emits `watch:record_time` for the activity heatmap
 
@@ -314,9 +314,9 @@ Socket-based progress syncing:
 
 URL normalization and response processing:
 - `normalizeRawUrls` — wraps URLs through proxy with token injection
-- `processResponse(server, response)` — unified processor for S1/S2/S3 responses
-- S1/S3: HLS token extraction + proxy wrapping for captions, sprites, subtitles
-- S2: Direct MP4 URLs with optional `apiDurationSeconds` fallback
+- `processResponse(response)` — unified processor for play responses
+- HLS: token extraction + proxy wrapping for captions, sprites, subtitles
+- MP4: direct URLs with optional `apiDurationSeconds` fallback
 
 ### NextEpisodeService
 
@@ -398,3 +398,9 @@ Escape hatch for hardware that reports misleading pointer media queries:
 6. `usePlayerHandlers` manages all user interactions
 7. `WatchProgressService.syncProgress` sends updates every 15s via socket
 8. Near end of episode → `useNextEpisode` fetches next episode info → shows `NextEpisodeOverlay`
+
+## Playback Routing
+
+All platforms — browser, Electron desktop, iOS, Android, and Android TV — stream VOD content through the backend CDN proxy (Cloudflare Worker). The proxy injects the upstream CDN's required `Referer` header server-side, so no client ever receives raw upstream CDN URLs or needs to manipulate request headers. This means browsers can play movies and series directly without requiring the desktop or mobile app.
+
+Previously, media segments were proxied through each end user's device, which browsers could not do because `Referer` is a forbidden header in the Fetch spec. The Cloudflare Workers now handle this centrally, eliminating the per-platform playback restrictions.
