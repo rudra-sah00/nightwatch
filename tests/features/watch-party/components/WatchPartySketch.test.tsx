@@ -57,6 +57,9 @@ vi.mock('@/features/watch-party/interactions/hooks/use-sketch-overlay', () => ({
   useSketchOverlay: vi.fn().mockReturnValue({
     handleMoveZ: vi.fn(),
   }),
+  useSketchMoveZ: vi.fn().mockReturnValue({
+    handleMoveZ: vi.fn(),
+  }),
 }));
 
 // Mock next/dynamic to render components synchronously in tests

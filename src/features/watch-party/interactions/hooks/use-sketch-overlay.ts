@@ -30,12 +30,61 @@ interface UseSketchOverlayOptions {
   userName?: string;
 }
 
+/** Moves a single action to the front or back of the z-order. */
+function reorder(
+  actions: SketchAction[],
+  actionId: string,
+  direction: 'front' | 'back',
+): SketchAction[] {
+  const index = actions.findIndex((a) => a.id === actionId);
+  if (index === -1) return actions;
+  const next = [...actions];
+  const [action] = next.splice(index, 1);
+  if (direction === 'front') next.push(action);
+  else next.unshift(action);
+  return next;
+}
+
+/**
+ * Z-order control for a single sketch action.
+ *
+ * Split out of {@link useSketchOverlay} so the sidebar tool panel can reorder
+ * shapes without mounting a second copy of the whole overlay hook (which would
+ * double-register every RTM listener and trigger effect).
+ *
+ * @param options - RTM sender and the acting user's id.
+ * @returns `handleMoveZ(actionId, direction)`.
+ */
+export function useSketchMoveZ({
+  rtmSendMessage,
+  userId,
+}: {
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  userId?: string;
+} = {}) {
+  const { setActions } = useSketch();
+
+  const handleMoveZ = useCallback(
+    (id: string, direction: 'front' | 'back') => {
+      if (!userId) return;
+      setActions((prev) => reorder(prev, id, direction));
+      rtmSendMessage?.({ type: 'SKETCH_MOVE_Z', actionId: id, direction });
+    },
+    [setActions, rtmSendMessage, userId],
+  );
+
+  return { handleMoveZ };
+}
+
 /**
  * Core logic hook for the Konva sketch overlay.
  *
  * Handles mouse/touch drawing, shape creation, text input, transform/drag,
  * undo, clear, z-order, cursor broadcasting, and RTM synchronisation of
  * all sketch actions across party members.
+ *
+ * Must be mounted exactly once per party (inside `SketchOverlay`); it owns the
+ * RTM subscriptions and the clear/undo trigger effects.
  *
  * @param options - RTM functions, user identity, and optional overrides.
  * @returns Stage event handlers, pending text state, action list, and helpers.
@@ -70,7 +119,6 @@ export function useSketchOverlay({
 
   const t = useTranslations('party');
   const lastCursorBroadcast = useRef(0);
-  const cursorBatchRef = useRef<{ x: number; y: number }[]>([]);
   const [pendingText, setPendingText] = useState<PendingTextInput | null>(null);
   const isDrawing = useRef(false);
   const currentActionRef = useRef<SketchAction | null>(null);
@@ -78,19 +126,71 @@ export function useSketchOverlay({
   const containerRef = useRef<HTMLDivElement>(null);
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
 
-  // Handle Resize
+  // Ref to access latest actions inside event callbacks without re-subscribing
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
+
+  /**
+   * Volatile values the effects below need to *read* but must not depend on.
+   *
+   * The clear/undo triggers are monotonic counters: once they pass 0 they stay
+   * above 0 forever. If the trigger effects also depended on `rtmSendMessage`,
+   * `selectedId`, `canDraw`, etc., then any identity change in those would
+   * re-run the effect and wipe the canvas / delete another stroke. Reading them
+   * through a ref keeps the effects keyed on the trigger alone.
+   */
+  const latest = useRef({ canDraw, userId, userName, selectedId });
+  latest.current = { canDraw, userId, userName, selectedId };
+  const sendRef = useRef(rtmSendMessage);
+  sendRef.current = rtmSendMessage;
+
+  /**
+   * Keep the Konva stage the same size as its container.
+   *
+   * A `window.resize` listener alone is not enough: collapsing or expanding the
+   * party sidebar changes the player's width by ~380px without ever resizing
+   * the window, which left the stage at its old size — strokes landed at the
+   * wrong coordinates and the uncovered strip of video ignored input entirely.
+   */
   useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        setStageSize({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight,
-        });
-      }
+    const el = containerRef.current;
+    if (!el) return;
+
+    let frame = 0;
+    const measure = () => {
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      setStageSize((prev) =>
+        prev.width === width && prev.height === height
+          ? prev
+          : { width, height },
+      );
     };
-    updateSize();
-    window.addEventListener('resize', updateSize, { passive: true });
-    return () => window.removeEventListener('resize', updateSize);
+    // Coalesce the burst of callbacks fired during the sidebar width transition.
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        measure();
+      });
+    };
+
+    measure();
+
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', schedule, { passive: true });
+      return () => {
+        if (frame) cancelAnimationFrame(frame);
+        window.removeEventListener('resize', schedule);
+      };
+    }
+
+    const observer = new ResizeObserver(schedule);
+    observer.observe(el);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
 
   // Prune stale cursors every 5s (removes cursors not updated in 5s)
@@ -119,14 +219,16 @@ export function useSketchOverlay({
     }
   }, [isHost, userId, rtmSendMessage]);
 
-  // Ref to access latest actions inside event callbacks without re-subscribing
-  const actionsRef = useRef(actions);
-  actionsRef.current = actions;
-
   // Listen for RTM events via the bridged on* API
   useEffect(() => {
     const cleanupDraw = onSketchDraw((action: SketchAction) => {
-      setActions((prev) => [...prev.filter((a) => a.id !== action.id), action]);
+      setActions((prev) => {
+        const index = prev.findIndex((a) => a.id === action.id);
+        if (index === -1) return [...prev, action];
+        const next = [...prev];
+        next[index] = action;
+        return next;
+      });
     });
 
     const cleanupClear = onSketchClear(({ userId: clearUserId, type }) => {
@@ -161,18 +263,7 @@ export function useSketchOverlay({
     );
 
     const cleanupMoveZ = onSketchMoveZ(({ actionId, direction }) => {
-      setActions((prev) => {
-        const index = prev.findIndex((a) => a.id === actionId);
-        if (index === -1) return prev;
-        const newActions = [...prev];
-        const [action] = newActions.splice(index, 1);
-        if (direction === 'front') {
-          newActions.push(action);
-        } else {
-          newActions.unshift(action);
-        }
-        return newActions;
-      });
+      setActions((prev) => reorder(prev, actionId, direction));
     });
 
     const cleanupCursorMove = onSketchCursorMove((data) => {
@@ -207,72 +298,51 @@ export function useSketchOverlay({
     setActions,
   ]);
 
-  // Handle local clear triggers
+  // Host-only "clear everything". Keyed on the trigger counter alone.
   useEffect(() => {
-    if (clearTrigger > 0 && canDraw && userId) {
-      setActions([]);
-      setSelectedId(null);
-      rtmSendMessage?.({
-        type: 'SKETCH_CLEAR',
-        mode: 'all',
-        userId: userId,
-      });
-    }
-  }, [
-    clearTrigger,
-    canDraw,
-    userId,
-    rtmSendMessage,
-    setSelectedId,
-    setActions,
-  ]);
+    if (clearTrigger === 0) return;
+    const { canDraw: allowed, userId: uid } = latest.current;
+    if (!allowed || !uid) return;
 
+    setActions([]);
+    setSelectedId(null);
+    sendRef.current?.({ type: 'SKETCH_CLEAR', mode: 'all', userId: uid });
+  }, [clearTrigger, setActions, setSelectedId]);
+
+  // "Clear mine" — drop only this user's own actions.
   useEffect(() => {
-    if (clearSelfTrigger > 0 && canDraw && userId) {
-      setActions((prev) => prev.filter((a) => !!a.userId));
-      setSelectedId(null);
-      rtmSendMessage?.({
-        type: 'SKETCH_CLEAR',
-        mode: 'self',
-        userId: userId,
-      });
-    }
-  }, [
-    clearSelfTrigger,
-    canDraw,
-    userId,
-    rtmSendMessage,
-    setSelectedId,
-    setActions,
-  ]);
+    if (clearSelfTrigger === 0) return;
+    const { canDraw: allowed, userId: uid } = latest.current;
+    if (!allowed || !uid) return;
 
-  // Handle local undo trigger
+    setActions((prev) => prev.filter((a) => a.userId !== uid));
+    setSelectedId(null);
+    sendRef.current?.({ type: 'SKETCH_CLEAR', mode: 'self', userId: uid });
+  }, [clearSelfTrigger, setActions, setSelectedId]);
+
+  // Undo the user's own most recent action.
   useEffect(() => {
-    if (undoTrigger > 0 && canDraw && userId) {
-      setActions((prev) => {
-        const idx = prev.findLastIndex((a) => !a.userId || a.userId === userId);
-        if (idx === -1) return prev;
+    if (undoTrigger === 0) return;
+    const {
+      canDraw: allowed,
+      userId: uid,
+      selectedId: currentSelection,
+    } = latest.current;
+    if (!allowed || !uid) return;
 
-        const undoneAction = prev[idx];
-        rtmSendMessage?.({
-          type: 'SKETCH_UNDO',
-          actionId: undoneAction.id,
-          userId: userId,
-        });
+    const current = actionsRef.current;
+    const idx = current.findLastIndex((a) => !a.userId || a.userId === uid);
+    if (idx === -1) return;
 
-        if (selectedId === undoneAction.id) setSelectedId(null);
-        return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-      });
-    }
-  }, [
-    undoTrigger,
-    canDraw,
-    userId,
-    rtmSendMessage,
-    selectedId,
-    setSelectedId,
-    setActions,
-  ]);
+    const undone = current[idx];
+    setActions((prev) => prev.filter((a) => a.id !== undone.id));
+    if (currentSelection === undone.id) setSelectedId(null);
+    sendRef.current?.({
+      type: 'SKETCH_UNDO',
+      actionId: undone.id,
+      userId: uid,
+    });
+  }, [undoTrigger, setActions, setSelectedId]);
 
   // Automatically clear laser pointer actions after 2 seconds
   useEffect(() => {
@@ -327,6 +397,10 @@ export function useSketchOverlay({
       const id = uuidv4();
       const videoTime = videoRef.current?.currentTime || 0;
 
+      // `userId` / `userName` / `opacity` are stamped here, not at mouse-up.
+      // Without them the local copy of a stroke was anonymous: it could not be
+      // selected or dragged by its own author, "clear mine" could not find it,
+      // and the opacity slider had no effect on pen or shape strokes.
       const newAction: SketchAction = {
         id,
         type:
@@ -336,22 +410,20 @@ export function useSketchOverlay({
         color: currentTool === 'eraser' ? 'eraser' : color,
         strokeWidth,
         fill: isFilled,
+        opacity,
         videoTimestamp: videoTime,
         data: [pos.x, pos.y],
+        userId,
+        userName,
       };
 
       if (currentTool === 'sticker' && selectedSticker) {
         const action: SketchAction = {
-          id,
+          ...newAction,
           type: 'sticker',
           color,
-          strokeWidth,
           fill: true,
-          opacity,
-          videoTimestamp: videoTime,
-          data: [pos.x, pos.y],
           text: selectedSticker,
-          userId,
         };
         setActions((prev) => [...prev, action]);
         rtmSendMessage?.({
@@ -392,6 +464,7 @@ export function useSketchOverlay({
       setSelectedSticker,
       rtmSendMessage,
       userId,
+      userName,
       opacity,
       setActions,
     ],
@@ -403,21 +476,17 @@ export function useSketchOverlay({
       const point = stage?.getPointerPosition();
       if (!point || !isSketchMode) return;
 
-      // Batch cursor positions and broadcast every 100ms
-      cursorBatchRef.current.push({ x: point.x, y: point.y });
+      // Broadcast the live cursor position, throttled to ~10fps.
       const now = Date.now();
       if (now - lastCursorBroadcast.current > 100) {
-        const batch = cursorBatchRef.current;
-        const last = batch[batch.length - 1];
         rtmSendMessage?.({
           type: 'SKETCH_CURSOR_MOVE',
-          x: last.x,
-          y: last.y,
+          x: point.x,
+          y: point.y,
           userName: userName || t('sketch.anonymous'),
           color,
           userId: userId || '',
         });
-        cursorBatchRef.current = [];
         lastCursorBroadcast.current = now;
       }
 
@@ -442,10 +511,16 @@ export function useSketchOverlay({
       const updatedAction = { ...lastAction, data: newData };
       currentActionRef.current = updatedAction;
 
-      setActions((prev) => [
-        ...prev.slice(0, Math.max(0, prev.length - 1)),
-        updatedAction,
-      ]);
+      // Update by id. The previous version overwrote whatever sat in the last
+      // slot, which destroyed any remote stroke that arrived mid-drag and
+      // duplicated the local one.
+      setActions((prev) => {
+        const index = prev.findIndex((a) => a.id === updatedAction.id);
+        if (index === -1) return [...prev, updatedAction];
+        const next = [...prev];
+        next[index] = updatedAction;
+        return next;
+      });
     },
     [
       canDraw,
@@ -480,7 +555,7 @@ export function useSketchOverlay({
       if (!userId) return;
       const node = e.target;
       const id = node.id();
-      const action = actions.find((a) => a.id === id);
+      const action = actionsRef.current.find((a) => a.id === id);
       if (!action) return;
 
       const updatedAction: SketchAction = {
@@ -500,7 +575,7 @@ export function useSketchOverlay({
         action: updatedAction,
       });
     },
-    [actions, userId, rtmSendMessage, setActions],
+    [userId, rtmSendMessage, setActions],
   );
 
   const confirmText = useCallback(
@@ -517,6 +592,7 @@ export function useSketchOverlay({
         data: pendingText.data,
         text: text.trim(),
         userId,
+        userName,
       };
       rtmSendMessage?.({
         type: 'SKETCH_DRAW',
@@ -530,6 +606,7 @@ export function useSketchOverlay({
       color,
       strokeWidth,
       userId,
+      userName,
       rtmSendMessage,
       isFilled,
       currentTool,
@@ -539,6 +616,8 @@ export function useSketchOverlay({
   );
 
   const cancelText = useCallback(() => setPendingText(null), []);
+
+  const { handleMoveZ } = useSketchMoveZ({ rtmSendMessage, userId });
 
   return {
     actions,
@@ -554,25 +633,6 @@ export function useSketchOverlay({
     cancelText,
     setSelectedId,
     selectedId,
-    handleMoveZ: (id: string, direction: 'front' | 'back') => {
-      if (!userId) return;
-      setActions((prev) => {
-        const index = prev.findIndex((a) => a.id === id);
-        if (index === -1) return prev;
-        const newActions = [...prev];
-        const [action] = newActions.splice(index, 1);
-        if (direction === 'front') {
-          newActions.push(action);
-        } else {
-          newActions.unshift(action);
-        }
-        return newActions;
-      });
-      rtmSendMessage?.({
-        type: 'SKETCH_MOVE_Z',
-        actionId: id,
-        direction,
-      });
-    },
+    handleMoveZ,
   };
 }

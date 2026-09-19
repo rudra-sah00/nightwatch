@@ -450,14 +450,11 @@ export function SketchOverlay({
                   y={(action.y || 0) + Math.min(y1, y2)}
                   width={Math.abs(x2 - x1)}
                   height={Math.abs(y2 - y1)}
-                  stroke="#1a1a1a"
-                  fill={fill ? color : '#ffffff'}
+                  stroke={fill ? '#1a1a1a' : color}
+                  fill={fill ? color : undefined}
                   strokeWidth={strokeWidth}
                   lineJoin="round"
                   opacity={action.opacity ?? 1}
-                  draggable={currentTool === 'select'}
-                  onDragMove={handleDragMove}
-                  onDragEnd={handleDragEnd}
                 />
               );
             }
@@ -470,13 +467,10 @@ export function SketchOverlay({
                   x={(action.x || 0) + x1 + (x2 - x1) / 2}
                   y={(action.y || 0) + y1 + (y2 - y1) / 2}
                   radius={radius}
-                  stroke="#1a1a1a"
-                  fill={fill ? color : '#ffffff'}
+                  stroke={fill ? '#1a1a1a' : color}
+                  fill={fill ? color : undefined}
                   strokeWidth={strokeWidth}
                   opacity={action.opacity ?? 1}
-                  draggable={currentTool === 'select'}
-                  onDragMove={handleDragMove}
-                  onDragEnd={handleDragEnd}
                 />
               );
             }
@@ -490,8 +484,8 @@ export function SketchOverlay({
                   radius={radius}
                   x={(action.x || 0) + x1 + (x2 - x1) / 2}
                   y={(action.y || 0) + y1 + (y2 - y1) / 2}
-                  stroke="#1a1a1a"
-                  fill={fill ? color : '#ffffff'}
+                  stroke={fill ? '#1a1a1a' : color}
+                  fill={fill ? color : undefined}
                   strokeWidth={strokeWidth}
                   opacity={action.opacity ?? 1}
                   rotation={
@@ -499,9 +493,6 @@ export function SketchOverlay({
                     (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI +
                     90
                   }
-                  draggable={currentTool === 'select'}
-                  onDragMove={handleDragMove}
-                  onDragEnd={handleDragEnd}
                 />
               );
             }
@@ -516,8 +507,8 @@ export function SketchOverlay({
                   outerRadius={radius}
                   x={(action.x || 0) + x1 + (x2 - x1) / 2}
                   y={(action.y || 0) + y1 + (y2 - y1) / 2}
-                  stroke="#1a1a1a"
-                  fill={color}
+                  stroke={fill ? '#1a1a1a' : color}
+                  fill={fill ? color : undefined}
                   strokeWidth={strokeWidth}
                   opacity={action.opacity ?? 1}
                   rotation={
@@ -525,9 +516,6 @@ export function SketchOverlay({
                     (Math.atan2(y2 - y1, x2 - x1) * 180) / Math.PI +
                     90
                   }
-                  draggable={currentTool === 'select'}
-                  onDragMove={handleDragMove}
-                  onDragEnd={handleDragEnd}
                 />
               );
             }
@@ -564,9 +552,6 @@ export function SketchOverlay({
                     (action.opacity ?? 1) * (type === 'sticker' ? 0.3 : 1)
                   }
                   opacity={action.opacity ?? 1}
-                  draggable={currentTool === 'select'}
-                  onDragMove={handleDragMove}
-                  onDragEnd={handleDragEnd}
                 >
                   {type === 'bubble' && (
                     <>

@@ -34,8 +34,9 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { type ToolType, useSketch } from '../context/SketchContext';
-import { useSketchOverlay } from '../hooks/use-sketch-overlay';
+import { useSketchMoveZ } from '../hooks/use-sketch-overlay';
 
 const TOOLS: { id: ToolType; labelKey: string; icon: React.ElementType }[] = [
   { id: 'select', labelKey: 'sketch.toolSelect', icon: MousePointer2 },
@@ -73,6 +74,14 @@ export function WatchPartySketchDisabled() {
   );
 }
 
+/** Props for the {@link WatchPartySketch} tool panel. */
+interface WatchPartySketchProps {
+  /** Broadcasts z-order changes to the rest of the party. */
+  rtmSendMessage?: (msg: RTMMessage) => void;
+  /** Current user's id — required for z-order changes to be attributed. */
+  userId?: string;
+}
+
 /**
  * Sketch tool panel rendered in the watch party sidebar.
  *
@@ -81,7 +90,10 @@ export function WatchPartySketchDisabled() {
  * opacity slider, fill toggle, undo/clear actions, z-order controls,
  * and a "Capture Scene" button that exports the Konva stage as a PNG.
  */
-export function WatchPartySketch() {
+export function WatchPartySketch({
+  rtmSendMessage,
+  userId,
+}: WatchPartySketchProps) {
   const {
     currentTool,
     setCurrentTool,
@@ -103,7 +115,7 @@ export function WatchPartySketch() {
     videoRef,
   } = useSketch();
 
-  const { handleMoveZ } = useSketchOverlay();
+  const { handleMoveZ } = useSketchMoveZ({ rtmSendMessage, userId });
   const { theme: appTheme } = useTheme();
   const t = useTranslations('party');
 

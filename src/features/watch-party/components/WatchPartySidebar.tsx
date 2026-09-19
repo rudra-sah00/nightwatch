@@ -261,7 +261,10 @@ export const WatchPartySidebar = memo(function WatchPartySidebar({
           )}
         >
           {isHost || canDraw ? (
-            <WatchPartySketch />
+            <WatchPartySketch
+              rtmSendMessage={rtmSendMessage}
+              userId={currentUserId}
+            />
           ) : (
             <WatchPartySketchDisabled />
           )}

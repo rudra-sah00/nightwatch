@@ -404,13 +404,23 @@ Searchable sound panel with:
 
 14 drawing tools: select, freehand, pencil, arrow, line, rectangle, circle, triangle, star, bubble, text, sticker, laser, eraser, reaction.
 
-Features: 19-color palette + custom color picker, stroke width slider, opacity slider, fill toggle, undo, clear (self/all), z-order controls, "Capture Scene" saves to clip library, remote cursor rendering (batched updates), real-time sync via RTM (`SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_MOVE_Z`, `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION`). Lines are rendered without shadow for cleaner visuals.
+Features: conic-gradient colour wheel (native `<input type="color">` behind it), stroke width / font size slider, opacity slider, fill toggle, undo, clear (self/all), z-order controls, "Capture Scene" saves to clip library, remote cursor rendering (throttled to ~10fps), real-time sync via RTM (`SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_MOVE_Z`, `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION`). Lines are rendered without shadow for cleaner visuals.
+
+Filled shapes use the selected colour with a hard `#1a1a1a` neo-brutalist border; unfilled ("outline only") shapes use the selected colour as the stroke with a transparent interior.
+
+**Hook ownership.** `useSketchOverlay` must be mounted exactly once per party — it owns every RTM subscription and the clear/undo trigger effects. The sidebar panel only needs z-order control, so it takes `rtmSendMessage` and `userId` as props and calls the standalone `useSketchMoveZ` instead. Mounting the full hook twice double-registers each listener and each trigger effect, and (because the panel had no RTM sender) silently dropped `SKETCH_MOVE_Z` broadcasts.
+
+**Stage sizing.** The Konva stage tracks its container with a `ResizeObserver` (rAF-coalesced, falling back to `window.resize`). A window listener alone is not sufficient: collapsing or expanding the sidebar changes the player width by ~380px without ever resizing the window, which left the stage at its old dimensions — strokes landed at the wrong coordinates and the uncovered strip of video ignored pointer input entirely.
+
+**Action identity.** `userId`, `userName`, and `opacity` are stamped onto an action when it is created in `handleMouseDown`, not when it is broadcast on mouse-up. An anonymous local copy cannot be selected or dragged by its own author, is invisible to "clear mine", and ignores the opacity slider. In-progress strokes are updated **by id**, never by array position, so a peer's stroke arriving mid-drag is not overwritten.
 
 ### SketchContext
 
 `interactions/context/SketchContext.tsx`
 
 React context providing all shared sketch state: current tool, color, stroke width, opacity, fill, actions array, selected element ID, remote cursors, sticker selection, video ref, and Konva stage ref. Exposes `triggerClear`, `triggerClearSelf`, `triggerUndo` via counter-based triggers.
+
+These triggers are monotonic counters, so `trigger > 0` stays true for the rest of the session. The effects that consume them in `use-sketch-overlay.ts` are therefore keyed on the counter **alone**, reading `canDraw` / `userId` / `selectedId` / `rtmSendMessage` through a ref. Listing those as dependencies makes any identity change re-run the effect — after a single undo press, every subsequent selection would delete another stroke and broadcast a stray `SKETCH_UNDO`.
 
 ## RTM Message Types
 
@@ -468,7 +478,7 @@ All calls go through `apiFetch` (cookie-authenticated). Defined in `room/service
 |----------|--------------|----------|
 | Sketch actions | Max 200, FIFO eviction | `SketchContext.tsx` |
 | Chat messages | Max 200, FIFO eviction | `useWatchPartyChat.ts` |
-| Remote cursors | Pruned every 5s (stale > 5s removed) | `use-sketch-overlay.ts` |
+| Remote cursors | Pruned every 5s (stale > 5s removed); broadcast throttled to ~10fps | `use-sketch-overlay.ts` |
 | Floating emojis | Auto-remove after 4.5s animation | `use-floating-emojis.ts` |
 | Soundboard audio | Dedicated ref per source (local + remote) | `use-soundboard.ts` |
 | Gesture detection | Disabled by default (opt-in via `enabled` prop) | `useGestureDetection.ts` |
