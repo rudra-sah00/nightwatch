@@ -12,6 +12,7 @@ const { mockHls, eventHandlers, MockHlsClass } = vi.hoisted(() => {
     loadSource: vi.fn(),
     attachMedia: vi.fn(),
     startLoad: vi.fn(),
+    stopLoad: vi.fn(),
     recoverMediaError: vi.fn(),
     swapAudioCodec: vi.fn(),
     destroy: vi.fn(),
@@ -390,6 +391,149 @@ describe('useHls', () => {
     });
 
     expect(mockHls.recoverMediaError).toHaveBeenCalled();
+  });
+
+  /**
+   * Segments are not IDR-aligned: each 10s segment holds five IDRs (2s GOPs) but does not
+   * begin on one, so Chrome treats a non-IDR frame as the random-access point. With
+   * `has extra data: false` (hls.js emits SPS/PPS in-band, not in the fMP4 avcC) a seek
+   * hands the decoder a non-keyframe with no parameter sets and it fails:
+   *
+   *   Failed to send video packet for decoding: {... is_key_frame=0 ...}
+   *
+   * Reproduced on hls.js 1.7.3 on both VideoToolbox and the FFmpeg software fallback, so
+   * it is not platform-specific. Reloading the fragment re-appends the init segment, which
+   * is the only thing that restores the parameter sets.
+   */
+  describe('seek re-primes the decoder', () => {
+    const seekTo = (video: HTMLVideoElement, t: number) => {
+      Object.defineProperty(video, 'currentTime', {
+        configurable: true,
+        writable: true,
+        value: t,
+      });
+      act(() => {
+        video.dispatchEvent(new Event('seeking'));
+      });
+    };
+
+    const mountVod = async (isLive = false) => {
+      const videoRef = createVideoRef();
+      renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+          isLive,
+        }),
+      );
+      await vi.waitFor(() => {
+        expect(mockHls.attachMedia).toHaveBeenCalled();
+      });
+      return videoRef.current;
+    };
+
+    it('reloads the fragment at the seek target', async () => {
+      const video = await mountVod();
+
+      seekTo(video, 2370.72);
+
+      expect(mockHls.stopLoad).toHaveBeenCalled();
+      // skipSeekToStartPosition=true: currentTime is already set, and letting hls.js
+      // set it again would re-enter the handler.
+      expect(mockHls.startLoad).toHaveBeenCalledWith(2370.72, true);
+    });
+
+    it('re-primes on every subsequent seek', async () => {
+      const video = await mountVod();
+
+      seekTo(video, 100);
+      seekTo(video, 200);
+      seekTo(video, 300);
+
+      expect(mockHls.startLoad).toHaveBeenCalledTimes(3);
+    });
+
+    /** startLoad settles the playhead itself and can emit another seeking event. */
+    it('does not recurse when startLoad emits its own seeking event', async () => {
+      const video = await mountVod();
+      mockHls.startLoad.mockImplementationOnce(() => {
+        video.dispatchEvent(new Event('seeking'));
+      });
+
+      seekTo(video, 500);
+
+      expect(mockHls.startLoad).toHaveBeenCalledTimes(1);
+    });
+
+    /**
+     * Holding skip-forward fires several seeks in one macrotask. A time-window guard
+     * re-primed only the first, leaving the decoder unprimed for where the user actually
+     * landed — so the guard compares positions, not elapsed time.
+     */
+    it('re-primes each of several rapid skips', async () => {
+      const video = await mountVod();
+
+      seekTo(video, 100);
+      seekTo(video, 105);
+      seekTo(video, 110);
+
+      expect(mockHls.startLoad).toHaveBeenCalledTimes(3);
+      expect(mockHls.startLoad).toHaveBeenLastCalledWith(110, true);
+    });
+
+    /** Returning to a position primed earlier must not be mistaken for an echo. */
+    it('re-primes when seeking back to an earlier target', async () => {
+      const video = await mountVod();
+
+      seekTo(video, 400);
+      act(() => {
+        video.dispatchEvent(new Event('seeked'));
+      });
+      seekTo(video, 400);
+
+      expect(mockHls.startLoad).toHaveBeenCalledTimes(2);
+    });
+
+    it('ignores a non-finite currentTime', async () => {
+      const video = await mountVod();
+
+      seekTo(video, Number.NaN);
+
+      expect(mockHls.startLoad).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Live buffers are a sliding window; stopLoad/startLoad would fight the live edge, and
+     * the live path does not exhibit this failure.
+     */
+    it('leaves live playback alone', async () => {
+      const video = await mountVod(true);
+
+      seekTo(video, 42);
+
+      expect(mockHls.startLoad).not.toHaveBeenCalled();
+    });
+
+    it('stops re-priming once the player is torn down', async () => {
+      const videoRef = createVideoRef();
+      const { unmount } = renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+        }),
+      );
+      await vi.waitFor(() => {
+        expect(mockHls.attachMedia).toHaveBeenCalled();
+      });
+      unmount();
+      mockHls.startLoad.mockClear();
+
+      seekTo(videoRef.current, 900);
+
+      expect(mockHls.startLoad).not.toHaveBeenCalled();
+    });
   });
 
   /**

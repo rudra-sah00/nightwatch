@@ -145,6 +145,18 @@ export function useHls({
     let cancelled = false;
     // Capture native HLS handler so the cleanup closure can remove it
     let nativeLoadedMetadataHandler: (() => void) | null = null;
+    // Seek re-prime handlers, removed on cleanup. See where they are assigned.
+    let onSeeking: (() => void) | null = null;
+    let onSeeked: (() => void) | null = null;
+    /**
+     * Target of the re-prime in flight, or null.
+     *
+     * Position-based rather than a plain boolean: a time-window guard would swallow rapid
+     * distinct seeks — holding skip-forward fires several within one macrotask and only
+     * the first would re-prime, leaving the decoder unprimed for where the user actually
+     * landed. Comparing positions suppresses only an echo of the same seek.
+     */
+    let primingFor: number | null = null;
 
     // Clear any previous errors when loading new stream
     dispatch({ type: 'SET_ERROR', error: null });
@@ -287,6 +299,61 @@ export function useHls({
 
         hls.loadSource(streamUrl);
         hls.attachMedia(video);
+
+        /**
+         * Re-prime the decoder on every seek.
+         *
+         * These segments are not IDR-aligned. Each 10s segment carries five IDRs (GOPs are
+         * 2s) but does not *begin* on one, so Chrome logs "Promoting non-IDR frame with SEI
+         * recovery point to keyframe for MSE random access" for every segment and treats a
+         * non-IDR frame as the random-access point. Combined with `has extra data: false`
+         * — hls.js's transmux emits SPS/PPS in-band rather than in the fMP4 `avcC` — a seek
+         * hands the decoder a non-keyframe with no parameter sets:
+         *
+         *   Failed to send video packet for decoding:
+         *     {timestamp=2370720000 duration=40000 size=26271 is_key_frame=0 encrypted=0}
+         *
+         * Both decoders reject that. Confirmed on hls.js 1.7.3 across VideoToolbox *and*
+         * the FFmpeg software fallback Chrome switches to, so it is not platform-specific.
+         *
+         * `stopLoad()` + `startLoad(t)` makes hls.js drop its buffer and load the fragment
+         * at `t` afresh, which re-appends the init segment and so restores the parameter
+         * sets. It costs a short fetch on seeks that would otherwise have been served from
+         * the buffer — the tradeoff for seeks that work at all on this content.
+         *
+         * Live is excluded: its buffer is a sliding window where stopLoad/startLoad would
+         * fight the live edge, and the live path does not show this failure.
+         */
+        if (!isLive) {
+          onSeeking = () => {
+            const target = video.currentTime;
+            if (!Number.isFinite(target)) return;
+
+            // Ignore the seek we perform ourselves to restore position after a reload:
+            // that already follows a fresh fragment load, so re-priming would loop.
+            if (resumePositionRef.current !== null) return;
+
+            // Suppress an echo of the seek we are already priming for. `startLoad` is
+            // called with skipSeekToStartPosition so it should not move the playhead at
+            // all, but this keeps a recursive event from re-entering if it ever does.
+            if (primingFor !== null && Math.abs(target - primingFor) < 0.5) {
+              return;
+            }
+            primingFor = target;
+
+            hls.stopLoad();
+            // skipSeekToStartPosition: currentTime is already where the user asked for;
+            // letting hls.js set it again would re-enter this handler.
+            hls.startLoad(target, true);
+          };
+          // Cleared once the seek settles, so returning to the same position later still
+          // re-primes rather than being mistaken for an echo.
+          onSeeked = () => {
+            primingFor = null;
+          };
+          video.addEventListener('seeking', onSeeking);
+          video.addEventListener('seeked', onSeeked);
+        }
 
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
           // Restore the playhead after a reload we triggered. Done on MANIFEST_PARSED
@@ -847,6 +914,14 @@ export function useHls({
 
     return () => {
       cancelled = true;
+      if (onSeeking) {
+        video.removeEventListener('seeking', onSeeking);
+        onSeeking = null;
+      }
+      if (onSeeked) {
+        video.removeEventListener('seeked', onSeeked);
+        onSeeked = null;
+      }
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
