@@ -393,6 +393,47 @@ describe('useHls', () => {
   });
 
   /**
+   * These streams are open-GOP — segments begin on non-IDR frames, which Chrome promotes
+   * to keyframes for MSE random access. That leaves sub-frame holes at fragment joins, and
+   * hls.js's default 0.1s tolerance is tight enough that a seek lands in one and stalls
+   * rather than nudging over it. The live branch already carried 0.5 for this reason while
+   * VOD sat on the default.
+   */
+  describe('VOD gap handling on seek', () => {
+    const configFor = async (isLive: boolean) => {
+      const videoRef = createVideoRef();
+      renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+          isLive,
+        }),
+      );
+      await vi.waitFor(() => {
+        expect(MockHlsClass).toHaveBeenCalled();
+      });
+      const calls = MockHlsClass.mock.calls as unknown as unknown[][];
+      return (calls.at(-1)?.[0] ?? {}) as Record<string, unknown>;
+    };
+
+    it('tolerates buffer holes wide enough to nudge over', async () => {
+      expect((await configFor(false)).maxBufferHole).toBe(0.5);
+    });
+
+    it('prefetches the next fragment so a forward seek finds data in flight', async () => {
+      expect((await configFor(false)).startFragPrefetch).toBe(true);
+    });
+
+    it('matches the live branch, which already handled this', async () => {
+      const vod = await configFor(false);
+      const live = await configFor(true);
+      expect(vod.maxBufferHole).toBe(live.maxBufferHole);
+      expect(vod.startFragPrefetch).toBe(live.startFragPrefetch);
+    });
+  });
+
+  /**
    * `recoverMediaError()` rebuilds the MediaSource and reloads from `currentTime`,
    * refilling the whole buffer. Uncapped, a decode error that survives the rebuild loops
    * forever and each cycle re-requests every segment — the request flood observed in

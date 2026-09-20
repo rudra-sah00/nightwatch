@@ -80,7 +80,7 @@
     "electron-window-state": "^5.0.3",
     "emoji-picker-react": "^4.20.2",
     "firebase": "12.18.0",
-    "hls.js": "^1.7.2",
+    "hls.js": "^1.7.3",
     "jsqr": "1.4.0",
     "konva": "^10.4.0",
     "lucide-react": "^1.42.0",

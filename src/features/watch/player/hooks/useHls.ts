@@ -210,9 +210,27 @@ export function useHls({
               enableWorker: true,
               lowLatencyMode: false,
               backBufferLength: 90,
-              maxBufferLength: 120, // 2 minutes (matches aggressive backend prefetch)
+              // Forward buffer. The comment this replaces claimed it matched an
+              // "aggressive backend prefetch" — that prefetch was removed (the CDN proxy
+              // is direct-pipe only now), so the sizing is no longer justified by it.
+              // Left as-is because changing it is a throughput decision, not part of the
+              // seek fix; at ~2 Mbps this reaches ~21 MB, well under the cap below.
+              maxBufferLength: 120,
               maxMaxBufferLength: 300, // 5 minutes max
               maxBufferSize: 200 * 1000 * 1000, // 200MB (crucial for 1080p)
+              // Gap handling on seek. These streams are open-GOP: segments start on
+              // non-IDR frames, so Chrome logs "Promoting non-IDR frame with SEI recovery
+              // point to keyframe for MSE random access" and the resulting buffer can
+              // carry sub-frame holes at fragment joins. hls.js defaults to a 0.1s
+              // tolerance, which is tight enough that a seek lands in a hole and stalls
+              // instead of nudging over it. The live branch already used 0.5 for the same
+              // reason; VOD was silently on the default.
+              maxBufferHole: 0.5,
+              // Fetch the next fragment before the current one is fully buffered, so a
+              // seek forward is more likely to find data already in flight.
+              startFragPrefetch: true,
+              // nudgeOffset (0.1) and nudgeMaxRetry (3) are deliberately not set — those
+              // are already the hls.js defaults, so restating them would be noise.
               abrEwmaFastVoD: 1.0,
               abrEwmaSlowVoD: 3.0,
               manifestLoadingMaxRetry: 5,
