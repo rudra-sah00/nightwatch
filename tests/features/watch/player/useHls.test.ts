@@ -551,6 +551,168 @@ describe('useHls', () => {
       expect(params).toHaveProperty('visibility');
     });
 
+    /**
+     * The macOS signature: Chrome disables the video track when the tab is hidden, then
+     * fails to rebuild the VideoToolbox decoder on return because these streams use open
+     * GOPs with no usable H.264 parameter sets. `recoverMediaError()` re-appends at the
+     * same non-IDR frame, so it fails identically — only a fresh player recovers. Verified
+     * against chrome://media-internals on 2026-09-20.
+     */
+    describe('unrecoverable platform decode failure', () => {
+      const raiseDecodeReset = (videoRef: { current: HTMLVideoElement }) => {
+        Object.defineProperty(videoRef.current, 'error', {
+          configurable: true,
+          value: { code: 3 }, // MEDIA_ERR_DECODE
+        });
+        act(() => {
+          triggerEvent('hlsError', {
+            fatal: true,
+            type: 'mediaError',
+            details: 'mediaSourceRequiresReset',
+          });
+        });
+      };
+
+      it('reloads immediately instead of burning rebuild attempts', async () => {
+        const onStreamExpired = vi.fn();
+        const videoRef = createVideoRef();
+        renderHook(() =>
+          useHls({
+            videoRef,
+            streamUrl: 'https://example.com/stream.m3u8',
+            dispatch: mockDispatch,
+            onStreamExpired,
+          }),
+        );
+        await vi.waitFor(() => {
+          expect(eventHandlers.has('hlsError')).toBe(true);
+        });
+
+        raiseDecodeReset(videoRef);
+
+        expect(onStreamExpired).toHaveBeenCalledTimes(1);
+        expect(mockHls.recoverMediaError).not.toHaveBeenCalled();
+        expect(mockHls.destroy).toHaveBeenCalled();
+      });
+
+      /**
+       * The saved-progress restore keys on metadata and socket state, not streamUrl, so it
+       * does not re-run for a refetch. Without carrying the playhead ourselves, recovering
+       * 33 minutes in would restart the episode.
+       */
+      it('carries the playhead across the reload', async () => {
+        const onStreamExpired = vi.fn();
+        const videoRef = createVideoRef();
+        const { rerender } = renderHook(
+          ({ url }: { url: string }) =>
+            useHls({
+              videoRef,
+              streamUrl: url,
+              dispatch: mockDispatch,
+              onStreamExpired,
+            }),
+          { initialProps: { url: 'https://example.com/a.m3u8' } },
+        );
+        await vi.waitFor(() => {
+          expect(eventHandlers.has('hlsError')).toBe(true);
+        });
+
+        Object.defineProperty(videoRef.current, 'currentTime', {
+          configurable: true,
+          writable: true,
+          value: 1970.9,
+        });
+        raiseDecodeReset(videoRef);
+        expect(onStreamExpired).toHaveBeenCalled();
+
+        // The refetch hands down a new URL, remounting the engine.
+        eventHandlers.clear();
+        rerender({ url: 'https://example.com/b.m3u8' });
+        await vi.waitFor(() => {
+          expect(eventHandlers.has('hlsManifestParsed')).toBe(true);
+        });
+        act(() => {
+          triggerEvent('hlsManifestParsed', { levels: mockHls.levels });
+        });
+
+        expect(videoRef.current.currentTime).toBeCloseTo(1970.9, 1);
+      });
+
+      it('still reports the failure so it stays visible in analytics', async () => {
+        const videoRef = createVideoRef();
+        renderHook(() =>
+          useHls({
+            videoRef,
+            streamUrl: 'https://example.com/stream.m3u8',
+            dispatch: mockDispatch,
+            onStreamExpired: vi.fn(),
+          }),
+        );
+        await vi.waitFor(() => {
+          expect(eventHandlers.has('hlsError')).toBe(true);
+        });
+
+        raiseDecodeReset(videoRef);
+
+        await vi.waitFor(() => {
+          expect(mockTrackEvent).toHaveBeenCalledWith(
+            'video_error',
+            expect.objectContaining({ action: 'reload-decoder' }),
+          );
+        });
+      });
+
+      /** With no reload available (TV surfaces omit it) the rebuild path must still run. */
+      it('falls back to rebuilding when no reload callback exists', async () => {
+        const videoRef = createVideoRef();
+        renderHook(() =>
+          useHls({
+            videoRef,
+            streamUrl: 'https://example.com/stream.m3u8',
+            dispatch: mockDispatch,
+          }),
+        );
+        await vi.waitFor(() => {
+          expect(eventHandlers.has('hlsError')).toBe(true);
+        });
+
+        raiseDecodeReset(videoRef);
+
+        expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    /** Exhausting the rebuild budget should reload rather than strand the viewer. */
+    it('reloads once the rebuild budget is spent', async () => {
+      const onStreamExpired = vi.fn();
+      const videoRef = createVideoRef();
+      renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+          onStreamExpired,
+        }),
+      );
+      await vi.waitFor(() => {
+        expect(eventHandlers.has('hlsError')).toBe(true);
+      });
+
+      // bufferStalledError has no video.error, so it takes the rebuild path.
+      for (let i = 0; i < 3; i++) {
+        act(() => {
+          triggerEvent('hlsError', {
+            fatal: true,
+            type: 'mediaError',
+            details: 'bufferStalledError',
+          });
+        });
+      }
+
+      expect(mockHls.recoverMediaError).toHaveBeenCalledTimes(2);
+      expect(onStreamExpired).toHaveBeenCalledTimes(1);
+    });
+
     /** A new title must start with a full budget, not inherit the previous one. */
     it('resets the budget when a new source loads', async () => {
       const { rerender } = renderPlayer();

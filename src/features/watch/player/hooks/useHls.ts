@@ -76,6 +76,16 @@ export function useHls({
   const mediaRecoveryCountRef = useRef(0);
   /** Set when the page was restored from the back/forward cache — see the MEDIA_ERROR handler. */
   const restoredFromBfcacheRef = useRef(false);
+  /**
+   * Playhead to restore after a reload we initiated ourselves.
+   *
+   * `onStreamExpired` refetches the stream, which remounts the engine against the same
+   * video element and resets `currentTime` to 0. The saved-progress restore cannot cover
+   * this: its effect keys on `metadata`/socket state, not `streamUrl`, so it does not
+   * re-run for a refetch. Without this, recovering a decode error 33 minutes into an
+   * episode would silently restart it from the beginning.
+   */
+  const resumePositionRef = useRef<number | null>(null);
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
@@ -261,6 +271,18 @@ export function useHls({
         hls.attachMedia(video);
 
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+          // Restore the playhead after a reload we triggered. Done on MANIFEST_PARSED
+          // rather than canplay because duration is not set before this, which makes a
+          // currentTime assignment silently fail.
+          const resumeAt = resumePositionRef.current;
+          resumePositionRef.current = null;
+          if (resumeAt !== null && resumeAt > 0 && !isLive) {
+            video.currentTime = resumeAt;
+            video.play().catch(() => {
+              // Autoplay may be refused; the user can resume manually.
+            });
+          }
+
           // Detect garbage manifests: when a CDN returns non-HLS content
           // (e.g. HTML/CSS block page) and the CF Worker rewrites every line
           // as a proxied segment URL, HLS.js "parses" it but produces levels
@@ -534,10 +556,55 @@ export function useHls({
                 hls.startLoad();
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR: {
+                /**
+                 * A platform decoder that cannot re-initialise is unrecoverable by
+                 * rebuilding the MediaSource, so go straight to a full reload.
+                 *
+                 * Observed on macOS Chrome (media-internals, 2026-09-20): backgrounding
+                 * the tab makes Chrome disable the video track to save power; on return it
+                 * re-enables it and rebuilds the hardware decoder, and
+                 * `CMVideoFormatDescriptionCreateFromH264ParameterSets()` fails with
+                 * OSStatus -12712 because these streams use open GOPs — segments start on
+                 * non-IDR frames ("Promoting non-IDR frame with SEI recovery point to
+                 * keyframe") and the config carries no avcC extradata, so there are no
+                 * usable H.264 parameter sets to re-initialise from.
+                 *
+                 * `recoverMediaError()` re-appends at that same promoted non-IDR frame, so
+                 * it fails identically every time — it just re-downloads the buffer first.
+                 * Only a fresh player and decoder recovers, so skip the attempts that
+                 * cannot work rather than spending ~15s of rebuffering to learn nothing.
+                 */
+                // MediaError.MEDIA_ERR_DECODE. Compared as a literal because the
+                // `MediaError` global is not present in every environment this runs in.
+                const MEDIA_ERR_DECODE = 3;
+                const isUnrecoverableDecode =
+                  (data.details as string) === 'mediaSourceRequiresReset' &&
+                  video.error?.code === MEDIA_ERR_DECODE;
+
+                if (isUnrecoverableDecode && onStreamExpiredRef.current) {
+                  reportPlaybackError(data, 'reload-decoder');
+                  resumePositionRef.current = video.currentTime;
+                  hls.destroy();
+                  dispatch({ type: 'SET_LOADING', isLoading: true });
+                  onStreamExpiredRef.current();
+                  break;
+                }
+
                 mediaRecoveryCountRef.current += 1;
                 const attempt = mediaRecoveryCountRef.current;
 
                 if (attempt > MAX_MEDIA_RECOVERY_ATTEMPTS) {
+                  // Out of rebuild attempts. A reload still gets a fresh decoder, so
+                  // prefer it over stranding the user on an error they cannot act on.
+                  if (onStreamExpiredRef.current) {
+                    reportPlaybackError(data, 'reload-exhausted');
+                    resumePositionRef.current = video.currentTime;
+                    hls.destroy();
+                    dispatch({ type: 'SET_LOADING', isLoading: true });
+                    onStreamExpiredRef.current();
+                    break;
+                  }
+
                   reportPlaybackError(data, 'gave-up');
                   dispatch({
                     type: 'SET_ERROR',
