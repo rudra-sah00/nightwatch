@@ -126,13 +126,15 @@ export function CenterPlayButton({
   return (
     <button
       type="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          if (!disabled && !isLoading) onToggle();
-        }
-      }}
+      // Deliberately out of the tab order and non-focusable on click.
+      //
+      // This button covers the whole player, so when it held focus every auto-repeat
+      // `keydown` from a held Space toggled playback again — a rapid play/pause stutter
+      // that also kept the video paused, preventing hold-to-speed-up from engaging.
+      // Space is owned by the global shortcut layer (`useKeyboard`); keyboard users get
+      // play/pause from the labelled button in the control bar.
+      tabIndex={-1}
+      onMouseDown={(e) => e.preventDefault()}
       className={cn(
         'absolute inset-0 transition-opacity duration-500 z-20 w-full cursor-pointer border-none bg-transparent p-0 m-0',
         !isPlaying && !isLoading

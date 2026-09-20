@@ -166,20 +166,28 @@ describe('CenterPlayButton', () => {
       expect(onToggle).not.toHaveBeenCalled();
     });
 
-    it('should handle keyboard Enter', () => {
+    /**
+     * This overlay used to handle Enter and Space itself while sitting in the tab order
+     * and covering the whole player. Holding Space then toggled playback on every
+     * auto-repeat tick — a rapid stutter that also kept the video paused, so the
+     * hold-to-speed-up boost could never engage. Keyboard play/pause now belongs to the
+     * global shortcut layer and to the labelled button in the control bar.
+     */
+    it('leaves keyboard play/pause to the global shortcut layer', () => {
       const onToggle = vi.fn();
       render(<CenterPlayButton {...defaultProps} onToggle={onToggle} />);
+      const button = screen.getByRole('button');
 
-      fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' });
-      expect(onToggle).toHaveBeenCalledTimes(1);
+      fireEvent.keyDown(button, { key: 'Enter' });
+      fireEvent.keyDown(button, { key: ' ', code: 'Space' });
+
+      expect(onToggle).not.toHaveBeenCalled();
     });
 
-    it('should handle keyboard Space', () => {
-      const onToggle = vi.fn();
-      render(<CenterPlayButton {...defaultProps} onToggle={onToggle} />);
+    it('stays out of the tab order', () => {
+      render(<CenterPlayButton {...defaultProps} />);
 
-      fireEvent.keyDown(screen.getByRole('button'), { key: ' ' });
-      expect(onToggle).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('button').getAttribute('tabindex')).toBe('-1');
     });
   });
 

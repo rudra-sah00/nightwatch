@@ -15,6 +15,7 @@ import {
 import { useFullscreen } from '../../../hooks/useFullscreen';
 import { useKeyboard } from '../../../hooks/useKeyboard';
 import { useNextEpisode } from '../../../hooks/useNextEpisode';
+import { usePlaybackSpeedBoost } from '../../../hooks/usePlaybackSpeedBoost';
 import { usePlayerEngine } from '../../../hooks/usePlayerEngine';
 import { usePlayerHandlers } from '../../../hooks/usePlayerHandlers';
 import { useWatchProgress } from '../../../hooks/useWatchProgress';
@@ -65,6 +66,8 @@ interface PlayerRootHookProps {
   onBack?: () => void;
   isLive?: boolean;
   playbackRate?: number;
+  /** Whether holding Space temporarily raises playback to 2x. */
+  holdToSpeedUp?: boolean;
   skipProgressHistory?: boolean;
   /** Stream format hint from backend (avoids URL-sniffing for engine selection) */
   streamFormat?: 'hls' | 'mp4' | 'dash';
@@ -92,6 +95,7 @@ export function usePlayerRoot({
   onBack: onBackProp,
   isLive = false,
   playbackRate: playbackRateProp,
+  holdToSpeedUp = true,
   skipProgressHistory = false,
   streamFormat,
 }: PlayerRootHookProps) {
@@ -372,6 +376,17 @@ export function usePlayerRoot({
     isLive,
     onInteraction: () => showControlsRef.current?.(),
     onToggleFullscreen: toggleFullscreen,
+    allowSpeedBoost: holdToSpeedUp,
+  });
+
+  // Same boost used by the Space key, exposed on context so the mobile long-press
+  // gesture shares one set of rules rather than reimplementing them.
+  const { engageSpeedBoost, releaseSpeedBoost } = usePlaybackSpeedBoost({
+    videoRef,
+    dispatch,
+    disabled: readOnly,
+    isLive,
+    allowSpeedBoost: holdToSpeedUp,
   });
 
   // --- NATIVE OS: KEEP AWAKE DURING PLAYBACK ---
@@ -491,6 +506,8 @@ export function usePlayerRoot({
       setAudioTrack: handleAudioChange,
       setSubtitleTrack: handleSubtitleChange,
       handleInteraction,
+      engageSpeedBoost,
+      releaseSpeedBoost,
     },
     nextEpisode: {
       show: showNextEpisode,

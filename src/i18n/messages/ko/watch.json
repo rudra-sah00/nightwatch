@@ -49,7 +49,8 @@
     "maximize": "최대화",
     "captionNone": "없음",
     "castStart": "Cast to device",
-    "castStop": "Stop casting"
+    "castStop": "Stop casting",
+    "speedBoostActive": "2배속으로 재생 중"
   },
   "settings": {
     "quality": "화질",

@@ -213,6 +213,10 @@ export function WatchPartyVideoArea({
       initialAudioTrackId={initialAudioTrackId}
       onAudioTrackChange={isHost ? handleAudioTrackChange : undefined}
       playbackRate={room.state.playbackRate}
+      // Playback rate is party state: useWatchPartyHostSync broadcasts a `rate` event
+      // on every ratechange, so a transient hold-to-speed boost would push 2x and then
+      // 1x to every member.
+      holdToSpeedUp={false}
     >
       {/* Blurred poster background */}
       {metadata.posterUrl ? (

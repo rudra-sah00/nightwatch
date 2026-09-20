@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { usePlayerContext } from '../../context/PlayerContext';
+import { useLongPressSpeedBoost } from '../../hooks/useLongPressSpeedBoost';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { VideoElement } from '../VideoElement';
 import { SubtitleOverlay } from './SubtitleOverlay';
@@ -77,6 +78,22 @@ export function PlayerVideo() {
   const canUseTapSeek =
     isMobile && !readOnly && metadata.type !== 'livestream' && !state.isLoading;
 
+  // Long-press anywhere on the video for 2x, matching the Space-key gesture on desktop.
+  // Shares `engageSpeedBoost`/`releaseSpeedBoost` with the keyboard path, so the rules
+  // (never boost a paused video, never exceed a rate already >= 2x, restore exactly what
+  // the user had) live in one place.
+  const { longPressHandlers, didBoost } = useLongPressSpeedBoost({
+    engageSpeedBoost: playerHandlers.engageSpeedBoost,
+    releaseSpeedBoost: playerHandlers.releaseSpeedBoost,
+    enabled: isMobile && !readOnly,
+  });
+
+  // A long press must not also register as a tap-seek on release.
+  const handleTapZone = (zone: TapZone) => {
+    if (didBoost()) return;
+    handleTapSeek(zone);
+  };
+
   const handleTapSeek = (zone: TapZone) => {
     const now = Date.now();
     const last = lastTapRef.current;
@@ -106,8 +123,10 @@ export function PlayerVideo() {
           }}
         />
       )}
-      {/* Video layer sits above the canvas */}
-      <div className="absolute inset-0 z-[1]">
+      {/* Video layer sits above the canvas. Carries the mobile long-press-to-2x
+          gesture; the equivalent action is Space on the keyboard and the speed menu in
+          the control bar, so this adds no touch-only capability. */}
+      <div className="absolute inset-0 z-[1]" {...longPressHandlers}>
         <VideoElement
           ref={videoCallbackRef}
           dispatch={dispatch}
@@ -130,14 +149,14 @@ export function PlayerVideo() {
               data-tap-zone
               aria-label={t('aria.seekBackward')}
               className="absolute inset-y-0 left-0 w-1/3 pointer-events-auto bg-transparent"
-              onClick={() => handleTapSeek('left')}
+              onClick={() => handleTapZone('left')}
             />
             <button
               type="button"
               data-tap-zone
               aria-label={t('aria.seekForward')}
               className="absolute inset-y-0 right-0 w-1/3 pointer-events-auto bg-transparent"
-              onClick={() => handleTapSeek('right')}
+              onClick={() => handleTapZone('right')}
             />
           </div>
         ) : null}

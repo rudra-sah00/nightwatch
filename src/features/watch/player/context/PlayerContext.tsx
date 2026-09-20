@@ -49,6 +49,15 @@ interface PlayerContextValue {
     setAudioTrack: (trackId: string) => void;
     setSubtitleTrack: (trackId: string | null) => void;
     handleInteraction: (isActive: boolean) => void;
+    /**
+     * Raise playback to 2x for the duration of a hold gesture.
+     *
+     * @returns `true` if the gesture counts as a hold, so the caller must not also fire
+     *   its tap action. `false` when boosting is impossible (paused, live, read-only).
+     */
+    engageSpeedBoost: () => boolean;
+    /** Restore the pre-boost rate. Safe to call when nothing is engaged. */
+    releaseSpeedBoost: () => void;
   };
   // Next episode state (only relevant for series)
   nextEpisode: {

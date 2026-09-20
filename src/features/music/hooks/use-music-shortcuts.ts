@@ -70,6 +70,10 @@ export function useMusicShortcuts() {
         return;
       }
 
+      // Holding a key fires keydown continuously. Without this, holding Space
+      // machine-guns play/pause and holding an arrow key skips tracks repeatedly.
+      if (e.repeat) return;
+
       const remote = isRemoteRef.current;
 
       switch (e.key) {

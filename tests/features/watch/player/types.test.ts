@@ -24,6 +24,7 @@ describe('Player Types and Reducer', () => {
         buffered: 0,
         volume: 1,
         playbackRate: 1,
+        isSpeedBoosted: false,
         error: null,
         showControls: true,
         qualities: [],

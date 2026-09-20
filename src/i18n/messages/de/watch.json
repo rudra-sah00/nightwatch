@@ -49,7 +49,8 @@
     "maximize": "Maximieren",
     "captionNone": "Keine",
     "castStart": "Cast to device",
-    "castStop": "Stop casting"
+    "castStop": "Stop casting",
+    "speedBoostActive": "Wiedergabe mit 2-facher Geschwindigkeit"
   },
   "settings": {
     "quality": "Qualität",

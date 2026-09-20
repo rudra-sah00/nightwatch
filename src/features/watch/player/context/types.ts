@@ -25,6 +25,14 @@ export interface PlayerState {
   buffered: number;
   volume: number;
   playbackRate: number;
+  /**
+   * Whether a transient hold-to-speed-up boost is active (hold Space).
+   *
+   * Deliberately separate from `playbackRate`: the boost is temporary and must not
+   * overwrite the speed the user picked in the settings menu, which is what they get
+   * back on release.
+   */
+  isSpeedBoosted: boolean;
   error: string | null;
   showControls: boolean;
   qualities: Quality[];
@@ -78,6 +86,7 @@ export type PlayerAction =
   | { type: 'SHOW_CONTROLS' }
   | { type: 'HIDE_CONTROLS' }
   | { type: 'SET_PLAYBACK_RATE'; rate: number }
+  | { type: 'SET_SPEED_BOOST'; isSpeedBoosted: boolean }
   | { type: 'SET_QUALITIES'; qualities: Quality[] }
   | { type: 'SET_CURRENT_QUALITY'; quality: string }
   | { type: 'SET_AUDIO_TRACKS'; audioTracks: AudioTrack[] }
@@ -97,6 +106,7 @@ export const initialPlayerState: PlayerState = {
   buffered: 0,
   volume: 1,
   playbackRate: 1,
+  isSpeedBoosted: false,
   error: null,
   showControls: true,
   qualities: [],
@@ -150,6 +160,8 @@ export function playerReducer(
       return { ...state, showControls: false };
     case 'SET_PLAYBACK_RATE':
       return { ...state, playbackRate: action.rate };
+    case 'SET_SPEED_BOOST':
+      return { ...state, isSpeedBoosted: action.isSpeedBoosted };
     case 'SET_QUALITIES':
       return { ...state, qualities: action.qualities };
     case 'SET_CURRENT_QUALITY':

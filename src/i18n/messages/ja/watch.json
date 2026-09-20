@@ -49,7 +49,8 @@
     "maximize": "最大化",
     "captionNone": "なし",
     "castStart": "Cast to device",
-    "castStop": "Stop casting"
+    "castStop": "Stop casting",
+    "speedBoostActive": "2倍速で再生中"
   },
   "settings": {
     "quality": "画質",

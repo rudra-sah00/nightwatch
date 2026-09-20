@@ -75,7 +75,10 @@ export const VideoElement = memo(function VideoElement({
       crossOrigin={crossOrigin}
       onClick={onClick}
       onKeyDown={(e) => {
-        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+        // Space is owned by the global shortcut layer (`useKeyboard`), which needs
+        // keydown *and* keyup to tell a tap from a hold-to-speed-up. Handling it here
+        // too would toggle playback on every auto-repeat tick.
+        if (onClick && e.key === 'Enter' && !e.repeat) {
           e.preventDefault();
           onClick();
         }

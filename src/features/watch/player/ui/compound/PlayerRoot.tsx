@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { PlayerContext } from '../../context/PlayerContext';
 import type { VideoMetadata } from '../../context/types';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
+import { SpeedBoostIndicator } from '../overlays/SpeedBoostIndicator';
 import { usePlayerRoot } from './hooks/use-player-root';
 
 /**
@@ -106,6 +107,13 @@ interface PlayerRootProps {
   playbackRate?: number;
   /** Stream format hint from backend — tells the player which engine to use (hls, mp4, dash) */
   streamFormat?: 'hls' | 'mp4' | 'dash';
+  /**
+   * Whether holding Space temporarily raises playback to 2x (YouTube-style).
+   *
+   * Defaults to `true`. Watch parties pass `false` because the host's `ratechange`
+   * events are broadcast to the whole room.
+   */
+  holdToSpeedUp?: boolean;
 }
 
 /**
@@ -180,6 +188,7 @@ export function PlayerRoot({
   layout = 'fill',
   playbackRate,
   streamFormat,
+  holdToSpeedUp = true,
 }: PlayerRootProps) {
   const tAria = useTranslations('watch.aria');
   const resolvedReadOnly =
@@ -223,6 +232,7 @@ export function PlayerRoot({
     isLive: resolvedIsLive,
     playbackRate,
     streamFormat,
+    holdToSpeedUp,
   });
 
   const isMobile = useMobileDetection();
@@ -285,7 +295,7 @@ export function PlayerRoot({
           )
             return;
 
-          const { togglePlay, seek, setVolume, toggleMute, toggleFullscreen } =
+          const { seek, setVolume, toggleMute, toggleFullscreen } =
             contextValue.playerHandlers;
           const vol = state.volume;
 
@@ -293,8 +303,10 @@ export function PlayerRoot({
             case ' ':
             case 'k':
             case 'K':
-              e.preventDefault();
-              togglePlay();
+              // Handled by the window-level listener in `useKeyboard`, which needs
+              // keyup too so holding Space can speed up to 2x. Toggling here as well
+              // would fire twice (cancelling out) and would pause on key-down,
+              // defeating the hold.
               break;
             case 'ArrowLeft':
             case 'j':
@@ -331,6 +343,7 @@ export function PlayerRoot({
         }}
       >
         {children}
+        <SpeedBoostIndicator />
       </div>
     </PlayerContext>
   );
