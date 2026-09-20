@@ -86,6 +86,24 @@ export function useHls({
    * episode would silently restart it from the beginning.
    */
   const resumePositionRef = useRef<number | null>(null);
+  /**
+   * Whether seeks on this stream must reload the fragment to re-prime the decoder.
+   *
+   * Off until proven necessary. Re-priming costs a fetch on seeks that the buffer would
+   * otherwise have served, and only content whose segment boundaries are not IDR-aligned
+   * needs it — properly authored streams (an IDR at every segment start, as Apple's HLS
+   * Authoring Specification requires) seek natively and should keep doing so. So the first
+   * seek runs native; if it produces the unrecoverable decode signature, the reload path
+   * recovers position and every later seek in this playback re-primes.
+   *
+   * Survives the engine remount that recovery triggers because it lives at hook scope, not
+   * inside the effect.
+   *
+   * Deliberately not persisted across page loads. A stored flag would keep charging the
+   * seek penalty for a title long after an upstream re-encode fixed it, and the cost of
+   * re-learning is a single ~1s recovery per playback.
+   */
+  const needsSeekReprimeRef = useRef(false);
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
@@ -222,14 +240,23 @@ export function useHls({
               enableWorker: true,
               lowLatencyMode: false,
               backBufferLength: 90,
-              // Forward buffer. The comment this replaces claimed it matched an
-              // "aggressive backend prefetch" — that prefetch was removed (the CDN proxy
-              // is direct-pipe only now), so the sizing is no longer justified by it.
-              // Left as-is because changing it is a throughput decision, not part of the
-              // seek fix; at ~2 Mbps this reaches ~21 MB, well under the cap below.
-              maxBufferLength: 120,
-              maxMaxBufferLength: 300, // 5 minutes max
-              maxBufferSize: 200 * 1000 * 1000, // 200MB (crucial for 1080p)
+              /**
+               * Forward buffer. Reduced from 120s/200MB.
+               *
+               * The old sizing was justified by an "aggressive backend prefetch" that no
+               * longer exists — the CDN proxy is direct-pipe only. And now that a seek on
+               * affected content reloads the fragment, a large forward buffer is actively
+               * wasteful: whatever was buffered ahead is discarded and refetched, so on a
+               * seek-heavy session we were downloading up to two minutes of video
+               * repeatedly and throwing it away.
+               *
+               * 60s is still double the hls.js default (30) and comfortably covers a
+               * network stall; 100MB holds 60s even at a 1080p bitrate, where the original
+               * 200MB comment was aimed.
+               */
+              maxBufferLength: 60,
+              maxMaxBufferLength: 180,
+              maxBufferSize: 100 * 1000 * 1000,
               // Gap handling on seek. These streams are open-GOP: segments start on
               // non-IDR frames, so Chrome logs "Promoting non-IDR frame with SEI recovery
               // point to keyframe for MSE random access" and the resulting buffer can
@@ -326,6 +353,10 @@ export function useHls({
          */
         if (!isLive) {
           onSeeking = () => {
+            // Native seek until this stream has proved it needs re-priming. See
+            // needsSeekReprimeRef.
+            if (!needsSeekReprimeRef.current) return;
+
             const target = video.currentTime;
             if (!Number.isFinite(target)) return;
 
@@ -665,6 +696,12 @@ export function useHls({
                 const isUnrecoverableDecode =
                   (data.details as string) === 'mediaSourceRequiresReset' &&
                   video.error?.code === MEDIA_ERR_DECODE;
+
+                if (isUnrecoverableDecode) {
+                  // The decoder could not configure itself from what it was handed. Every
+                  // later seek on this stream re-primes so it does not recur.
+                  needsSeekReprimeRef.current = true;
+                }
 
                 if (isUnrecoverableDecode && onStreamExpiredRef.current) {
                   reportPlaybackError(data, 'reload-decoder');

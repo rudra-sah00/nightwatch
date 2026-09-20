@@ -417,7 +417,17 @@ describe('useHls', () => {
       });
     };
 
-    const mountVod = async (isLive = false) => {
+    /**
+     * Re-priming is off until a stream proves it needs it, so arming means reproducing the
+     * decode signature once. `arm: false` exercises the default native-seek path.
+     */
+    const mountVod = async ({
+      isLive = false,
+      arm = true,
+    }: {
+      isLive?: boolean;
+      arm?: boolean;
+    } = {}) => {
       const videoRef = createVideoRef();
       renderHook(() =>
         useHls({
@@ -430,8 +440,62 @@ describe('useHls', () => {
       await vi.waitFor(() => {
         expect(mockHls.attachMedia).toHaveBeenCalled();
       });
+
+      if (arm) {
+        Object.defineProperty(videoRef.current, 'error', {
+          configurable: true,
+          value: { code: 3 }, // MEDIA_ERR_DECODE
+        });
+        act(() => {
+          triggerEvent('hlsError', {
+            fatal: true,
+            type: 'mediaError',
+            details: 'mediaSourceRequiresReset',
+          });
+        });
+        mockHls.startLoad.mockClear();
+        mockHls.stopLoad.mockClear();
+      }
       return videoRef.current;
     };
+
+    /**
+     * Streams authored to spec — an IDR at every segment start — seek natively and must not
+     * pay the refetch. Charging every title for JioHotstar's segmentation would be a
+     * regression for the rest of the catalogue.
+     */
+    it('seeks natively until a stream proves it needs re-priming', async () => {
+      const video = await mountVod({ arm: false });
+
+      seekTo(video, 300);
+
+      expect(mockHls.startLoad).not.toHaveBeenCalled();
+      expect(mockHls.stopLoad).not.toHaveBeenCalled();
+    });
+
+    it('starts re-priming once the decode signature appears', async () => {
+      const video = await mountVod({ arm: false });
+
+      seekTo(video, 300);
+      expect(mockHls.startLoad).not.toHaveBeenCalled();
+
+      Object.defineProperty(video, 'error', {
+        configurable: true,
+        value: { code: 3 },
+      });
+      act(() => {
+        triggerEvent('hlsError', {
+          fatal: true,
+          type: 'mediaError',
+          details: 'mediaSourceRequiresReset',
+        });
+      });
+      mockHls.startLoad.mockClear();
+
+      seekTo(video, 400);
+
+      expect(mockHls.startLoad).toHaveBeenCalledWith(400, true);
+    });
 
     it('reloads the fragment at the seek target', async () => {
       const video = await mountVod();
@@ -508,7 +572,7 @@ describe('useHls', () => {
      * the live path does not exhibit this failure.
      */
     it('leaves live playback alone', async () => {
-      const video = await mountVod(true);
+      const video = await mountVod({ isLive: true });
 
       seekTo(video, 42);
 
@@ -567,6 +631,27 @@ describe('useHls', () => {
 
     it('prefetches the next fragment so a forward seek finds data in flight', async () => {
       expect((await configFor(false)).startFragPrefetch).toBe(true);
+    });
+
+    /**
+     * Sized down from 120s/200MB. The old numbers were justified by a backend prefetch that
+     * no longer exists, and now that an affected seek reloads the fragment, a large forward
+     * buffer is refetched and discarded — wasted bandwidth on a seek-heavy session.
+     */
+    it('keeps the forward buffer generous but not wasteful', async () => {
+      const cfg = await configFor(false);
+
+      expect(cfg.maxBufferLength).toBe(60);
+      expect(cfg.maxMaxBufferLength).toBe(180);
+      expect(cfg.maxBufferSize).toBe(100 * 1000 * 1000);
+    });
+
+    it('still buffers well beyond the hls.js defaults', async () => {
+      const cfg = await configFor(false);
+
+      // hls.js defaults are 30s / 60MB.
+      expect(cfg.maxBufferLength as number).toBeGreaterThan(30);
+      expect(cfg.maxBufferSize as number).toBeGreaterThan(60 * 1000 * 1000);
     });
 
     it('matches the live branch, which already handled this', async () => {
