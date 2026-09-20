@@ -65,9 +65,17 @@
       "title": "Nightwatchへようこそ",
       "description": "新しいミニマルな映画体験をご案内します。"
     },
+    "hub": {
+      "title": "ここがスタート地点",
+      "description": "毎回ここから始まります。行き先を選んでください。ホームからいつでもこの画面に戻れます。"
+    },
     "search": {
       "title": "映画を探す",
       "description": "12,000以上のタイトルから検索。お気に入りの映画やドラマをここに入力してください。"
+    },
+    "movies": {
+      "title": "映画・ドラマ",
+      "description": "12,000本以上の映画や番組を検索できます。どの作品からでもウォッチパーティーを始められます。"
     },
     "resume": {
       "title": "視聴を再開",
@@ -131,7 +139,8 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "continueBtn": "次へ進む"
   },
   "creatorFooter": {
     "title": "クリエイター情報",

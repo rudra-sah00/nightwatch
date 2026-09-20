@@ -65,9 +65,17 @@
       "title": "欢迎来到 Nightwatch",
       "description": "让我们带您了解全新的极简电影体验。"
     },
+    "hub": {
+      "title": "从这里开始",
+      "description": "每次访问都从这里开始。选一个去处——你随时可以从首页回到这个界面。"
+    },
     "search": {
       "title": "找到您的电影",
       "description": "搜索超过12,000个标题。在这里输入您喜欢的电影或节目。"
+    },
+    "movies": {
+      "title": "电影和剧集",
+      "description": "搜索超过 1.2 万部电影和剧集。可以从任意作品开启共同观影。"
     },
     "resume": {
       "title": "继续观看",
@@ -131,7 +139,8 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "continueBtn": "继续"
   },
   "creatorFooter": {
     "title": "创作者身份",

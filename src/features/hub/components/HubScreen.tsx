@@ -59,6 +59,10 @@ export function HubScreen({
       role="dialog"
       aria-modal="true"
       aria-label={t('hub.title')}
+      // The product tour cannot highlight layout chrome while this is up — it is
+      // opaque and sits above driver.js's overlay. The tour polls for this marker
+      // before starting its chrome phase.
+      data-hub-screen=""
       className="fixed inset-0 z-[10300] bg-background flex flex-col items-center justify-center p-4 sm:p-8 overflow-y-auto"
     >
       <div className="w-full max-w-5xl flex flex-col items-center my-auto">

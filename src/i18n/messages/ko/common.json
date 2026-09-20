@@ -65,9 +65,17 @@
       "title": "Nightwatch에 오신 것을 환영합니다",
       "description": "새로운 미니멀 시네마 경험을 안내해 드리겠습니다."
     },
+    "hub": {
+      "title": "시작하는 곳",
+      "description": "방문할 때마다 여기서 시작합니다. 목적지를 골라 보세요. 홈에서 언제든 이 화면으로 돌아올 수 있습니다."
+    },
     "search": {
       "title": "영화 찾기",
       "description": "12,000개 이상의 타이틀에서 검색하세요. 좋아하는 영화나 드라마를 여기에 입력하세요."
+    },
+    "movies": {
+      "title": "영화 및 시리즈",
+      "description": "12,000편이 넘는 영화와 시리즈를 검색하세요. 어떤 작품에서든 왓치 파티를 시작할 수 있습니다."
     },
     "resume": {
       "title": "이어서 시청",
@@ -131,7 +139,8 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "continueBtn": "계속하기"
   },
   "creatorFooter": {
     "title": "크리에이터 정보",

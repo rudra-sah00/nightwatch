@@ -20,13 +20,17 @@ export function HubGrid({ onPick }: { onPick?: () => void }) {
   const destinations = hubDestinationsFor('web');
 
   return (
-    <nav aria-label={t('hub.title')} className="w-full">
+    <nav aria-label={t('hub.title')} className="w-full" data-tour="hub-grid">
       <ul className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 w-full list-none p-0 m-0">
         {destinations.map(({ id, href, icon: Icon, labelKey, accent }) => (
           <li key={id}>
             <Link
               href={href}
               onClick={onPick}
+              // The sidebar carries links to the same routes, so an `a[href=...]`
+              // selector would match the sidebar's copy first (it precedes the hub in
+              // DOM order). The product tour keys off this instead.
+              data-tour={`hub-${id}`}
               className="flex flex-col items-center justify-center gap-4 p-6 sm:p-8 h-full border-[3px] border-border bg-card hover:border-neo-blue focus-visible:border-neo-blue focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neo-blue"
             >
               <span

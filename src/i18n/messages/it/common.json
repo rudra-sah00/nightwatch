@@ -65,9 +65,17 @@
       "title": "Benvenuto su Nightwatch",
       "description": "Lascia che ti mostriamo la tua nuova esperienza cinematografica minimalista."
     },
+    "hub": {
+      "title": "Il tuo punto di partenza",
+      "description": "Ogni visita comincia qui. Scegli una destinazione: puoi sempre tornare a questa schermata dalla Home."
+    },
     "search": {
       "title": "Trova il tuo film",
       "description": "Cerca tra oltre 12k titoli. Digita il tuo film o serie preferita qui."
+    },
+    "movies": {
+      "title": "Film e serie",
+      "description": "Sfoglia e cerca oltre 12.000 film e serie. Avvia un watch party da qualsiasi titolo."
     },
     "resume": {
       "title": "Riprendi la visione",
@@ -131,7 +139,8 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "continueBtn": "Continua"
   },
   "creatorFooter": {
     "title": "Identità del Creatore",

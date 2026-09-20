@@ -65,9 +65,17 @@
       "title": "Nightwatch'ya Hoş Geldiniz",
       "description": "Yeni minimalist sinema deneyiminizi size tanıtalım."
     },
+    "hub": {
+      "title": "Başlangıç noktan",
+      "description": "Her ziyaret burada başlar. Bir yer seç — Ana sayfadan bu ekrana her zaman dönebilirsin."
+    },
     "search": {
       "title": "Filminizi Bulun",
       "description": "12.000'den fazla başlıkta arayın. Favori filminizi veya dizinizi buraya yazın."
+    },
+    "movies": {
+      "title": "Filmler ve diziler",
+      "description": "On iki binden fazla film ve diziyi ara. Herhangi bir yapımdan izleme partisi başlat."
     },
     "resume": {
       "title": "İzlemeye Devam Et",
@@ -131,7 +139,8 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "continueBtn": "Devam et"
   },
   "creatorFooter": {
     "title": "Yaratıcı Kimliği",

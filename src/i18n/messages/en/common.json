@@ -65,9 +65,17 @@
       "title": "Welcome to Nightwatch",
       "description": "Let us show you around your personal streaming companion. Synchronized playback, music, manga, and more."
     },
+    "hub": {
+      "title": "Your Starting Point",
+      "description": "Every visit begins here. Pick a destination — you can always come back to this screen from Home."
+    },
     "search": {
       "title": "Find Your Film",
       "description": "Search across 12k+ titles. Type your favorite movie or show here."
+    },
+    "movies": {
+      "title": "Movies & Web Series",
+      "description": "Browse and search 12k+ films and shows. Start a watch party from any title."
     },
     "resume": {
       "title": "Resume Watching",
@@ -131,7 +139,8 @@
     },
     "nextBtn": "Next",
     "prevBtn": "Back",
-    "doneBtn": "Let's Go!"
+    "doneBtn": "Let's Go!",
+    "continueBtn": "Keep Going"
   },
   "creatorFooter": {
     "title": "Creator Identity",

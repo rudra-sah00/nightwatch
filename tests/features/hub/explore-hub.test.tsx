@@ -146,4 +146,43 @@ describe('ExploreHub', () => {
       expect(link.className).not.toMatch(/hover:scale/);
     }
   });
+
+  /**
+   * The product tour highlights these tiles. It cannot address them by `href`: the
+   * sidebar links to the same routes and precedes the hub in DOM order, so
+   * `a[href="/live"]` resolves to the sidebar's copy — which is behind this opaque
+   * surface and invisible. `data-tour` is the stable anchor.
+   */
+  describe('product tour anchors', () => {
+    it('marks the grid', () => {
+      render(<ExploreHub />);
+
+      expect(screen.getByRole('navigation')).toHaveAttribute(
+        'data-tour',
+        'hub-grid',
+      );
+    });
+
+    it('marks every tile with its destination id', () => {
+      render(<ExploreHub />);
+
+      const anchors = screen
+        .getAllByRole('link')
+        .map((l) => l.getAttribute('data-tour'));
+
+      expect(anchors).toEqual(
+        hubDestinationsFor('web').map((d) => `hub-${d.id}`),
+      );
+    });
+
+    it('keeps tile anchors unique', () => {
+      render(<ExploreHub />);
+
+      const anchors = screen
+        .getAllByRole('link')
+        .map((l) => l.getAttribute('data-tour'));
+
+      expect(new Set(anchors).size).toBe(anchors.length);
+    });
+  });
 });
