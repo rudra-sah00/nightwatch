@@ -3,7 +3,14 @@
 import { Canvas } from '@react-three/fiber';
 import { Physics, type RapierRigidBody } from '@react-three/rapier';
 import type { RefObject } from 'react';
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import { ACESFilmicToneMapping, SRGBColorSpace } from 'three';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
@@ -57,6 +64,14 @@ interface TheatreSceneProps {
    * seated instead — see PassiveAvatars.
    */
   memberIds?: readonly string[];
+  /**
+   * userId -> display name, from the party roster.
+   *
+   * Names used to come only from chat, so a member who never typed showed a
+   * slice of their raw id above their head while the sidebar displayed their
+   * name correctly. The roster is the same source the sidebar reads.
+   */
+  memberNames?: Record<string, string>;
 }
 
 export function TheatreScene({
@@ -64,9 +79,21 @@ export function TheatreScene({
   rtmSendMessage,
   cinema = false,
   memberIds = [],
+  memberNames,
 }: TheatreSceneProps) {
   const { data: assets, isLoading, error } = useTheatreAssets();
-  const { bubbles, names } = useSpeechBubbles(true);
+  const { bubbles, names: chatNames } = useSpeechBubbles(true);
+
+  /**
+   * Roster names win; chat names only fill gaps.
+   *
+   * A pose can arrive from someone the roster has not listed yet, and a chat
+   * line is the only name we have for them until it does.
+   */
+  const names = useMemo(
+    () => ({ ...chatNames, ...(memberNames ?? {}) }),
+    [chatNames, memberNames],
+  );
 
   // The party's existing <video>. Reused, never re-fetched — which is why the 3D
   // overlay keeps Player.Root mounted underneath. The REF is passed down, not
@@ -89,6 +116,9 @@ export function TheatreScene({
       userId,
       rtmSendMessage,
       character,
+      // The roster is the authority on who exists: peers missing from it are
+      // despawned, so a departure lands in 3D whichever membership signal fired.
+      memberIds,
       enabled: true,
     });
 

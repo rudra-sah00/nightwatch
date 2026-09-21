@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
@@ -16,6 +17,7 @@ import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { WatchPartyRoom } from '../room/types';
+import { memberNames, presentMemberIds } from '../theatre/lib/roster';
 import { useTheatreView } from '../theatre/lib/view-mode';
 
 const FloatingEmojis = dynamic(
@@ -158,6 +160,33 @@ export function WatchPartyVideoArea({
   userId,
   currentUserName,
 }: WatchPartyVideoAreaProps) {
+  /**
+   * Present members, memoised on the member list.
+   *
+   * A fresh array every render would re-fire the theatre's roster reconciliation
+   * effect on unrelated re-renders and defeat the `useMemo` that PassiveAvatars
+   * uses to keep seat assignment stable.
+   */
+  const theatreMemberIds = useMemo(
+    () => presentMemberIds(room.members),
+    [room.members],
+  );
+
+  /**
+   * Display names for the 3D labels, from the roster.
+   *
+   * `currentUserName` is folded in as a fallback for this user, in case the
+   * roster row for self has not arrived yet — a guest is added to `members`
+   * asynchronously after approval.
+   */
+  const theatreMemberNames = useMemo(() => {
+    const map = memberNames(room.members);
+    if (userId && currentUserName && !map[userId]) {
+      map[userId] = currentUserName;
+    }
+    return map;
+  }, [room.members, userId, currentUserName]);
+
   const {
     metadata,
     streamUrlOverride,
@@ -314,12 +343,24 @@ export function WatchPartyVideoArea({
             rtmSendMessage={rtmSendMessage}
             cinema={viewMode === 'cinema'}
             /*
-              Everyone in the party, so members who never switched 3D on can
-              still be shown sitting in the room rather than being invisible.
+              Everyone currently in the party, so members who never switched 3D
+              on can still be shown sitting in the room rather than being
+              invisible.
+
+              Filtered through `presentMemberIds`, which drops `disconnected`
+              members. They stay in `room.members` during the host's grace period
+              so the 2D list can grey them out, but a greyed-out row and a body
+              occupying a chair are different claims — a seat is either taken or
+              it is not. Without this filter a closed tab left an avatar sitting
+              there for the full two minutes, or forever with no host present.
             */
-            memberIds={room.members
-              .map((m) => m?.id)
-              .filter((id): id is string => Boolean(id))}
+            memberIds={theatreMemberIds}
+            /*
+              Names from the roster — the same source the sidebar reads. Without
+              this the labels only learned a name when someone sent a chat
+              message, and showed a slice of the raw user id until then.
+            */
+            memberNames={theatreMemberNames}
           />
         </div>
       ) : null}

@@ -3,6 +3,7 @@
 import { Html } from '@react-three/drei';
 import { identityColour } from '../lib/avatar-instance';
 import { STANDING_EYE_HEIGHT } from '../lib/layout';
+import { displayName } from '../lib/roster';
 
 interface AvatarLabelProps {
   userId: string;
@@ -24,7 +25,9 @@ interface AvatarLabelProps {
  */
 export function AvatarLabel({ userId, name, message }: AvatarLabelProps) {
   const colour = identityColour(userId);
-  const label = name ?? userId.slice(0, 8);
+  // Never a raw id: `userId.slice(0, 8)` printed things like `guest_2f` for
+  // anyone who had not yet sent a chat message.
+  const label = displayName(userId, name);
 
   return (
     <Html

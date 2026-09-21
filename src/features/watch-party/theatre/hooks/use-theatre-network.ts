@@ -16,6 +16,7 @@ import {
   SnapshotBuffer,
   THEATRE_NET,
 } from '../lib/interpolation';
+import { peersToDrop } from '../lib/roster';
 import {
   PacketRateMeter,
   PING_INTERVAL_MS,
@@ -28,6 +29,15 @@ interface UseTheatreNetworkOptions {
   rtmSendMessage?: (msg: RTMMessage) => void;
   /** Party members already present when 3D is switched on. */
   initialPeerIds?: readonly string[];
+  /**
+   * Ids the party roster says are present right now, already excluding
+   * `disconnected` members (see `presentMemberIds`).
+   *
+   * This is the authority on who exists. Peers absent from it are despawned,
+   * which is what makes a departure show up in 3D regardless of which
+   * membership event fired — or whether one fired at all.
+   */
+  memberIds?: readonly string[];
   /**
    * Which body this user chose. Broadcast on every pose so peers draw them
    * correctly; without it every client would have to guess.
@@ -66,10 +76,18 @@ export function useTheatreNetwork({
   userId,
   rtmSendMessage,
   initialPeerIds,
+  memberIds,
   character = 'man',
   enabled,
 }: UseTheatreNetworkOptions) {
   const buffers = useRef<Map<string, SnapshotBuffer>>(new Map());
+  /**
+   * Peers the party roster has confirmed at least once.
+   *
+   * Reconciliation may only remove someone who has appeared in `memberIds`, so a
+   * pose that arrives ahead of its MEMBER_JOINED is not immediately culled.
+   */
+  const acknowledged = useRef<Set<string>>(new Set());
   const lastSent = useRef<Pose | null>(null);
   const lastSentAt = useRef(0);
   const lastPose = useRef<Pose | null>(null);
@@ -168,6 +186,48 @@ export function useTheatreNetwork({
       offLeave();
     };
   }, [enabled, ensurePeer, removePeer]);
+
+  /**
+   * Reconcile the peer set against the party roster.
+   *
+   * The membership EVENTS above are an optimisation — they make a departure
+   * instant. This is the correctness guarantee: whatever events fired or were
+   * missed, anyone no longer in `memberIds` is dropped here.
+   *
+   * It is what makes a dropped connection show up in 3D at all. Agora presence
+   * only marks a member `disconnected` and leaves them in `room.members`, so the
+   * theatre never received an event for the most common way of leaving — closing
+   * the tab. Previously that avatar stayed put until the 30 s staleness sweep,
+   * and a seated non-3D member stayed for the full two-minute grace period.
+   */
+  useEffect(() => {
+    if (!enabled || !memberIds) return;
+
+    for (const id of memberIds) acknowledged.current.add(id);
+
+    const drop = peersToDrop({
+      knownPeerIds: [...buffers.current.keys()],
+      presentIds: memberIds,
+      acknowledged: acknowledged.current,
+    });
+    if (drop.length === 0) return;
+
+    for (const id of drop) buffers.current.delete(id);
+    setPeerIds([...buffers.current.keys()]);
+    // Stop tracking their chosen body too, or the map grows for the life of the
+    // session as people come and go.
+    setPeerCharacters((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const id of drop) {
+        if (id in next) {
+          delete next[id];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [enabled, memberIds]);
 
   // ---- poses ----
   useEffect(() => {
@@ -285,6 +345,7 @@ export function useTheatreNetwork({
   useEffect(() => {
     if (enabled) return;
     buffers.current.clear();
+    acknowledged.current.clear();
     lastSent.current = null;
     lastPose.current = null;
     rate.current.reset();

@@ -571,8 +571,24 @@ export const onMemberJoined = (
     callback({ id, name: (m.userName ?? m.name) as string | undefined });
   });
 
+/**
+ * A member leaving.
+ *
+ * Reads the id defensively. `onMemberJoined` above already tolerates both
+ * `member.userId` and `member.id`, which tells us the wire shape is not
+ * consistent — and this handler drives avatar despawn in the 3D theatre, where a
+ * silently dropped id leaves a body sitting in a chair. Accepting the same
+ * variants here costs nothing and removes a whole class of ghost.
+ */
 export const onMemberLeft = (callback: (userId: string) => void) =>
-  subscribe('MEMBER_LEFT', (msg) => callback(msg.userId as string));
+  subscribe('MEMBER_LEFT', (msg) => {
+    const m = msg.member as Record<string, unknown> | undefined;
+    const id = (msg.userId ?? msg.id ?? m?.userId ?? m?.id) as
+      | string
+      | undefined;
+    if (typeof id !== 'string' || id.length === 0) return;
+    callback(id);
+  });
 
 export const onSketchClear = <
   T extends { userId: string; type: 'all' | 'self' } = {
