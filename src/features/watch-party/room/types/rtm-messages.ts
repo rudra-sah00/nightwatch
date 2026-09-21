@@ -270,12 +270,21 @@ export interface RtmAvatarTransform {
   t: number;
 }
 
-/** Guest -> host, point-to-point. Host is the sole authority on seating. */
+/**
+ * Broadcast seat claim. Not host-arbitrated: party admission is already the
+ * permission boundary, so any approved member may sit anywhere.
+ *
+ * `at` exists purely to resolve a simultaneous grab deterministically on every
+ * client — earliest wins, exact ties break on the lower userId — so no referee
+ * is required.
+ */
 export interface RtmSeatClaim {
   type: 'SEAT_CLAIM';
   userId: string;
   /** seat id to take, or null to stand up */
   seatId: string | null;
+  /** claim timestamp, ms */
+  at: number;
 }
 
 /** Host -> channel. Full map, broadcast only when it actually changes. */

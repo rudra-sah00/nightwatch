@@ -4,15 +4,21 @@ import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import { Suspense, useCallback } from 'react';
 import { ACESFilmicToneMapping, SRGBColorSpace } from 'three';
+import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import type { RTMMessage } from '../../room/types/rtm-messages';
+import { useSeatOccupancy } from '../hooks/use-seat-occupancy';
+import { useSeatedCamera } from '../hooks/use-seated-camera';
+import { useSitInteraction } from '../hooks/use-sit-interaction';
 import { useTheatreAssets } from '../hooks/use-theatre-assets';
 import { useTheatreNetwork } from '../hooks/use-theatre-network';
+import { useVideoTexture } from '../hooks/use-video-texture';
 import type { Pose } from '../lib/interpolation';
 import { ROOM, SPAWN, STANDING_EYE_HEIGHT } from '../lib/layout';
 import { LocalPlayer } from './LocalPlayer';
 import { RemoteAvatars } from './RemoteAvatar';
 import { TheatreColliders } from './TheatreColliders';
 import { TheatreRoom } from './TheatreRoom';
+import { TheatreScreen } from './TheatreScreen';
 import { TheatreSeating } from './TheatreSeating';
 
 interface TheatreSceneProps {
@@ -22,20 +28,22 @@ interface TheatreSceneProps {
   cinema?: boolean;
 }
 
-/**
- * Canvas root for 3D theatre mode.
- *
- * Asset URLs come from the backend manifest, so nothing renders until that
- * resolves. The auditorium is deliberately dark — the screen is the primary
- * light source (spec §4), so ambient is kept very low and the bulk of the
- * illumination will come from the screen driver once it lands.
- */
 export function TheatreScene({
   userId,
   rtmSendMessage,
   cinema = false,
 }: TheatreSceneProps) {
   const { data: assets, isLoading, error } = useTheatreAssets();
+
+  // The party's existing <video>. Reused, never re-fetched — which is why the 3D
+  // overlay keeps Player.Root mounted underneath.
+  const { videoRef } = usePlayerContext();
+
+  const { seatMap, mySeat, claimSeat } = useSeatOccupancy({
+    userId,
+    rtmSendMessage,
+    enabled: true,
+  });
 
   const { peerIds, publishPose, samplePeer } = useTheatreNetwork({
     userId,
@@ -67,58 +75,119 @@ export function TheatreScene({
   }
 
   return (
-    <Canvas
-      dpr={[1, 2]}
-      shadows
-      camera={{
-        position: [SPAWN.x, SPAWN.y + STANDING_EYE_HEIGHT, SPAWN.z],
-        fov: 60,
-        near: 0.1,
-        far: 100,
-      }}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
-      onCreated={({ gl }) => {
-        gl.toneMapping = ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.1;
-        gl.outputColorSpace = SRGBColorSpace;
-      }}
-    >
-      {/* Very low ambient: just enough that unlit corners are not pure black. */}
-      <ambientLight intensity={0.08} color="#2a2018" />
+    <div className="relative h-full w-full">
+      <Canvas
+        dpr={[1, 2]}
+        shadows
+        camera={{
+          position: [SPAWN.x, SPAWN.y + STANDING_EYE_HEIGHT, SPAWN.z],
+          fov: 60,
+          near: 0.1,
+          far: 100,
+        }}
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.1;
+          gl.outputColorSpace = SRGBColorSpace;
+        }}
+      >
+        {/* Very low ambient. The screen is the primary light source, so the
+            rest of the room is lit by TheatreScreen's screen-driven light. */}
+        <ambientLight intensity={0.08} color="#2a2018" />
 
-      {/* Placeholder for the screen's contribution until use-screen-light lands. */}
-      <rectAreaLight
-        position={[0, 2.084, 0.1]}
-        width={7}
-        height={2.93}
-        intensity={3}
-        color="#cfe0ff"
-      />
+        <Suspense fallback={null}>
+          <TheatreRoom url={assets.models.room} />
+          <TheatreSeating
+            url={assets.models.chair}
+            seatMap={seatMap}
+            highlightedSeat={null}
+          />
+          <RemoteAvatars
+            peerIds={peerIds}
+            url={assets.models.avatar}
+            sample={samplePeer}
+          />
+          <SceneInterior
+            video={videoRef.current}
+            seatMap={seatMap}
+            mySeat={mySeat}
+            claimSeat={claimSeat}
+            cinema={cinema}
+            onPose={handlePose}
+          />
+        </Suspense>
 
-      <Suspense fallback={null}>
-        <TheatreRoom url={assets.models.room} />
-        <TheatreSeating url={assets.models.chair} />
-        <RemoteAvatars
-          peerIds={peerIds}
-          url={assets.models.avatar}
-          sample={samplePeer}
-        />
-        {/*
-          Physics is inside Suspense so colliders and the capsule only exist once
-          the room has loaded — spawning the capsule first would drop it through
-          a floor that has not arrived yet.
+        <fog attach="fog" args={['#05060a', ROOM.maxZ, ROOM.maxZ + 8]} />
+      </Canvas>
 
-          Gravity is zero at the world level because the character controller
-          integrates its own gravity; letting Rapier also apply it would double
-          the fall rate.
-        */}
-        <Physics gravity={[0, 0, 0]} timeStep="vary">
-          <TheatreColliders />
-          <LocalPlayer enabled={!cinema} onPose={handlePose} />
-        </Physics>
-      </Suspense>
+      <SitPrompt seatMap={seatMap} mySeat={mySeat} />
+    </div>
+  );
+}
 
-      <fog attach="fog" args={['#05060a', ROOM.maxZ, ROOM.maxZ + 8]} />
-    </Canvas>
+/**
+ * Split out so the hooks that need R3F context (useFrame / useThree) sit inside
+ * the Canvas. Calling them from TheatreScene would throw.
+ */
+function SceneInterior({
+  video,
+  seatMap,
+  mySeat,
+  claimSeat,
+  cinema,
+  onPose,
+}: {
+  video: HTMLVideoElement | null;
+  seatMap: Record<string, string | null>;
+  mySeat: ReturnType<typeof useSeatOccupancy>['mySeat'];
+  claimSeat: ReturnType<typeof useSeatOccupancy>['claimSeat'];
+  cinema: boolean;
+  onPose: (p: Pose) => void;
+}) {
+  const texture = useVideoTexture(video);
+  const { seated } = useSitInteraction({
+    seatMap,
+    mySeat,
+    claimSeat,
+    enabled: !cinema,
+  });
+
+  // Seated and cinema views drive the camera from the seat anchor; walking is
+  // disabled in both so the two never fight over camera.position.
+  useSeatedCamera({ seatId: mySeat, enabled: seated || cinema });
+
+  return (
+    <>
+      <TheatreScreen texture={texture} />
+      <Physics gravity={[0, 0, 0]} timeStep="vary">
+        <TheatreColliders />
+        <LocalPlayer enabled={!seated && !cinema} onPose={onPose} />
+      </Physics>
+    </>
+  );
+}
+
+/** DOM overlay, outside the Canvas. */
+function SitPrompt({
+  seatMap,
+  mySeat,
+}: {
+  seatMap: Record<string, string | null>;
+  mySeat: string | null;
+}) {
+  const anyFree = Object.values(seatMap).some((v) => v === null);
+  if (mySeat) {
+    return (
+      <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-md bg-black/70 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80">
+        Press E to stand
+      </div>
+    );
+  }
+  if (!anyFree) return null;
+  return (
+    <div className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-md bg-black/50 px-3 py-1.5 text-xs font-medium tracking-wide text-white/50">
+      Walk to a seat and press E to sit
+    </div>
   );
 }

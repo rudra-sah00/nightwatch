@@ -490,6 +490,18 @@ export const onAvatarTransform = (
     }),
   );
 
+/** Broadcast seat claims. Applied by every client under the same rule. */
+export const onSeatClaim = (
+  callback: (c: { userId: string; seatId: string | null; at: number }) => void,
+) =>
+  subscribe('SEAT_CLAIM', (msg) =>
+    callback({
+      userId: msg.userId as string,
+      seatId: (msg.seatId ?? null) as string | null,
+      at: (msg.at as number) ?? Date.now(),
+    }),
+  );
+
 /** Host-authoritative seat occupancy map. */
 export const onSeatMap = (
   callback: (seats: Record<string, string | null>) => void,
