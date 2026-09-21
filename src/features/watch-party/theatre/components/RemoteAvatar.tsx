@@ -7,13 +7,17 @@ import type { Group } from 'three';
 import { MathUtils } from 'three';
 import { useAvatarAnimation } from '../hooks/use-avatar-animation';
 import type { AvatarState } from '../lib/animation';
-import { applyIdentityColour, instantiateAvatar } from '../lib/avatar-instance';
+import {
+  applyIdentityColour,
+  avatarUrlFor,
+  instantiateAvatar,
+} from '../lib/avatar-instance';
 import type { Pose } from '../lib/interpolation';
 import { AvatarLabel } from './AvatarLabel';
 
 /** Network sends a short state key; map it onto the animation state machine. */
 function toAvatarState(s: string): AvatarState {
-  if (s === 'walk' || s === 'run' || s === 'sitIdle' || s === 'dance') {
+  if (s === 'walk' || s === 'sitIdle' || s === 'dance') {
     return s;
   }
   return 'idle';
@@ -104,7 +108,12 @@ export function RemoteAvatar({
 
 interface RemoteAvatarsProps {
   peerIds: readonly string[];
-  url: string;
+  /** Every loaded character model. */
+  urls: readonly string[];
+  /** The body a peer chose, or null until they have told us. */
+  characterOf?: (peerId: string) => 'man' | 'woman' | null;
+  /** Resolve a character to one of `urls`. */
+  resolve?: (character: 'man' | 'woman') => string | null;
   sample: (peerId: string) => Pose | null;
   names?: Record<string, string>;
   bubbles?: Record<string, string>;
@@ -112,23 +121,37 @@ interface RemoteAvatarsProps {
 
 export function RemoteAvatars({
   peerIds,
-  url,
+  urls,
+  characterOf,
+  resolve,
   sample,
   names,
   bubbles,
 }: RemoteAvatarsProps) {
   return (
     <group name="remote-avatars">
-      {peerIds.map((id) => (
-        <RemoteAvatar
-          key={id}
-          peerId={id}
-          url={url}
-          sample={sample}
-          name={names?.[id]}
-          message={bubbles?.[id] ?? null}
-        />
-      ))}
+      {peerIds.map((id) => {
+        // Prefer what the peer told us they are. Fall back to a stable hash so
+        // an older client that never sends a character still gets a consistent
+        // body rather than flickering between models.
+        const chosen = characterOf?.(id) ?? null;
+        const url =
+          (chosen && resolve ? resolve(chosen) : null) ??
+          avatarUrlFor(urls, id);
+        // No published character yet — render nothing rather than throwing
+        // inside useGLTF with an empty url.
+        if (!url) return null;
+        return (
+          <RemoteAvatar
+            key={id}
+            peerId={id}
+            url={url}
+            sample={sample}
+            name={names?.[id]}
+            message={bubbles?.[id] ?? null}
+          />
+        );
+      })}
     </group>
   );
 }

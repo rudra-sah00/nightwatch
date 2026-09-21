@@ -4,6 +4,7 @@ import { useGLTF } from '@react-three/drei';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useTheatreView } from '../lib/view-mode';
+import { avatarModels } from '../types';
 import { useTheatreAssets } from './use-theatre-assets';
 
 /**
@@ -34,10 +35,16 @@ export function useTheatrePreload() {
     setPhase('downloading');
     setProgress(0);
 
-    // room + chair are required to render anything; cafe and avatar can arrive
-    // later, so they are fetched but not gated on.
+    // room + chair are required to render anything; cafe and the characters can
+    // arrive later, so they are fetched but not gated on.
+    //
+    // EVERY character model is fetched, not just the one this user picked. A
+    // peer can choose a different body, and we cannot render them without their
+    // model — discovering that mid-party would mean a stall, or an avatar that
+    // silently never appears. The preference decides what YOU look like to
+    // others, not what this client is capable of drawing.
     const critical = [assets.models.room, assets.models.chair];
-    const deferred = [assets.models.cafe, assets.models.avatar];
+    const deferred = [assets.models.cafe, ...avatarModels(assets)];
 
     let done = 0;
     function step() {

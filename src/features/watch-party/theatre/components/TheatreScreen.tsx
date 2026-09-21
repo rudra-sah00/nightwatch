@@ -1,13 +1,18 @@
 'use client';
 
-import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { type ThreeEvent, useFrame } from '@react-three/fiber';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { RectAreaLight, VideoTexture } from 'three';
 import { Color } from 'three';
 import { SCREEN } from '../lib/layout';
 
 interface TheatreScreenProps {
   texture: VideoTexture | null;
+  /**
+   * Toggle playback. Omitted in read-only contexts, in which case the screen is
+   * not interactive at all rather than being a button that does nothing.
+   */
+  onTogglePlay?: () => void;
 }
 
 /** How fast the screen light chases the picture. Too high and it strobes. */
@@ -26,7 +31,7 @@ const LIGHT_LERP = 3.5;
  * CPU from a tiny canvas; a full GPU readback per frame would cost more than the
  * effect is worth.
  */
-export function TheatreScreen({ texture }: TheatreScreenProps) {
+export function TheatreScreen({ texture, onTogglePlay }: TheatreScreenProps) {
   const light = useRef<RectAreaLight>(null);
 
   // 16x9 is plenty to derive an average — we only need a colour, not an image
@@ -87,9 +92,55 @@ export function TheatreScreen({ texture }: TheatreScreenProps) {
     l.intensity = 2 + luma * 9;
   });
 
+  const interactive = Boolean(onTogglePlay);
+
+  /**
+   * Click the picture to play/pause, the same gesture as the 2D player.
+   *
+   * `stopPropagation` matters: without it the click also reaches the canvas,
+   * which `usePointerLook` treats as "re-acquire the mouse", so pausing would
+   * silently grab the pointer at the same time.
+   */
+  const handleClick = useCallback(
+    (e: ThreeEvent<MouseEvent>) => {
+      if (!onTogglePlay) return;
+      e.stopPropagation();
+      onTogglePlay();
+    },
+    [onTogglePlay],
+  );
+
+  const handleOver = useCallback(() => {
+    if (interactive) document.body.style.cursor = 'pointer';
+  }, [interactive]);
+
+  const handleOut = useCallback(() => {
+    if (interactive) document.body.style.cursor = '';
+  }, [interactive]);
+
+  // Leaving the cursor as a pointer after unmount would strand it that way over
+  // the whole page.
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = '';
+    };
+  }, []);
+
   return (
     <group name="theatre-screen">
-      <mesh position={[0, SCREEN.centreY, SCREEN.z]}>
+      {/*
+        biome-ignore lint/a11y/noStaticElementInteractions: <mesh> is a
+        react-three-fiber scene object, not a DOM element. There is no HTML node
+        here to attach a role or keyboard handler to — R3F dispatches this from a
+        raycast against the 3D plane. Keyboard users get the same action from the
+        2D player controls, which stay mounted underneath the canvas.
+      */}
+      <mesh
+        position={[0, SCREEN.centreY, SCREEN.z]}
+        onClick={interactive ? handleClick : undefined}
+        onPointerOver={interactive ? handleOver : undefined}
+        onPointerOut={interactive ? handleOut : undefined}
+      >
         <planeGeometry args={[SCREEN.width, SCREEN.height]} />
         {texture ? (
           // basic, not standard: the screen emits light, it does not receive it

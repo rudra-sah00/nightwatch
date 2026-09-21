@@ -266,6 +266,14 @@ export interface RtmAvatarTransform {
   r: number;
   /** animation state key, see AvatarState in theatre/lib/animation.ts */
   s: string;
+  /**
+   * Chosen character body: 'm' man, 'w' woman.
+   *
+   * Optional, and a single character, because this rides on every pose message.
+   * Peers need it to draw you as the body you picked rather than guessing from a
+   * hash of your id. Absent from older clients, which fall back to the hash.
+   */
+  c?: 'm' | 'w';
   /** sender timestamp, ms — used to order and interpolate snapshots */
   t: number;
 }

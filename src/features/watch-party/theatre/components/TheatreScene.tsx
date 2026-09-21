@@ -2,11 +2,13 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
+import type { RefObject } from 'react';
 import { Suspense, useCallback, useEffect, useRef } from 'react';
 import { ACESFilmicToneMapping, SRGBColorSpace } from 'three';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import type { RTMMessage } from '../../room/types/rtm-messages';
 import { useDanceKeys } from '../hooks/use-dance-keys';
+import { usePointerLook } from '../hooks/use-pointer-look';
 import { useSeatOccupancy } from '../hooks/use-seat-occupancy';
 import { useSeatedCamera } from '../hooks/use-seated-camera';
 import { useSitInteraction } from '../hooks/use-sit-interaction';
@@ -16,9 +18,12 @@ import { useTheatreNetwork } from '../hooks/use-theatre-network';
 import { useVideoTexture } from '../hooks/use-video-texture';
 import type { Pose } from '../lib/interpolation';
 import { ROOM, SPAWN, STANDING_EYE_HEIGHT } from '../lib/layout';
+import { useTheatreView } from '../lib/view-mode';
+import { avatarModelForCharacter, avatarModels } from '../types';
 import { LocalPlayer } from './LocalPlayer';
 import { RemoteAvatars } from './RemoteAvatar';
 import { TheatreColliders } from './TheatreColliders';
+import { TheatreLighting } from './TheatreLighting';
 import { TheatreRoom } from './TheatreRoom';
 import { TheatreScreen } from './TheatreScreen';
 import { TheatreSeating } from './TheatreSeating';
@@ -39,8 +44,14 @@ export function TheatreScene({
   const { bubbles, names } = useSpeechBubbles(true);
 
   // The party's existing <video>. Reused, never re-fetched — which is why the 3D
-  // overlay keeps Player.Root mounted underneath.
-  const { videoRef } = usePlayerContext();
+  // overlay keeps Player.Root mounted underneath. The REF is passed down, not
+  // `ref.current`: a ref mutation does not re-render, so reading it here would
+  // freeze whatever value existed at first paint (usually null) and the screen
+  // would never receive a picture.
+  const { videoRef, playerHandlers, readOnly } = usePlayerContext();
+
+  // Only one character body is ever fetched — see avatarModelsFor.
+  const character = useTheatreView((s) => s.character);
 
   const { seatMap, mySeat, claimSeat } = useSeatOccupancy({
     userId,
@@ -48,11 +59,21 @@ export function TheatreScene({
     enabled: true,
   });
 
-  const { peerIds, publishPose, samplePeer } = useTheatreNetwork({
-    userId,
-    rtmSendMessage,
-    enabled: true,
-  });
+  const { peerIds, publishPose, samplePeer, peerCharacter } = useTheatreNetwork(
+    {
+      userId,
+      rtmSendMessage,
+      character,
+      enabled: true,
+    },
+  );
+
+  // Maps a peer's chosen body onto one of the already-loaded models.
+  const resolveCharacterModel = useCallback(
+    (c: 'man' | 'woman') =>
+      assets ? avatarModelForCharacter(assets, c) : null,
+    [assets],
+  );
 
   const handlePose = useCallback(
     (pose: Pose) => {
@@ -95,9 +116,11 @@ export function TheatreScene({
           gl.outputColorSpace = SRGBColorSpace;
         }}
       >
-        {/* Very low ambient. The screen is the primary light source, so the
-            rest of the room is lit by TheatreScreen's screen-driven light. */}
-        <ambientLight intensity={0.08} color="#2a2018" />
+        {/* The screen is the primary light source (see TheatreScreen); this rig
+            is the secondary fill that makes the room navigable and gives
+            avatars a contact shadow. It also initialises RectAreaLight's
+            lookup tables, without which the screen light emits nothing. */}
+        <TheatreLighting />
 
         <Suspense fallback={null}>
           <TheatreRoom url={assets.models.room} />
@@ -108,13 +131,16 @@ export function TheatreScene({
           />
           <RemoteAvatars
             peerIds={peerIds}
-            url={assets.models.avatar}
+            urls={avatarModels(assets)}
+            characterOf={peerCharacter}
+            resolve={resolveCharacterModel}
             sample={samplePeer}
             names={names}
             bubbles={bubbles}
           />
           <SceneInterior
-            video={videoRef.current}
+            videoRef={videoRef}
+            onTogglePlay={readOnly ? undefined : playerHandlers.togglePlay}
             seatMap={seatMap}
             mySeat={mySeat}
             claimSeat={claimSeat}
@@ -136,14 +162,16 @@ export function TheatreScene({
  * the Canvas. Calling them from TheatreScene would throw.
  */
 function SceneInterior({
-  video,
+  videoRef,
+  onTogglePlay,
   seatMap,
   mySeat,
   claimSeat,
   cinema,
   onPose,
 }: {
-  video: HTMLVideoElement | null;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  onTogglePlay?: () => void;
   seatMap: Record<string, string | null>;
   mySeat: ReturnType<typeof useSeatOccupancy>['mySeat'];
   claimSeat: ReturnType<typeof useSeatOccupancy>['claimSeat'];
@@ -151,7 +179,7 @@ function SceneInterior({
   onPose: (p: Pose) => void;
 }) {
   const lastPoseRef = useRef<Pose>({ x: 0, y: 0, z: 0, r: 0, s: 'idle' });
-  const texture = useVideoTexture(video);
+  const texture = useVideoTexture(videoRef);
   const { seated } = useSitInteraction({
     seatMap,
     mySeat,
@@ -159,6 +187,11 @@ function SceneInterior({
     enabled: !cinema,
   });
   const { dance } = useDanceKeys(!cinema);
+
+  // Mouse look. Gated on exactly the same condition as LocalPlayer so pointer
+  // look and useSeatedCamera never both write camera rotation.
+  const walking = !seated && !cinema;
+  usePointerLook({ enabled: walking });
 
   /**
    * Override the animation state the walk controller derived.
@@ -204,10 +237,10 @@ function SceneInterior({
 
   return (
     <>
-      <TheatreScreen texture={texture} />
+      <TheatreScreen texture={texture} onTogglePlay={onTogglePlay} />
       <Physics gravity={[0, 0, 0]} timeStep="vary">
         <TheatreColliders />
-        <LocalPlayer enabled={!seated && !cinema} onPose={recordAndPublish} />
+        <LocalPlayer enabled={walking} onPose={recordAndPublish} />
       </Physics>
     </>
   );

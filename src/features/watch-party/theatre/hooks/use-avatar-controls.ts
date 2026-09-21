@@ -8,7 +8,6 @@ import { Vector3 } from 'three';
 /** Movement tuning, metres/second and radians. */
 export const LOCOMOTION = {
   WALK_SPEED: 2.2,
-  RUN_SPEED: 4.0,
   GRAVITY: -18,
   /** Terminal fall speed, so a long drop cannot tunnel through the floor. */
   MAX_FALL: -22,
@@ -29,6 +28,19 @@ export const LOCOMOTION = {
   /** Gap Rapier keeps between the capsule and geometry. */
   COLLIDER_OFFSET: 0.01,
 } as const;
+
+/**
+ * Distance from the capsule's centre to the soles of its feet.
+ *
+ * Rapier reports a capsule's translation at its CENTRE, but a character model's
+ * origin is between its feet. Anything that converts between "where the physics
+ * body is" and "where the body appears to stand" must go through this value.
+ *
+ * Publishing the raw capsule centre as an avatar position is a real bug we
+ * shipped: remote avatars rendered 0.88 m in the air, hovering above the seats.
+ */
+export const CAPSULE_CENTRE_TO_FEET =
+  LOCOMOTION.CAPSULE_HALF_HEIGHT + LOCOMOTION.CAPSULE_RADIUS;
 
 type Keys = Record<string, boolean>;
 
@@ -125,8 +137,7 @@ export function useAvatarControls(
     const delta = Math.min(rawDelta, 1 / 30);
 
     const k = keys.current;
-    const wantsRun = Boolean(k.shift);
-    const speed = wantsRun ? LOCOMOTION.RUN_SPEED : LOCOMOTION.WALK_SPEED;
+    const speed = LOCOMOTION.WALK_SPEED;
 
     // camera-relative, flattened to the floor plane
     camera.getWorldDirection(forward);
@@ -189,7 +200,6 @@ export function useAvatarControls(
           k.arrowright,
       );
     },
-    isRunning: () => Boolean(keys.current.shift),
     rapierVersion: rapier.version(),
   };
 }

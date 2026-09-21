@@ -74,6 +74,8 @@ export function WatchPartySettings({
   const theatreProgress = useTheatreView((s) => s.progress);
   const enableTheatre = useTheatreView((s) => s.enable);
   const disableTheatre = useTheatreView((s) => s.disable);
+  const theatreCharacter = useTheatreView((s) => s.character);
+  const setTheatreCharacter = useTheatreView((s) => s.setCharacter);
 
   const handleGlobalPermissionToggle = (
     key: keyof WatchPartyRoom['permissions'],
@@ -237,7 +239,7 @@ export function WatchPartySettings({
                           ? 'Ready — press V to change view'
                           : theatrePhase === 'error'
                             ? 'Download failed — toggle to retry'
-                            : 'Downloads ~2.6 MB of assets'}
+                            : 'Downloads ~35 MB of assets'}
                     </span>
                   </span>
                   <Switch
@@ -248,6 +250,52 @@ export function WatchPartySettings({
                     label="3D Theatre"
                   />
                 </div>
+
+                {/*
+                  Which body you appear as. Shown only once 3D is on, because it
+                  is meaningless otherwise.
+
+                  This does NOT change what gets downloaded — every character
+                  model is fetched regardless, since a peer may have picked the
+                  other one and we cannot draw them without it. The choice is
+                  broadcast with your pose so other people see you as the body
+                  you picked.
+                */}
+                {theatreEnabled ? (
+                  <div className="flex items-center justify-between w-full">
+                    <span className="flex flex-col">
+                      <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                        Your Character
+                      </span>
+                      <span className="text-[10px] font-medium text-white/40">
+                        How others see you in the theatre
+                      </span>
+                    </span>
+                    <fieldset className="flex items-center gap-1 rounded-md border-2 border-white/15 p-0.5">
+                      <legend className="sr-only">Your character</legend>
+                      {(['man', 'woman'] as const).map((option) => (
+                        <label
+                          key={option}
+                          className={`cursor-pointer px-2.5 py-1 text-[10px] font-black font-headline uppercase tracking-widest transition-colors ${
+                            theatreCharacter === option
+                              ? 'bg-white text-black'
+                              : 'text-white/50 hover:text-white/80'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="theatre-character"
+                            value={option}
+                            checked={theatreCharacter === option}
+                            onChange={() => setTheatreCharacter(option)}
+                            className="sr-only"
+                          />
+                          {option === 'man' ? 'Man' : 'Woman'}
+                        </label>
+                      ))}
+                    </fieldset>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 

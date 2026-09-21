@@ -8,7 +8,11 @@ import {
 } from '@react-three/rapier';
 import { useRef } from 'react';
 import { Vector3 } from 'three';
-import { LOCOMOTION, useAvatarControls } from '../hooks/use-avatar-controls';
+import {
+  CAPSULE_CENTRE_TO_FEET,
+  LOCOMOTION,
+  useAvatarControls,
+} from '../hooks/use-avatar-controls';
 import { SPAWN, STANDING_EYE_HEIGHT } from '../lib/layout';
 
 interface LocalPlayerProps {
@@ -42,13 +46,10 @@ export function LocalPlayer({ enabled, onPose }: LocalPlayerProps) {
     if (!rb || !enabled) return;
 
     const p = rb.translation();
-    // capsule centre -> eye: half the capsule plus a cap, minus a little so the
-    // eye is inside the head rather than floating above it
-    const eyeY =
-      p.y -
-      (LOCOMOTION.CAPSULE_HALF_HEIGHT + LOCOMOTION.CAPSULE_RADIUS) +
-      STANDING_EYE_HEIGHT;
-    eye.current.set(p.x, eyeY, p.z);
+    // Rapier puts a capsule's translation at its centre. Both the camera and
+    // the broadcast pose need the point between the feet, so derive it once.
+    const groundY = p.y - CAPSULE_CENTRE_TO_FEET;
+    eye.current.set(p.x, groundY + STANDING_EYE_HEIGHT, p.z);
     camera.position.copy(eye.current);
 
     if (onPose) {
@@ -57,13 +58,14 @@ export function LocalPlayer({ enabled, onPose }: LocalPlayerProps) {
           180) /
         Math.PI;
       const moving = controls.isMoving();
-      const running = controls.isRunning();
       onPose({
         x: p.x,
-        y: p.y,
+        // Ground level, NOT the capsule centre. Peers place a feet-origin model
+        // at this point, so sending p.y floats every avatar 0.88 m off the deck.
+        y: groundY,
         z: p.z,
         r: yaw,
-        s: moving ? (running ? 'run' : 'walk') : 'idle',
+        s: moving ? 'walk' : 'idle',
       });
     }
   });
@@ -74,11 +76,7 @@ export function LocalPlayer({ enabled, onPose }: LocalPlayerProps) {
       type="kinematicPosition"
       colliders={false}
       // spawn the capsule so its feet land on the platform
-      position={[
-        SPAWN.x,
-        SPAWN.y + LOCOMOTION.CAPSULE_HALF_HEIGHT + LOCOMOTION.CAPSULE_RADIUS,
-        SPAWN.z,
-      ]}
+      position={[SPAWN.x, SPAWN.y + CAPSULE_CENTRE_TO_FEET, SPAWN.z]}
       name="local-player"
     >
       <CapsuleCollider

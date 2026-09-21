@@ -21,6 +21,11 @@ interface UseTheatreNetworkOptions {
   rtmSendMessage?: (msg: RTMMessage) => void;
   /** Party members already present when 3D is switched on. */
   initialPeerIds?: readonly string[];
+  /**
+   * Which body this user chose. Broadcast on every pose so peers draw them
+   * correctly; without it every client would have to guess.
+   */
+  character?: 'man' | 'woman';
   /** Only run while 3D mode is actually visible. */
   enabled: boolean;
 }
@@ -54,6 +59,7 @@ export function useTheatreNetwork({
   userId,
   rtmSendMessage,
   initialPeerIds,
+  character = 'man',
   enabled,
 }: UseTheatreNetworkOptions) {
   const buffers = useRef<Map<string, SnapshotBuffer>>(new Map());
@@ -61,6 +67,17 @@ export function useTheatreNetwork({
   const lastSentAt = useRef(0);
   const lastPose = useRef<Pose | null>(null);
   const [peerIds, setPeerIds] = useState<readonly string[]>([]);
+  /**
+   * Which body each peer chose, from their pose messages.
+   *
+   * State rather than a ref because the avatar list must re-resolve its models
+   * when a peer's body becomes known. It is only written when the value actually
+   * changes, which is at most once per peer, so this does not re-render on every
+   * incoming packet.
+   */
+  const [peerCharacters, setPeerCharacters] = useState<
+    Record<string, 'man' | 'woman'>
+  >({});
 
   const minInterval = useMemo(() => 1000 / THEATRE_NET.SEND_HZ, []);
 
@@ -102,10 +119,11 @@ export function useTheatreNetwork({
         z: q.z,
         r: q.r,
         s: q.s,
+        c: character === 'woman' ? 'w' : 'm',
         t: now,
       });
     },
-    [enabled, rtmSendMessage, userId, minInterval],
+    [enabled, rtmSendMessage, userId, minInterval, character],
   );
 
   /** Call every frame with the local pose. */
@@ -139,6 +157,14 @@ export function useTheatreNetwork({
     if (!enabled) return;
     return onAvatarTransform((pose) => {
       if (pose.userId === userId) return; // RTM does not echo self; defensive
+      // Remember which body they picked. Only writes when it actually changes,
+      // so this does not re-render the avatar list on every packet.
+      if (pose.c) {
+        const next = pose.c === 'w' ? 'woman' : 'man';
+        setPeerCharacters((prev) =>
+          prev[pose.userId] === next ? prev : { ...prev, [pose.userId]: next },
+        );
+      }
       const map = buffers.current;
       let buf = map.get(pose.userId);
       if (!buf) {
@@ -202,11 +228,21 @@ export function useTheatreNetwork({
     lastSent.current = null;
     lastPose.current = null;
     setPeerIds([]);
+    setPeerCharacters({});
   }, [enabled]);
 
   const samplePeer = useCallback((peerId: string): Pose | null => {
     return buffers.current.get(peerId)?.sample(Date.now()) ?? null;
   }, []);
 
-  return { peerIds, publishPose, samplePeer };
+  /**
+   * The body a peer chose, or null if they have not told us yet (an older client,
+   * or their first pose has not arrived). Callers fall back to a hash of the id.
+   */
+  const peerCharacter = useCallback(
+    (peerId: string): 'man' | 'woman' | null => peerCharacters[peerId] ?? null,
+    [peerCharacters],
+  );
+
+  return { peerIds, publishPose, samplePeer, peerCharacter };
 }

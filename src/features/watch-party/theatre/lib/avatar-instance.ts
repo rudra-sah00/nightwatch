@@ -110,13 +110,40 @@ export const IDENTITY_COLOURS: readonly string[] = [
   '#eab308', // yellow
 ];
 
-/** Stable colour for a user id — same person is the same colour for everyone. */
-export function identityColour(userId: string): string {
+/**
+ * Stable, order-independent hash of a user id.
+ *
+ * Every client must derive the same appearance for the same person without any
+ * coordination, so anything that varies per user (colour, which character model
+ * they get) has to come from the id itself rather than join order or an index
+ * into a local list.
+ */
+export function identityHash(userId: string): number {
   let hash = 0;
   for (let i = 0; i < userId.length; i += 1) {
     hash = (hash * 31 + userId.charCodeAt(i)) | 0;
   }
-  const index = Math.abs(hash) % IDENTITY_COLOURS.length;
+  return Math.abs(hash);
+}
+
+/**
+ * Pick one of several avatar models for a user, deterministically.
+ *
+ * Returns null when given no urls so callers can fall back to the manifest's
+ * single `avatar`. The same person resolves to the same character on every
+ * client, which is what stops an avatar changing identity as peers reconnect.
+ */
+export function avatarUrlFor(
+  urls: readonly string[],
+  userId: string,
+): string | null {
+  if (urls.length === 0) return null;
+  return urls[identityHash(userId) % urls.length];
+}
+
+/** Stable colour for a user id — same person is the same colour for everyone. */
+export function identityColour(userId: string): string {
+  const index = identityHash(userId) % IDENTITY_COLOURS.length;
   return IDENTITY_COLOURS[index];
 }
 

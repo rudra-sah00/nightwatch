@@ -1,20 +1,25 @@
 /**
  * Avatar animation state machine.
  *
- * Clip NAMES are indirected through `AVATAR_CLIPS` on purpose. The avatar is
- * not chosen yet (Ready Player Me vs a Mixamo character vs a custom rig), and
- * every source names its clips differently. Point this map at whatever the
- * chosen .glb actually contains and nothing else has to change.
+ * Clip NAMES are indirected through `AVATAR_CLIPS` on purpose, so the same
+ * state machine drives any character whose glb happens to name its clips
+ * differently. Point this map at whatever the chosen .glb contains and nothing
+ * else has to change.
  *
- * Assumes a Mixamo-compatible skeleton so that clips from different files are
- * interchangeable without per-clip retargeting.
+ * The avatars are Mixamo characters and every clip is authored on the standard
+ * `mixamorig:` skeleton, so one set of clips drives all of them without
+ * per-character retargeting. Clip channels are addressed by bone NAME, which is
+ * why a shorter character can play a taller character's walk and still plant
+ * its feet: hips translation is stored as an offset from that rig's own rest
+ * pose, not as an absolute height.
+ *
+ * There is deliberately no `run`. This is a cinema.
  */
 
 /** Logical states, independent of clip naming. */
 export type AvatarState =
   | 'idle'
   | 'walk'
-  | 'run'
   | 'sitDown'
   | 'sitIdle'
   | 'standUp'
@@ -24,7 +29,6 @@ export type AvatarState =
 export const AVATAR_CLIPS: Record<Exclude<AvatarState, 'dance'>, string> = {
   idle: 'Idle',
   walk: 'Walk',
-  run: 'Run',
   sitDown: 'SitDown',
   sitIdle: 'SitIdle',
   standUp: 'StandUp',
@@ -45,7 +49,6 @@ export const DANCE_CLIPS: readonly string[] = [
 export const FADE_SECONDS: Record<AvatarState, number> = {
   idle: 0.25,
   walk: 0.18,
-  run: 0.18,
   sitDown: 0.15,
   sitIdle: 0.2,
   standUp: 0.15,
@@ -72,9 +75,8 @@ export function nextAfter(state: AvatarState): AvatarState | null {
 
 /** Legal transitions. Guards against e.g. walking straight out of a sit. */
 const ALLOWED: Record<AvatarState, readonly AvatarState[]> = {
-  idle: ['walk', 'run', 'sitDown', 'dance'],
-  walk: ['idle', 'run', 'sitDown'],
-  run: ['idle', 'walk'],
+  idle: ['walk', 'sitDown', 'dance'],
+  walk: ['idle', 'sitDown'],
   sitDown: ['sitIdle'],
   sitIdle: ['standUp', 'dance'],
   standUp: ['idle'],
