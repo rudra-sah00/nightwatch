@@ -62,12 +62,24 @@ export function useWatchPartySync({
         if (event.action === 'JOIN' && event.userId !== room?.hostId) {
           if (room?.id) {
             const video = videoRef?.current;
+            // A video element that is missing, or present but still loading, reports
+            // currentTime 0 and paused. Broadcasting that would reset every member
+            // already watching back to the start — the element is genuinely absent for a
+            // moment while the player remounts on an episode change. Fall back to the
+            // room's last known state instead of publishing a bogus 0.
+            const hasUsableVideo = !!video && video.readyState >= 1;
+            const videoTime = hasUsableVideo
+              ? video.currentTime
+              : room.state.currentTime;
+
             rtmSendMessage?.({
               type: 'SYNC',
-              currentTime: isLiveRoom ? 0 : (video?.currentTime ?? 0),
-              videoTime: isLiveRoom ? 0 : (video?.currentTime ?? 0),
-              isPlaying: video ? !video.paused : false,
-              playbackRate: video?.playbackRate ?? 1,
+              currentTime: isLiveRoom ? 0 : videoTime,
+              videoTime: isLiveRoom ? 0 : videoTime,
+              isPlaying: hasUsableVideo ? !video.paused : room.state.isPlaying,
+              playbackRate: hasUsableVideo
+                ? video.playbackRate
+                : room.state.playbackRate,
               serverTime: Date.now(),
               fromHost: true,
             });
@@ -107,6 +119,9 @@ export function useWatchPartySync({
       isLiveRoom,
       room?.hostId,
       room?.id,
+      room?.state.currentTime,
+      room?.state.isPlaying,
+      room?.state.playbackRate,
       rtmSendMessage,
       videoRef,
       t,
@@ -154,12 +169,24 @@ export function useWatchPartySync({
         serverTime: Date.now(),
       } as unknown as RTMMessage);
 
-      // Also persist to backend so new joiners/reconnects get latest state
+      // Also persist to backend so new joiners/reconnects get latest state.
+      //
+      // `room.state` is stale on the host: RTM does not echo a sender its own messages,
+      // so the host never applies its own events and its copy of `room.state` only moves
+      // when the backend poll refreshes it. For seek and rate the event itself carries
+      // the truth, so prefer `wasPlaying`. Without this, seeking while paused persisted
+      // `isPlaying: true` and the next guest to join started playing against a paused
+      // host.
+      const persistedIsPlaying =
+        normalizedEventType === 'play'
+          ? true
+          : normalizedEventType === 'pause'
+            ? false
+            : (event.wasPlaying ?? room.state.isPlaying);
+
       syncPartyState(room.id, {
         currentTime: normalizedVideoTime,
-        isPlaying:
-          normalizedEventType === 'play' ||
-          (normalizedEventType !== 'pause' && room.state.isPlaying),
+        isPlaying: persistedIsPlaying,
         playbackRate: event.playbackRate || room.state.playbackRate,
       });
     },
