@@ -25,6 +25,8 @@ function isTypingTarget(target: EventTarget | null): boolean {
 export function useViewModeHotkey(active: boolean) {
   const cycle = useTheatreView((s) => s.cycle);
   const phase = useTheatreView((s) => s.phase);
+  const enabled = useTheatreView((s) => s.enabled);
+  const progress = useTheatreView((s) => s.progress);
 
   useEffect(() => {
     if (!active) return;
@@ -35,10 +37,29 @@ export function useViewModeHotkey(active: boolean) {
       if (e.repeat) return;
       if (isTypingTarget(e.target)) return;
 
+      // Each not-ready state needs its own explanation. Telling someone to
+      // "turn it on in settings" while their download is at 60% is simply wrong,
+      // and it was what this said before.
       if (phase !== 'ready') {
-        toast.info('3D theatre is not enabled', {
-          description: 'Turn it on in watch party settings.',
-        });
+        e.preventDefault();
+        if (!enabled) {
+          toast.info('3D theatre is not enabled', {
+            description: 'Turn it on in watch party settings.',
+          });
+        } else if (phase === 'downloading') {
+          toast.info(`Still downloading — ${Math.round(progress * 100)}%`, {
+            description:
+              'The whole room has to arrive before you can walk into it.',
+          });
+        } else if (phase === 'error') {
+          toast.error('3D assets failed to download', {
+            description: 'Toggle 3D Theatre off and on to retry.',
+          });
+        } else {
+          toast.info('3D theatre is getting ready', {
+            description: 'One moment.',
+          });
+        }
         return;
       }
 
@@ -51,5 +72,5 @@ export function useViewModeHotkey(active: boolean) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [active, cycle, phase]);
+  }, [active, cycle, phase, enabled, progress]);
 }
