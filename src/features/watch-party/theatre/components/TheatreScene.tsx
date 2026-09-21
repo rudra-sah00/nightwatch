@@ -2,13 +2,15 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
-import { Suspense, useCallback } from 'react';
+import { Suspense, useCallback, useEffect, useRef } from 'react';
 import { ACESFilmicToneMapping, SRGBColorSpace } from 'three';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import type { RTMMessage } from '../../room/types/rtm-messages';
+import { useDanceKeys } from '../hooks/use-dance-keys';
 import { useSeatOccupancy } from '../hooks/use-seat-occupancy';
 import { useSeatedCamera } from '../hooks/use-seated-camera';
 import { useSitInteraction } from '../hooks/use-sit-interaction';
+import { useSpeechBubbles } from '../hooks/use-speech-bubbles';
 import { useTheatreAssets } from '../hooks/use-theatre-assets';
 import { useTheatreNetwork } from '../hooks/use-theatre-network';
 import { useVideoTexture } from '../hooks/use-video-texture';
@@ -34,6 +36,7 @@ export function TheatreScene({
   cinema = false,
 }: TheatreSceneProps) {
   const { data: assets, isLoading, error } = useTheatreAssets();
+  const { bubbles, names } = useSpeechBubbles(true);
 
   // The party's existing <video>. Reused, never re-fetched — which is why the 3D
   // overlay keeps Player.Root mounted underneath.
@@ -107,6 +110,8 @@ export function TheatreScene({
             peerIds={peerIds}
             url={assets.models.avatar}
             sample={samplePeer}
+            names={names}
+            bubbles={bubbles}
           />
           <SceneInterior
             video={videoRef.current}
@@ -145,6 +150,7 @@ function SceneInterior({
   cinema: boolean;
   onPose: (p: Pose) => void;
 }) {
+  const lastPoseRef = useRef<Pose>({ x: 0, y: 0, z: 0, r: 0, s: 'idle' });
   const texture = useVideoTexture(video);
   const { seated } = useSitInteraction({
     seatMap,
@@ -152,6 +158,45 @@ function SceneInterior({
     claimSeat,
     enabled: !cinema,
   });
+  const { dance } = useDanceKeys(!cinema);
+
+  /**
+   * Override the animation state the walk controller derived.
+   *
+   * LocalPlayer only knows about locomotion, so without this a seated avatar
+   * would broadcast 'idle' and stand up in its own chair on every peer's screen.
+   * Sitting wins over dancing — you cannot do both.
+   */
+  const publish = useCallback(
+    (pose: Pose) => {
+      const s = seated ? 'sitIdle' : dance ? 'dance' : pose.s;
+      onPose({ ...pose, s });
+    },
+    [onPose, seated, dance],
+  );
+
+  const recordAndPublish = useCallback(
+    (pose: Pose) => {
+      lastPoseRef.current = pose;
+      publish(pose);
+    },
+    [publish],
+  );
+
+  /**
+   * Seated and dancing avatars stop moving, so the dead band would suppress the
+   * state change entirely. Nudge one send whenever the state flips and let the
+   * heartbeat carry it from there.
+   *
+   * The pose is taken from the live ref rather than a zero vector — publishing
+   * (0,0,0) would teleport the avatar to the room origin on every peer.
+   */
+  const onPoseRef = useRef(onPose);
+  onPoseRef.current = onPose;
+  useEffect(() => {
+    const s = seated ? 'sitIdle' : dance ? 'dance' : 'idle';
+    onPoseRef.current({ ...lastPoseRef.current, s });
+  }, [seated, dance]);
 
   // Seated and cinema views drive the camera from the seat anchor; walking is
   // disabled in both so the two never fight over camera.position.
@@ -162,7 +207,7 @@ function SceneInterior({
       <TheatreScreen texture={texture} />
       <Physics gravity={[0, 0, 0]} timeStep="vary">
         <TheatreColliders />
-        <LocalPlayer enabled={!seated && !cinema} onPose={onPose} />
+        <LocalPlayer enabled={!seated && !cinema} onPose={recordAndPublish} />
       </Physics>
     </>
   );

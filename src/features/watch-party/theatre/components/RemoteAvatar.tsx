@@ -9,6 +9,7 @@ import { useAvatarAnimation } from '../hooks/use-avatar-animation';
 import type { AvatarState } from '../lib/animation';
 import { applyIdentityColour, instantiateAvatar } from '../lib/avatar-instance';
 import type { Pose } from '../lib/interpolation';
+import { AvatarLabel } from './AvatarLabel';
 
 /** Network sends a short state key; map it onto the animation state machine. */
 function toAvatarState(s: string): AvatarState {
@@ -22,6 +23,8 @@ interface RemoteAvatarProps {
   peerId: string;
   url: string;
   sample: (peerId: string) => Pose | null;
+  name?: string;
+  message?: string | null;
 }
 
 /**
@@ -36,7 +39,13 @@ interface RemoteAvatarProps {
  * `animations.clipsEmbedded`), and `AnimationClip`s are safe to share across
  * mixers because the per-avatar state lives in the actions, not the clip.
  */
-export function RemoteAvatar({ peerId, url, sample }: RemoteAvatarProps) {
+export function RemoteAvatar({
+  peerId,
+  url,
+  sample,
+  name,
+  message,
+}: RemoteAvatarProps) {
   const { scene, animations } = useGLTF(url);
   const group = useRef<Group>(null);
 
@@ -88,6 +97,7 @@ export function RemoteAvatar({ peerId, url, sample }: RemoteAvatarProps) {
   return (
     <group ref={group} visible={false}>
       <primitive object={instance} />
+      <AvatarLabel userId={peerId} name={name} message={message} />
     </group>
   );
 }
@@ -96,13 +106,28 @@ interface RemoteAvatarsProps {
   peerIds: readonly string[];
   url: string;
   sample: (peerId: string) => Pose | null;
+  names?: Record<string, string>;
+  bubbles?: Record<string, string>;
 }
 
-export function RemoteAvatars({ peerIds, url, sample }: RemoteAvatarsProps) {
+export function RemoteAvatars({
+  peerIds,
+  url,
+  sample,
+  names,
+  bubbles,
+}: RemoteAvatarsProps) {
   return (
     <group name="remote-avatars">
       {peerIds.map((id) => (
-        <RemoteAvatar key={id} peerId={id} url={url} sample={sample} />
+        <RemoteAvatar
+          key={id}
+          peerId={id}
+          url={url}
+          sample={sample}
+          name={names?.[id]}
+          message={bubbles?.[id] ?? null}
+        />
       ))}
     </group>
   );

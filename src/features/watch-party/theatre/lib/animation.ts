@@ -36,10 +36,9 @@ export const AVATAR_CLIPS: Record<Exclude<AvatarState, 'dance'>, string> = {
  * avatar out of its chair.
  */
 export const DANCE_CLIPS: readonly string[] = [
-  'Dance.Hiphop',
-  'Dance.Shuffle',
+  'Dance.Sway',
+  'Dance.Bounce',
   'Dance.Twist',
-  'Dance.Robot',
 ];
 
 /** Crossfade duration in seconds, per destination state. */

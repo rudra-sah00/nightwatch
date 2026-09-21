@@ -490,6 +490,22 @@ export const onAvatarTransform = (
     }),
   );
 
+/**
+ * Chat lines, for 3D speech bubbles. Same stream the 2D sidebar consumes — there
+ * is one conversation, so a line said in 3D must show in the sidebar too.
+ */
+export const onChatMessage = (
+  callback: (m: { userId: string; userName: string; text: string }) => void,
+) =>
+  subscribe('CHAT', (msg) => {
+    // system notices have no speaker, so they get no bubble
+    if (msg.isSystem) return;
+    const text = (msg.content as string) ?? '';
+    const userId = msg.userId as string;
+    if (!userId || !text) return;
+    callback({ userId, userName: (msg.userName as string) ?? '', text });
+  });
+
 /** Broadcast seat claims. Applied by every client under the same rule. */
 export const onSeatClaim = (
   callback: (c: { userId: string; seatId: string | null; at: number }) => void,
