@@ -52,6 +52,24 @@ interface TheatreViewState {
   /** Asset download progress, 0..1 */
   progress: number;
   phase: AssetPhase;
+  /** Bytes downloaded so far. Drives the MB readout on the download toast. */
+  receivedBytes: number;
+  /** Total bytes expected. 0 while unknown, or if no server advertises sizes. */
+  totalBytes: number;
+  /** Assets finished / assets in the batch, for "3 of 5". */
+  filesDone: number;
+  fileCount: number;
+  /**
+   * Which attempt an asset is on, 1 while all is well.
+   *
+   * Surfaced so a slow recovery looks like progress rather than a stall — a
+   * retry can take several seconds of backoff during which no bytes move.
+   */
+  attempt: number;
+  /** Short reason for a failed download, null when there is none. */
+  error: string | null;
+  /** Bumped by `retry()`; the preloader watches it to start again. */
+  retryNonce: number;
   mode: TheatreViewMode;
   /** Chosen character body. Decides which single avatar model is fetched. */
   character: AvatarCharacter;
@@ -60,16 +78,46 @@ interface TheatreViewState {
   disable: () => void;
   setPhase: (phase: AssetPhase) => void;
   setProgress: (progress: number) => void;
+  /** One call for everything the download toast renders. */
+  setDownload: (update: {
+    progress: number;
+    receivedBytes: number;
+    totalBytes: number;
+    filesDone: number;
+    fileCount: number;
+  }) => void;
+  setAttempt: (attempt: number) => void;
+  fail: (error: string) => void;
+  /** Ask the preloader to try again, keeping assets already downloaded. */
+  retry: () => void;
   /** Advance the view cycle. No-op until assets are ready. */
   cycle: () => void;
   setMode: (mode: TheatreViewMode) => void;
   setCharacter: (character: AvatarCharacter) => void;
 }
 
+/** Fields reset whenever a download starts or is abandoned. */
+const DOWNLOAD_RESET = {
+  progress: 0,
+  receivedBytes: 0,
+  totalBytes: 0,
+  filesDone: 0,
+  fileCount: 0,
+  attempt: 1,
+  error: null,
+} as const;
+
 export const useTheatreView = create<TheatreViewState>((set, get) => ({
   enabled: false,
   progress: 0,
   phase: 'idle',
+  receivedBytes: 0,
+  totalBytes: 0,
+  filesDone: 0,
+  fileCount: 0,
+  attempt: 1,
+  error: null,
+  retryNonce: 0,
   mode: '2d',
   character: storedCharacter(),
 
@@ -78,10 +126,29 @@ export const useTheatreView = create<TheatreViewState>((set, get) => ({
   // Turning 3D off must also drop the view back to 2d, or the user is stranded
   // in a scene whose assets we are no longer maintaining.
   disable: () =>
-    set({ enabled: false, mode: '2d', phase: 'idle', progress: 0 }),
+    set({ enabled: false, mode: '2d', phase: 'idle', ...DOWNLOAD_RESET }),
 
   setPhase: (phase) => set({ phase }),
   setProgress: (progress) => set({ progress }),
+
+  setDownload: (update) => set(update),
+  setAttempt: (attempt) => set({ attempt }),
+
+  fail: (error) => set({ phase: 'error', error }),
+
+  /**
+   * Retry without clearing progress.
+   *
+   * Assets already on the machine are kept by the preloader, so a retry after
+   * four of five files succeeded resumes rather than re-downloading 30 MB.
+   */
+  retry: () =>
+    set((s) => ({
+      phase: 'downloading',
+      error: null,
+      attempt: 1,
+      retryNonce: s.retryNonce + 1,
+    })),
 
   cycle: () => {
     const { phase, mode } = get();

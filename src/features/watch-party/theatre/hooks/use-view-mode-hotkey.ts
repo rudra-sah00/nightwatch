@@ -19,7 +19,6 @@ export function useViewModeHotkey(active: boolean) {
   const cycle = useTheatreView((s) => s.cycle);
   const phase = useTheatreView((s) => s.phase);
   const enabled = useTheatreView((s) => s.enabled);
-  const progress = useTheatreView((s) => s.progress);
 
   useEffect(() => {
     if (!active) return;
@@ -33,24 +32,34 @@ export function useViewModeHotkey(active: boolean) {
       // Each not-ready state needs its own explanation. Telling someone to
       // "turn it on in settings" while their download is at 60% is simply wrong,
       // and it was what this said before.
+      //
+      // A stable id on each of these keeps a mashed V key from stacking a column
+      // of identical toasts.
       if (phase !== 'ready') {
         e.preventDefault();
         if (!enabled) {
           toast.info('3D theatre is not enabled', {
             description: 'Turn it on in watch party settings.',
+            id: 'theatre-not-enabled',
           });
         } else if (phase === 'downloading') {
-          toast.info(`Still downloading — ${Math.round(progress * 100)}%`, {
+          // The percentage is deliberately NOT repeated here: the persistent
+          // download toast is already on screen showing it, and two live
+          // counters that can disagree is worse than one.
+          toast.info('Still downloading', {
             description:
               'The whole room has to arrive before you can walk into it.',
+            id: 'theatre-still-downloading',
           });
         } else if (phase === 'error') {
           toast.error('3D assets failed to download', {
-            description: 'Toggle 3D Theatre off and on to retry.',
+            description: 'Use Retry on the download notice.',
+            id: 'theatre-download-failed',
           });
         } else {
           toast.info('3D theatre is getting ready', {
             description: 'One moment.',
+            id: 'theatre-getting-ready',
           });
         }
         return;
@@ -65,5 +74,5 @@ export function useViewModeHotkey(active: boolean) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [active, cycle, phase, enabled, progress]);
+  }, [active, cycle, phase, enabled]);
 }
