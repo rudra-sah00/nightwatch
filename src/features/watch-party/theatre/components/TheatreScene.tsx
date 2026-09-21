@@ -16,11 +16,19 @@ import { useSpeechBubbles } from '../hooks/use-speech-bubbles';
 import { useTheatreAssets } from '../hooks/use-theatre-assets';
 import { useTheatreNetwork } from '../hooks/use-theatre-network';
 import { useVideoTexture } from '../hooks/use-video-texture';
+import { DANCE_CLIPS } from '../lib/animation';
 import type { Pose } from '../lib/interpolation';
-import { ROOM, SPAWN, STANDING_EYE_HEIGHT } from '../lib/layout';
+import {
+  ROOM,
+  type SeatId,
+  SPAWN,
+  STANDING_EYE_HEIGHT,
+  seatedAvatarPose,
+} from '../lib/layout';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
 import { LocalPlayer } from './LocalPlayer';
+import { PassiveAvatars } from './PassiveAvatars';
 import { RemoteAvatars } from './RemoteAvatar';
 import { TheatreColliders } from './TheatreColliders';
 import { TheatreLighting } from './TheatreLighting';
@@ -33,12 +41,21 @@ interface TheatreSceneProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   /** Screen-focused mode locks the camera instead of allowing free walking. */
   cinema?: boolean;
+  /**
+   * Every party member, including this user.
+   *
+   * Members who have not enabled 3D never broadcast a pose, so without this list
+   * the room would look empty to the one person who did enable it. They are drawn
+   * seated instead — see PassiveAvatars.
+   */
+  memberIds?: readonly string[];
 }
 
 export function TheatreScene({
   userId,
   rtmSendMessage,
   cinema = false,
+  memberIds = [],
 }: TheatreSceneProps) {
   const { data: assets, isLoading, error } = useTheatreAssets();
   const { bubbles, names } = useSpeechBubbles(true);
@@ -138,6 +155,21 @@ export function TheatreScene({
             names={names}
             bubbles={bubbles}
           />
+          {/*
+            Party members who never turned 3D on. They broadcast nothing, so they
+            are seated deterministically rather than left invisible. The instant
+            one of them enables 3D their live pose arrives, they appear in
+            peerIds, and this layer stops drawing them.
+          */}
+          <PassiveAvatars
+            memberIds={memberIds}
+            livePeerIds={peerIds}
+            selfId={userId}
+            seatMap={seatMap}
+            url={resolveCharacterModel('man')}
+            names={names}
+            bubbles={bubbles}
+          />
           <SceneInterior
             videoRef={videoRef}
             onTogglePlay={readOnly ? undefined : playerHandlers.togglePlay}
@@ -199,13 +231,35 @@ function SceneInterior({
    * LocalPlayer only knows about locomotion, so without this a seated avatar
    * would broadcast 'idle' and stand up in its own chair on every peer's screen.
    * Sitting wins over dancing — you cannot do both.
+   *
+   * When seated the POSITION is overridden too, to the seat anchor. The walk
+   * controller is switched off while sitting, so the last pose it produced is
+   * wherever you were standing — the floor pad 0.52 m in front of the chair.
+   * Sending that made remote viewers see you sitting in mid-air ahead of your
+   * seat instead of in it.
+   *
+   * The dance INDEX goes out as well. Broadcasting only 'dance' left every peer
+   * falling back to DANCE_CLIPS[0], so all three dances looked the same to
+   * everyone except the person dancing.
    */
   const publish = useCallback(
     (pose: Pose) => {
-      const s = seated ? 'sitIdle' : dance ? 'dance' : pose.s;
-      onPose({ ...pose, s });
+      if (seated && mySeat) {
+        const seat = seatedAvatarPose(mySeat as SeatId);
+        onPose({ ...seat, s: 'sitIdle' });
+        return;
+      }
+      const s = dance ? 'dance' : pose.s;
+      const d =
+        s === 'dance' && dance
+          ? (() => {
+              const i = DANCE_CLIPS.indexOf(dance);
+              return i >= 0 ? i : undefined;
+            })()
+          : undefined;
+      onPose({ ...pose, s, d });
     },
-    [onPose, seated, dance],
+    [onPose, seated, mySeat, dance],
   );
 
   const recordAndPublish = useCallback(
@@ -227,9 +281,19 @@ function SceneInterior({
   const onPoseRef = useRef(onPose);
   onPoseRef.current = onPose;
   useEffect(() => {
-    const s = seated ? 'sitIdle' : dance ? 'dance' : 'idle';
-    onPoseRef.current({ ...lastPoseRef.current, s });
-  }, [seated, dance]);
+    if (seated && mySeat) {
+      const seat = seatedAvatarPose(mySeat as SeatId);
+      onPoseRef.current({ ...seat, s: 'sitIdle' });
+      return;
+    }
+    const s = dance ? 'dance' : 'idle';
+    const i = dance ? DANCE_CLIPS.indexOf(dance) : -1;
+    onPoseRef.current({
+      ...lastPoseRef.current,
+      s,
+      d: s === 'dance' && i >= 0 ? i : undefined,
+    });
+  }, [seated, mySeat, dance]);
 
   // Seated and cinema views drive the camera from the seat anchor; walking is
   // disabled in both so the two never fight over camera.position.

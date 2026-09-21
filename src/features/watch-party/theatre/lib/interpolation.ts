@@ -58,6 +58,8 @@ export interface Snapshot {
   r: number;
   /** animation state key */
   s: string;
+  /** which dance, index into DANCE_CLIPS. Only set when `s` is 'dance'. */
+  d?: number;
   /** sender timestamp, ms */
   t: number;
 }
@@ -68,6 +70,8 @@ export interface Pose {
   z: number;
   r: number;
   s: string;
+  /** which dance, index into DANCE_CLIPS. Only set when `s` is 'dance'. */
+  d?: number;
 }
 
 function lerp(a: number, b: number, k: number): number {
@@ -120,14 +124,14 @@ export class SnapshotBuffer {
     if (this.items.length === 0) return null;
     if (this.items.length === 1) {
       const o = this.items[0];
-      return { x: o.x, y: o.y, z: o.z, r: o.r, s: o.s };
+      return { x: o.x, y: o.y, z: o.z, r: o.r, s: o.s, d: o.d };
     }
 
     const target = renderTime - THEATRE_NET.INTERP_DELAY_MS;
 
     if (target <= this.items[0].t) {
       const o = this.items[0];
-      return { x: o.x, y: o.y, z: o.z, r: o.r, s: o.s };
+      return { x: o.x, y: o.y, z: o.z, r: o.r, s: o.s, d: o.d };
     }
     const newest = this.items[this.items.length - 1];
     if (target >= newest.t) {
@@ -137,6 +141,7 @@ export class SnapshotBuffer {
         z: newest.z,
         r: newest.r,
         s: newest.s,
+        d: newest.d,
       };
     }
 
@@ -154,10 +159,18 @@ export class SnapshotBuffer {
           // Animation state is discrete — never blend it, take the earlier one
           // so the clip change lands with the movement it belongs to.
           s: a.s,
+          d: a.d,
         };
       }
     }
-    return { x: newest.x, y: newest.y, z: newest.z, r: newest.r, s: newest.s };
+    return {
+      x: newest.x,
+      y: newest.y,
+      z: newest.z,
+      r: newest.r,
+      s: newest.s,
+      d: newest.d,
+    };
   }
 }
 
@@ -165,6 +178,9 @@ export class SnapshotBuffer {
 export function exceedsDeadBand(last: Pose | null, next: Pose): boolean {
   if (!last) return true;
   if (last.s !== next.s) return true;
+  // Switching dance moves no distance, so without this the dead band would
+  // swallow it and peers would keep showing the previous clip.
+  if (last.d !== next.d) return true;
   const dx = next.x - last.x;
   const dy = next.y - last.y;
   const dz = next.z - last.z;
@@ -181,5 +197,6 @@ export function quantise(p: Pose): Pose {
     z: Math.round(p.z * 100) / 100,
     r: Math.round(p.r),
     s: p.s,
+    d: p.d,
   };
 }

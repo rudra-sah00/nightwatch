@@ -476,6 +476,7 @@ export const onAvatarTransform = (
     r: number;
     s: string;
     c?: 'm' | 'w';
+    d?: number;
     t: number;
   }) => void,
 ) =>
@@ -489,6 +490,7 @@ export const onAvatarTransform = (
       s: msg.s as string,
       // Older clients omit this; the avatar layer falls back to a hash of the id.
       c: msg.c === 'm' || msg.c === 'w' ? msg.c : undefined,
+      d: typeof msg.d === 'number' ? msg.d : undefined,
       t: msg.t as number,
     }),
   );

@@ -196,6 +196,98 @@ export function getSeat(id: SeatId): Seat {
 /** Radius around a seat pad within which the "Press E to sit" prompt shows. */
 export const SIT_PROMPT_RADIUS = 1.0;
 
+/**
+ * Lift applied to a seated avatar so its hips land on the cushion.
+ *
+ * An avatar's origin is between its feet, and the seated clip puts the hips
+ * 0.461 m above that origin. The recliner's cushion measures 0.530 m above its
+ * row floor. Dropping the avatar straight onto the floor therefore buries it
+ * 69 mm into the seat.
+ */
+export const SEATED_AVATAR_LIFT = 0.069;
+
+/**
+ * Body yaw, degrees, for someone sitting in a seat.
+ *
+ * The characters face +Z at rotation 0 (Mixamo's -Y front becomes +Z through
+ * Blender's Y-up conversion — measured, not assumed), and the screen is at
+ * z ≈ 0 with the seats at z = 4.5 and 6.2. Facing the screen is therefore a
+ * half turn. Bodies do not get the per-seat aim from `SEAT_AIM`: a seated person
+ * turns their head toward the screen, not their torso, and the chairs are all
+ * bolted facing forward anyway.
+ */
+export const SEATED_BODY_YAW_DEG = 180;
+
+/**
+ * Where a seated avatar's body goes, for a given seat.
+ *
+ * Both the live path and the passive path need this. Broadcasting the walking
+ * position with a 'sitIdle' state was a real bug: the last walking position is
+ * the floor pad 0.52 m IN FRONT of the chair, so remote viewers saw people
+ * sitting in mid-air ahead of their seat rather than in it.
+ */
+export function seatedAvatarPose(seatId: SeatId): {
+  x: number;
+  y: number;
+  z: number;
+  r: number;
+} {
+  const seat = getSeat(seatId);
+  return {
+    x: seat.position.x,
+    y: seat.position.y + SEATED_AVATAR_LIFT,
+    z: seat.position.z,
+    r: SEATED_BODY_YAW_DEG,
+  };
+}
+
+/**
+ * Which seat each non-3D member is shown in.
+ *
+ * Pure and deterministic on purpose. Every client runs this independently with no
+ * coordination, so the inputs are sorted and the seats filled in a fixed order —
+ * that is what makes two people looking at the same room see the same person in
+ * the same chair.
+ *
+ * Crucially the seat is assigned from the FULL member list, and only then are the
+ * viewer and the live peers filtered out of the RESULT. Filtering first was a bug
+ * caught by test: removing yourself before numbering the seats shifts everyone
+ * after you along by one, so the same member landed in a different chair
+ * depending on who was looking. Assigning first also means a member keeps their
+ * chair when they toggle 3D on and off, instead of the room reshuffling.
+ *
+ * Seats already claimed by someone in 3D are excluded: two avatars in one chair
+ * looks worse than one person missing. Overflow beyond the eight seats is
+ * dropped for the same reason.
+ */
+export function assignPassiveSeats(
+  memberIds: readonly string[],
+  livePeerIds: readonly string[],
+  selfId: string,
+  seatMap: Record<string, string | null>,
+): readonly { id: string; seatId: SeatId }[] {
+  const taken = new Set(
+    Object.entries(seatMap)
+      .filter(([, occupant]) => occupant !== null)
+      .map(([seat]) => seat),
+  );
+  const free = SEAT_IDS.filter((s) => !taken.has(s));
+
+  // Viewer-independent: sort every member, then hand out the free seats in order.
+  const ordered = [...new Set(memberIds)].filter(Boolean).sort();
+
+  const live = new Set(livePeerIds);
+  const out: { id: string; seatId: SeatId }[] = [];
+  ordered.forEach((id, i) => {
+    if (i >= free.length) return; // no chair left for them
+    // Drawn elsewhere: self by LocalPlayer, live peers by RemoteAvatars. Their
+    // slot is still consumed above so nobody else's chair moves.
+    if (id === selfId || live.has(id)) return;
+    out.push({ id, seatId: free[i] as SeatId });
+  });
+  return out;
+}
+
 /** Clamp a yaw/pitch pair into a seat's allowed head cone. */
 export function clampToSeatView(
   seat: Seat,

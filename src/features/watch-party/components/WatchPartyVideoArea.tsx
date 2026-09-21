@@ -313,6 +313,13 @@ export function WatchPartyVideoArea({
             userId={userId ?? ''}
             rtmSendMessage={rtmSendMessage}
             cinema={viewMode === 'cinema'}
+            /*
+              Everyone in the party, so members who never switched 3D on can
+              still be shown sitting in the room rather than being invisible.
+            */
+            memberIds={room.members
+              .map((m) => m?.id)
+              .filter((id): id is string => Boolean(id))}
           />
         </div>
       ) : null}

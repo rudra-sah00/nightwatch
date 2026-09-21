@@ -120,6 +120,7 @@ export function useTheatreNetwork({
         r: q.r,
         s: q.s,
         c: character === 'woman' ? 'w' : 'm',
+        d: q.d,
         t: now,
       });
     },
@@ -180,6 +181,7 @@ export function useTheatreNetwork({
         z: pose.z,
         r: pose.r,
         s: pose.s,
+        d: pose.d,
         t: pose.t,
       });
     });

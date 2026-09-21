@@ -274,6 +274,16 @@ export interface RtmAvatarTransform {
    * hash of your id. Absent from older clients, which fall back to the hash.
    */
   c?: 'm' | 'w';
+  /**
+   * Which dance, as an index into `DANCE_CLIPS`. Only meaningful when `s` is
+   * 'dance'.
+   *
+   * Without this every remote dancer fell back to `DANCE_CLIPS[0]`, so all three
+   * dances looked identical to everyone but the dancer. An index rather than the
+   * clip name keeps the message small, and an unknown index degrades to the
+   * first clip rather than to no animation.
+   */
+  d?: number;
   /** sender timestamp, ms — used to order and interpolate snapshots */
   t: number;
 }

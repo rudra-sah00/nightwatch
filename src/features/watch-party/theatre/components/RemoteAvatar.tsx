@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { Group } from 'three';
 import { MathUtils } from 'three';
 import { useAvatarAnimation } from '../hooks/use-avatar-animation';
-import type { AvatarState } from '../lib/animation';
+import { type AvatarState, DANCE_CLIPS } from '../lib/animation';
 import {
   applyIdentityColour,
   avatarUrlFor,
@@ -68,6 +68,7 @@ export function RemoteAvatar({
   });
 
   const lastState = useRef<AvatarState>('idle');
+  const lastDance = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     instance.name = `avatar-${peerId}`;
@@ -91,10 +92,19 @@ export function RemoteAvatar({
     // Drive the clip from the peer's broadcast state. `force` bypasses the
     // transition table on purpose: the sender is authoritative over its own
     // animation, and a dropped packet must not leave us stuck in the wrong clip.
+    //
+    // The dance index is part of the identity of the state here: switching from
+    // Sway to Twist keeps `s === 'dance'`, so comparing state alone would never
+    // restart the mixer and the peer would appear stuck on their first dance.
     const next = toAvatarState(pose.s);
-    if (next !== lastState.current) {
+    if (next !== lastState.current || pose.d !== lastDance.current) {
       lastState.current = next;
-      force(next);
+      lastDance.current = pose.d;
+      const clip =
+        next === 'dance' && pose.d !== undefined
+          ? DANCE_CLIPS[pose.d]
+          : undefined;
+      force(next, clip);
     }
   });
 
