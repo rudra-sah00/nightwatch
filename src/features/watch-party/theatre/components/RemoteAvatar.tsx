@@ -7,7 +7,7 @@ import type { Group } from 'three';
 import { MathUtils } from 'three';
 import { useAvatarAnimation } from '../hooks/use-avatar-animation';
 import type { AvatarState } from '../lib/animation';
-import { instantiateAvatar } from '../lib/avatar-instance';
+import { applyIdentityColour, instantiateAvatar } from '../lib/avatar-instance';
 import type { Pose } from '../lib/interpolation';
 
 /** Network sends a short state key; map it onto the animation state machine. */
@@ -40,7 +40,13 @@ export function RemoteAvatar({ peerId, url, sample }: RemoteAvatarProps) {
   const { scene, animations } = useGLTF(url);
   const group = useRef<Group>(null);
 
-  const instance = useMemo(() => instantiateAvatar(scene), [scene]);
+  // Colour is applied per instance, on cloned materials, so each peer is
+  // visually distinct without recolouring everyone else.
+  const instance = useMemo(() => {
+    const obj = instantiateAvatar(scene);
+    applyIdentityColour(obj, peerId);
+    return obj;
+  }, [scene, peerId]);
 
   const { force } = useAvatarAnimation({
     root: instance,

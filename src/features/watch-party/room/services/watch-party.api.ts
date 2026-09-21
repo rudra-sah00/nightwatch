@@ -498,6 +498,27 @@ export const onSeatMap = (
     callback(msg.seats as Record<string, string | null>),
   );
 
+/**
+ * Party roster changes, used to spawn and despawn 3D avatars.
+ *
+ * Membership is the authority on who exists in the room — not avatar traffic.
+ * Inferring presence from movement means a motionless avatar is invisible and a
+ * departed one lingers until a timeout.
+ */
+export const onMemberJoined = (
+  callback: (member: { id: string; name?: string }) => void,
+) =>
+  subscribe('MEMBER_JOINED', (msg) => {
+    const m = msg.member as Record<string, unknown> | undefined;
+    if (!m) return;
+    const id = (m.userId ?? m.id) as string | undefined;
+    if (!id) return;
+    callback({ id, name: (m.userName ?? m.name) as string | undefined });
+  });
+
+export const onMemberLeft = (callback: (userId: string) => void) =>
+  subscribe('MEMBER_LEFT', (msg) => callback(msg.userId as string));
+
 export const onSketchClear = <
   T extends { userId: string; type: 'all' | 'self' } = {
     userId: string;

@@ -32,8 +32,22 @@ export const THEATRE_NET = {
   INTERP_DELAY_MS: 160,
   /** Discard snapshots older than this. */
   BUFFER_MS: 1000,
-  /** Treat a peer as gone if silent for this long. */
-  STALE_MS: 15000,
+  /**
+   * Force a pose through the dead band this often.
+   *
+   * Without it a motionless avatar transmits nothing and is therefore invisible
+   * to everyone — including anyone who joins later. 2 s costs 0.5 msg/s per
+   * person, negligible beside the 8 Hz walking cap, and doubles as liveness.
+   */
+  HEARTBEAT_MS: 2000,
+  /**
+   * Treat a peer as gone if silent for this long.
+   *
+   * This is a connection-loss fallback only; normal departures come from
+   * MEMBER_LEFT. It must comfortably exceed HEARTBEAT_MS or idle players get
+   * culled while still present.
+   */
+  STALE_MS: 30000,
 } as const;
 
 export interface Snapshot {

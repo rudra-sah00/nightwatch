@@ -1,5 +1,5 @@
 import type { AnimationClip, Object3D } from 'three';
-import { Bone, SkinnedMesh } from 'three';
+import { Bone, Color, Mesh, MeshStandardMaterial, SkinnedMesh } from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 /**
@@ -93,4 +93,54 @@ export function findClip(
   wanted: string,
 ): AnimationClip | null {
   return index.get(normaliseClipName(wanted)) ?? null;
+}
+
+/**
+ * Per-user identity palette, mirroring the ID_* materials in the Blender file.
+ * Eight hues chosen to stay distinguishable in a dim room.
+ */
+export const IDENTITY_COLOURS: readonly string[] = [
+  '#3b82f6', // blue
+  '#06b6d4', // cyan
+  '#22c55e', // green
+  '#f97316', // orange
+  '#ec4899', // pink
+  '#a855f7', // purple
+  '#ef4444', // red
+  '#eab308', // yellow
+];
+
+/** Stable colour for a user id — same person is the same colour for everyone. */
+export function identityColour(userId: string): string {
+  let hash = 0;
+  for (let i = 0; i < userId.length; i += 1) {
+    hash = (hash * 31 + userId.charCodeAt(i)) | 0;
+  }
+  const index = Math.abs(hash) % IDENTITY_COLOURS.length;
+  return IDENTITY_COLOURS[index];
+}
+
+/**
+ * Tint an avatar instance's shirt so players are telling apart at a glance.
+ *
+ * Materials are CLONED first. The glb's materials are shared across every
+ * instance, so mutating them in place would recolour all avatars at once — the
+ * same class of bug as cloning a SkinnedMesh without rebinding its skeleton.
+ */
+export function applyIdentityColour(root: Object3D, userId: string): void {
+  const colour = new Color(identityColour(userId));
+  root.traverse((child) => {
+    if (!(child instanceof Mesh) && !(child instanceof SkinnedMesh)) return;
+    const mats = Array.isArray(child.material)
+      ? child.material
+      : [child.material];
+    const next = mats.map((m) => {
+      if (!(m instanceof MeshStandardMaterial)) return m;
+      if (m.name !== 'AVATAR_Identity') return m;
+      const clone = m.clone();
+      clone.color.copy(colour);
+      return clone;
+    });
+    child.material = Array.isArray(child.material) ? next : next[0];
+  });
 }

@@ -1,7 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { onAvatarTransform } from '../../room/services/watch-party.api';
+import {
+  onAvatarTransform,
+  onMemberJoined,
+  onMemberLeft,
+} from '../../room/services/watch-party.api';
 import type { RTMMessage } from '../../room/types/rtm-messages';
 import {
   exceedsDeadBand,
@@ -15,47 +19,78 @@ interface UseTheatreNetworkOptions {
   userId: string;
   /** Existing channel broadcast from useWatchParty. */
   rtmSendMessage?: (msg: RTMMessage) => void;
+  /** Party members already present when 3D is switched on. */
+  initialPeerIds?: readonly string[];
   /** Only run while 3D mode is actually visible. */
   enabled: boolean;
 }
 
 /**
- * Avatar position sync over the existing Agora RTM channel.
+ * Avatar presence and position sync over the existing Agora RTM channel.
  *
  * Deliberately NOT routed through our backend. Movement is ephemeral peer state;
  * putting it on the backend would add a round trip through a server with no
  * reason to know about it and tie the room's responsiveness to API latency. RTM
- * is already connected for chat and playback sync.
+ * is already connected for chat and playback sync, and nothing here needs a
+ * second transport.
  *
- * Receiving uses the same `subscribe` bus that `onSketchDraw` uses, fed by
- * `dispatchRtmMessage` in the central `useWatchParty` router — so this hook needs
- * no message prop and no changes to that router.
+ * WHO EXISTS vs WHERE THEY ARE are two separate problems, and conflating them
+ * was a bug in the first version of this hook:
  *
- * Two things keep this inside RTM's rate budget:
- *   1. a send cap of `THEATRE_NET.SEND_HZ`
- *   2. a dead band, so a still or seated avatar sends nothing at all
+ *  - Membership (`MEMBER_JOINED` / `MEMBER_LEFT`) is the authority on who is in
+ *    the room. Avatars spawn and despawn from that, so a departure removes the
+ *    avatar at once instead of leaving a ghost until a timeout.
+ *  - Poses say where they are. These are rate-capped and dead-banded, so a
+ *    motionless avatar sends almost nothing.
+ *
+ * The dead band alone made stationary players invisible: they never transmitted,
+ * so nobody ever learned they were there. A low-rate HEARTBEAT fixes that — it
+ * forces a pose through the dead band every `HEARTBEAT_MS`, which also means a
+ * late joiner sees everyone within one heartbeat without any request/reply
+ * handshake. At 2 s that is 0.5 msg/s per person, which is negligible next to
+ * the 8 Hz cap while walking.
  */
 export function useTheatreNetwork({
   userId,
   rtmSendMessage,
+  initialPeerIds,
   enabled,
 }: UseTheatreNetworkOptions) {
   const buffers = useRef<Map<string, SnapshotBuffer>>(new Map());
   const lastSent = useRef<Pose | null>(null);
   const lastSentAt = useRef(0);
+  const lastPose = useRef<Pose | null>(null);
   const [peerIds, setPeerIds] = useState<readonly string[]>([]);
 
   const minInterval = useMemo(() => 1000 / THEATRE_NET.SEND_HZ, []);
 
-  const publishPose = useCallback(
-    (pose: Pose) => {
-      if (!enabled || !rtmSendMessage) return;
+  const ensurePeer = useCallback(
+    (id: string) => {
+      if (id === userId) return;
+      const map = buffers.current;
+      if (!map.has(id)) {
+        map.set(id, new SnapshotBuffer());
+        setPeerIds([...map.keys()]);
+      }
+    },
+    [userId],
+  );
 
+  const removePeer = useCallback((id: string) => {
+    if (buffers.current.delete(id)) {
+      setPeerIds([...buffers.current.keys()]);
+    }
+  }, []);
+
+  /** Send a pose, honouring the rate cap. `force` bypasses the dead band. */
+  const send = useCallback(
+    (pose: Pose, force: boolean) => {
+      if (!enabled || !rtmSendMessage) return;
       const now = Date.now();
       if (now - lastSentAt.current < minInterval) return;
 
       const q = quantise(pose);
-      if (!exceedsDeadBand(lastSent.current, q)) return;
+      if (!force && !exceedsDeadBand(lastSent.current, q)) return;
 
       lastSentAt.current = now;
       lastSent.current = q;
@@ -73,14 +108,42 @@ export function useTheatreNetwork({
     [enabled, rtmSendMessage, userId, minInterval],
   );
 
-  // ingest remote poses off the RTM bus
+  /** Call every frame with the local pose. */
+  const publishPose = useCallback(
+    (pose: Pose) => {
+      lastPose.current = pose;
+      send(pose, false);
+    },
+    [send],
+  );
+
+  // ---- seed the roster with members already in the party ----
+  useEffect(() => {
+    if (!enabled || !initialPeerIds) return;
+    for (const id of initialPeerIds) ensurePeer(id);
+  }, [enabled, initialPeerIds, ensurePeer]);
+
+  // ---- roster: membership drives spawn/despawn ----
   useEffect(() => {
     if (!enabled) return;
-    const unsubscribe = onAvatarTransform((pose) => {
-      if (pose.userId === userId) return; // defensive; RTM does not echo self
+    const offJoin = onMemberJoined((m) => ensurePeer(m.id));
+    const offLeave = onMemberLeft((id) => removePeer(id));
+    return () => {
+      offJoin();
+      offLeave();
+    };
+  }, [enabled, ensurePeer, removePeer]);
+
+  // ---- poses ----
+  useEffect(() => {
+    if (!enabled) return;
+    return onAvatarTransform((pose) => {
+      if (pose.userId === userId) return; // RTM does not echo self; defensive
       const map = buffers.current;
       let buf = map.get(pose.userId);
       if (!buf) {
+        // A pose from someone the roster has not mentioned yet — trust the pose
+        // rather than dropping them. Join events and 3D activation can race.
         buf = new SnapshotBuffer();
         map.set(pose.userId, buf);
         setPeerIds([...map.keys()]);
@@ -94,31 +157,50 @@ export function useTheatreNetwork({
         t: pose.t,
       });
     });
-    return unsubscribe;
   }, [enabled, userId]);
 
-  // drop peers that have gone quiet
+  // ---- heartbeat: makes stationary avatars visible, and late joiners see all ----
   useEffect(() => {
     if (!enabled) return;
     const id = setInterval(() => {
-      const map = buffers.current;
+      const pose = lastPose.current;
+      if (pose) send(pose, true);
+    }, THEATRE_NET.HEARTBEAT_MS);
+    return () => clearInterval(id);
+  }, [enabled, send]);
+
+  // ---- announce immediately on entry, so others do not wait a heartbeat ----
+  useEffect(() => {
+    if (!enabled) return;
+    const id = setTimeout(() => {
+      const pose = lastPose.current;
+      if (pose) send(pose, true);
+    }, 150);
+    return () => clearTimeout(id);
+  }, [enabled, send]);
+
+  // ---- staleness is a connection-loss fallback, not the removal path ----
+  useEffect(() => {
+    if (!enabled) return;
+    const id = setInterval(() => {
       let changed = false;
-      for (const [peer, buf] of map) {
+      for (const [peer, buf] of buffers.current) {
         if (buf.isStale()) {
-          map.delete(peer);
+          buffers.current.delete(peer);
           changed = true;
         }
       }
-      if (changed) setPeerIds([...map.keys()]);
+      if (changed) setPeerIds([...buffers.current.keys()]);
     }, 5000);
     return () => clearInterval(id);
   }, [enabled]);
 
-  // reset when 3D is switched off so we never resume with stale poses
+  // ---- reset when 3D is switched off so we never resume with stale poses ----
   useEffect(() => {
     if (enabled) return;
     buffers.current.clear();
     lastSent.current = null;
+    lastPose.current = null;
     setPeerIds([]);
   }, [enabled]);
 
