@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  onAvatarPing,
+  onAvatarPong,
   onAvatarTransform,
   onMemberJoined,
   onMemberLeft,
@@ -14,7 +16,11 @@ import {
   SnapshotBuffer,
   THEATRE_NET,
 } from '../lib/interpolation';
-import { PacketRateMeter } from '../lib/theatre-stats';
+import {
+  PacketRateMeter,
+  PING_INTERVAL_MS,
+  RoundTripTracker,
+} from '../lib/theatre-stats';
 
 interface UseTheatreNetworkOptions {
   userId: string;
@@ -86,6 +92,8 @@ export function useTheatreNetwork({
    * so the figures are free of clock skew between machines.
    */
   const rate = useRef(new PacketRateMeter());
+  /** Round-trip latency, measured entirely on this machine's clock. */
+  const rtt = useRef(new RoundTripTracker());
 
   const minInterval = useMemo(() => 1000 / THEATRE_NET.SEND_HZ, []);
 
@@ -216,6 +224,47 @@ export function useTheatreNetwork({
     return () => clearTimeout(id);
   }, [enabled, send]);
 
+  // ---- latency probes ----
+  // Answer everyone else's probe immediately. Replying is what makes THEIR
+  // measurement possible, so this runs regardless of whether we are measuring.
+  useEffect(() => {
+    if (!enabled || !rtmSendMessage) return;
+    return onAvatarPing((ping) => {
+      if (ping.userId === userId) return;
+      rtmSendMessage({
+        type: 'AVATAR_PONG',
+        userId,
+        to: ping.userId,
+        id: ping.id,
+      });
+    });
+  }, [enabled, rtmSendMessage, userId]);
+
+  // Collect replies addressed to us. Several peers answer the same broadcast
+  // probe and each reply is a separate valid sample.
+  useEffect(() => {
+    if (!enabled) return;
+    return onAvatarPong((pong) => {
+      if (pong.to !== userId) return;
+      rtt.current.received(pong.id);
+    });
+  }, [enabled, userId]);
+
+  useEffect(() => {
+    if (!enabled || !rtmSendMessage) return;
+    let seq = 0;
+    function probe() {
+      seq += 1;
+      // Unique per send so a late reply cannot be matched to a newer probe.
+      const token = `${userId}:${Date.now()}:${seq}`;
+      rtt.current.sent(token);
+      rtmSendMessage?.({ type: 'AVATAR_PING', userId, id: token });
+    }
+    probe();
+    const id = setInterval(probe, PING_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [enabled, rtmSendMessage, userId]);
+
   // ---- staleness is a connection-loss fallback, not the removal path ----
   useEffect(() => {
     if (!enabled) return;
@@ -239,6 +288,7 @@ export function useTheatreNetwork({
     lastSent.current = null;
     lastPose.current = null;
     rate.current.reset();
+    rtt.current.reset();
     setPeerIds([]);
     setPeerCharacters({});
   }, [enabled]);
@@ -261,6 +311,7 @@ export function useTheatreNetwork({
     () => ({
       lastPacketAt: rate.current.lastAt(),
       packetHz: rate.current.hz(),
+      rttMs: rtt.current.best(),
     }),
     [],
   );

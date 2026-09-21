@@ -296,6 +296,37 @@ export interface RtmAvatarTransform {
  * client — earliest wins, exact ties break on the lower userId — so no referee
  * is required.
  */
+/**
+ * Latency probe. Broadcast; every other client echoes it straight back.
+ *
+ * This exists because latency CANNOT be derived from `RtmAvatarTransform.t`.
+ * That field is the sender's `Date.now()`, and browser clocks are not
+ * synchronised, so subtracting it from the local clock yields network delay plus
+ * an unknown skew — routinely hundreds of milliseconds, and sometimes negative.
+ *
+ * A round trip avoids the problem entirely: both timestamps are taken on the
+ * ORIGINATING clock, so the skew cancels and what remains is real transit time.
+ */
+export interface RtmAvatarPing {
+  type: 'AVATAR_PING';
+  /** Who is asking. */
+  userId: string;
+  /** Opaque token, echoed verbatim so replies can be matched to sends. */
+  id: string;
+}
+
+/** Reply to {@link RtmAvatarPing}. Broadcast, but only `to` should act on it. */
+export interface RtmAvatarPong {
+  type: 'AVATAR_PONG';
+  /** Who is replying. */
+  userId: string;
+  /** Who asked. Everyone else ignores the message. */
+  to: string;
+  /** The token from the ping, unmodified. */
+  id: string;
+}
+
+/** Claimant -> channel. Optimistic; ties resolve deterministically on every client. */
 export interface RtmSeatClaim {
   type: 'SEAT_CLAIM';
   userId: string;
@@ -351,6 +382,8 @@ export type RTMMessage =
   | RtmContentUpdated
   | RtmStreamToken
   | RtmAvatarTransform
+  | RtmAvatarPing
+  | RtmAvatarPong
   | RtmSeatClaim
   | RtmSeatMap
   | RtmSeatDenied;

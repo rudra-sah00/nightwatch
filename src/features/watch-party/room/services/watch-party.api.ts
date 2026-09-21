@@ -496,6 +496,28 @@ export const onAvatarTransform = (
   );
 
 /**
+ * Latency probes. See `RtmAvatarPing` for why a round trip is required rather
+ * than reading the timestamp off a pose message.
+ */
+export const onAvatarPing = (
+  callback: (msg: { userId: string; id: string }) => void,
+) =>
+  subscribe('AVATAR_PING', (msg) =>
+    callback({ userId: msg.userId as string, id: msg.id as string }),
+  );
+
+export const onAvatarPong = (
+  callback: (msg: { userId: string; to: string; id: string }) => void,
+) =>
+  subscribe('AVATAR_PONG', (msg) =>
+    callback({
+      userId: msg.userId as string,
+      to: msg.to as string,
+      id: msg.id as string,
+    }),
+  );
+
+/**
  * Chat lines, for 3D speech bubbles. Same stream the 2D sidebar consumes — there
  * is one conversation, so a line said in 3D must show in the sidebar too.
  */

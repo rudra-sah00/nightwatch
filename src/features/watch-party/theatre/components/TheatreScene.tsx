@@ -122,6 +122,7 @@ export function TheatreScene({
       const n = netStats();
       stats.current.lastPacketAt = n.lastPacketAt;
       stats.current.packetHz = n.packetHz;
+      stats.current.rttMs = n.rttMs;
       stats.current.peers = peerIds.length;
     }, 200);
     return () => clearInterval(id);

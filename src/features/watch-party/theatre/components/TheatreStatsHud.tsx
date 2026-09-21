@@ -63,6 +63,7 @@ export function TheatreStatsHud({
     hz: number;
     peers: number;
     interpDelayMs: number;
+    rttMs: number | null;
   } | null>(null);
 
   useEffect(() => {
@@ -82,6 +83,7 @@ export function TheatreStatsHud({
         hz: s.packetHz,
         peers: s.peers,
         interpDelayMs: s.interpDelayMs,
+        rttMs: s.rttMs,
       });
     }
     sample();
@@ -100,6 +102,16 @@ export function TheatreStatsHud({
         : health === 'stalled'
           ? 'text-red-400'
           : 'text-white/40';
+  // Round-trip bands. 100 ms RTT is imperceptible for avatar motion, 300 ms is
+  // where interpolation stops hiding it, beyond that movement visibly lags.
+  const pingColour =
+    view.rttMs === null
+      ? 'text-white/40'
+      : view.rttMs <= 100
+        ? 'text-emerald-400'
+        : view.rttMs <= 300
+          ? 'text-amber-400'
+          : 'text-red-400';
   const fpsColour =
     view.fps >= 50
       ? 'text-emerald-400'
@@ -108,7 +120,19 @@ export function TheatreStatsHud({
         : 'text-red-400';
 
   return (
-    <div className="pointer-events-none absolute right-3 top-3 z-50 rounded-md bg-black/70 px-2.5 py-2 font-mono text-[10px] leading-relaxed tabular-nums text-white/70 backdrop-blur-sm">
+    <div className="pointer-events-none absolute bottom-3 right-3 z-50 rounded-md bg-black/70 px-2.5 py-2 font-mono text-[10px] leading-relaxed tabular-nums text-white/70 backdrop-blur-sm">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-white/40">PING</span>
+        <span className={pingColour}>
+          {view.rttMs === null ? '—' : `${view.rttMs}ms`}
+          {view.rttMs !== null ? (
+            <span className="text-white/30">
+              {' '}
+              / {Math.round(view.rttMs / 2)}ms one-way
+            </span>
+          ) : null}
+        </span>
+      </div>
       <div className="flex items-center justify-between gap-3">
         <span className="text-white/40">FPS</span>
         <span className={fpsColour}>

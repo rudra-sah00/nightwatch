@@ -3,7 +3,10 @@ import { THEATRE_NET } from '@/features/watch-party/theatre/lib/interpolation';
 import {
   createStats,
   PacketRateMeter,
+  PING_INTERVAL_MS,
+  PING_TIMEOUT_MS,
   packetHealth,
+  RoundTripTracker,
 } from '@/features/watch-party/theatre/lib/theatre-stats';
 
 describe('createStats', () => {
@@ -66,6 +69,78 @@ describe('PacketRateMeter', () => {
     m.reset();
     expect(m.lastAt()).toBeNull();
     expect(m.hz(1000)).toBe(0);
+  });
+});
+
+describe('RoundTripTracker', () => {
+  it('reports nothing before any reply', () => {
+    expect(new RoundTripTracker().best(1000)).toBeNull();
+  });
+
+  it('measures the round trip on the local clock only', () => {
+    const t = new RoundTripTracker();
+    t.sent('a', 1000);
+    expect(t.received('a', 1120)).toBe(120);
+    expect(t.best(1120)).toBe(120);
+  });
+
+  it('ignores a reply to a token we never sent', () => {
+    const t = new RoundTripTracker();
+    expect(t.received('never-sent', 1000)).toBeNull();
+  });
+
+  it('accepts one reply per peer to the same broadcast probe', () => {
+    const t = new RoundTripTracker();
+    t.sent('p1', 1000);
+    // three peers each answer the same probe; all are valid samples
+    expect(t.received('p1', 1050)).toBe(50);
+    expect(t.received('p1', 1080)).toBe(80);
+    expect(t.received('p1', 1300)).toBe(300);
+  });
+
+  it('reports the fastest peer, so one bad connection does not mask the rest', () => {
+    const t = new RoundTripTracker();
+    t.sent('p1', 1000);
+    t.received('p1', 1400); // someone on hotel wifi
+    t.received('p1', 1060); // everyone else
+    expect(t.best(1400)).toBe(60);
+  });
+
+  it('never reports a negative round trip', () => {
+    const t = new RoundTripTracker();
+    t.sent('a', 5000);
+    expect(t.received('a', 4000)).toBe(0);
+  });
+
+  it('forgets stale samples so a stale figure is not shown as current', () => {
+    const t = new RoundTripTracker();
+    t.sent('a', 1000);
+    t.received('a', 1050);
+    expect(t.best(1050)).toBe(50);
+    expect(t.best(1050 + PING_TIMEOUT_MS + 1)).toBeNull();
+  });
+
+  it('writes off probes nobody answered', () => {
+    const t = new RoundTripTracker();
+    t.sent('lost', 1000);
+    t.prune(1000 + PING_TIMEOUT_MS + 1);
+    // the token is gone, so a very late reply is no longer matchable
+    expect(t.received('lost', 1000 + PING_TIMEOUT_MS + 2)).toBeNull();
+  });
+
+  it('forgets everything on reset', () => {
+    const t = new RoundTripTracker();
+    t.sent('a', 1000);
+    t.received('a', 1100);
+    t.reset();
+    expect(t.best(1100)).toBeNull();
+  });
+
+  it('probes often enough to stay current but not chattily', () => {
+    expect(PING_INTERVAL_MS).toBeGreaterThanOrEqual(1000);
+    expect(PING_INTERVAL_MS).toBeLessThanOrEqual(5000);
+    // a probe must not expire before the next one is even sent
+    expect(PING_TIMEOUT_MS).toBeGreaterThan(PING_INTERVAL_MS);
   });
 });
 

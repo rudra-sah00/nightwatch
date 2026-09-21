@@ -50,6 +50,15 @@ export interface TheatreStats {
   peers: number;
   /** Interpolation delay we add on purpose, ms. */
   interpDelayMs: number;
+  /**
+   * Measured round-trip time to the fastest-answering peer, ms, or null before
+   * any reply.
+   *
+   * A genuine measurement: both timestamps are taken on THIS machine's clock, so
+   * clock skew between peers cancels out entirely. One-way latency is roughly
+   * half this.
+   */
+  rttMs: number | null;
 }
 
 export function createStats(): TheatreStats {
@@ -60,7 +69,77 @@ export function createStats(): TheatreStats {
     packetHz: 0,
     peers: 0,
     interpDelayMs: THEATRE_NET.INTERP_DELAY_MS,
+    rttMs: null,
   };
+}
+
+/** How often to probe latency. */
+export const PING_INTERVAL_MS = 3000;
+
+/**
+ * An unanswered probe is written off after this long.
+ *
+ * Generous on purpose: a slow answer is still a useful measurement, and treating
+ * it as lost would bias the reported figure toward whatever the fast peers
+ * managed. Anything beyond this is indistinguishable from a dropped message.
+ */
+export const PING_TIMEOUT_MS = 10000;
+
+/**
+ * Matches latency probes to their replies and keeps the best recent round trip.
+ *
+ * Deliberately reports the FASTEST peer rather than an average. The question the
+ * readout answers is "is the link healthy", and one person on hotel wifi should
+ * not make everyone else's connection look broken. A single slow peer is their
+ * problem; a slow figure across all peers is yours.
+ */
+export class RoundTripTracker {
+  private pending = new Map<string, number>();
+  private samples: { rtt: number; at: number }[] = [];
+
+  /** Record that a probe went out. */
+  sent(token: string, now: number = Date.now()): void {
+    this.pending.set(token, now);
+  }
+
+  /**
+   * Record a reply. Returns the round trip, or null for a token we never sent
+   * (a duplicate reply, or one for a probe already timed out).
+   */
+  received(token: string, now: number = Date.now()): number | null {
+    const sentAt = this.pending.get(token);
+    if (sentAt === undefined) return null;
+    // Deliberately NOT deleted: several peers each answer the same broadcast
+    // probe, and every one of those replies is a valid measurement.
+    const rtt = Math.max(0, now - sentAt);
+    this.samples.push({ rtt, at: now });
+    this.prune(now);
+    return rtt;
+  }
+
+  /** Best round trip seen recently, or null if nothing has answered. */
+  best(now: number = Date.now()): number | null {
+    this.prune(now);
+    if (this.samples.length === 0) return null;
+    return this.samples.reduce(
+      (m, s) => (s.rtt < m ? s.rtt : m),
+      Number.POSITIVE_INFINITY,
+    );
+  }
+
+  /** Drop timed-out probes and stale samples. */
+  prune(now: number = Date.now()): void {
+    for (const [token, at] of this.pending) {
+      if (now - at > PING_TIMEOUT_MS) this.pending.delete(token);
+    }
+    const cutoff = now - PING_TIMEOUT_MS;
+    this.samples = this.samples.filter((s) => s.at >= cutoff);
+  }
+
+  reset(): void {
+    this.pending.clear();
+    this.samples = [];
+  }
 }
 
 /**
