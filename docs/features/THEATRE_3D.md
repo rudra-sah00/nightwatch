@@ -43,7 +43,68 @@ only changes *where the pixels are displayed*.
 
 ---
 
+## 1b. Implementation Status
+
+Last synced with the code: 2026-09-21.
+
+### Built and verified
+
+| Area | Module | Notes |
+|---|---|---|
+| Scene constants | `theatre/lib/layout.ts` | Single source of truth, measured from Blender |
+| Canvas + room + seating | `theatre/components/TheatreScene/TheatreRoom/TheatreSeating.tsx` | Chair glb loaded once, reused across 8 seats |
+| Walking | `theatre/hooks/use-avatar-controls.ts` + `components/LocalPlayer.tsx` | Rapier kinematic controller, WASD + Shift |
+| Collision | `theatre/components/TheatreColliders.tsx` | Static boxes from `layout.ts`, not a trimesh |
+| Networking | `theatre/hooks/use-theatre-network.ts` | Agora RTM, 8 Hz + dead band |
+| Interpolation | `theatre/lib/interpolation.ts` | 160 ms snapshot buffer |
+| Remote avatars | `theatre/components/RemoteAvatar.tsx` | `SkeletonUtils` clone per peer |
+| Animation | `theatre/hooks/use-avatar-animation.ts` + `lib/animation.ts` | Mixer + crossfade state machine |
+| Seated camera | `theatre/hooks/use-seated-camera.ts` | Per-seat head cone clamp |
+| Asset manifest | `theatre/api.ts` + `hooks/use-theatre-assets.ts` | Backend-owned URLs |
+| View modes | `theatre/lib/view-mode.ts` + `hooks/use-view-mode-hotkey.ts` | `V` cycles 2D → 3D → screen focus |
+| Opt-in download | `theatre/hooks/use-theatre-preload.ts` | Nothing fetched until enabled in settings |
+
+### Not yet built
+
+| Area | Blocker |
+|---|---|
+| `TheatreScreen` + `use-video-texture` | None — next piece of work. The in-scene screen is currently a lit placeholder; audio plays because `Player.Root` stays mounted. |
+| `use-screen-light` (average-colour driver) | Depends on the video texture |
+| `E` to sit, `use-seat-authority` | RTM message types exist (`SEAT_CLAIM` / `SEAT_MAP` / `SEAT_DENIED`); arbitration not written |
+| `SitDown` / `StandUp` clips | Need authoring on the existing rig |
+| Dance clips | Need authoring; `THEATRE_DANCE_CLIPS` on the backend gates publishing |
+| Spatial audio, speech bubbles | Not started |
+
+### Avatar rig, as built
+
+The avatar is an assembly of **23 separate capsules**, so it uses **rigid**
+skinning — one bone per segment, weight 1.0, no blending — rather than smooth
+skinning, which would need continuous geometry across joints. **12 joint spheres**
+at hip, knee, ankle, shoulder, elbow and wrist are weighted to the parent bone and
+fill the wedge that opens when a joint bends. The torso is the exception: it is
+continuous, so it gets graded weights across hips/spine/chest.
+
+19 bones. `Idle` / `Walk` / `Run` are embedded in `avatar.glb`, which is why the
+manifest reports `animations.clipsEmbedded: true`.
+
+Two export traps worth remembering:
+
+- **Draco must be off for the avatar.** It can drop joint/weight attributes on
+  skinned meshes. Textures still go through WebP, which is where the size win is.
+- **`export_apply` must be `false`.** Applying modifiers bakes away the armature
+  and silently produces an unrigged mesh.
+
 ## 2. Scene Specification
+
+> **Status: BUILT.** Every number below is measured from the Blender scene, which
+> is the source of truth (kept outside the repo — it is a ~158 MB binary). These
+> values are mirrored in `src/features/watch-party/theatre/lib/layout.ts`, which
+> is what the runtime reads. If this document and `layout.ts` ever disagree,
+> `layout.ts` wins and this document is stale.
+>
+> The original draft of this section described a 6 m room with 0.70 m seat pitch
+> and a 5 m screen. The room as built is 8 m wide with 0.90 m pitch and a 7 m
+> screen; the figures here have been corrected.
 
 ### Coordinate system
 
@@ -58,16 +119,21 @@ Three.js convention: **Y up, metres, right-handed.**
 
 | Dimension | Value |
 |---|---|
-| Width | 6.0 m (`X` from −3.0 to +3.0) |
-| Depth | 12.0 m (`Z` from 0 to 12.0) |
-| Ceiling height | 4.5 m |
+| Width | 8.0 m (`X` from −4.0 to +4.0) |
+| Depth | 8.5 m auditorium (`Z` 0 → 8.5), plus a café room `Z` 8.7 → 14.2 |
+| Wall top | 4.6 m |
+| Ceiling soffit | 4.35 m (coffered) |
+
+The auditorium connects to a **café room** through a 2.60 × 2.30 m gate in the
+back wall at `Z` 8.5–8.7. Both floors sit at `Y = 0.45` there, so it is walkable
+in one continuous surface — 19.8 m from screen wall to café back wall.
 
 ### Screen
 
 | Property | Value |
 |---|---|
-| Width | 5.0 m |
-| Aspect | 2.39:1 → height 2.09 m |
+| Width | 7.0 m |
+| Aspect | 2.39:1 → height 2.929 m |
 | Bottom edge | `Y = 1.20` |
 | Top edge | `Y = 3.29` |
 | Centre | `(0, 2.245, 0.02)` |
@@ -85,16 +151,22 @@ Two rows, four seats each. Rear row on a raised platform.
 
 | Row | Floor `Y` | `Z` | Seat `X` positions |
 |---|---|---|---|
-| A (front) | 0.00 | 6.0 | −1.05, −0.35, +0.35, +1.05 |
-| B (rear) | 0.45 | 7.4 | −1.05, −0.35, +0.35, +1.05 |
+| A (front) | 0.00 | 4.5 | −1.35, −0.45, +0.45, +1.35 |
+| B (rear) | 0.45 | 6.2 | −1.35, −0.45, +0.45, +1.35 |
 
-- Seat spacing 0.70 m (premium recliner pitch, not multiplex)
-- Row pitch 1.4 m — generous, gives clean tread depth over the step
-- Step riser at `Z = 6.7`, 0.45 m tall
-- Rear platform spans `Z` 6.7 → 12.0 at `Y = 0.45`
+- Seat spacing **0.90 m** (premium recliner pitch, not multiplex)
+- Row pitch 1.7 m
+- Step riser at `Z = 5.3`, 0.45 m tall
+- Rear platform spans `Z` 5.3 → 8.5 at `Y = 0.45`
+
+**There is no centre aisle.** The seats are contiguous, so the only route between
+levels is the aisle stairs at `|X|` 1.80–4.00 — three risers of 0.15 m with
+0.30 m treads, spanning `Z` 4.69 → 5.29. This is enforced in physics: a collider
+across the riser face between the stairs blocks the shortcut, and the character
+controller's slope limit stops you walking up the drop.
 
 Seat IDs are `A1`–`A4` and `B1`–`B4`, numbered left to right from the
-audience's point of view (i.e. `A1` is at `X = −1.05`).
+audience's point of view (i.e. `A1` is at `X = −1.35`).
 
 Each seat also carries a **`SEATPAD_<id>`** marker: a thin emissive floor pad
 0.52 m in front of the chair, at the spot an avatar stands to sit down. These
@@ -103,22 +175,38 @@ for the proximity trigger.
 
 ### Sightline validation
 
-These numbers were checked, not guessed:
+Measured against the built geometry, not guessed. These changed when the screen
+was enlarged from 4.40 m to 7.00 m.
 
-| Check | Result | Standard |
-|---|---|---|
-| Row A horizontal viewing angle | 45.2° | Wide, normal for a front row |
-| Row B horizontal viewing angle | 37.3° | THX reference range 36–40° ✓ |
-| Row A upward angle to screen centre | 9.8° | Under 15° limit ✓ |
-| Row B upward angle to screen centre | 4.5° | ✓ |
-| Row B clearance over Row A heads | +0.23 m | Clears ✓ |
+| Check | Row A | Row B | Standard |
+|---|---|---|---|
+| Distance to screen | 4.5 m | 6.2 m | |
+| Horizontal viewing angle | **75.7°** | 58.9° | Row A exceeds IMAX (~70°) |
+| Angle to screen top | 28.1° | 17.4° | Under the THX 35° limit ✓ |
+| Seated eye height above own floor | 1.254 m | 1.254 m | from the seated avatar mesh |
 
-Row B is the **reference seat**: at 37.3° it lands in the middle of THX's
-recommended 36–40° range. Row A is deliberately wider, which is what a real
-front row looks like.
+**Row A at 75.7° is deliberately aggressive** — wider than IMAX. It is a
+front-row tradeoff accepted in exchange for screen size. Trimming the screen to
+about 6.2 m would bring Row A to roughly 68° if that proves too immersive.
 
-Seated eye height is taken as 1.20 m above the seat's own floor level; head top
-as 1.35 m.
+### Seated head cone
+
+A seated viewer turns their head, not their torso, so the camera is clamped per
+seat. Without this you can spin 360° in a chair, which reads as a floating camera
+and destroys presence.
+
+| Parameter | Value |
+|---|---|
+| Yaw | ±55° from that seat's neutral aim |
+| Pitch | +30° / −35° |
+
+Each seat's neutral aim points at screen centre, so off-axis seats are pre-rotated
+(A1 −16.77°, A2 −5.74°, B1 −12.32°, B2 −4.16°, mirrored for 3/4). **Verified: from
+all eight seats both screen edges fall inside the cone**, so the clamp never fights
+the thing you are there to watch.
+
+Anchors are baked in Blender as `SEATVIEW_<id>` empties carrying the limits as
+custom properties, and mirrored into `layout.ts` for the runtime.
 
 ### Spawn & circulation
 
@@ -196,14 +284,49 @@ downloaded and instantiated four times.
 
 ### Export pipeline
 
-Blender → glTF Binary (`.glb`), `+Y` up, Draco on, selected objects only, no
-cameras or lights, transforms applied (`Ctrl+A` → Rotation & Scale). Then:
+Blender → glTF Binary (`.glb`), `+Y` up, selected objects only, no cameras or
+lights.
 
 ```bash
-gltf-transform optimize in.glb out.glb --compress draco --texture-compress ktx2
+# static geometry — draco is fine here
+gltf-transform optimize room.glb out.glb \
+  --texture-compress webp --texture-size 1024 --compress draco
+
+# the avatar — draco OFF, it can drop joint/weight attributes on skinned meshes
+gltf-transform optimize avatar.glb out.glb \
+  --texture-compress webp --texture-size 1024 --no-compress
 ```
 
-Assets live in `public/models/theatre/`.
+**Textures dominate size, not geometry.** A 126-face chair exported at 10.3 MB
+because of six 2048² maps, each costing ~22 MB of GPU memory; the optimize step
+took it to 311 KB and the room from 16.5 MB to 2.3 MB. KTX2 is better still —
+it stays compressed in VRAM rather than only on the wire — but needs the `ktx`
+binary (`brew install ktx`), without which the command fails at the `uastc` step.
+
+For the avatar, `export_apply` must be **false**: applying modifiers bakes away
+the armature and silently yields an unrigged mesh.
+
+### Where assets live
+
+**Not in `public/`.** They are served from the Cloudflare R2 bucket
+`nightwatch-assets` via `assets.nightwatch.in`, under a versioned prefix:
+
+```
+theatre/v1/models/{room,cafe,chair,avatar}.glb
+theatre/v1/animations/...
+```
+
+URLs are owned by the backend (`GET /api/theatre/assets`) so the bucket, domain
+and version can change without a frontend release. Bucket config, CORS and the
+upload commands are documented in `nightwatch-backend/infra/r2/README.md`.
+
+The `v1/` prefix is deliberate: a watch party holds clients for hours, so a new
+asset set must be publishable without breaking sessions in flight. Bump to `v2/`;
+never overwrite a live version in place.
+
+One upload trap: `wrangler r2 object put` writes to a **local simulator** without
+`--remote`, while still printing `Upload complete`. Verify over HTTP, not by
+trusting the CLI.
 
 ---
 

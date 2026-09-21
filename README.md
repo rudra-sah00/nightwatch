@@ -38,6 +38,7 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [Watch Content](./docs/features/WATCH.md): VOD operations, HLS bitrates, and Redis heartbeat synchronization.
 - [Watchlist](./docs/features/WATCHLIST.md): Optimistic UI, Radix primitives, and TanStack query caching.
 - [Watch Party](./docs/features/WATCH_PARTY.md): Decentralized peer-to-peer event pipelines over Agora Real-Time Messaging.
+- [3D Theatre Mode](./docs/features/THEATRE_3D.md): Opt-in 3D auditorium for watch parties — R3F scene, Rapier walking, avatar sync over Agora RTM.
 - [Friends & Voice Calls](./docs/features/FRIENDS.md): Friend system, voice calls, media ducking, and online presence.
 - [Music](./docs/features/MUSIC.md): JioSaavn streaming, AudioEngine, synced lyrics, playlists, Redis queue, gapless playback, crossfade, equalizer, sleep timer, and Spotify Connect-like device transfer.
 - [Music Discover](./docs/features/MUSIC_DISCOVER.md): Swipe-based song discovery feed with audio previews, haptic feedback, and personalized recommendation engine.

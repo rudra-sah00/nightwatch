@@ -1,9 +1,20 @@
 # Games Deployment Guide
 
+> **Needs review (2026-09-21).** The storage backend described below was
+> inconsistent. Verified via `wrangler`: a Cloudflare R2 bucket `nightwatch-games`
+> exists with 3,186 objects and an active custom domain `games.nightwatch.in`, so
+> the Architecture section has been corrected to R2.
+>
+> The upload procedure, cache-purge steps and troubleshooting further down still
+> describe MinIO and `s3.nightwatch.in`. Whether MinIO is retired, or still runs
+> alongside R2, was not verified — so those sections were left untouched rather
+> than rewritten on a guess. Someone who knows the current deploy path should
+> reconcile them.
+
 ## Architecture
 
-- Game assets stored in MinIO bucket `nightwatch-games` (public-read)
-- Served via `s3.nightwatch.in` (nginx → MinIO, behind Cloudflare)
+- Game assets stored in Cloudflare R2 bucket `nightwatch-games`
+- Served via the R2 custom domain `games.nightwatch.in`
 - Frontend loads game in sandboxed iframe (`allow-scripts allow-same-origin allow-popups`)
 - Backend returns direct public URL (no presigned URLs — bucket is public)
 
