@@ -14,6 +14,18 @@ import type { AudioTrack, PlayerAction, Quality } from '../context/types';
  */
 const MAX_MEDIA_RECOVERY_ATTEMPTS = 2;
 
+/**
+ * Attempts on a variant playlist that will not parse, before giving up.
+ *
+ * Three, because the two causes need different treatment and this is the smallest
+ * number that separates them. A variant playlist can genuinely be missing or
+ * truncated for a beat while a live stream is still coming up, which a retry
+ * fixes. A source handing back an HTML error page or an expired-token block page
+ * will hand back the same thing every time, and retrying it forever only fills
+ * the console — the previous behaviour.
+ */
+const LEVEL_PARSE_MAX_RETRIES = 3;
+
 interface ManualQualityOption {
   label: string;
   height: number;
@@ -63,6 +75,13 @@ export function useHls({
 }: UseHlsOptions) {
   const hlsRef = useRef<HlsType | null>(null);
   const unauthorizedRetryCountRef = useRef(0);
+  /**
+   * Attempts made on a variant playlist that would not parse.
+   *
+   * Bounded because a source serving an error page instead of M3U8 will serve it
+   * again next time; retrying forever only fills the console.
+   */
+  const levelParseRetryCountRef = useRef(0);
   const manualQualitiesRef = useRef<ManualQualityOption[]>([]);
   /**
    * Fatal MEDIA_ERROR recoveries attempted for the current source.
@@ -182,6 +201,7 @@ export function useHls({
     mediaRecoveryCountRef.current = 0;
     dispatch({ type: 'SET_LOADING', isLoading: true });
     unauthorizedRetryCountRef.current = 0;
+    levelParseRetryCountRef.current = 0;
 
     const initHls = async () => {
       const { default: Hls } = await import('hls.js');
@@ -603,6 +623,43 @@ export function useHls({
           // Detect non-HLS content from CDNs that return HTML/CSS block pages
           // with 200 OK when tokens expire. HLS.js fires manifestParsingError
           // when the response body isn't a valid M3U8 playlist.
+          //
+          // `levelParsingError` is the same failure one level down: the MASTER
+          // playlist parsed, but a VARIANT playlist came back as something that
+          // is not M3U8 — an HTML error page, an XML CDN error, or an empty body.
+          // hls.js labels both `networkError` even though nothing is wrong with
+          // the network, which is why the console shows
+          // "Fatal networkError (retry): details: 'levelParsingError'".
+          //
+          // It used to fall through to the generic fatal-network branch below and
+          // call hls.startLoad() forever, because a source serving a login page
+          // instead of a playlist will serve it again on the next attempt. A
+          // variant can legitimately fail for a moment while a live stream is
+          // still starting up, so this is given a few attempts rather than being
+          // failed outright like the master playlist, and then gives up instead
+          // of spinning.
+          if (data.fatal && (data.details as string) === 'levelParsingError') {
+            levelParseRetryCountRef.current += 1;
+
+            if (levelParseRetryCountRef.current <= LEVEL_PARSE_MAX_RETRIES) {
+              reportPlaybackError(
+                data,
+                `retry ${levelParseRetryCountRef.current}/${LEVEL_PARSE_MAX_RETRIES}`,
+              );
+              dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+              hls.startLoad();
+              return;
+            }
+
+            reportPlaybackError(data, 'give up');
+            dispatch({
+              type: 'SET_ERROR',
+              error: 'Stream unavailable — source returned invalid content.',
+            });
+            hls.destroy();
+            return;
+          }
+
           if (
             data.fatal &&
             (data.details as string) === 'manifestParsingError'
