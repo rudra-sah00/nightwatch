@@ -1,56 +1,72 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import type { DirectionalLight } from 'three';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import type { DirectionalLight, PointLight, RectAreaLight } from 'three';
 import { ROOM, SCREEN } from '../lib/layout';
+import {
+  AMBIENT,
+  AMBIENT_COLOUR,
+  approach,
+  COVES,
+  HEMI,
+  HEMI_GROUND,
+  HEMI_SKY,
+  KEY,
+  KEY_COLOUR,
+  levelValue,
+  POINT_FIXTURES,
+  targetLevel,
+} from '../lib/lighting';
 import { ensureRectAreaLights } from '../lib/rect-area-light';
 
 /**
  * The auditorium light rig.
  *
- * `TheatreScreen` owns the primary light — a RectAreaLight driven by the picture,
- * which is what makes a cinema read as a cinema. Everything here is secondary
- * fill, and exists for three reasons the screen light cannot cover:
+ * All positions and colours live in `lib/lighting.ts`, which also explains why
+ * this rig has to exist at all: the 52 fixtures in the Blender scene are not in
+ * `room.glb` and cannot be — glTF carries lights only through
+ * `KHR_lights_punctual`, which the export omits and which cannot describe an
+ * area light anyway. The room's emissive LED strips glow but illuminate nothing,
+ * because three.js has no global illumination to bounce them.
  *
- *  1. RectAreaLight casts no shadows in three.js. The Canvas enables `shadows`
- *     and avatars set `castShadow`, so without a shadow-capable light every
- *     character floats with no contact cue and reads as pasted on.
- *  2. The screen goes black during dark scenes and fades between shots. If the
- *     screen were the only source the room would strobe from lit to invisible.
- *  3. A real auditorium has step lights and aisle strips that stay on during the
- *     film precisely so people can walk without falling over.
+ * `TheatreScreen` owns one further light, a `RectAreaLight` driven by the
+ * picture. That one is the primary source once the film is running; everything
+ * here is the house rig around it.
  *
- * Intensities are deliberately low. This is a dim room by design — the goal is
- * "I can see where I am walking and who is next to me", not a lit interior.
- * Raising AMBIENT is the single knob for overall visibility.
+ * Two modes, per the brief: lights up while walking, dimmed once seated or in
+ * screen-focus mode. Intensities are written every frame from a single smoothed
+ * scalar, so the change is a fade rather than a cut.
  */
+interface TheatreLightingProps {
+  /** Seated viewers get the film-running look. */
+  seated: boolean;
+  /** Screen-focus mode is also a committed viewing state. */
+  cinema: boolean;
+}
 
-/** Overall floor of visibility. The one value to raise if the room reads too dark. */
-const AMBIENT = 0.22;
-/** Warm bounce off seat fabric and carpet. */
-const AMBIENT_COLOUR = '#3a3026';
-
-/** Gentle top-down gradient so the ceiling is not the same value as the floor. */
-const HEMI_INTENSITY = 0.28;
-const HEMI_SKY = '#2a3550';
-const HEMI_GROUND = '#1a1410';
-
-/** Shadow-casting key. Low and cool, hung above and behind the audience. */
-const KEY_INTENSITY = 0.42;
-const KEY_COLOUR = '#aab6d4';
-
-/** Warm aisle strips near the floor, one per side wall. */
-const AISLE_INTENSITY = 1.6;
-const AISLE_COLOUR = '#ffa64d';
-const AISLE_DISTANCE = 5.0;
-const AISLE_Y = 0.35;
-
-export function TheatreLighting() {
-  // RectAreaLight needs its LTC tables before the first render that contains
-  // one, otherwise TheatreScreen's light silently emits nothing.
+export function TheatreLighting({ seated, cinema }: TheatreLightingProps) {
+  // RectAreaLight needs its LTC lookup tables before the first render that
+  // contains one, or both the coves here and the screen light in TheatreScreen
+  // silently emit nothing. This is latched, so calling it here is enough for
+  // the whole scene.
   ensureRectAreaLights();
 
   const key = useRef<DirectionalLight>(null);
+  const points = useRef<(PointLight | null)[]>([]);
+  const coves = useRef<(RectAreaLight | null)[]>([]);
+  const ambient = useRef<{ intensity: number } | null>(null);
+  const hemi = useRef<{ intensity: number } | null>(null);
+
+  const target = targetLevel({ seated, cinema });
+
+  /**
+   * Start already at the right level instead of fading in from house lights.
+   *
+   * Someone who enters the party in screen-focus mode should not watch the
+   * house lights go down on arrival — they were never up.
+   */
+  const level = useRef(target);
 
   useEffect(() => {
     const l = key.current;
@@ -70,44 +86,99 @@ export function TheatreLighting() {
     l.shadow.normalBias = 0.02;
   }, []);
 
+  /**
+   * Cove rotations are static, so they are applied once rather than per frame.
+   * `rotation` is not settable as a prop array on `rectAreaLight` without R3F
+   * re-creating the Euler each render, and a light that never moves should not
+   * pay for that.
+   */
+  useEffect(() => {
+    COVES.forEach((fixture, i) => {
+      const l = coves.current[i];
+      if (!l) return;
+      l.rotation.set(...fixture.rotation);
+    });
+  }, []);
+
+  useFrame((_, delta) => {
+    const next = approach(level.current, target, delta);
+    level.current = next;
+
+    if (ambient.current) ambient.current.intensity = levelValue(AMBIENT, next);
+    if (hemi.current) hemi.current.intensity = levelValue(HEMI, next);
+    if (key.current) key.current.intensity = levelValue(KEY, next);
+
+    for (let i = 0; i < POINT_FIXTURES.length; i += 1) {
+      const l = points.current[i];
+      if (l) l.intensity = levelValue(POINT_FIXTURES[i].level, next);
+    }
+    for (let i = 0; i < COVES.length; i += 1) {
+      const l = coves.current[i];
+      if (l) l.intensity = levelValue(COVES[i].level, next);
+    }
+  });
+
+  // Mount at the level we are starting from, so the very first frame is right
+  // even before useFrame has run once.
+  const initial = useMemo(() => level.current, []);
+
   return (
     <group name="theatre-lighting">
-      <ambientLight intensity={AMBIENT} color={AMBIENT_COLOUR} />
+      <ambientLight
+        ref={ambient}
+        intensity={levelValue(AMBIENT, initial)}
+        color={AMBIENT_COLOUR}
+      />
       <hemisphereLight
-        intensity={HEMI_INTENSITY}
+        ref={hemi}
+        intensity={levelValue(HEMI, initial)}
         color={HEMI_SKY}
         groundColor={HEMI_GROUND}
       />
 
-      {/* Key light: above the rear of the room aiming at the screen wall, so
-          avatars are lit from behind-above like a real projector throw. */}
+      {/* Shadow key: above the rear of the room aiming at the screen wall, so
+          avatars are lit from behind-above like a real projector throw. The
+          only shadow caster in the scene — see lib/lighting.ts. */}
       <directionalLight
         ref={key}
         position={[1.5, ROOM.ceilingY - 0.2, ROOM.maxZ - 1.5]}
         target-position={[0, 0, SCREEN.z]}
-        intensity={KEY_INTENSITY}
+        intensity={levelValue(KEY, initial)}
         color={KEY_COLOUR}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
       />
 
-      {/* Aisle strips. Point lights with a finite distance rather than more
-          ambient: they pick out the steps and give the walls some falloff. */}
-      <pointLight
-        position={[ROOM.minX + 0.35, AISLE_Y, ROOM.maxZ * 0.45]}
-        intensity={AISLE_INTENSITY}
-        color={AISLE_COLOUR}
-        distance={AISLE_DISTANCE}
-        decay={2}
-      />
-      <pointLight
-        position={[ROOM.maxX - 0.35, AISLE_Y, ROOM.maxZ * 0.45]}
-        intensity={AISLE_INTENSITY}
-        color={AISLE_COLOUR}
-        distance={AISLE_DISTANCE}
-        decay={2}
-      />
+      {/* Ceiling downlights, sconces, step and exit glow. */}
+      {POINT_FIXTURES.map((fixture, i) => (
+        <pointLight
+          key={fixture.id}
+          ref={(l) => {
+            points.current[i] = l;
+          }}
+          position={fixture.position}
+          color={fixture.colour}
+          intensity={levelValue(fixture.level, initial)}
+          distance={fixture.distance}
+          decay={2}
+        />
+      ))}
+
+      {/* Cove uplight on the side walls. */}
+      {COVES.map((fixture, i) => (
+        <rectAreaLight
+          key={fixture.id}
+          ref={(l) => {
+            coves.current[i] = l;
+          }}
+          position={fixture.position}
+          width={fixture.width}
+          height={fixture.height}
+          color={fixture.colour}
+          intensity={levelValue(fixture.level, initial)}
+        />
+      ))}
     </group>
   );
 }

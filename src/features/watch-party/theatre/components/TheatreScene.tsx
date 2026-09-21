@@ -170,10 +170,13 @@ export function TheatreScene({
         }}
       >
         {/* The screen is the primary light source (see TheatreScreen); this rig
-            is the secondary fill that makes the room navigable and gives
-            avatars a contact shadow. It also initialises RectAreaLight's
-            lookup tables, without which the screen light emits nothing. */}
-        <TheatreLighting />
+            is the house lighting around it — ceiling downlights, sconces, cove
+            wash, step and exit glow, standing in for the 52 Blender fixtures
+            that glTF cannot carry. It goes bright while walking and dims when
+            you sit down or switch to screen focus. It also initialises
+            RectAreaLight's lookup tables, without which both the coves here and
+            the screen light emit nothing. */}
+        <TheatreLighting seated={mySeat !== null} cinema={cinema} />
 
         <Suspense fallback={null}>
           <TheatreRoom url={assets.models.room} />

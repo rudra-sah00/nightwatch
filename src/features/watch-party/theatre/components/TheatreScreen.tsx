@@ -2,7 +2,7 @@
 
 import { type ThreeEvent, useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { RectAreaLight, VideoTexture } from 'three';
+import type { MeshBasicMaterial, RectAreaLight, VideoTexture } from 'three';
 import { Color } from 'three';
 import { SCREEN } from '../lib/layout';
 
@@ -33,6 +33,7 @@ const LIGHT_LERP = 3.5;
  */
 export function TheatreScreen({ texture, onTogglePlay }: TheatreScreenProps) {
   const light = useRef<RectAreaLight>(null);
+  const material = useRef<MeshBasicMaterial>(null);
 
   // 16x9 is plenty to derive an average — we only need a colour, not an image
   const sampler = useMemo(() => {
@@ -50,7 +51,22 @@ export function TheatreScreen({ texture, onTogglePlay }: TheatreScreenProps) {
   const target = useMemo(() => new Color('#cfe0ff'), []);
   const frame = useRef(0);
 
+  /**
+   * Force a shader recompile when the video texture arrives.
+   *
+   * three.js decides whether to sample `map` at PROGRAM COMPILE time, via the
+   * `USE_MAP` define, and it only rebuilds the program when `material.version`
+   * changes. Assigning `material.map` does not bump that version, and R3F's
+   * `applyProps` does not either — it sets the property and nothing else. So a
+   * material that was first compiled with `map === null` keeps a shader with no
+   * texture fetch in it no matter what is assigned afterwards, and the screen
+   * renders a flat colour forever.
+   *
+   * `needsUpdate` is the documented way to ask for the rebuild. It only fires
+   * on texture identity change, so this is once per session, not per frame.
+   */
   useEffect(() => {
+    if (material.current) material.current.needsUpdate = true;
     if (texture) texture.needsUpdate = true;
   }, [texture]);
 
@@ -142,12 +158,32 @@ export function TheatreScreen({ texture, onTogglePlay }: TheatreScreenProps) {
         onPointerOut={interactive ? handleOut : undefined}
       >
         <planeGeometry args={[SCREEN.width, SCREEN.height]} />
-        {texture ? (
-          // basic, not standard: the screen emits light, it does not receive it
-          <meshBasicMaterial map={texture} toneMapped={false} />
-        ) : (
-          <meshBasicMaterial color="#0b0d12" />
-        )}
+        {/*
+          ONE material, with `color` ALWAYS specified. Both halves matter.
+
+          `meshBasicMaterial` multiplies `map` by `color`, so the tint has to be
+          white for the video to come through at full value — and this is where
+          the picture was being lost. The two branches used to be separate
+          elements, `color="#0b0d12"` for the placeholder and `map={texture}`
+          for the video. React reuses one material instance across a ternary
+          like that, so R3F diffed the props and saw `color` REMOVED. Its
+          removed-prop path (`diffProps`, "Reset removed props for HMR") cannot
+          ask three.js for a property's default, so when the owner's constructor
+          takes arguments it falls back to `changedProps[prop] = 0` — and
+          `Color.set(0)` is pure black. The texture bound correctly and was then
+          multiplied by zero, which is why the screen stayed dark while audio
+          played fine.
+
+          `basic`, not `standard`: the screen emits light rather than receiving
+          it, and `toneMapped={false}` keeps ACES off the picture so the film
+          grades the way the encoder intended.
+        */}
+        <meshBasicMaterial
+          ref={material}
+          map={texture}
+          color={texture ? '#ffffff' : '#0b0d12'}
+          toneMapped={false}
+        />
       </mesh>
 
       <rectAreaLight
