@@ -1,13 +1,15 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { Physics } from '@react-three/rapier';
+import { Physics, type RapierRigidBody } from '@react-three/rapier';
 import type { RefObject } from 'react';
-import { Suspense, useCallback, useEffect, useRef } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { ACESFilmicToneMapping, SRGBColorSpace } from 'three';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import type { RTMMessage } from '../../room/types/rtm-messages';
-import { useDanceKeys } from '../hooks/use-dance-keys';
+import { useDanceMenu } from '../hooks/use-dance-menu';
+import { useDanceSpace } from '../hooks/use-dance-space';
 import { usePointerLook } from '../hooks/use-pointer-look';
 import { useSeatOccupancy } from '../hooks/use-seat-occupancy';
 import { useSeatedCamera } from '../hooks/use-seated-camera';
@@ -17,6 +19,7 @@ import { useTheatreAssets } from '../hooks/use-theatre-assets';
 import { useTheatreNetwork } from '../hooks/use-theatre-network';
 import { useVideoTexture } from '../hooks/use-video-texture';
 import { DANCE_CLIPS } from '../lib/animation';
+import { DANCE_CLEARANCE_M } from '../lib/dance-rules';
 import type { Pose } from '../lib/interpolation';
 import {
   ROOM,
@@ -28,6 +31,7 @@ import {
 import { createStats } from '../lib/theatre-stats';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
+import { DanceWheel } from './DanceWheel';
 import { LocalPlayer } from './LocalPlayer';
 import { PassiveAvatars } from './PassiveAvatars';
 import { RemoteAvatars } from './RemoteAvatar';
@@ -99,6 +103,19 @@ export function TheatreScene({
    * A ref, not state: the frame sampler writes every frame and the HUD polls it
    * at 5 Hz, so displaying the numbers never re-renders the scene.
    */
+  /**
+   * Dance wheel presentation, lifted out of SceneInterior.
+   *
+   * The wheel is a DOM overlay so it must render OUTSIDE the Canvas, but the
+   * state that drives it depends on physics (clearance) and the seated camera,
+   * both of which only exist inside. SceneInterior therefore reports upward.
+   */
+  const [wheel, setWheel] = useState<{
+    open: boolean;
+    origin: { x: number; y: number };
+    hovered: number | null;
+  }>({ open: false, origin: { x: 0, y: 0 }, hovered: null });
+
   const stats = useRef(createStats());
   useEffect(() => {
     const id = setInterval(() => {
@@ -196,6 +213,7 @@ export function TheatreScene({
             claimSeat={claimSeat}
             cinema={cinema}
             onPose={handlePose}
+            onWheelChange={setWheel}
           />
         </Suspense>
 
@@ -204,6 +222,11 @@ export function TheatreScene({
         <fog attach="fog" args={['#05060a', ROOM.maxZ, ROOM.maxZ + 8]} />
       </Canvas>
 
+      <DanceWheel
+        open={wheel.open}
+        origin={wheel.origin}
+        hovered={wheel.hovered}
+      />
       <TheatreStatsHud stats={stats} />
       <SitPrompt seatMap={seatMap} mySeat={mySeat} />
     </div>
@@ -222,6 +245,7 @@ function SceneInterior({
   claimSeat,
   cinema,
   onPose,
+  onWheelChange,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   onTogglePlay?: () => void;
@@ -230,6 +254,11 @@ function SceneInterior({
   claimSeat: ReturnType<typeof useSeatOccupancy>['claimSeat'];
   cinema: boolean;
   onPose: (p: Pose) => void;
+  onWheelChange: (w: {
+    open: boolean;
+    origin: { x: number; y: number };
+    hovered: number | null;
+  }) => void;
 }) {
   const lastPoseRef = useRef<Pose>({ x: 0, y: 0, z: 0, r: 0, s: 'idle' });
   const texture = useVideoTexture(videoRef);
@@ -239,12 +268,47 @@ function SceneInterior({
     claimSeat,
     enabled: !cinema,
   });
-  const { dance } = useDanceKeys(!cinema);
-
-  // Mouse look. Gated on exactly the same condition as LocalPlayer so pointer
-  // look and useSeatedCamera never both write camera rotation.
   const walking = !seated && !cinema;
-  usePointerLook({ enabled: walking });
+
+  // Clearance probe needs the player's collider, so the body ref is owned here
+  // and handed to LocalPlayer rather than created inside it.
+  const playerBody = useRef<RapierRigidBody>(null);
+  const { canDanceHere, clearance } = useDanceSpace(playerBody);
+
+  const {
+    open: wheelOpen,
+    origin: wheelOrigin,
+    hovered,
+    dance,
+  } = useDanceMenu({
+    enabled: !cinema,
+    seated,
+    canDanceHere,
+    onRefused: (reason) => {
+      if (reason === 'seated') {
+        toast.info('Stand up to dance', {
+          description: 'Press E to leave your seat first.',
+        });
+        return;
+      }
+      const room = clearance();
+      toast.info('Not enough room to dance', {
+        description: Number.isFinite(room)
+          ? `You need ${DANCE_CLEARANCE_M.toFixed(1)} m of clear space — there is ${room.toFixed(1)} m here. Try the aisle or the rear platform.`
+          : 'Move somewhere more open, like the aisle or the rear platform.',
+      });
+    },
+  });
+
+  // Mouse look. Off while the wheel is open: a locked pointer reports only
+  // relative movement and shows no cursor, so there would be nothing to aim at.
+  // Toggling this releases and re-acquires the lock for us.
+  usePointerLook({ enabled: walking && !wheelOpen });
+
+  // Hand the wheel's presentation state to the DOM layer above the Canvas.
+  useEffect(() => {
+    onWheelChange({ open: wheelOpen, origin: wheelOrigin, hovered });
+  }, [wheelOpen, wheelOrigin, hovered, onWheelChange]);
 
   /**
    * Override the animation state the walk controller derived.
@@ -325,7 +389,11 @@ function SceneInterior({
       <TheatreScreen texture={texture} onTogglePlay={onTogglePlay} />
       <Physics gravity={[0, 0, 0]} timeStep="vary">
         <TheatreColliders />
-        <LocalPlayer enabled={walking} onPose={recordAndPublish} />
+        <LocalPlayer
+          enabled={walking}
+          onPose={recordAndPublish}
+          bodyRef={playerBody}
+        />
       </Physics>
     </>
   );

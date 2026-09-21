@@ -17,6 +17,14 @@ import { SPAWN, STANDING_EYE_HEIGHT } from '../lib/layout';
 
 interface LocalPlayerProps {
   enabled: boolean;
+  /**
+   * Shared handle on the physics body.
+   *
+   * Owned by the caller because other systems need to query the player's
+   * surroundings — the dance clearance probe casts rays from this collider and
+   * must exclude it, which it cannot do without the handle.
+   */
+  bodyRef?: React.RefObject<RapierRigidBody | null>;
   /** Called with the local pose so the network layer can broadcast it. */
   onPose?: (pose: {
     x: number;
@@ -35,8 +43,9 @@ interface LocalPlayerProps {
  * A camera-as-body approach lets you push your viewpoint into geometry because a
  * point has no radius.
  */
-export function LocalPlayer({ enabled, onPose }: LocalPlayerProps) {
-  const body = useRef<RapierRigidBody>(null);
+export function LocalPlayer({ enabled, onPose, bodyRef }: LocalPlayerProps) {
+  const own = useRef<RapierRigidBody>(null);
+  const body = bodyRef ?? own;
   const camera = useThree((s) => s.camera);
   const controls = useAvatarControls(body, enabled);
   const eye = useRef(new Vector3());
