@@ -25,6 +25,7 @@ import {
   STANDING_EYE_HEIGHT,
   seatedAvatarPose,
 } from '../lib/layout';
+import { createStats } from '../lib/theatre-stats';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
 import { LocalPlayer } from './LocalPlayer';
@@ -35,6 +36,7 @@ import { TheatreLighting } from './TheatreLighting';
 import { TheatreRoom } from './TheatreRoom';
 import { TheatreScreen } from './TheatreScreen';
 import { TheatreSeating } from './TheatreSeating';
+import { StatsProbe, TheatreStatsHud } from './TheatreStatsHud';
 
 interface TheatreSceneProps {
   userId: string;
@@ -76,14 +78,13 @@ export function TheatreScene({
     enabled: true,
   });
 
-  const { peerIds, publishPose, samplePeer, peerCharacter } = useTheatreNetwork(
-    {
+  const { peerIds, publishPose, samplePeer, peerCharacter, netStats } =
+    useTheatreNetwork({
       userId,
       rtmSendMessage,
       character,
       enabled: true,
-    },
-  );
+    });
 
   // Maps a peer's chosen body onto one of the already-loaded models.
   const resolveCharacterModel = useCallback(
@@ -91,6 +92,23 @@ export function TheatreScene({
       assets ? avatarModelForCharacter(assets, c) : null,
     [assets],
   );
+
+  /**
+   * Live FPS / network readout.
+   *
+   * A ref, not state: the frame sampler writes every frame and the HUD polls it
+   * at 5 Hz, so displaying the numbers never re-renders the scene.
+   */
+  const stats = useRef(createStats());
+  useEffect(() => {
+    const id = setInterval(() => {
+      const n = netStats();
+      stats.current.lastPacketAt = n.lastPacketAt;
+      stats.current.packetHz = n.packetHz;
+      stats.current.peers = peerIds.length;
+    }, 200);
+    return () => clearInterval(id);
+  }, [netStats, peerIds.length]);
 
   const handlePose = useCallback(
     (pose: Pose) => {
@@ -181,9 +199,12 @@ export function TheatreScene({
           />
         </Suspense>
 
+        <StatsProbe stats={stats} />
+
         <fog attach="fog" args={['#05060a', ROOM.maxZ, ROOM.maxZ + 8]} />
       </Canvas>
 
+      <TheatreStatsHud stats={stats} />
       <SitPrompt seatMap={seatMap} mySeat={mySeat} />
     </div>
   );

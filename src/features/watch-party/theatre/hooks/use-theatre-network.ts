@@ -14,6 +14,7 @@ import {
   SnapshotBuffer,
   THEATRE_NET,
 } from '../lib/interpolation';
+import { PacketRateMeter } from '../lib/theatre-stats';
 
 interface UseTheatreNetworkOptions {
   userId: string;
@@ -78,6 +79,13 @@ export function useTheatreNetwork({
   const [peerCharacters, setPeerCharacters] = useState<
     Record<string, 'man' | 'woman'>
   >({});
+  /**
+   * Inbound message rate and recency, for the stats readout.
+   *
+   * Arrival times are taken from the LOCAL clock, never from the sender's `t`,
+   * so the figures are free of clock skew between machines.
+   */
+  const rate = useRef(new PacketRateMeter());
 
   const minInterval = useMemo(() => 1000 / THEATRE_NET.SEND_HZ, []);
 
@@ -158,6 +166,7 @@ export function useTheatreNetwork({
     if (!enabled) return;
     return onAvatarTransform((pose) => {
       if (pose.userId === userId) return; // RTM does not echo self; defensive
+      rate.current.mark();
       // Remember which body they picked. Only writes when it actually changes,
       // so this does not re-render the avatar list on every packet.
       if (pose.c) {
@@ -229,6 +238,7 @@ export function useTheatreNetwork({
     buffers.current.clear();
     lastSent.current = null;
     lastPose.current = null;
+    rate.current.reset();
     setPeerIds([]);
     setPeerCharacters({});
   }, [enabled]);
@@ -246,5 +256,14 @@ export function useTheatreNetwork({
     [peerCharacters],
   );
 
-  return { peerIds, publishPose, samplePeer, peerCharacter };
+  /** Inbound traffic figures for the stats readout. Local clock only. */
+  const netStats = useCallback(
+    () => ({
+      lastPacketAt: rate.current.lastAt(),
+      packetHz: rate.current.hz(),
+    }),
+    [],
+  );
+
+  return { peerIds, publishPose, samplePeer, peerCharacter, netStats };
 }
