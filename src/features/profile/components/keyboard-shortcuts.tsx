@@ -24,7 +24,11 @@ interface ShortcutGroup {
   /** Unique group identifier used for tab selection and i18n keys. */
   id: string;
   /** Lucide icon component for the group tab. */
-  icon: React.ElementType;
+  // Props are specified so the intrinsic-element union stays narrowed to
+  // elements that accept `className`. Bare `React.ElementType` collapses
+  // `className` to `never` once @react-three/fiber augments
+  // JSX.IntrinsicElements with three.js elements, which have no className.
+  icon: React.ElementType<{ className?: string }>;
   /** Tailwind color class for the active tab icon. */
   color: string;
   /** Array of keyboard shortcuts in this group. */

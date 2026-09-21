@@ -38,7 +38,15 @@ import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { type ToolType, useSketch } from '../context/SketchContext';
 import { useSketchMoveZ } from '../hooks/use-sketch-overlay';
 
-const TOOLS: { id: ToolType; labelKey: string; icon: React.ElementType }[] = [
+// `icon` props are specified so the intrinsic-element union stays narrowed to
+// elements that accept `className`. Bare `React.ElementType` collapses
+// `className` to `never` once @react-three/fiber augments JSX.IntrinsicElements
+// with three.js elements, which have no className.
+const TOOLS: {
+  id: ToolType;
+  labelKey: string;
+  icon: React.ElementType<{ className?: string }>;
+}[] = [
   { id: 'select', labelKey: 'sketch.toolSelect', icon: MousePointer2 },
   { id: 'freehand', labelKey: 'sketch.toolPen', icon: PenTool },
   { id: 'pencil', labelKey: 'sketch.toolPencil', icon: Pencil },

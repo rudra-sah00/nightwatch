@@ -16,6 +16,7 @@ import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { WatchPartyRoom } from '../room/types';
+import { useTheatreView } from '../theatre/lib/view-mode';
 
 const FloatingEmojis = dynamic(
   () =>
@@ -29,6 +30,15 @@ const SketchOverlay = dynamic(
   () =>
     import('../interactions/components/SketchOverlay').then(
       (mod) => mod.SketchOverlay,
+    ),
+  { ssr: false },
+);
+
+// three.js + rapier are ~1 MB; code-split so a 2D watch party never loads them.
+const TheatreScene = dynamic(
+  () =>
+    import('../theatre/components/TheatreScene').then(
+      (mod) => mod.TheatreScene,
     ),
   { ssr: false },
 );
@@ -191,6 +201,9 @@ export function WatchPartyVideoArea({
       />
     ) : null;
 
+  const viewMode = useTheatreView((s) => s.mode);
+  const is3D = viewMode !== '2d';
+
   return (
     <Player.Root
       streamUrl={streamUrlOverride || room.streamUrl || null}
@@ -284,6 +297,25 @@ export function WatchPartyVideoArea({
           <Player.EpisodePanelOverlay />
         </Player.EpisodePanel>
       )}
+
+      {/*
+        3D theatre overlay.
+
+        Player.Root stays MOUNTED underneath rather than being swapped out:
+        unmounting it would tear down the HLS pipeline, lose playback sync with
+        the party and re-buffer on every V press. The canvas is opaque and
+        covers it, and keeping the <video> element alive is also what lets the
+        theatre screen use it as a VideoTexture source.
+      */}
+      {is3D ? (
+        <div className="absolute inset-0 z-40 bg-black">
+          <TheatreScene
+            userId={userId ?? ''}
+            rtmSendMessage={rtmSendMessage}
+            cinema={viewMode === 'cinema'}
+          />
+        </div>
+      ) : null}
     </Player.Root>
   );
 }

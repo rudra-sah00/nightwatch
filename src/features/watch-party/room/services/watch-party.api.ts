@@ -461,6 +461,43 @@ function subscribe(event: string, callback: RtmListener) {
 export const onSketchDraw = <T = unknown>(callback: (action: T) => void) =>
   subscribe('SKETCH_DRAW', (msg) => callback(msg.action as unknown as T));
 
+/* ───────────────────── 3D theatre mode ───────────────────── */
+
+/**
+ * Remote avatar poses. Fires for peers only — `useAgoraRtm` does not echo the
+ * local user's own messages back, so no self-filtering is needed here.
+ */
+export const onAvatarTransform = (
+  callback: (pose: {
+    userId: string;
+    x: number;
+    y: number;
+    z: number;
+    r: number;
+    s: string;
+    t: number;
+  }) => void,
+) =>
+  subscribe('AVATAR_TRANSFORM', (msg) =>
+    callback({
+      userId: msg.userId as string,
+      x: msg.x as number,
+      y: msg.y as number,
+      z: msg.z as number,
+      r: msg.r as number,
+      s: msg.s as string,
+      t: msg.t as number,
+    }),
+  );
+
+/** Host-authoritative seat occupancy map. */
+export const onSeatMap = (
+  callback: (seats: Record<string, string | null>) => void,
+) =>
+  subscribe('SEAT_MAP', (msg) =>
+    callback(msg.seats as Record<string, string | null>),
+  );
+
 export const onSketchClear = <
   T extends { userId: string; type: 'all' | 'self' } = {
     userId: string;

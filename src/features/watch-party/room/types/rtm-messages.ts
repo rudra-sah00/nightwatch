@@ -244,6 +244,54 @@ export interface RtmStreamToken {
  * Discriminated union of every Agora RTM message that can be sent in a
  * Watch Party channel.
  */
+/* ────────────────────────── 3D theatre mode ──────────────────────────── */
+
+/**
+ * Avatar pose broadcast. Rides the existing RTM channel — avatar movement never
+ * touches our backend.
+ *
+ * Fields are deliberately short and quantised: RTM bills and rate-limits per
+ * message, and this is the only message type that repeats while someone walks.
+ * Senders MUST throttle and dead-band (see `THEATRE_NET`), and a still or
+ * seated avatar should emit nothing at all.
+ */
+export interface RtmAvatarTransform {
+  type: 'AVATAR_TRANSFORM';
+  userId: string;
+  /** position, metres, 2dp */
+  x: number;
+  y: number;
+  z: number;
+  /** yaw, degrees, integer */
+  r: number;
+  /** animation state key, see AvatarState in theatre/lib/animation.ts */
+  s: string;
+  /** sender timestamp, ms — used to order and interpolate snapshots */
+  t: number;
+}
+
+/** Guest -> host, point-to-point. Host is the sole authority on seating. */
+export interface RtmSeatClaim {
+  type: 'SEAT_CLAIM';
+  userId: string;
+  /** seat id to take, or null to stand up */
+  seatId: string | null;
+}
+
+/** Host -> channel. Full map, broadcast only when it actually changes. */
+export interface RtmSeatMap {
+  type: 'SEAT_MAP';
+  /** seatId -> userId, or null when free */
+  seats: Record<string, string | null>;
+}
+
+/** Host -> claimant. Seat was taken between the prompt and the claim. */
+export interface RtmSeatDenied {
+  type: 'SEAT_DENIED';
+  seatId: string;
+  reason: 'taken' | 'invalid';
+}
+
 export type RTMMessage =
   | RtmPlayEvent
   | RtmPauseEvent
@@ -274,7 +322,11 @@ export type RTMMessage =
   | RtmPermissionsUpdated
   | RtmMemberPermissionsUpdated
   | RtmContentUpdated
-  | RtmStreamToken;
+  | RtmStreamToken
+  | RtmAvatarTransform
+  | RtmSeatClaim
+  | RtmSeatMap
+  | RtmSeatDenied;
 
 /** Narrow the message type for specific handling */
 export type RTMMessageOfType<T extends RTMMessage['type']> = Extract<

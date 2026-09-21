@@ -6,6 +6,9 @@ import { useAuth } from '@/providers/auth-provider';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../room/types';
+import { useTheatrePreload } from '../theatre/hooks/use-theatre-preload';
+import { useViewModeHotkey } from '../theatre/hooks/use-view-mode-hotkey';
+import { useTheatreView } from '../theatre/lib/view-mode';
 import { FloatingParticipants } from './FloatingParticipants';
 import { WatchPartyVideoArea } from './WatchPartyVideoArea';
 
@@ -93,6 +96,12 @@ export function ActiveWatchParty({
   rtmSendMessage,
   rtmSendMessageToPeer,
 }: ActiveWatchPartyProps) {
+  // 3D theatre: downloads assets once opted in, and binds V to cycle views.
+  useTheatrePreload();
+  useViewModeHotkey(true);
+  const viewMode = useTheatreView((s) => s.mode);
+  const is3D = viewMode !== '2d';
+
   const {
     watchPartyContainerRef,
     showDesktopSidebar,
@@ -185,6 +194,10 @@ export function ActiveWatchParty({
       true);
 
   // ── Render ────────────────────────────────────────────────────────────────
+  // 3D forces the sidebar closed and the tiles off, but WITHOUT mutating the
+  // user's 2D preferences — switching back with V restores exactly what they had.
+  const sidebarVisible = is3D ? false : showDesktopSidebar;
+
   return (
     <div
       ref={watchPartyContainerRef}
@@ -195,11 +208,11 @@ export function ActiveWatchParty({
       {/* Sidebar */}
       <aside
         aria-label={tAria('partySidebar')}
-        aria-hidden={!showDesktopSidebar}
+        aria-hidden={!sidebarVisible}
         className={cn(
           'relative overflow-hidden flex-shrink-0 transition-[width,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] bg-background z-30',
           'h-full order-1 flex-none border-r-4 border-border',
-          showDesktopSidebar ? 'w-64 lg:w-80 xl:w-96' : 'w-0 border-none',
+          sidebarVisible ? 'w-64 lg:w-80 xl:w-96' : 'w-0 border-none',
         )}
       >
         <WatchPartySidebar
@@ -225,7 +238,7 @@ export function ActiveWatchParty({
           onToggleFloatingChat={handleToggleFloatingChat}
           floatingTilesEnabled={floatingTilesEnabled}
           onToggleFloatingTiles={handleToggleFloatingTiles}
-          isVisible={showDesktopSidebar}
+          isVisible={sidebarVisible}
           rtmSendMessage={rtmSendMessage}
           rtmSendMessageToPeer={rtmSendMessageToPeer}
           currentUserName={currentUserName}
@@ -247,7 +260,7 @@ export function ActiveWatchParty({
           onVideoRef={handleVideoRef}
           onNavigate={handleNavigate}
           onSidebarToggle={() => setShowDesktopSidebar((prev) => !prev)}
-          isSidebarOpen={showDesktopSidebar}
+          isSidebarOpen={sidebarVisible}
           toggleFullscreen={toggleFullscreen}
           onNextEpisode={
             isHost && room.type === 'series' ? handleNextEpisode : undefined
@@ -258,16 +271,22 @@ export function ActiveWatchParty({
           currentUserName={currentUserName}
         />
 
-        {/* Floating participant tiles when sidebar is closed */}
-        {!showDesktopSidebar &&
+        {/* Floating participant tiles when sidebar is closed.
+            Hidden entirely in 3D — webcam tiles floating over a room you are
+            standing in breaks the illusion, and the video belongs on the
+            theatre screen instead. */}
+        {!sidebarVisible &&
+        !is3D &&
         floatingTilesEnabled &&
         agoraParticipants.length > 0 ? (
           <FloatingParticipants participants={agoraParticipants} />
         ) : null}
       </main>
 
-      {/* Floating chat overlay — text-only, no background, bottom-right */}
-      {!showDesktopSidebar && floatingChatEnabled ? (
+      {/* Floating chat overlay — text-only, no background, bottom-right.
+          Forced on in 3D: the sidebar is hidden there, so this is the only way
+          to keep the conversation visible. */}
+      {(is3D || (!sidebarVisible && floatingChatEnabled)) && canChatInParty ? (
         <FloatingChat
           messages={messages}
           currentUserId={currentUserId}

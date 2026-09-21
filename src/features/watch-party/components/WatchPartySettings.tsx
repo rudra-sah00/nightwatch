@@ -9,6 +9,7 @@ import {
   updatePartyPermissions,
 } from '../room/services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '../room/types';
+import { useTheatreView } from '../theatre/lib/view-mode';
 
 // Simple Toggle Switch built with Tailwind
 interface SwitchProps {
@@ -65,6 +66,14 @@ export function WatchPartySettings({
 }: WatchPartySettingsProps) {
   const t = useTranslations('party');
   const { isOpen, setIsOpen } = useWatchPartySettings();
+
+  // 3D theatre opt-in lives in a store so settings, the video area and the V
+  // hotkey all read one source of truth.
+  const theatreEnabled = useTheatreView((s) => s.enabled);
+  const theatrePhase = useTheatreView((s) => s.phase);
+  const theatreProgress = useTheatreView((s) => s.progress);
+  const enableTheatre = useTheatreView((s) => s.enable);
+  const disableTheatre = useTheatreView((s) => s.disable);
 
   const handleGlobalPermissionToggle = (
     key: keyof WatchPartyRoom['permissions'],
@@ -206,6 +215,39 @@ export function WatchPartySettings({
                     />
                   </div>
                 ) : null}
+
+                {/*
+                  3D theatre opt-in. Reads the store directly rather than taking
+                  props, because this component sits two levels below
+                  ActiveWatchParty and prop-drilling it through the sidebar would
+                  touch three files to move one boolean.
+
+                  Nothing downloads until this is switched on — a normal 2D watch
+                  party must not pay for 3D assets it never shows.
+                */}
+                <div className="flex items-center justify-between w-full">
+                  <span className="flex flex-col">
+                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                      3D Theatre
+                    </span>
+                    <span className="text-[10px] font-medium text-white/40">
+                      {theatrePhase === 'downloading'
+                        ? `Downloading… ${Math.round(theatreProgress * 100)}%`
+                        : theatrePhase === 'ready'
+                          ? 'Ready — press V to change view'
+                          : theatrePhase === 'error'
+                            ? 'Download failed — toggle to retry'
+                            : 'Downloads ~2.6 MB of assets'}
+                    </span>
+                  </span>
+                  <Switch
+                    checked={theatreEnabled}
+                    onCheckedChange={(next) =>
+                      next ? enableTheatre() : disableTheatre()
+                    }
+                    label="3D Theatre"
+                  />
+                </div>
               </div>
             ) : null}
 
