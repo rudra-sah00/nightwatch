@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ChatMessage } from '../../room/types';
+import { CHAT_SURFACE_ATTR } from '../../theatre/lib/keyboard';
 
 /** Props for the {@link FloatingChat} component. */
 interface FloatingChatProps {
@@ -36,6 +37,8 @@ export function FloatingChat({
   const [input, setInput] = useState('');
   const t = useTranslations('party');
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const prevCountRef = useRef(0);
 
   // Auto-scroll to the newest message after each render where count grew.
@@ -66,13 +69,42 @@ export function FloatingChat({
     [handleSend],
   );
 
+  /**
+   * Clicking anywhere on the panel puts the caret in the message field.
+   *
+   * Without this, clicking the transcript leaves focus on `<body>`, and in 3D
+   * theatre mode the next letters typed are swallowed by the scene's `WASD`/`E`/
+   * `R`/`V` shortcuts instead of appearing in the box. Bound imperatively rather
+   * than as an `onMouseDown` prop because a focus convenience does not make a
+   * static container an interactive control.
+   */
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    function focusInput() {
+      inputRef.current?.focus();
+    }
+    root.addEventListener('mousedown', focusInput);
+    return () => root.removeEventListener('mousedown', focusInput);
+  }, []);
+
   // Only keep the last 60 messages for perf
   const visibleMessages = messages.slice(-60);
 
   return (
+    // z-50, not z-40: in 3D theatre mode the scene canvas is an opaque
+    // `absolute inset-0 z-40 bg-black` layer, so at the same z-index the canvas
+    // painted straight over this panel and chat vanished the moment you entered
+    // the room.
+    //
+    // `CHAT_SURFACE_ATTR` makes every theatre shortcut treat this region as text
+    // entry. Clicking the message list also focuses the field, because otherwise
+    // focus stays on <body> and the letters you type get read as WASD/E/R/V.
     <div
       id="wp-floating-chat"
-      className="fixed bottom-28 right-4 z-40 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-3 motion-safe:duration-300 motion-reduce:animate-none"
+      ref={rootRef}
+      {...{ [CHAT_SURFACE_ATTR]: '' }}
+      className="fixed bottom-28 right-4 z-50 flex flex-col items-end gap-2 w-72 max-w-[calc(100vw-2rem)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-3 motion-safe:duration-300 motion-reduce:animate-none"
     >
       {/* ── Message list — no background, text + shadow only ── */}
       <div
@@ -122,6 +154,7 @@ export function FloatingChat({
       {canChat ? (
         <div className="flex items-center gap-1.5 w-full pointer-events-auto mt-2">
           <input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

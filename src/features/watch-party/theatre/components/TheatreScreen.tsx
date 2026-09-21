@@ -183,6 +183,28 @@ export function TheatreScreen({ texture, onTogglePlay }: TheatreScreenProps) {
           map={texture}
           color={texture ? '#ffffff' : '#0b0d12'}
           toneMapped={false}
+          /*
+            Win the depth test against anything the room model puts at this same
+            depth, without moving the plane in world space.
+
+            The screen sits at `SCREEN.z = 0.02`, and room.glb has geometry in
+            exactly that plane: `ScreenTrim_*` spans z -0.005..0.025 and touches
+            the picture along its whole border, and the published v2 asset also
+            carried `SCREEN_REF_do_not_export`, an opaque near-black quad at
+            z 0.02 with the identical 7 x 2.929 size. Two coplanar surfaces make
+            the depth comparison a coin toss that is resolved per pixel and
+            re-resolved as the camera moves, which is seen as black patches
+            sweeping across the film and then correcting themselves.
+
+            The offending quad is now excluded from the export, but the picture
+            should not depend on a separately authored asset staying clean, and
+            the trim seam is real regardless. A negative polygon offset biases
+            this surface towards the viewer in depth only — geometry, collision
+            and the seating camera are untouched.
+          */
+          polygonOffset
+          polygonOffsetFactor={-4}
+          polygonOffsetUnits={-4}
         />
       </mesh>
 

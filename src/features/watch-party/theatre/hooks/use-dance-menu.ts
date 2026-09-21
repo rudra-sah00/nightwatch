@@ -3,13 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DANCE_CLIPS } from '../lib/animation';
 import { wheelSelection } from '../lib/dance-rules';
-
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  return target.isContentEditable;
-}
+import { isTypingTarget } from '../lib/keyboard';
 
 /** Human labels for the wheel. Clip names are internal, not user-facing. */
 export const DANCE_LABELS: Readonly<Record<string, string>> = {
@@ -19,7 +13,7 @@ export const DANCE_LABELS: Readonly<Record<string, string>> = {
 };
 
 export interface DanceMenuState {
-  /** Wheel is on screen because D is held. */
+  /** Wheel is on screen because R is held. */
   open: boolean;
   /** Screen position the wheel is drawn around. */
   origin: { x: number; y: number };
@@ -43,7 +37,7 @@ interface UseDanceMenuOptions {
 /**
  * Hold-D radial dance picker.
  *
- * Press and hold D to open a wheel of dances, move the cursor toward one, release
+ * Press and hold R to open a wheel of dances, move the cursor toward one, release
  * to commit. Releasing without moving cancels — see `WHEEL_DEAD_ZONE_PX`. This
  * replaces the old number-key bindings: 1/2/3 were undiscoverable, gave no
  * indication that dances existed at all, and silently did nothing when a dance
@@ -121,13 +115,14 @@ export function useDanceMenu({
       const key = e.key.toLowerCase();
 
       // Moving cancels a dance: the walk controller owns the animation state
-      // while you are walking and the two would otherwise fight.
-      if (['w', 'a', 's', 'd'].includes(key) && key !== 'd') {
+      // while you are walking and the two would otherwise fight. `d` is now a
+      // plain movement key, so there is no longer an exception here.
+      if (['w', 'a', 's', 'd'].includes(key)) {
         stop();
         return;
       }
 
-      if (key !== 'd') return;
+      if (key !== 'r') return;
       e.preventDefault();
       if (e.repeat) return; // holding fires repeats; only the first opens
 
@@ -154,7 +149,7 @@ export function useDanceMenu({
     }
 
     function onKeyUp(e: KeyboardEvent) {
-      if (e.key.toLowerCase() !== 'd') return;
+      if (e.key.toLowerCase() !== 'r') return;
       if (!openRef.current) return;
       openRef.current = false;
       const picked = hoveredRef.current;

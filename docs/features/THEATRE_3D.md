@@ -456,11 +456,16 @@ real sweep-and-slide handling.
 | `W` `A` `S` `D` | Move, camera-relative |
 | `Shift` | Run |
 | `E` | Sit / stand, when within range of a free seat |
+| `R` | Hold to open the dance wheel, release toward a clip |
 | Mouse drag | Camera orbit |
 
-`W`, `A`, `S`, `D`, and `E` are confirmed **unbound** in the existing player —
-it uses `K`/`J`/`L`/`M`/`F`, Space, and arrows. No remapping needed. Arrow keys
-(seek) must be gated while the avatar has focus.
+`W`, `A`, `S`, `D`, `E` and `R` are all unbound in the existing player, which
+uses `K`/`J`/`L`/`M`/`F`/`C`/`N`, Space, arrows and Escape. `F` is deliberately
+avoided for sitting: it is the player's fullscreen toggle, and the player stays
+mounted beneath the scene (the theatre renders inside `Player.Root` so the video
+keeps playing), so a theatre binding on `F` would fire both actions. `R` is used
+only by the music shortcut layer, which is not active in a watch party. Arrow
+keys (seek) must still be gated while the avatar has focus.
 
 Guests are `interactionMode: 'read-only'` for playback already, so only the host
 holds both control roles.

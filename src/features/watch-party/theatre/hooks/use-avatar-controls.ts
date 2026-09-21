@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { type RapierRigidBody, useRapier } from '@react-three/rapier';
 import { useEffect, useMemo, useRef } from 'react';
 import { Vector3 } from 'three';
+import { isTypingTarget } from '../lib/keyboard';
 
 /** Movement tuning, metres/second and radians. */
 export const LOCOMOTION = {
@@ -93,18 +94,8 @@ export function useAvatarControls(
       keys.current = {};
       return;
     }
-    function isTyping(t: EventTarget | null): boolean {
-      if (!(t instanceof HTMLElement)) return false;
-      const tag = t.tagName;
-      return (
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
-        tag === 'SELECT' ||
-        t.isContentEditable
-      );
-    }
     function down(e: KeyboardEvent) {
-      if (isTyping(e.target)) return;
+      if (isTypingTarget(e.target)) return;
       keys.current[e.key.toLowerCase()] = true;
     }
     function up(e: KeyboardEvent) {

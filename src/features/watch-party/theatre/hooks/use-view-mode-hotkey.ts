@@ -2,15 +2,8 @@
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { isTypingTarget } from '../lib/keyboard';
 import { useTheatreView, viewModeLabel } from '../lib/view-mode';
-
-/** True when the user is typing and must keep the keystroke. */
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  return target.isContentEditable;
-}
 
 /**
  * `V` cycles 2D -> 3D -> screen focus -> 2D.

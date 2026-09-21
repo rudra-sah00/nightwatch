@@ -2,6 +2,7 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isTypingTarget } from '../lib/keyboard';
 import { SEATS, type SeatId, SIT_PROMPT_RADIUS } from '../lib/layout';
 
 interface UseSitInteractionOptions {
@@ -12,13 +13,6 @@ interface UseSitInteractionOptions {
   /** Take a seat, or stand when passed null. */
   claimSeat: (seat: SeatId | null) => void;
   enabled: boolean;
-}
-
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  return target.isContentEditable;
 }
 
 /**
