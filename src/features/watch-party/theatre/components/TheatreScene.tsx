@@ -235,6 +235,40 @@ export function TheatreScene({
 }
 
 /**
+ * Publishes the clearance probe to code that lives outside `<Physics />`.
+ *
+ * `useRapier` throws unless it runs inside the Physics provider, and the dance
+ * menu that needs the measurement is a keyboard/DOM concern that sits above it.
+ * This component exists solely to bridge that: it renders nothing, sits inside
+ * Physics, and writes its callbacks into refs the outer scene already holds.
+ *
+ * Calling `useDanceSpace` directly from the outer scene is what crashed the whole
+ * watch party — react-three-rapier throws "useRapier must be used within
+ * <Physics />" on mount, which took out the page rather than just the dance
+ * feature.
+ */
+function DanceSpaceProbe({
+  bodyRef,
+  canDanceRef,
+  clearanceRef,
+}: {
+  bodyRef: React.RefObject<RapierRigidBody | null>;
+  canDanceRef: React.RefObject<(() => boolean) | null>;
+  clearanceRef: React.RefObject<(() => number) | null>;
+}) {
+  const { canDanceHere, clearance } = useDanceSpace(bodyRef);
+  useEffect(() => {
+    canDanceRef.current = canDanceHere;
+    clearanceRef.current = clearance;
+    return () => {
+      canDanceRef.current = null;
+      clearanceRef.current = null;
+    };
+  }, [canDanceHere, clearance, canDanceRef, clearanceRef]);
+  return null;
+}
+
+/**
  * Split out so the hooks that need R3F context (useFrame / useThree) sit inside
  * the Canvas. Calling them from TheatreScene would throw.
  */
@@ -274,7 +308,13 @@ function SceneInterior({
   // Clearance probe needs the player's collider, so the body ref is owned here
   // and handed to LocalPlayer rather than created inside it.
   const playerBody = useRef<RapierRigidBody>(null);
-  const { canDanceHere, clearance } = useDanceSpace(playerBody);
+  // The probe must run inside <Physics />, so it is published into refs by
+  // DanceSpaceProbe below rather than called here.
+  const canDanceRef = useRef<(() => boolean) | null>(null);
+  const clearanceRef = useRef<(() => number) | null>(null);
+  // No probe yet means no physics world yet, so refuse rather than permit.
+  const canDanceHere = useCallback(() => canDanceRef.current?.() ?? false, []);
+  const clearance = useCallback(() => clearanceRef.current?.() ?? 0, []);
 
   const {
     open: wheelOpen,
@@ -390,6 +430,11 @@ function SceneInterior({
       <TheatreScreen texture={texture} onTogglePlay={onTogglePlay} />
       <Physics gravity={[0, 0, 0]} timeStep="vary">
         <TheatreColliders />
+        <DanceSpaceProbe
+          bodyRef={playerBody}
+          canDanceRef={canDanceRef}
+          clearanceRef={clearanceRef}
+        />
         <LocalPlayer
           enabled={walking}
           onPose={recordAndPublish}
