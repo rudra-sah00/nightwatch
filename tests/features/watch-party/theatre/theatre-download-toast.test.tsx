@@ -191,3 +191,34 @@ describe('TheatreDownloadCard', () => {
     expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
   });
 });
+
+describe('progress visibility', () => {
+  it('is hidden by default, so a download shows nothing unasked', () => {
+    setDownloading(5 * MB, 38 * MB);
+    expect(useTheatreView.getState().progressVisible).toBe(false);
+  });
+
+  it('showProgress reveals it — this is what pressing V does', () => {
+    setDownloading(5 * MB, 38 * MB);
+    useTheatreView.getState().showProgress();
+    expect(useTheatreView.getState().progressVisible).toBe(true);
+  });
+
+  it('stays visible once summoned, including across a retry', () => {
+    setDownloading(5 * MB, 38 * MB);
+    useTheatreView.getState().showProgress();
+    useTheatreView.getState().fail('Network unavailable');
+    expect(useTheatreView.getState().progressVisible).toBe(true);
+
+    // Retry is clicked ON the card, so the card must not vanish underneath it.
+    useTheatreView.getState().retry();
+    expect(useTheatreView.getState().progressVisible).toBe(true);
+  });
+
+  it('is cleared when the theatre is switched off', () => {
+    setDownloading(5 * MB, 38 * MB);
+    useTheatreView.getState().showProgress();
+    useTheatreView.getState().disable();
+    expect(useTheatreView.getState().progressVisible).toBe(false);
+  });
+});

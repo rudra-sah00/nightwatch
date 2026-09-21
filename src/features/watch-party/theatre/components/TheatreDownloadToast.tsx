@@ -196,12 +196,16 @@ export function TheatreDownloadCard() {
 export const DOWNLOAD_TOAST_ID = 'theatre-asset-download';
 
 /**
- * Owns the lifetime of the persistent download toast.
+ * Owns the lifetime of the download progress toast.
  *
- * The toast is created once when the download starts and is given
- * `duration: Infinity` with `dismissible: false`, so it cannot time out or be
- * swiped away while bytes are still moving — the user asked for it to stay until
- * the download is actually finished. It is only ever removed by this hook:
+ * Nothing is shown until `showProgress()` is called, which the `V` hotkey does
+ * when someone tries to enter 3D before the assets have landed. The download is
+ * background work: pinning a notification on screen for the whole transfer,
+ * unasked, is noise. Once summoned it stays — `duration: Infinity` with
+ * `dismissible: false`, so it cannot time out or be swiped away while bytes are
+ * still moving.
+ *
+ * It is only ever removed by this hook:
  *
  *  - `ready`  -> dismissed, replaced by the short "press V" success toast.
  *  - `error`  -> kept, but becomes dismissible and grows Retry / Cancel buttons.
@@ -214,9 +218,11 @@ export const DOWNLOAD_TOAST_ID = 'theatre-asset-download';
  */
 export function useTheatreDownloadToast() {
   const phase = useTheatreView((s) => s.phase);
+  const progressVisible = useTheatreView((s) => s.progressVisible);
 
   useEffect(() => {
-    if (phase !== 'downloading' && phase !== 'error') {
+    const active = phase === 'downloading' || phase === 'error';
+    if (!active || !progressVisible) {
       toast.dismiss(DOWNLOAD_TOAST_ID);
       return;
     }
@@ -232,7 +238,7 @@ export function useTheatreDownloadToast() {
       unstyled: true,
       classNames: { toast: 'w-full' },
     });
-  }, [phase]);
+  }, [phase, progressVisible]);
 
   // Never leave the toast behind if the party unmounts mid-download.
   useEffect(

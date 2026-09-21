@@ -68,6 +68,16 @@ interface TheatreViewState {
   attempt: number;
   /** Short reason for a failed download, null when there is none. */
   error: string | null;
+  /**
+   * Whether to show the download progress card.
+   *
+   * False by default and only turned on by `showProgress()`, which the `V`
+   * hotkey calls. The download is background work nobody asked to watch — a
+   * notification pinned on screen for the whole transfer is noise. It appears
+   * when you press `V` and find the room is not ready yet, which is the moment
+   * you actually want to know how far along it is.
+   */
+  progressVisible: boolean;
   /** Bumped by `retry()`; the preloader watches it to start again. */
   retryNonce: number;
   mode: TheatreViewMode;
@@ -87,6 +97,8 @@ interface TheatreViewState {
     fileCount: number;
   }) => void;
   setAttempt: (attempt: number) => void;
+  /** Reveal the progress card. Called when `V` is pressed before assets land. */
+  showProgress: () => void;
   fail: (error: string) => void;
   /** Ask the preloader to try again, keeping assets already downloaded. */
   retry: () => void;
@@ -105,6 +117,7 @@ const DOWNLOAD_RESET = {
   fileCount: 0,
   attempt: 1,
   error: null,
+  progressVisible: false,
 } as const;
 
 export const useTheatreView = create<TheatreViewState>((set, get) => ({
@@ -117,6 +130,7 @@ export const useTheatreView = create<TheatreViewState>((set, get) => ({
   fileCount: 0,
   attempt: 1,
   error: null,
+  progressVisible: false,
   retryNonce: 0,
   mode: '2d',
   character: storedCharacter(),
@@ -133,6 +147,8 @@ export const useTheatreView = create<TheatreViewState>((set, get) => ({
 
   setDownload: (update) => set(update),
   setAttempt: (attempt) => set({ attempt }),
+
+  showProgress: () => set({ progressVisible: true }),
 
   fail: (error) => set({ phase: 'error', error }),
 

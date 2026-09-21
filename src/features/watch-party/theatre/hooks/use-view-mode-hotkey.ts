@@ -19,6 +19,7 @@ export function useViewModeHotkey(active: boolean) {
   const cycle = useTheatreView((s) => s.cycle);
   const phase = useTheatreView((s) => s.phase);
   const enabled = useTheatreView((s) => s.enabled);
+  const showProgress = useTheatreView((s) => s.showProgress);
 
   useEffect(() => {
     if (!active) return;
@@ -42,20 +43,12 @@ export function useViewModeHotkey(active: boolean) {
             description: 'Turn it on in watch party settings.',
             id: 'theatre-not-enabled',
           });
-        } else if (phase === 'downloading') {
-          // The percentage is deliberately NOT repeated here: the persistent
-          // download toast is already on screen showing it, and two live
-          // counters that can disagree is worse than one.
-          toast.info('Still downloading', {
-            description:
-              'The whole room has to arrive before you can walk into it.',
-            id: 'theatre-still-downloading',
-          });
-        } else if (phase === 'error') {
-          toast.error('3D assets failed to download', {
-            description: 'Use Retry on the download notice.',
-            id: 'theatre-download-failed',
-          });
+        } else if (phase === 'downloading' || phase === 'error') {
+          // Pressing V is the moment someone actually wants to know how far the
+          // download has got, so reveal the progress card rather than describing
+          // it in words. It is not shown before this: an unasked-for notification
+          // pinned up for the whole transfer is noise.
+          showProgress();
         } else {
           toast.info('3D theatre is getting ready', {
             description: 'One moment.',
@@ -74,5 +67,5 @@ export function useViewModeHotkey(active: boolean) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [active, cycle, phase, enabled]);
+  }, [active, cycle, phase, enabled, showProgress]);
 }
