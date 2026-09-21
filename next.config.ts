@@ -131,7 +131,20 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https:",
               `img-src 'self' blob: data: https: http://localhost:9000 ${backendOrigin}`,
               "font-src 'self' data: https:",
-              `connect-src 'self' data: wss: ws: https: http: http://localhost:9000 ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
+              // `blob:` is required here, not just in worker-src/media-src.
+              // hls.js builds its transmuxing worker from a Blob and reads
+              // MediaSource/segment data back through blob URLs, and the Agora
+              // SDKs do the same for their own workers. Without it the browser
+              // refuses the request outright with
+              // "Fetch API cannot load blob:<origin>/<uuid>. Refused to connect
+              // because it violates the document's Content Security Policy."
+              //
+              // This grants nothing to a remote origin: a blob URL is minted by
+              // this document via URL.createObjectURL, is same-origin by
+              // definition, and cannot be pointed at data the page does not
+              // already hold. Every other directive that needs it already lists
+              // it — connect-src was simply missed.
+              `connect-src 'self' blob: data: wss: ws: https: http: http://localhost:9000 ${backendOrigin} ${backendOrigin.replace('http', 'ws')} https://challenges.cloudflare.com`,
               "frame-src 'self' https: http://localhost:9000 http://minio:9000 blob: data: about: https://challenges.cloudflare.com",
               "worker-src 'self' blob: https:",
               // http://127.0.0.1:* / http://localhost:* are required by the Android

@@ -233,7 +233,11 @@ const startElectronApp = async () => {
           "font-src 'self' https://fonts.gstatic.com",
           "img-src 'self' data: blob: https:",
           "media-src 'self' blob: https:",
-          "connect-src 'self' https: wss: ws: http://localhost:*",
+          // blob: is needed for hls.js's transmuxer worker and the Agora SDK
+          // workers, which are fetched back through same-origin blob URLs. See
+          // the matching note in next.config.ts — a blob URL is minted by this
+          // document and grants no remote origin anything.
+          "connect-src 'self' blob: https: wss: ws: http://localhost:*",
           "frame-src 'self' https://challenges.cloudflare.com http://localhost:9000 https://*.nightwatch.in",
           "worker-src 'self' blob:",
         ].join('; '),
