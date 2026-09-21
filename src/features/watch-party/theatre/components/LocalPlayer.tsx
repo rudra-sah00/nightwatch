@@ -7,12 +7,13 @@ import {
   RigidBody,
 } from '@react-three/rapier';
 import { useRef } from 'react';
-import { Vector3 } from 'three';
+import { PerspectiveCamera, Vector3 } from 'three';
 import {
   CAPSULE_CENTRE_TO_FEET,
   LOCOMOTION,
   useAvatarControls,
 } from '../hooks/use-avatar-controls';
+import { useDanceCamera } from '../hooks/use-dance-camera';
 import { SPAWN, STANDING_EYE_HEIGHT } from '../lib/layout';
 
 interface LocalPlayerProps {
@@ -25,6 +26,13 @@ interface LocalPlayerProps {
    * must exclude it, which it cannot do without the handle.
    */
   bodyRef?: React.RefObject<RapierRigidBody | null>;
+  /**
+   * True while a dance clip is playing, which slides the camera off the head so
+   * the dancer can actually see themselves.
+   */
+  dancing?: boolean;
+  /** Reports how far the camera pulled back, so the caller can reveal the avatar. */
+  onCameraDistance?: (metres: number) => void;
   /** Called with the local pose so the network layer can broadcast it. */
   onPose?: (pose: {
     x: number;
@@ -43,14 +51,22 @@ interface LocalPlayerProps {
  * A camera-as-body approach lets you push your viewpoint into geometry because a
  * point has no radius.
  */
-export function LocalPlayer({ enabled, onPose, bodyRef }: LocalPlayerProps) {
+export function LocalPlayer({
+  enabled,
+  onPose,
+  bodyRef,
+  dancing = false,
+  onCameraDistance,
+}: LocalPlayerProps) {
   const own = useRef<RapierRigidBody>(null);
   const body = bodyRef ?? own;
   const camera = useThree((s) => s.camera);
   const controls = useAvatarControls(body, enabled);
   const eye = useRef(new Vector3());
+  const resolveCamera = useDanceCamera(body);
+  const lastDistance = useRef(-1);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const rb = body.current;
     if (!rb || !enabled) return;
 
@@ -59,7 +75,20 @@ export function LocalPlayer({ enabled, onPose, bodyRef }: LocalPlayerProps) {
     // the broadcast pose need the point between the feet, so derive it once.
     const groundY = p.y - CAPSULE_CENTRE_TO_FEET;
     eye.current.set(p.x, groundY + STANDING_EYE_HEIGHT, p.z);
-    camera.position.copy(eye.current);
+
+    // First person parks the camera on the eye point; dancing slides it back
+    // along the look axis, clamped by a ray so it never enters the room shell.
+    let distance = 0;
+    if (camera instanceof PerspectiveCamera) {
+      distance = resolveCamera(eye.current, camera, dancing, delta);
+    } else {
+      camera.position.copy(eye.current);
+    }
+
+    if (onCameraDistance && Math.abs(distance - lastDistance.current) > 0.01) {
+      lastDistance.current = distance;
+      onCameraDistance(distance);
+    }
 
     if (onPose) {
       const yaw =

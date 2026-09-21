@@ -56,13 +56,19 @@ export const FLOORS = {
 /**
  * Aisle stairs, 3 risers of 0.15 m with 0.30 m treads.
  * There is NO centre aisle — these are the only way between levels.
+ *
+ * Narrowed from 2.2 m to 1.2 m per run. The old inner edge at 1.8 m is where the
+ * outer seats now sit (their edge reaches 2.16 m at the 1.20 m pitch), so the
+ * stairs had to give the width back. 1.2 m is still a comfortable single-file
+ * run. `room.glb` geometry was rescaled to match; the outer edge stays flush to
+ * the side wall at 4.0 m.
  */
 export const STAIRS = {
   risers: 3,
   riserHeight: 0.15,
   treadDepth: 0.3,
   /** present on both sides at these |x| bounds */
-  innerX: 1.8,
+  innerX: 2.8,
   outerX: 4.0,
   minZ: 4.69,
   maxZ: 5.29,
@@ -128,33 +134,215 @@ export interface Seat {
   /** emissive floor pad you stand on to sit, 0.52 m in front of the chair */
   pad: { x: number; y: number; z: number };
   view: SeatView;
+  /** Screen framing from this seat's eye, for the per-seat FOV. */
+  framing: SeatFraming;
 }
 
 const D = Math.PI / 180;
 
 /**
- * Per-seat neutral aim, computed from the measured screen centre.
- * Blender yaw is mirrored because +θ about three's +Y turns left while the
- * Blender figure was computed as "turn toward +x".
+ * Aim and field of view for a seat, computed from the measured screen rather
+ * than tabulated.
+ *
+ * This used to be a hand-written `SEAT_AIM` table of eight yaw/pitch pairs. The
+ * numbers were right for a 0.90 m seat pitch and became silently wrong the
+ * moment the seats moved — nothing referenced the screen, so nothing complained.
+ * Deriving both from `SCREEN` means any change to seat spacing, row depth, eye
+ * height or screen size stays correct with no second edit.
+ *
+ * The FOV half is what keeps the picture uncropped. A fixed 60 degree vertical
+ * FOV is fine dead centre, but an outer seat sits 1.8 m off axis and 4.5 m back,
+ * so the far screen edge is a much wider angle than the near one, and the window
+ * can be any shape the user drags it to. A tall narrow window has a NARROW
+ * horizontal FOV for the same vertical one, which crops the sides of a 2.39:1
+ * screen first. So the horizontal requirement is converted into the vertical FOV
+ * three.js actually takes, given the live aspect ratio.
  */
-const SEAT_AIM: Record<SeatId, { yawDeg: number; pitchDeg: number }> = {
-  A1: { yawDeg: -16.77, pitchDeg: 10.06 },
-  A2: { yawDeg: -5.74, pitchDeg: 10.45 },
-  A3: { yawDeg: 5.74, pitchDeg: 10.45 },
-  A4: { yawDeg: 16.77, pitchDeg: 10.06 },
-  B1: { yawDeg: -12.32, pitchDeg: 3.44 },
-  B2: { yawDeg: -4.16, pitchDeg: 3.51 },
-  B3: { yawDeg: 4.16, pitchDeg: 3.51 },
-  B4: { yawDeg: 12.32, pitchDeg: 3.44 },
-};
+export interface SeatFraming {
+  /** three.js Y-rotation, radians, that aims the camera at screen centre. */
+  yaw: number;
+  /** three.js X-rotation, radians, positive is up. */
+  pitch: number;
+  /** Half-angle, radians, from the aim axis to the widest screen corner. */
+  halfAngleH: number;
+  halfAngleV: number;
+}
+
+/**
+ * Widest horizontal and vertical half-angles from an eye point to the screen,
+ * measured about the axis that points at screen centre.
+ */
+function frameScreenFrom(eye: {
+  x: number;
+  y: number;
+  z: number;
+}): SeatFraming {
+  // Screen centre. The screen plane is at z = SCREEN.z, audience at greater z,
+  // so the view direction is -Z and depth is positive.
+  const depth = eye.z - SCREEN.z;
+  const yaw = Math.atan2(-(0 - eye.x), depth);
+  const pitch = Math.atan2(SCREEN.centreY - eye.y, depth);
+
+  // Every corner, so an off-axis seat is framed by whichever is worst.
+  let halfAngleH = 0;
+  let halfAngleV = 0;
+  for (const cx of [SCREEN.minX, SCREEN.maxX]) {
+    const a = Math.abs(
+      Math.atan2(cx - eye.x, depth) - Math.atan2(-eye.x, depth),
+    );
+    if (a > halfAngleH) halfAngleH = a;
+  }
+  for (const cy of [SCREEN.bottomY, SCREEN.topY]) {
+    const a = Math.abs(
+      Math.atan2(cy - eye.y, depth) - Math.atan2(SCREEN.centreY - eye.y, depth),
+    );
+    if (a > halfAngleV) halfAngleV = a;
+  }
+  return { yaw, pitch, halfAngleH, halfAngleV };
+}
+
+/** Breathing room around the picture so it is framed, not jammed to the edges. */
+export const SCREEN_FRAMING_MARGIN = 1.08;
+
+/** Never go below this: a narrow FOV on a near seat looks like a zoom lens. */
+export const SEAT_FOV_MIN_DEG = 55;
+/** Nor above it: past this the room visibly distorts at the corners. */
+export const SEAT_FOV_MAX_DEG = 82;
+
+/**
+ * Hard ceiling, used only when widening the lens is the last way to avoid
+ * cropping the film. Ugly, but it beats losing the edges of the picture.
+ */
+export const SEAT_FOV_ABSOLUTE_MAX_DEG = 100;
+
+/** Furthest the view may slide back from the seat to fit the screen, metres. */
+export const SEAT_MAX_DOLLY = 2.2;
+
+/** Widest half-angles to the screen from a point `extraDepth` behind the eye. */
+function halfAnglesAt(
+  eye: { x: number; y: number; z: number },
+  extraDepth: number,
+): { h: number; v: number } {
+  const depth = eye.z - SCREEN.z + extraDepth;
+  const centreH = Math.atan2(-eye.x, depth);
+  const centreV = Math.atan2(SCREEN.centreY - eye.y, depth);
+  let h = 0;
+  let v = 0;
+  for (const cx of [SCREEN.minX, SCREEN.maxX]) {
+    const a = Math.abs(Math.atan2(cx - eye.x, depth) - centreH);
+    if (a > h) h = a;
+  }
+  for (const cy of [SCREEN.bottomY, SCREEN.topY]) {
+    const a = Math.abs(Math.atan2(cy - eye.y, depth) - centreV);
+    if (a > v) v = a;
+  }
+  return { h, v };
+}
+
+/** Vertical FOV, radians, that contains both half-angles at `aspect`. */
+function fovForHalfAngles(
+  half: { h: number; v: number },
+  aspect: number,
+): number {
+  const safeAspect = aspect > 0.01 ? aspect : 0.01;
+  const fromV = 2 * half.v * SCREEN_FRAMING_MARGIN;
+  // Inverse of three.js's own hFov = 2*atan(tan(vFov/2) * aspect).
+  const fromH =
+    2 * Math.atan(Math.tan(half.h * SCREEN_FRAMING_MARGIN) / safeAspect);
+  return Math.max(fromV, fromH);
+}
+
+export interface SeatCamera {
+  /** Vertical FOV in degrees to assign to the camera. */
+  fovDeg: number;
+  /** Metres to slide the view back along its aim axis, away from the screen. */
+  dolly: number;
+}
+
+/**
+ * Camera settings that show the WHOLE screen from a seat, at a live aspect ratio.
+ *
+ * Two knobs, used in order. Widening the FOV is free and invisible, so it goes
+ * first. But an outer front-row seat at a square window needs about 92 degrees,
+ * which bends the room badly at the corners, so past {@link SEAT_FOV_MAX_DEG} the
+ * view slides backwards instead — more distance shrinks the angle the screen
+ * subtends without touching the lens.
+ *
+ * `aspect` is width / height. Solved by bisection because the half-angle is not
+ * invertible in closed form once both screen edges are involved.
+ */
+export function seatCamera(
+  eye: { x: number; y: number; z: number },
+  aspect: number,
+): SeatCamera {
+  const maxFov = (SEAT_FOV_MAX_DEG * Math.PI) / 180;
+
+  if (fovForHalfAngles(halfAnglesAt(eye, 0), aspect) <= maxFov) {
+    const fov = fovForHalfAngles(halfAnglesAt(eye, 0), aspect);
+    return {
+      fovDeg: Math.max(SEAT_FOV_MIN_DEG, (fov * 180) / Math.PI),
+      dolly: 0,
+    };
+  }
+
+  // Need to move back. Bisect on extra depth; monotonic, so 24 steps is exact
+  // to well under a millimetre over this range.
+  let lo = 0;
+  let hi = SEAT_MAX_DOLLY;
+  for (let i = 0; i < 24; i += 1) {
+    const mid = (lo + hi) / 2;
+    if (fovForHalfAngles(halfAnglesAt(eye, mid), aspect) <= maxFov) hi = mid;
+    else lo = mid;
+  }
+
+  const atLimit = fovForHalfAngles(halfAnglesAt(eye, hi), aspect);
+  if (atLimit <= maxFov) return { fovDeg: SEAT_FOV_MAX_DEG, dolly: hi };
+
+  /*
+    Both knobs exhausted. This needs a window taller than it is wide — a 2.39:1
+    screen seen from a front-row seat through a 0.6 aspect viewport cannot be
+    contained by 82 degrees, and sliding further back would put the view behind
+    the rear row and eventually outside the room.
+
+    A cropped film is worse than a distorted room, because the film is the reason
+    anyone is sitting here, so the lens gives way last rather than never.
+  */
+  return {
+    fovDeg: Math.min(SEAT_FOV_ABSOLUTE_MAX_DEG, (atLimit * 180) / Math.PI),
+    dolly: hi,
+  };
+}
+
+/**
+ * Convenience wrapper kept for callers that only want the lens.
+ * Prefer {@link seatCamera}, which also reports the dolly needed.
+ */
+export function seatFovDeg(framing: SeatFraming, aspect: number): number {
+  const fov = fovForHalfAngles(
+    { h: framing.halfAngleH, v: framing.halfAngleV },
+    aspect,
+  );
+  return Math.min(
+    SEAT_FOV_MAX_DEG,
+    Math.max(SEAT_FOV_MIN_DEG, (fov * 180) / Math.PI),
+  );
+}
 
 const ROW_GEOMETRY: Record<SeatRow, { floorY: number; z: number }> = {
   A: { floorY: 0.0, z: 4.5 },
   B: { floorY: 0.45, z: 6.2 },
 };
 
-/** Seat pitch is 0.90 m. x is ordered left-to-right from the audience's view. */
-export const SEAT_X = [-1.35, -0.45, 0.45, 1.35] as const;
+/**
+ * Seat pitch is 1.20 m, x ordered left-to-right from the audience's view.
+ *
+ * Was 0.90 m, which left only 0.18 m between 0.719 m wide chairs — they read as
+ * a bench rather than separate recliners. 1.20 m gives 0.48 m. The outer chair
+ * edge lands at 2.16 m, which is why the aisle stairs were narrowed to start at
+ * 2.8 m: at the old 1.8 m they would now overlap the end seats.
+ */
+export const SEAT_PITCH = 1.2;
+export const SEAT_X = [-1.8, -0.6, 0.6, 1.8] as const;
 
 function buildSeats(): Seat[] {
   const seats: Seat[] = [];
@@ -162,21 +350,26 @@ function buildSeats(): Seat[] {
     const { floorY, z } = ROW_GEOMETRY[row];
     SEAT_X.forEach((x, i) => {
       const id = `${row}${i + 1}` as SeatId;
-      const { yawDeg, pitchDeg } = SEAT_AIM[id];
+      const eye = { x, y: floorY + SEATED_EYE_HEIGHT, z };
+      const framing = frameScreenFrom(eye);
+      const yawDeg = (framing.yaw * 180) / Math.PI;
       seats.push({
         id,
         row,
         position: { x, y: floorY, z },
-        eye: { x, y: floorY + SEATED_EYE_HEIGHT, z },
+        eye,
         pad: { x, y: floorY, z: z - 0.52 },
         view: {
-          yaw: yawDeg * D,
-          pitch: pitchDeg * D,
+          yaw: framing.yaw,
+          pitch: framing.pitch,
+          // Head limits stay relative to the neutral aim, so the clamp follows
+          // the seat instead of being baked around an old angle.
           yawMin: (yawDeg - HEAD_LIMITS.yaw) * D,
           yawMax: (yawDeg + HEAD_LIMITS.yaw) * D,
           pitchMin: HEAD_LIMITS.pitchDown * D,
           pitchMax: HEAD_LIMITS.pitchUp * D,
         },
+        framing,
       });
     });
   }
@@ -197,14 +390,41 @@ export function getSeat(id: SeatId): Seat {
 export const SIT_PROMPT_RADIUS = 1.0;
 
 /**
- * Lift applied to a seated avatar so its hips land on the cushion.
+ * Lift applied to a seated avatar so its body rests ON the cushion.
  *
- * An avatar's origin is between its feet, and the seated clip puts the hips
- * 0.461 m above that origin. The recliner's cushion measures 0.530 m above its
- * row floor. Dropping the avatar straight onto the floor therefore buries it
- * 69 mm into the seat.
+ * An avatar's origin is between its feet and the seated clip puts the hips
+ * 0.461 m above it, against a cushion 0.530 m above the row floor. The old
+ * 0.069 value came from aligning the hip JOINT with the cushion surface, which
+ * is the wrong test: the buttock mesh hangs ~80 mm below that joint, so the
+ * body sank into the seat. Measured against the skinned mesh in Blender, 644 of
+ * 3980 body vertices were inside the chair solid — buttocks and thighs up to
+ * 79 mm deep, shins up to 123 mm, feet up to 103 mm.
+ *
+ * Solved numerically by sweeping lift against the chair's collision geometry:
+ * this is the smallest value that leaves zero vertices inside the chair, with
+ * the underside 2.1 mm clear of the cushion.
+ *
+ * Coupled to the cushion height and to SEATED_AVATAR_FORWARD — all three move
+ * together or the body clips again.
  */
-export const SEATED_AVATAR_LIFT = 0.069;
+export const SEATED_AVATAR_LIFT = 0.199;
+
+/**
+ * Forward offset, metres toward the screen, for a seated avatar's body.
+ *
+ * The seat pan is 0.58 m deep (z 4.16 to 4.74 on row A) but this avatar's thigh
+ * is only 0.31 m long, so parking its origin on the chair origin left the shins
+ * descending straight down THROUGH the cushion at z ≈ 4.37 and the feet tucked
+ * under the seat on the chair's base — the "knees inside the chair" this fixes.
+ * The back was buried in the backrest by up to 59 mm at the same time.
+ *
+ * 0.30 m puts the knees 95 mm clear of the pan's front edge so the lower legs
+ * hang in free air, and brings the back to z 4.694, just off the backrest face.
+ * Because the pan is deeper than the thigh is long, the occupant cannot both
+ * touch the backrest and clear the front edge; clearing the front edge wins,
+ * since clipping through upholstery is far more visible than a small gap.
+ */
+export const SEATED_AVATAR_FORWARD = 0.3;
 
 /**
  * Body yaw, degrees, for someone sitting in a seat.
@@ -236,7 +456,7 @@ export function seatedAvatarPose(seatId: SeatId): {
   return {
     x: seat.position.x,
     y: seat.position.y + SEATED_AVATAR_LIFT,
-    z: seat.position.z,
+    z: seat.position.z - SEATED_AVATAR_FORWARD,
     r: SEATED_BODY_YAW_DEG,
   };
 }

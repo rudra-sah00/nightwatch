@@ -3,6 +3,7 @@ import {
   assignPassiveSeats,
   getSeat,
   SEAT_IDS,
+  SEATED_AVATAR_FORWARD,
   SEATED_AVATAR_LIFT,
   SEATED_BODY_YAW_DEG,
   seatedAvatarPose,
@@ -17,9 +18,21 @@ describe('seatedAvatarPose', () => {
     const pose = seatedAvatarPose('A2');
     const seat = getSeat('A2');
     expect(pose.x).toBe(seat.position.x);
-    expect(pose.z).toBe(seat.position.z);
     // the pad is 0.52 m in front — the bug was publishing that instead
-    expect(Math.abs(pose.z - seat.pad.z)).toBeGreaterThan(0.3);
+    expect(pose.z).toBeGreaterThan(seat.pad.z);
+    expect(Math.abs(pose.z - seat.pad.z)).toBeCloseTo(0.22, 6);
+  });
+
+  it('sits the body forward of the chair origin so the legs clear the pan', () => {
+    const pose = seatedAvatarPose('A2');
+    const seat = getSeat('A2');
+    // The pan is 0.58 m deep but the thigh only 0.31 m, so parking the origin
+    // on the chair origin drove the shins down through the cushion.
+    expect(seat.position.z - pose.z).toBeCloseTo(SEATED_AVATAR_FORWARD, 6);
+    expect(SEATED_AVATAR_FORWARD).toBeGreaterThan(0);
+    // still within the pan footprint, measured in Blender as z 4.16 to 4.74
+    expect(pose.z).toBeGreaterThan(4.16);
+    expect(pose.z).toBeLessThan(4.74);
   });
 
   it('lifts the avatar onto the cushion rather than burying it in the seat', () => {
@@ -28,7 +41,9 @@ describe('seatedAvatarPose', () => {
       getSeat('A2').position.y + SEATED_AVATAR_LIFT,
       6,
     );
-    expect(SEATED_AVATAR_LIFT).toBeGreaterThan(0);
+    // The buttock mesh hangs ~80 mm below the hip joint, so aligning the joint
+    // with the 0.530 m cushion is not enough to keep the body out of it.
+    expect(SEATED_AVATAR_LIFT).toBeGreaterThan(0.08);
   });
 
   it('faces the screen', () => {

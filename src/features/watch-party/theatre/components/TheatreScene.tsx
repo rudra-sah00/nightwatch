@@ -10,6 +10,7 @@ import { usePlayerContext } from '@/features/watch/player/context/PlayerContext'
 import type { RTMMessage } from '../../room/types/rtm-messages';
 import { useDanceMenu } from '../hooks/use-dance-menu';
 import { useDanceSpace } from '../hooks/use-dance-space';
+import { useGateInteraction } from '../hooks/use-gate-interaction';
 import { usePointerLook } from '../hooks/use-pointer-look';
 import { useSeatOccupancy } from '../hooks/use-seat-occupancy';
 import { useSeatedCamera } from '../hooks/use-seated-camera';
@@ -32,6 +33,7 @@ import { createStats } from '../lib/theatre-stats';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
 import { DanceWheel } from './DanceWheel';
+import { LocalAvatar } from './LocalAvatar';
 import { LocalPlayer } from './LocalPlayer';
 import { PassiveAvatars } from './PassiveAvatars';
 import { RemoteAvatars } from './RemoteAvatar';
@@ -116,6 +118,14 @@ export function TheatreScene({
     hovered: number | null;
   }>({ open: false, origin: { x: 0, y: 0 }, hovered: null });
 
+  /**
+   * Whether the local player is standing at the cafe doors.
+   *
+   * Reported up from inside the Canvas for the same reason as the wheel: the
+   * proximity test needs the live camera position, the prompt is DOM.
+   */
+  const [gateInRange, setGateInRange] = useState(false);
+
   const stats = useRef(createStats());
   useEffect(() => {
     const id = setInterval(() => {
@@ -179,7 +189,10 @@ export function TheatreScene({
         <TheatreLighting seated={mySeat !== null} cinema={cinema} />
 
         <Suspense fallback={null}>
-          <TheatreRoom url={assets.models.room} />
+          <RoomWithDoors
+            url={assets.models.room}
+            onGateRangeChange={setGateInRange}
+          />
           <TheatreSeating
             url={assets.models.chair}
             seatMap={seatMap}
@@ -211,6 +224,8 @@ export function TheatreScene({
           />
           <SceneInterior
             videoRef={videoRef}
+            userId={userId}
+            avatarUrl={resolveCharacterModel('man')}
             onTogglePlay={readOnly ? undefined : playerHandlers.togglePlay}
             seatMap={seatMap}
             mySeat={mySeat}
@@ -233,6 +248,14 @@ export function TheatreScene({
       />
       <TheatreStatsHud stats={stats} />
       <SitPrompt seatMap={seatMap} mySeat={mySeat} />
+      {/* Standing at the doors takes precedence in the prompt: the seat prompt
+          cannot be showing at the same time, because the gate is 1.3 m beyond
+          the furthest seat pad's radius. */}
+      {gateInRange && mySeat === null ? (
+        <div className="pointer-events-none absolute bottom-16 left-1/2 -translate-x-1/2 rounded-md bg-black/70 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80">
+          Press E to open the cafe doors
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -250,6 +273,30 @@ export function TheatreScene({
  * <Physics />" on mount, which took out the page rather than just the dance
  * feature.
  */
+/**
+ * The room, plus the cafe doors it contains.
+ *
+ * Exists only because `useGateInteraction` needs `useThree` to read the camera
+ * position, and `TheatreScene` sits outside the Canvas — it renders it. The door
+ * prompt is a DOM overlay outside the Canvas, so proximity is reported upwards
+ * rather than rendered here.
+ */
+function RoomWithDoors({
+  url,
+  onGateRangeChange,
+}: {
+  url: string;
+  onGateRangeChange: (inRange: boolean) => void;
+}) {
+  const gate = useGateInteraction(true);
+
+  useEffect(() => {
+    onGateRangeChange(gate.inRange);
+  }, [gate.inRange, onGateRangeChange]);
+
+  return <TheatreRoom url={url} gateProgress={gate.progress} />;
+}
+
 function DanceSpaceProbe({
   bodyRef,
   canDanceRef,
@@ -284,6 +331,8 @@ function SceneInterior({
   cinema,
   onPose,
   onWheelChange,
+  userId,
+  avatarUrl,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   onTogglePlay?: () => void;
@@ -291,6 +340,10 @@ function SceneInterior({
   mySeat: ReturnType<typeof useSeatOccupancy>['mySeat'];
   claimSeat: ReturnType<typeof useSeatOccupancy>['claimSeat'];
   cinema: boolean;
+  /** Local user id, for the identity colour peers also see. */
+  userId: string;
+  /** Local user's avatar glb, or null when the manifest has none. */
+  avatarUrl: string | null;
   onPose: (p: Pose) => void;
   onWheelChange: (w: {
     open: boolean;
@@ -428,6 +481,18 @@ function SceneInterior({
   // disabled in both so the two never fight over camera.position.
   useSeatedCamera({ seatId: mySeat, enabled: seated || cinema });
 
+  /*
+    How far the dance camera has pulled back, mirrored into state so the local
+    avatar can be revealed.
+
+    Kept as state rather than a ref because `LocalAvatar` has to re-render to
+    become visible, and `LocalPlayer` only reports it when it changes by more
+    than a centimetre — so this settles within the glide and then stops, instead
+    of setting state every frame.
+  */
+  const [cameraDistance, setCameraDistance] = useState(0);
+  const danceIndex = dance ? DANCE_CLIPS.indexOf(dance) : -1;
+
   return (
     <>
       <TheatreScreen texture={texture} onTogglePlay={onTogglePlay} />
@@ -442,7 +507,20 @@ function SceneInterior({
           enabled={walking}
           onPose={recordAndPublish}
           bodyRef={playerBody}
+          dancing={Boolean(dance) && walking}
+          onCameraDistance={setCameraDistance}
         />
+        {/* Only mounted while the camera is off the head — there is nothing to
+            see in first person, and this is a full skinned character. */}
+        {cameraDistance > 0.05 && avatarUrl ? (
+          <LocalAvatar
+            url={avatarUrl}
+            selfId={userId}
+            body={playerBody}
+            danceIndex={danceIndex >= 0 ? danceIndex : null}
+            cameraDistance={cameraDistance}
+          />
+        ) : null}
       </Physics>
     </>
   );

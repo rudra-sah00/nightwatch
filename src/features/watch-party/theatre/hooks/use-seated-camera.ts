@@ -2,12 +2,13 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
-import { Euler, Vector3 } from 'three';
+import { Euler, PerspectiveCamera, Vector3 } from 'three';
 import {
   clampToSeatView,
   getSeat,
   type Seat,
   type SeatId,
+  seatCamera,
 } from '../lib/layout';
 
 /** Radians per pixel of pointer drag. */
@@ -112,7 +113,29 @@ export function useSeatedCamera({
     currentYaw.current += (targetYaw.current - currentYaw.current) * k;
     currentPitch.current += (targetPitch.current - currentPitch.current) * k;
 
-    eye.current.set(seat.eye.x, seat.eye.y, seat.eye.z);
+    /*
+      Fit the whole screen, whatever shape the window is.
+
+      A fixed 60 degree vertical FOV crops a 2.39:1 screen from the outer front
+      seats as soon as the viewport narrows, because horizontal FOV is derived
+      from the vertical one and the aspect. `seatCamera` returns the lens and, if
+      the lens alone cannot do it, how far to slide back. Recomputed per frame
+      because the user can resize the window at any time, and it is a handful of
+      trig calls.
+    */
+    if (camera instanceof PerspectiveCamera) {
+      const { fovDeg, dolly } = seatCamera(seat.eye, camera.aspect);
+      if (Math.abs(camera.fov - fovDeg) > 0.01) {
+        camera.fov = fovDeg;
+        camera.updateProjectionMatrix();
+      }
+      // Slide straight back from the screen, keeping the seat's own height and
+      // lateral offset so the geometry the aim was computed from still holds.
+      eye.current.set(seat.eye.x, seat.eye.y, seat.eye.z + dolly);
+    } else {
+      eye.current.set(seat.eye.x, seat.eye.y, seat.eye.z);
+    }
+
     camera.position.lerp(eye.current, k);
 
     // YXZ so yaw applies before pitch and the horizon never rolls
