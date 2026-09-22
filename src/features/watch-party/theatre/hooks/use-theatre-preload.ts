@@ -9,6 +9,7 @@ import {
   downloadAll,
   isAbortError,
 } from '../lib/asset-download';
+import { attachKtx2, isKtx2Ready } from '../lib/ktx2';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModels } from '../types';
 import { useTheatreAssets } from './use-theatre-assets';
@@ -136,10 +137,22 @@ export function useTheatrePreload() {
 
         completed.current = result.completed;
 
-        // Warm drei's cache. Served from the HTTP cache — the objects are
-        // published immutable — so this re-request costs no transfer.
-        for (const url of urls) {
-          useGLTF.preload(url);
+        /*
+          Warm drei's cache. Served from the HTTP cache — the objects are
+          published immutable — so this re-request costs no transfer.
+
+          Skipped until a Canvas has existed once. From v3 the textures are KTX2,
+          and parsing one before `detectKtx2Support` has seen a renderer rejects —
+          which drei would then cache, so every later load of that url would fail
+          from the cache rather than retry. The renderer only exists inside the
+          Canvas, and on first entry that has not mounted yet. Nothing is lost:
+          the bytes are already on the machine, so the parse simply happens on
+          first use instead of here.
+        */
+        if (isKtx2Ready()) {
+          for (const url of urls) {
+            useGLTF.preload(url, false, false, attachKtx2);
+          }
         }
 
         setAttempt(1);

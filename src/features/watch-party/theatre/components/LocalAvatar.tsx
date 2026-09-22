@@ -1,12 +1,12 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import type { RapierRigidBody } from '@react-three/rapier';
 import { useEffect, useMemo, useRef } from 'react';
 import type { Group } from 'three';
 import { useAvatarAnimation } from '../hooks/use-avatar-animation';
 import { CAPSULE_CENTRE_TO_FEET } from '../hooks/use-avatar-controls';
+import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 import { DANCE_CLIPS } from '../lib/animation';
 import { applyIdentityColour, instantiateAvatar } from '../lib/avatar-instance';
 
@@ -52,7 +52,7 @@ export function LocalAvatar({
   danceIndex,
   cameraDistance,
 }: LocalAvatarProps) {
-  const { scene, animations } = useGLTF(url);
+  const { scene, animations } = useTheatreGltf(url);
   const group = useRef<Group>(null);
 
   // Cloned with SkeletonUtils via instantiateAvatar: a plain Object3D.clone()

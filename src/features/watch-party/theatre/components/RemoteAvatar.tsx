@@ -1,11 +1,11 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import type { Group } from 'three';
 import { MathUtils } from 'three';
 import { useAvatarAnimation } from '../hooks/use-avatar-animation';
+import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 import { type AvatarState, DANCE_CLIPS } from '../lib/animation';
 import {
   applyIdentityColour,
@@ -50,7 +50,7 @@ export function RemoteAvatar({
   name,
   message,
 }: RemoteAvatarProps) {
-  const { scene, animations } = useGLTF(url);
+  const { scene, animations } = useTheatreGltf(url);
   const group = useRef<Group>(null);
 
   // Colour is applied per instance, on cloned materials, so each peer is

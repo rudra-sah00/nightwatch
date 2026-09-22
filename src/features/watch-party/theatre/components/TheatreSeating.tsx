@@ -1,8 +1,8 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
 import { useMemo } from 'react';
 import { Mesh } from 'three';
+import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 import { SEATS, type Seat, type SeatId } from '../lib/layout';
 
 /** Seat pad tint encodes occupancy so the room reads at a glance. */
@@ -31,7 +31,7 @@ export function TheatreSeating({
   seatMap,
   highlightedSeat = null,
 }: TheatreSeatingProps) {
-  const { scene } = useGLTF(url);
+  const { scene } = useTheatreGltf(url);
 
   // Pull the single chair mesh out of the loaded glb so it can be reused.
   const chair = useMemo(() => {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
 import { useEffect, useMemo } from 'react';
 import { Mesh } from 'three';
+import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 import { GATE } from '../lib/layout';
 
 interface TheatreRoomProps {
@@ -22,7 +22,7 @@ interface TheatreRoomProps {
  * not in a transform on this component.
  */
 export function TheatreRoom({ url, gateProgress = 0 }: TheatreRoomProps) {
-  const { scene } = useGLTF(url);
+  const { scene } = useTheatreGltf(url);
 
   /**
    * The two cafe door leaves, which are the only moving parts of the room.

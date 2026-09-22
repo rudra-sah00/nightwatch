@@ -195,7 +195,18 @@ export function TheatreScene({
   return (
     <div className="relative h-full w-full">
       <Canvas
-        dpr={[1, 2]}
+        /*
+          Capped at 1.5, not 2.
+
+          The scene is fragment-bound, not geometry-bound: ~12,000 triangles lit by
+          16 point and area lights, so cost scales with pixels shaded rather than
+          with what is in the room. At dpr 2 a Retina display renders four times the
+          pixels of a 1x buffer; 1.5 renders 2.25x, about 44% less work, and with
+          `antialias` still on the difference is hard to see on a display that dense.
+          This is the cheapest frame-time win available here and it costs no asset
+          work.
+        */
+        dpr={[1, 1.5]}
         shadows
         camera={{
           position: [SPAWN.x, SPAWN.y + STANDING_EYE_HEIGHT, SPAWN.z],

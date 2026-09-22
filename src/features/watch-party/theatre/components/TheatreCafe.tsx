@@ -1,8 +1,8 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
 import { useEffect, useMemo } from 'react';
 import { Mesh } from 'three';
+import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 
 interface TheatreCafeProps {
   /** cafe.glb url from the backend manifest */
@@ -26,7 +26,7 @@ interface TheatreCafeProps {
  * mounts at identity with no transform — same as `TheatreRoom`.
  */
 export function TheatreCafe({ url }: TheatreCafeProps) {
-  const { scene } = useGLTF(url);
+  const { scene } = useTheatreGltf(url);
 
   /**
    * `cafe.glb` carries its own copy of the gate.

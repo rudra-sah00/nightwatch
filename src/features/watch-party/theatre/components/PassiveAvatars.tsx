@@ -1,9 +1,9 @@
 'use client';
 
-import { useGLTF } from '@react-three/drei';
 import { useEffect, useMemo } from 'react';
 import { MathUtils } from 'three';
 import { useAvatarAnimation } from '../hooks/use-avatar-animation';
+import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 import { applyIdentityColour, instantiateAvatar } from '../lib/avatar-instance';
 import {
   assignPassiveSeats,
@@ -93,7 +93,7 @@ function PassiveAvatar({
   name?: string;
   message?: string | null;
 }) {
-  const { scene, animations } = useGLTF(url);
+  const { scene, animations } = useTheatreGltf(url);
 
   // Same SkeletonUtils clone as RemoteAvatar: a plain clone would share the
   // skeleton and make every passive avatar animate in lockstep with the others.
