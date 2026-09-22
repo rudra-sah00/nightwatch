@@ -6,7 +6,9 @@
  * hook in `use-theatre-preload.ts` is a thin wrapper that pipes these callbacks
  * into the view store.
  *
- * The theatre is ~38 MB across five files. That is large enough that a single
+ * The theatre is the character models now that the room is generated in code —
+ * roughly 13 MB across two files, down from ~38 MB across five. Still large
+ * enough that a single
  * dropped connection part-way through used to throw away everything already
  * downloaded, so the rules here are:
  *

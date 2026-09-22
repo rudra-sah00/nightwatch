@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { FLOORS, GATE, ROOM } from '@/features/watch-party/theatre/lib/layout';
+import { ROOM } from '@/features/watch-party/theatre/lib/layout';
 import {
   AMBIENT,
   approach,
-  CAFE,
   COVES,
   DIM_FADE_SECONDS,
   HEMI,
@@ -110,41 +109,14 @@ describe('the rig itself', () => {
     expect(step.level.dim / step.level.house).toBeGreaterThan(0.5);
   });
 
-  it('places every fixture inside the room it belongs to', () => {
-    const cafeIds = new Set(CAFE.map((f) => f.id));
+  it('places every fixture inside the room', () => {
     for (const f of [...POINT_FIXTURES, ...COVES]) {
       const [x, y, z] = f.position;
       expect(Math.abs(x), f.id).toBeLessThanOrEqual(ROOM.maxX + 0.5);
       expect(y, f.id).toBeGreaterThan(ROOM.floorY);
-      if (cafeIds.has(f.id)) {
-        // The cafe is its own room through the gate, with a lower ceiling
-        // (Cafe_Shell tops out at y 3.60) and its floor at 0.45.
-        expect(y, f.id).toBeLessThanOrEqual(3.6);
-        expect(z, f.id).toBeGreaterThanOrEqual(FLOORS.cafe.minZ);
-        expect(z, f.id).toBeLessThanOrEqual(FLOORS.cafe.maxZ);
-      } else {
-        expect(y, f.id).toBeLessThanOrEqual(ROOM.wallTopY);
-        expect(z, f.id).toBeGreaterThanOrEqual(ROOM.minZ);
-        expect(z, f.id).toBeLessThanOrEqual(ROOM.maxZ);
-      }
-    }
-  });
-
-  it('gives the cafe its own fixtures, since no auditorium light reaches it', () => {
-    // Every auditorium fixture stops at the back wall; the furthest is the exit
-    // glow at z 8.1, and the gate is at 8.6. Without these the cafe rendered as
-    // a dark box.
-    expect(CAFE.length).toBeGreaterThan(0);
-    for (const f of CAFE) {
-      expect(f.position[2], f.id).toBeGreaterThan(GATE.z);
-    }
-  });
-
-  it('keeps the cafe lit while the film runs, like a real lobby', () => {
-    // The dim state only means THIS viewer sat down. The cafe may well have
-    // someone else in it, and it is visible through the glazed doors.
-    for (const f of CAFE) {
-      expect(f.level.dim / f.level.house, f.id).toBeGreaterThan(0.3);
+      expect(y, f.id).toBeLessThanOrEqual(ROOM.wallTopY);
+      expect(z, f.id).toBeGreaterThanOrEqual(ROOM.minZ);
+      expect(z, f.id).toBeLessThanOrEqual(ROOM.maxZ);
     }
   });
 
@@ -158,13 +130,13 @@ describe('the rig itself', () => {
     // Plus ambient, hemisphere, one directional, and the screen's own
     // RectAreaLight in TheatreScreen.
     //
-    // Raised from 12 to 16 when the cafe was mounted and lit. Every point light
-    // is a fixed per-fragment cost in a forward renderer whether or not it can
-    // reach the surface being shaded, so a wall does not make its light free —
-    // this is a real increase, accepted because the alternative was a dark room.
-    // If frame cost becomes a problem the cafe group is the one to gate on
-    // proximity, since it is the only group that is out of sight most of the time.
-    expect(POINT_FIXTURES.length + COVES.length).toBeLessThanOrEqual(16);
+    // Back down to 12 from 16 now the cafe and its four fixtures are gone.
+    // Every point light is a fixed per-fragment cost in a forward renderer
+    // whether or not it can reach the surface being shaded, so a wall does not
+    // make its light free. This is the cheapest lever in the whole rig: the
+    // cost curve is superlinear past roughly 16 punctual lights, where each
+    // extra one costs about twice the previous.
+    expect(POINT_FIXTURES.length + COVES.length).toBeLessThanOrEqual(12);
   });
 
   it('has unique fixture ids, since they are React keys', () => {
@@ -330,127 +302,5 @@ describe('measured illumination', () => {
     expect(riser).toBeDefined();
     if (!riser) return;
     expect(displayed(riser.p, riser.n, riser.albedo, 0)).toBeGreaterThan(100);
-  });
-});
-
-/**
- * Cafe surfaces, sampled from the objects in `cafe.glb`.
- *
- * This is the check that actually corresponds to the reported bug. Before the cafe
- * fixtures existed, the only thing reaching these points was flat ambient plus
- * hemisphere — the nearest auditorium fixture is the exit glow at z 8.1, behind a
- * wall and 1.5 m short of the gate — so every one of them sat in the low teens.
- */
-const CAFE_SURFACES: Array<{
-  name: string;
-  p: Vec3;
-  n: Vec3;
-  albedo: number;
-}> = [
-  // Floor under the pendant cluster and the tables.
-  {
-    name: 'cafe floor @ tables',
-    p: [0, 0.45, 10.7],
-    n: [0, 1, 0],
-    albedo: 0.1,
-  },
-  // Just inside the doors, the first thing you see walking through.
-  { name: 'cafe floor @ gate', p: [0, 0.45, 9.0], n: [0, 1, 0], albedo: 0.1 },
-  // Counter top, where the popcorn is served.
-  {
-    name: 'counter top',
-    p: [-1.65, 1.35, 12.5],
-    n: [0, 1, 0],
-    albedo: 0.18,
-  },
-  // Menu board face, which looks back toward the doors (-Z).
-  {
-    name: 'menu board',
-    p: [2.4, 2.1, 14.17],
-    n: [0, 0, -1],
-    albedo: 0.18,
-  },
-  // Far wall of the shell, behind the back bar.
-  { name: 'cafe back wall', p: [0, 1.6, 14.4], n: [0, 0, -1], albedo: 0.18 },
-];
-
-describe('cafe illumination', () => {
-  /**
-   * Anchors the bug as it actually was, which is NOT that every surface metered
-   * black — ambient plus hemisphere put a 0.18-albedo wall at 105 of 255. It is
-   * that the light was perfectly FLAT: with no fixture past the auditorium's back
-   * wall, every point of a given albedo read the same value wherever it sat, so
-   * the room had no pools, no falloff and no modelled form. Combined with
-   * `cafe.glb` never being mounted at all, walking through the doors showed a
-   * dark, featureless void.
-   */
-  it('reproduces the flat, unlit cafe that was reported', () => {
-    const flat = AMBIENT.house + HEMI.house;
-    const floor = Math.round(srgbEncode(aces((0.1 * flat) / Math.PI)) * 255);
-    const wall = Math.round(srgbEncode(aces((0.18 * flat) / Math.PI)) * 255);
-
-    // The floor really was dark; the walls were merely featureless.
-    expect(floor).toBeLessThan(75);
-    expect(wall).toBeLessThan(120);
-
-    // The diagnostic property: position made no difference whatsoever.
-    for (const s of CAFE_SURFACES) {
-      const asIfUnlit = Math.round(
-        srgbEncode(aces((s.albedo * flat) / Math.PI)) * 255,
-      );
-      expect(asIfUnlit, s.name).toBe(s.albedo === 0.1 ? floor : wall);
-    }
-  });
-
-  it('now varies with position, so the room has modelled form', () => {
-    const underPendants = displayed([0, 0.45, 10.7], [0, 1, 0], 0.1, 1);
-    /*
-      A far corner, chosen to be outside every fixture's cutoff — including the
-      auditorium's exit glow, which at z 8.1 with a 4.5 m radius genuinely does
-      reach through the gate wall into the doorway. None of the point lights in
-      this rig cast shadows, so that leak is real in the renderer and not an
-      artifact of this analytic model; the first version of this test compared
-      against the doorway and failed because of it.
-    */
-    const farCorner = displayed([4.2, 0.45, 9.2], [0, 1, 0], 0.1, 1);
-    expect(underPendants).toBeGreaterThan(farCorner);
-  });
-
-  it('lights the cafe floor enough to walk on', () => {
-    for (const s of CAFE_SURFACES.filter((x) =>
-      x.name.startsWith('cafe floor'),
-    )) {
-      expect(displayed(s.p, s.n, s.albedo, 1), s.name).toBeGreaterThan(60);
-    }
-  });
-
-  it('makes the counter and the menu board readable', () => {
-    for (const s of CAFE_SURFACES.filter(
-      (x) => x.name === 'counter top' || x.name === 'menu board',
-    )) {
-      expect(displayed(s.p, s.n, s.albedo, 1), s.name).toBeGreaterThan(110);
-    }
-  });
-
-  it('does not blow any cafe surface out to white', () => {
-    for (const s of CAFE_SURFACES) {
-      expect(displayed(s.p, s.n, s.albedo, 1), s.name).toBeLessThan(250);
-    }
-  });
-
-  it('is brighter than it was before the fixtures were added', () => {
-    const flat = AMBIENT.house + HEMI.house;
-    for (const s of CAFE_SURFACES) {
-      const before = Math.round(
-        srgbEncode(aces((s.albedo * flat) / Math.PI)) * 255,
-      );
-      expect(displayed(s.p, s.n, s.albedo, 1), s.name).toBeGreaterThan(before);
-    }
-  });
-
-  it('stays usable while the film runs, since the lobby does not go dark', () => {
-    for (const s of CAFE_SURFACES) {
-      expect(displayed(s.p, s.n, s.albedo, 0), s.name).toBeGreaterThan(40);
-    }
   });
 });

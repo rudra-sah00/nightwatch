@@ -1,9 +1,10 @@
 # 3D Theatre Mode — Design Specification
 
-> **Status: SPEC — not implemented.** This document defines what we are building
-> before we build it. Every other doc in `docs/features/` describes shipped
-> behaviour; this one describes intent. Update it as decisions change, and
-> rewrite it as an as-built doc once the feature ships.
+> **Status: PART BUILT.** Most of this is shipped — see §1b for what is and is
+> not. Sections still describing intent rather than behaviour say so inline.
+> `layout.ts` and `lib/geometry/` are the source of truth for anything
+> dimensional; where this document disagrees with them, they win and this is
+> stale.
 
 An optional mode for a Watch Party that replaces the flat sidebar-plus-video
 layout with a navigable 3D screening room. The host's stream plays on a cinema
@@ -45,14 +46,15 @@ only changes *where the pixels are displayed*.
 
 ## 1b. Implementation Status
 
-Last synced with the code: 2026-09-21.
+Last synced with the code: 2026-09-23.
 
 ### Built and verified
 
 | Area | Module | Notes |
 |---|---|---|
-| Scene constants | `theatre/lib/layout.ts` | Single source of truth, measured from Blender |
-| Canvas + room + seating | `theatre/components/TheatreScene/TheatreRoom/TheatreSeating.tsx` | Chair glb loaded once, reused across 8 seats |
+| Scene constants | `theatre/lib/layout.ts` | Single source of truth |
+| Room + chair geometry | `theatre/lib/geometry/` | Generated in code — no `room.glb`, no `chair.glb`. 22 draw calls (§3) |
+| Canvas + room + seating | `theatre/components/TheatreScene/TheatreRoom/TheatreSeating.tsx` | Room and all eight chairs batched per material |
 | Walking | `theatre/hooks/use-avatar-controls.ts` + `components/LocalPlayer.tsx` | Rapier kinematic controller, WASD + Shift |
 | Collision | `theatre/components/TheatreColliders.tsx` | Static boxes from `layout.ts`, not a trimesh |
 | Networking | `theatre/hooks/use-theatre-network.ts` | Agora RTM, 8 Hz + dead band |
@@ -60,9 +62,9 @@ Last synced with the code: 2026-09-21.
 | Remote avatars | `theatre/components/RemoteAvatar.tsx` | `SkeletonUtils` clone per peer |
 | Animation | `theatre/hooks/use-avatar-animation.ts` + `lib/animation.ts` | Mixer + crossfade state machine |
 | Seated camera | `theatre/hooks/use-seated-camera.ts` | Per-seat head cone clamp |
-| Asset manifest | `theatre/api.ts` + `hooks/use-theatre-assets.ts` | Backend-owned URLs |
+| Asset manifest | `theatre/api.ts` + `hooks/use-theatre-assets.ts` | Backend-owned URLs. Characters only now the room is generated |
 | View modes | `theatre/lib/view-mode.ts` + `hooks/use-view-mode-hotkey.ts` | `V` cycles 2D → 3D → screen focus |
-| Opt-in download | `theatre/hooks/use-theatre-preload.ts` | Nothing fetched until enabled in settings |
+| Opt-in download | `theatre/hooks/use-theatre-preload.ts` | Nothing fetched until enabled in settings. ~13 MB of characters, was ~38 MB |
 
 ### Not yet built
 
@@ -96,11 +98,11 @@ Two export traps worth remembering:
 
 ## 2. Scene Specification
 
-> **Status: BUILT.** Every number below is measured from the Blender scene, which
-> is the source of truth (kept outside the repo — it is a ~158 MB binary). These
-> values are mirrored in `src/features/watch-party/theatre/lib/layout.ts`, which
-> is what the runtime reads. If this document and `layout.ts` ever disagree,
-> `layout.ts` wins and this document is stale.
+> **Status: BUILT.** `src/features/watch-party/theatre/lib/layout.ts` is the
+> source of truth and the room geometry is generated from it (§3). The figures
+> below were originally measured from a Blender scene; that scene is now a
+> reference for surface detail only, not an asset in the pipeline. If this
+> document and `layout.ts` ever disagree, `layout.ts` wins and this is stale.
 >
 > The original draft of this section described a 6 m room with 0.70 m seat pitch
 > and a 5 m screen. The room as built is 8 m wide with 0.90 m pitch and a 7 m
@@ -120,13 +122,13 @@ Three.js convention: **Y up, metres, right-handed.**
 | Dimension | Value |
 |---|---|
 | Width | 8.0 m (`X` from −4.0 to +4.0) |
-| Depth | 8.5 m auditorium (`Z` 0 → 8.5), plus a café room `Z` 8.7 → 14.2 |
+| Depth | 8.5 m (`Z` 0 → 8.5) |
 | Wall top | 4.6 m |
 | Ceiling soffit | 4.35 m (coffered) |
 
-The auditorium connects to a **café room** through a 2.60 × 2.30 m gate in the
-back wall at `Z` 8.5–8.7. Both floors sit at `Y = 0.45` there, so it is walkable
-in one continuous surface — 19.8 m from screen wall to café back wall.
+The back wall is solid. A café room used to sit behind it through glazed double
+doors; both are gone, because the doors' transmissive glass cost a full extra
+scene pass — see §3.
 
 ### Screen
 
@@ -151,10 +153,11 @@ Two rows, four seats each. Rear row on a raised platform.
 
 | Row | Floor `Y` | `Z` | Seat `X` positions |
 |---|---|---|---|
-| A (front) | 0.00 | 4.5 | −1.35, −0.45, +0.45, +1.35 |
-| B (rear) | 0.45 | 6.2 | −1.35, −0.45, +0.45, +1.35 |
+| A (front) | 0.00 | 4.5 | −1.8, −0.6, +0.6, +1.8 |
+| B (rear) | 0.45 | 6.2 | −1.8, −0.6, +0.6, +1.8 |
 
-- Seat spacing **0.90 m** (premium recliner pitch, not multiplex)
+- Seat spacing **1.2 m** (`SEAT_PITCH`), premium recliner pitch, not multiplex.
+  The chair is 0.719 m wide, so that leaves a 0.48 m gap to walk between them.
 - Row pitch 1.7 m
 - Step riser at `Z = 5.3`, 0.45 m tall
 - Rear platform spans `Z` 5.3 → 8.5 at `Y = 0.45`
@@ -166,7 +169,7 @@ across the riser face between the stairs blocks the shortcut, and the character
 controller's slope limit stops you walking up the drop.
 
 Seat IDs are `A1`–`A4` and `B1`–`B4`, numbered left to right from the
-audience's point of view (i.e. `A1` is at `X = −1.35`).
+audience's point of view (i.e. `A1` is at `X = −1.8`).
 
 Each seat also carries a **`SEATPAD_<id>`** marker: a thin emissive floor pad
 0.52 m in front of the chair, at the spot an avatar stands to sit down. These
@@ -205,136 +208,128 @@ Each seat's neutral aim points at screen centre, so off-axis seats are pre-rotat
 all eight seats both screen edges fall inside the cone**, so the clamp never fights
 the thing you are there to watch.
 
-Anchors are baked in Blender as `SEATVIEW_<id>` empties carrying the limits as
-custom properties, and mirrored into `layout.ts` for the runtime.
+Anchors are `SEATVIEW_<id>` transforms in `layout.ts`, carrying each seat's
+neutral aim and its head-cone limits.
 
 ### Spawn & circulation
 
-- Spawn at `(0, 0.45, 11.0)` — rear platform, facing the screen
-- Players walk forward and **step down** into Row A, which gives the natural
-  "walking down the aisle" feel
-- Clear side aisles: seats span 2.8 m in a 6.0 m room, leaving 1.6 m each side
+- Spawn at `(0, 0.45, 7.8)` — rear platform, facing the screen (`SPAWN`)
+- Players walk forward and **step down** into Row A via the aisle stairs, which
+  gives the natural "walking down the aisle" feel
+- Seats span |x| ≤ 2.16 in an 8.0 m room, leaving the 1.2 m stair runs each side
+
+### Reachability — tighter than it looks
+
+**You cannot walk between two chairs, and that is deliberate.** At 1.2 m pitch
+with a 0.719 m chair the gap is 0.482 m against a 0.56 m player capsule. The
+seats are contiguous (there is no centre aisle), so a seat is only ever
+approached from its `SEATPAD_<id>` in front of it.
+
+That makes the band in front of each row load-bearing:
+
+| Row | Floor starts | Chair face | Standing band |
+|---|---|---|---|
+| A | z 0.0 | z 4.16 | the whole front floor |
+| B | z 5.30 | z 5.86 | **0.56 m — exactly one capsule diameter** |
+
+Row B has no margin. It works because sitting only requires being within
+`SIT_PROMPT_RADIUS` (1.0 m) of the pad rather than standing exactly on it, so the
+capsule can sit flush against the chair face and still trigger. Deepen the chair
+or move Row B forward and the rear row becomes unreachable. `collision.test.ts`
+asserts both the band and the prompt reach.
+
+Avatars carry **no colliders** — only the local player has a body. Eight capsules
+shoving each other turns a shared row into a scrum, and remote poses arrive
+interpolated ~160 ms in the past, so a collision would disagree on both sides and
+push each player somewhere the other never saw them. Double-occupancy is prevented
+by the seat map instead (§5).
 
 ---
 
-## 3. Asset Manifest
+## 3. Geometry & Assets
 
-Three assets need modelling. Everything else is code.
+**The room is generated in code. There is no room asset.**
 
-### `chair.glb`
+`room.glb`, `chair.glb` and `cafe.glb` are gone. The auditorium, its eight
+recliners and the starlight ceiling are built from primitives at runtime by
+`theatre/lib/geometry/`, which reads its dimensions from `layout.ts`.
 
-| Requirement | Value |
+### What that replaced
+
+| Was | Now |
 |---|---|
-| Triangles | ≤ 1200 |
-| Origin | Floor centre of the seat footprint |
-| Facing | `−Z` |
-| Footprint | ≤ 0.70 m wide × 0.85 m deep |
-| Seat pan height | 0.45 m |
-| Total height | ≤ 1.10 m |
-| File size | < 100 KB |
+| `room.glb`, 2.3 MB, 307 draw calls across 19 materials | `buildAuditorium()`, 0 bytes, **22 draw calls** |
+| `chair.glb`, 311 KB, instanced 8x | `buildSeating()`, 0 bytes, batched into the same call count as one chair |
+| `cafe.glb` + glazed gate | deleted outright — see below |
+| KTX2 texture sets, `gltf-transform` pipeline, `v1/` -> `v2/` versioning | nothing to ship, nothing to version |
 
-Exported **once** and instanced 8× in code via `InstancedMesh`. Do not model
-eight chairs. Do not include chairs in the room model.
+### Why it is worth doing this way
 
-### `room.glb`
+- **Draw calls are bounded by MATERIALS, not objects.** `GeometryBatcher` bakes
+  each primitive's transform into its vertices and merges per material, so detail
+  is close to free. The Blender blockout spent 229 objects on the coffered
+  ceiling alone; the generated room spends one mesh per surface type.
+- **Dimensions cannot drift.** `layout.ts` was already the source of truth for the
+  colliders and the seat anchors, and the geometry now reads the same constants.
+  Previously a change to the room meant editing a 158 MB `.blend` outside the
+  repo, re-exporting, re-optimising, re-uploading to R2 and bumping a version
+  prefix — with `layout.ts` updated by hand to match, or not.
+- **Nothing to download.** 3D used to gate on ~38 MB across five files.
 
-The auditorium shell: raked floor with the step, walls, ceiling, screen masking
-frame, acoustic wall panels, aisle light fixtures, exit signs.
+### The cafe, and why it went
 
-| Requirement | Value |
-|---|---|
-| Triangles | ≤ 40k |
-| Origin | World origin as defined above |
-| File size | < 2 MB |
-| Materials | Tiling trim sheets, not unique UVs per surface |
-| Lighting | **No baked lighting.** See §4. |
+The cafe was a second room through glazed double doors at the back of the
+auditorium. Both are deleted. The doors were the expensive part: their glass used
+`MeshPhysicalMaterial` with `transmission: 0.75`, and three.js renders a **whole
+extra scene pass** for any transmissive material in the scene.
 
-Include a separate low-poly **collision proxy** mesh (named `_collision`) —
-boxes only, no detail. Rapier uses this, not the visual mesh.
+Measured on an M4 at 2268x1111, adding one pane of that glass back to the
+finished room: **0.36 ms -> 12.92 ms per frame, and +29 draw calls.** That single
+material cost more than every other surface put together. Avoid `transmission`
+in this scene.
 
-### `avatar.glb`
+### Characters — the one thing still fetched
 
-> **DEFERRED — not needed for v1.** §12 Q4 resolves avatars to stylised capsules
-> generated in code (`CapsuleGeometry` + a name-tag sprite), so there is no
-> avatar asset, no rig and no animation clips to author. Animation state reduces
-> to position, yaw and a `sitting` flag, which is exactly what
-> `AVATAR_TRANSFORM` already carries (§6). The specification below is retained
-> for when rigged avatars are revisited post-launch.
+The avatars stay remote, because they are the one part that cannot be generated:
+skinned meshes with an armature, ten clips, and rigid-skinned joint spheres. A
+capsule would be a downgrade, not a port.
 
-| Requirement | Value |
-|---|---|
-| Standing height | 1.75 m |
-| Origin | Between the feet |
-| Facing | `−Z` |
-| Triangles | ≤ 15k |
-| Rig | Humanoid, Mixamo-compatible bone names |
-| File size | < 2 MB |
-
-Ships with four animation clips **in the same file**:
-
-| Clip | Notes |
-|---|---|
-| `Idle` | Looping |
-| `Walk` | Looping. Must be authored or retimed to ~1.4 m/s to match the controller. |
-| `SitDown` | One-shot, ends in the seated pose |
-| `SeatedIdle` | Looping |
-
-Four clips in one GLB, not four files — otherwise the skinned mesh and rig are
-downloaded and instantiated four times.
-
-### Export pipeline
-
-Blender → glTF Binary (`.glb`), `+Y` up, selected objects only, no cameras or
-lights.
-
-```bash
-# static geometry — draco is fine here
-gltf-transform optimize room.glb out.glb \
-  --texture-compress webp --texture-size 1024 --compress draco
-
-# the avatar — draco OFF, it can drop joint/weight attributes on skinned meshes
-gltf-transform optimize avatar.glb out.glb \
-  --texture-compress webp --texture-size 1024 --no-compress
-```
-
-**Textures dominate size, not geometry.** A 126-face chair exported at 10.3 MB
-because of six 2048² maps, each costing ~22 MB of GPU memory; the optimize step
-took it to 311 KB and the room from 16.5 MB to 2.3 MB. KTX2 is better still —
-it stays compressed in VRAM rather than only on the wire — but needs the `ktx`
-binary (`brew install ktx`), without which the command fails at the `uastc` step.
-
-For the avatar, `export_apply` must be **false**: applying modifiers bakes away
-the armature and silently yields an unrigged mesh.
-
-### Where assets live
-
-**Not in `public/`.** They are served from the Cloudflare R2 bucket
-`nightwatch-assets` via `assets.nightwatch.in`, under a versioned prefix:
+They are served from the Cloudflare R2 bucket `nightwatch-assets` via
+`assets.nightwatch.in`, under a versioned prefix:
 
 ```
-theatre/v1/models/{room,cafe,chair,avatar}.glb
-theatre/v1/animations/...
+theatre/v3/models/avatar-{boy,girl}.glb
 ```
 
 URLs are owned by the backend (`GET /api/theatre/assets`) so the bucket, domain
-and version can change without a frontend release. Bucket config, CORS and the
-upload commands are documented in `nightwatch-backend/infra/r2/README.md`.
+and version can change without a frontend release. The manifest's `models` field
+is now just `{ avatar, avatars? }`; `room`, `cafe` and `chair` are ignored if the
+backend still sends them, so the frontend can ship ahead of the backend being
+trimmed.
 
-The `v1/` prefix is deliberate: a watch party holds clients for hours, so a new
-asset set must be publishable without breaking sessions in flight. Bump to `v2/`;
-never overwrite a live version in place.
+Two export traps worth keeping:
+
+- **Draco must be off for the avatar.** It can drop joint/weight attributes on
+  skinned meshes. Textures still go through KTX2.
+- **`export_apply` must be `false`.** Applying modifiers bakes away the armature
+  and silently produces an unrigged mesh.
+
+```bash
+# the avatar — draco OFF, it can drop joint/weight attributes on skinned meshes
+gltf-transform optimize avatar.glb out.glb \
+  --texture-compress ktx2 --texture-size 1024 --no-compress
+```
 
 One upload trap: `wrangler r2 object put` writes to a **local simulator** without
 `--remote`, while still printing `Upload complete`. Verify over HTTP, not by
 trusting the CLI.
 
----
 
 ## 4. Lighting
 
 **The screen is the primary light source, and it is dynamic.** This is the
 single highest-impact element of the whole feature and it is why no lighting is
-baked into `room.glb`.
+baked into the room geometry.
 
 Implementation: each frame (throttled — see §8), downscale the video texture to
 a tiny offscreen canvas, average its pixels, and drive a light's colour and
@@ -353,95 +348,56 @@ Post-processing via `@react-three/postprocessing`: **bloom** on the screen
 
 ---
 
-## 4b. Materials & Texturing
+## 4b. Materials
 
-The current build is **flat-colour blockout** — every surface is a solid
-neo-brutalist tone with `Metallic = 0` and no maps. That was deliberate for
-getting the geometry and sightlines right. It is not the target look.
+Every surface is a flat `MeshStandardMaterial` from a single shared palette in
+`theatre/lib/geometry/materials.ts`. No texture files, no UV work, no maps.
 
-Target is **photoreal PBR surfaces carrying the neo-brutalist palette** — real
-carpet weave, real fabric, real leather, real plaster, but tinted to the brand
-colours rather than left as stock beige. Grain and wear come from the textures;
-the colour identity stays ours.
+The palette is converted from the Blender scene's materials, and the conversion
+matters: **Blender stores base colours linear, three.js `material.color` is
+sRGB.** Every value in the palette is the sRGB equivalent of Blender's, not a
+copy of it. Where a Blender material was textured — carpet, walnut veneer, brown
+plank risers, red leather — it is represented by a flat tone.
 
-### Source
+One shared palette is load-bearing, not tidiness: draw calls are bounded by
+material count, so if the chairs built their own copies they would not batch with
+the room and every seat would cost its own calls.
 
-[Poly Haven](https://polyhaven.com) — CC0, no attribution required, already
-wired into the Blender MCP addon. It must be enabled first:
-*3D Viewport → sidebar (`N`) → MCP for Blender → ✅ Use assets from Poly Haven*,
-then reconnect.
+### Two conversions that were bugs first
 
-### Verified candidate textures
+**`metalness`.** A metallic surface has almost no diffuse response — it shows its
+surroundings instead. With a weak environment there is little to show, so anything
+much above 0.4 renders near black however many lights hit it. Blender specifies
+`1.0` for the brass stair nosing and the speaker chassis, and `0.85` for the rear
+wall rail. All are held to 0.70–0.75 here; at Blender's values they read as black
+lips rather than brass ones. `geometry.test.ts` guards the ceiling.
 
-These slugs were confirmed present in the Poly Haven API, with full PBR map
-sets at 1k/2k/4k/8k:
+**`emissiveIntensity`.** Blender's emission strength is a radiance figure for a
+path tracer: 2.5 on the cove LEDs, 1.35 on the step markers, 2.4 on the speaker
+standby light. Carried over literally, every strip clipped to flat cream plastic
+in this tone-mapped forward renderer. The hues are kept, pushed slightly more
+saturated, and the levels cut to roughly a third — enough that a strip still
+reads as a source.
 
-| Surface | Slug | Notes |
-|---|---|---|
-| Floor carpet | `dirty_carpet` | Only carpet in the library. Tint to oxblood `#2a1416` |
-| Chair upholstery | `velour_velvet` | **First choice.** Velvet is *the* cinema seat material |
-| Chair upholstery alt | `leather_red_02` | Red leather, closest match to brand red `#e63b2e` |
-| Chair upholstery alt | `leather_red_03`, `scuba_suede`, `fabric_leather_01` | Compare before committing |
-| Chair frame | `metal_plate` | Dark, tint toward `#1f1d24` |
-| Acoustic wall panels | `poly_wool_herringbone` | Woven wool — reads as real acoustic fabric |
-| Acoustic panel alt | `ribbed_corduroy`, `wool_boucle`, `caban` | Corduroy ribbing suits vertical panel runs |
-| Wall plaster | `grey_plaster_02`, `plastered_wall_04` | Tint to charcoal violet `#1f1d24` |
-| Ceiling | `grey_plaster_03` | Tint near-black `#141318` |
-| Riser / structural | `concrete_wall_003` | Available up to 16k |
+### If textures are ever wanted
 
-Worth browsing the **`indoor`** category (76 assets) as a whole before settling —
-it is the most relevant pool and larger than any single search above.
-
-### Map conventions — easy to get wrong
-
-Poly Haven ships several packed variants. For a three.js target:
-
-- **Use `nor_gl`, not `nor_dx`.** `nor_gl` is the OpenGL green-channel
-  convention, which is what three.js and glTF expect. `nor_dx` will make
-  lighting appear inverted on every surface.
-- **Use the `arm` map.** It packs AO → R, Roughness → G, Metalness → B in one
-  image, which is exactly glTF's `occlusionRoughnessMetallicTexture` layout.
-  One fetch instead of three.
-- Prefer **`jpg`** over `png`/`exr` for the web. At 1k the `arm` map is ~1 MB as
-  jpg versus ~4.5 MB as png.
-- Each asset also offers a ready-made **`gltf`** variant worth checking before
-  hand-wiring nodes.
-
-### Resolution budget
-
-Total 3D payload ceiling is **6 MB** (§8), and textures will dominate it.
-
-| Surface class | Resolution | Reasoning |
-|---|---|---|
-| Carpet | 1k, tiled | Large area, always at a distance, low detail need |
-| Walls, ceiling | 1k, tiled | Mostly unlit and out of focus |
-| Chair upholstery | 2k | Closest surface to a seated camera |
-| Accent trim | 512 or flat colour | Small screen area |
-
-Tile with UV scaling, never by increasing resolution. A 1k carpet tiled 8× over
-the floor looks sharper than a 4k carpet stretched once, and costs 1/16 the
-bytes.
+They are not needed for the current look, and adding them would reintroduce the
+download budget this section used to be about. If it is revisited: use
+[Poly Haven](https://polyhaven.com) (CC0), prefer the `arm` map (AO/roughness/
+metalness packed, matching glTF's `occlusionRoughnessMetallicTexture`), use
+`nor_gl` not `nor_dx` (three.js expects the OpenGL green channel), and use
+KTX2/Basis rather than WebP — WebP shrinks the download but decodes to `RGBA8`
+on GPU upload, so it does nothing for texture memory.
 
 ### Non-negotiables
 
-- **No baked lighting in any map.** §4 makes the screen the dynamic primary
-  light source. Baked AO in the `arm` map is fine and expected; baked
-  *directional* light is not.
-- **Screen aperture stays untextured.** The masking border may be textured; the
-  aperture itself must remain flat and unobstructed for the `VideoTexture`.
-- **Hard black outlines stay in post.** The neo-brutalist edge look comes from
-  the postprocessing pass, not from baked outlines or extra geometry.
-- Run everything through `gltf-transform optimize --texture-compress ktx2`
-  before shipping, and re-measure against the 6 MB ceiling.
-- **Use KTX2/Basis, not WebP.** WebP shrinks the *download* but is decoded to
-  raw `RGBA8` on GPU upload, so it does nothing for texture memory. KTX2
-  transcodes to a native GPU format (ASTC/BC7/ETC2) and stays compressed in
-  VRAM. Measured on the current blockout: the 15 wired maps cost **135 MB** as
-  `RGBA8`+mips versus **~17 MB** as KTX2 — an 8× saving for a barely
-  perceptible quality cost. Download and VRAM are separate budgets; only KTX2
-  fixes both.
+- **No baked lighting.** §4 makes the screen the dynamic primary light source.
+- **The screen aperture stays clear.** The masking surround is built as four
+  pieces around the picture; nothing may cross it. `geometry.test.ts` asserts no
+  masking vertex falls inside the aperture.
+- **No `transmission`, anywhere.** One transmissive material costs a full extra
+  scene pass — 0.36 ms to 12.92 ms, measured. This is why the cafe doors went.
 
----
 
 ## 5. Character Controller
 
@@ -610,7 +566,7 @@ participants, RTM, and React. The GPU and main thread are already busy.
 | WebGL frame time | **< 8 ms** — leaves headroom for video decode and Agora |
 | Draw calls | < 80 |
 | Triangles | < 150k |
-| Total 3D payload | < 6 MB |
+| Total 3D payload | < 16 MB — characters only; the room is generated (§3) |
 | Screen-light sampling | Throttled to ~10 Hz, not per-frame |
 
 ### Adaptive quality — measure, do not predict
@@ -645,12 +601,36 @@ the unshadowed primary source (§4).
 
 ### Draw-call batching
 
-The blockout currently has **307 draw calls across only 19 materials** — the
-coffered ceiling alone is 229 objects sharing 4 materials (96 `CofferInner`,
-96 `CofferLED`, 24 `CofferBack`, 13 beams). Merge each material group into one
-mesh at export time and instance the chairs; that clears the < 80 target with no
-visual change whatsoever. Geometry is *not* the constraint here — the blockout is
-2,140 triangles against a 150k budget, so detail should be spent, not cut.
+**Done, by generating the room instead of exporting it.** The Blender blockout
+spent **307 draw calls across only 19 materials** — its coffered ceiling alone was
+229 objects sharing 4. `GeometryBatcher` (§3) merges per material, so the whole
+auditorium is **22 draw calls** and the eight chairs cost the same as one.
+
+Geometry is not the constraint: the room is well under the 150k triangle budget,
+so detail should be spent, not cut. The constraint is **light count** — see below.
+
+### Light count is the real fragment cost
+
+Three.js forward-shades every light on every fragment, and `light.distance` only
+shapes falloff; it does not skip the light. Cost is also superlinear past roughly
+16 punctual lights, where each extra one costs about twice the previous. Measured
+on an M4 at 2268x1111, shader compiles awaited:
+
+| punctual lights | ms/frame |
+|---|---|
+| 16 | 1.69 |
+| 24 | 3.01 |
+| 32 | 7.78 |
+
+The rig in `lib/lighting.ts` is 12 point/area fixtures plus ambient, hemisphere,
+one directional and the screen's own `RectAreaLight`. `lighting.test.ts` holds the
+ceiling at 12. Adding fixtures is the easiest way to regress this feature's frame
+time, and a wall does not make a light behind it free.
+
+One trap worth repeating from §3: changing the light *count* at runtime forces a
+recompile of every material. If lights are ever culled dynamically, keep a fixed
+slot count and move them rather than toggling `visible`, or steady-state cost is
+traded for compile hitches.
 
 ### Bundle isolation
 
@@ -688,9 +668,10 @@ src/features/watch-party/
 ├── theatre/                          ← new, self-contained
 │   ├── components/
 │   │   ├── TheatreScene.tsx          Canvas root, lighting rig, post-processing
-│   │   ├── TheatreRoom.tsx           room.glb + collision proxy
+│   │   ├── TheatreRoom.tsx           generated shell + starfield
 │   │   ├── TheatreScreen.tsx         video plane + VideoTexture
-│   │   ├── TheatreSeating.tsx        InstancedMesh chairs + seat anchors
+│   │   ├── TheatreSeating.tsx        generated chairs + seat pads
+│   │   ├── TheatreColliders.tsx      static boxes from layout.ts
 │   │   ├── LocalAvatar.tsx           controlled avatar
 │   │   ├── RemoteAvatar.tsx          interpolated peer avatar
 │   │   └── SpeechBubble.tsx
@@ -704,22 +685,26 @@ src/features/watch-party/
 │   │   └── use-spatial-audio.ts
 │   ├── lib/
 │   │   ├── layout.ts                 seat table + room constants from §2
+│   │   ├── geometry/                 the room itself — no asset
+│   │   │   ├── batch.ts              GeometryBatcher: merge per material
+│   │   │   ├── materials.ts          shared flat palette
+│   │   │   ├── auditorium.ts         shell, walls, stairs, speakers, rear wall
+│   │   │   ├── recliner.ts           the chair, x8 into one batch
+│   │   │   └── starfield.ts          3 instanced tiers, 630 stars
 │   │   └── interpolation.ts          snapshot buffer, dead reckoning
 │   └── types.ts
 └── room/types/rtm-messages.ts        ← extend union (§6)
-
-public/models/theatre/
-├── room.glb
-├── chair.glb
-└── avatar.glb
 ```
+
+No `public/models/`. The room is generated; the character models are fetched from
+R2 at the URLs the backend publishes (§3).
 
 Gate mode selection in `WatchPartyClient` at the same branch point as the
 existing `isTV()` / `useIsMobile()` checks.
 
 All constants in §2 belong in `theatre/lib/layout.ts` as named exports — single
-source of truth shared by the Blender script, the collision setup, and the seat
-anchors.
+source of truth shared by the generated geometry, the collision setup, and the
+seat anchors.
 
 ---
 
@@ -755,13 +740,17 @@ Unresolved. Do not treat as decided.
    Likely yes, unverified.
 3. **Frame budget under full load** — 8 participants with cameras on plus HLS
    plus WebGL is the realistic worst case and has never been measured.
-4. ~~**Avatar fidelity vs. cost.**~~ **RESOLVED — stylised capsules for v1.**
-   Rigged humanoids are deferred. Capsules suit the neo-brutalist theme, and
-   they delete the rig, all four animation clips, retargeting, per-frame GPU
-   skinning for 8 avatars, and roughly 2 MB of the 6 MB payload. This is the
-   largest single lever for widening the device floor, and it removes the
-   critical path — there is no armature in `theatre_blockout.blend` today, so
-   the rigging work has not started. Revisit after the feature ships.
+4. ~~**Avatar fidelity vs. cost.**~~ **SUPERSEDED — rigged avatars were built.**
+   This was resolved as "stylised capsules for v1", and then the opposite
+   shipped: §1b documents a 19-bone rig with 23 capsules, rigid skinning, finger
+   bones stripped at load, and ten clips embedded in the glb. `RemoteAvatar`,
+   `use-avatar-animation.ts` and `lib/animation.ts` all depend on it.
+
+   That makes the characters the **only** remaining download, now that the room
+   is generated (§3). The capsule argument still holds as a device-floor lever if
+   it is ever needed — it would delete the rig, the clips, per-frame GPU skinning
+   for 8 avatars and the last of the payload — but it would now be a removal of
+   working behaviour, not a deferral.
 5. ~~**Does 3D mode need its own room flag on the backend?**~~
    **RESOLVED — client-side preference, not a room mode.** 3D is chosen per
    participant, so rooms are mixed-mode: the host may be in 3D while a guest
@@ -789,6 +778,15 @@ Follow `docs/TESTING.md`. Specific to this feature:
 
 - **Unit** — seat layout maths, interpolation buffer, dead reckoning, seat
   arbitration logic (host grants/denies correctly under concurrent claims)
+- **Geometry** — `geometry.test.ts` covers the generated room without a GL
+  context, by inspecting the built `BufferGeometry` directly. It asserts the
+  batcher collapses primitives per material, that the room and chair match their
+  measured envelopes, that no masking vertex crosses the screen aperture, that
+  wall detail stands on the floor beneath it rather than on datum, and that the
+  material palette stays inside the metalness and emissive ceilings §4b explains.
+  These are the checks that caught real bugs during the port — a chair a third too
+  tall, a backrest tilted the wrong way, a cup-holder wider than its armrest, and
+  pilasters with their feet buried under the rear platform.
 - **Integration** — RTM message round trip for `AVATAR_TRANSFORM` and
   `SEAT_MAP`; mode gating in `WatchPartyClient`
 - **Not unit-testable** — anything requiring a WebGL context. Rendering, the

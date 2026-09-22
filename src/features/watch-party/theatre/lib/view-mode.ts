@@ -156,7 +156,7 @@ export const useTheatreView = create<TheatreViewState>((set, get) => ({
    * Retry without clearing progress.
    *
    * Assets already on the machine are kept by the preloader, so a retry after
-   * four of five files succeeded resumes rather than re-downloading 30 MB.
+   * one of two character models succeeded resumes rather than starting over.
    */
   retry: () =>
     set((s) => ({

@@ -45,12 +45,18 @@ export const SCREEN = {
   z: 0.02,
 } as const;
 
-/** Walkable floor levels. Row B, the rear platform and the cafe share 0.45. */
+/**
+ * Walkable floor levels. Row B shares the rear platform at 0.45.
+ *
+ * The cafe and its gate threshold used to continue this to z = 14.2. Both are
+ * gone: the auditorium is now generated in code (`lib/geometry`), and the cafe was
+ * a second room reached through glazed doors whose transmissive glass forced a
+ * whole extra scene pass — measured at 0.36 ms against 12.92 ms for a single pane.
+ * The rear wall is solid.
+ */
 export const FLOORS = {
   front: { y: 0.0, minZ: 0.0, maxZ: 5.3 },
   rearPlatform: { y: 0.45, minZ: 5.3, maxZ: 8.5 },
-  gateThreshold: { y: 0.45, minZ: 8.5, maxZ: 8.7 },
-  cafe: { y: 0.45, minZ: 8.7, maxZ: 14.2 },
 } as const;
 
 /**
@@ -60,8 +66,11 @@ export const FLOORS = {
  * Narrowed from 2.2 m to 1.2 m per run. The old inner edge at 1.8 m is where the
  * outer seats now sit (their edge reaches 2.16 m at the 1.20 m pitch), so the
  * stairs had to give the width back. 1.2 m is still a comfortable single-file
- * run. `room.glb` geometry was rescaled to match; the outer edge stays flush to
- * the side wall at 4.0 m.
+ * run, and the outer edge stays flush to the side wall at 4.0 m.
+ *
+ * `minZ`/`maxZ` bound the whole run. Only TWO of the three rises are stair
+ * geometry — surfaces at 0.15 and 0.30 — because the rear platform edge at
+ * z = 5.3 is itself the third. `lib/geometry/auditorium.ts` builds it that way.
  */
 export const STAIRS = {
   risers: 3,
@@ -72,18 +81,6 @@ export const STAIRS = {
   outerX: 4.0,
   minZ: 4.69,
   maxZ: 5.29,
-} as const;
-
-/** Doorway from the auditorium into the cafe. Glazed double doors. */
-export const GATE = {
-  minX: -1.3,
-  maxX: 1.3,
-  bottomY: 0.45,
-  topY: 2.75,
-  z: 8.6,
-  clearWidth: 2.54,
-  /** leaves swing into the cafe (+z) */
-  openDegrees: 85,
 } as const;
 
 export const SPAWN = { x: 0, y: 0.45, z: 7.8 } as const;

@@ -22,7 +22,7 @@ const LIGHT_LERP = 3.5;
  * The projection screen, and the room's primary light source.
  *
  * Geometry comes from `layout.ts` so it matches the physical trim and masking
- * exported in `room.glb` — the screen plane is a separate mesh here because it
+ * part of the generated room — the screen plane is a separate mesh because it
  * needs a live texture, while the bezel and masking are baked into the room.
  *
  * The light is driven from the video rather than being static. A cinema's
@@ -187,7 +187,7 @@ export function TheatreScreen({ texture, onTogglePlay }: TheatreScreenProps) {
             Win the depth test against anything the room model puts at this same
             depth, without moving the plane in world space.
 
-            The screen sits at `SCREEN.z = 0.02`, and room.glb has geometry in
+            The screen sits at `SCREEN.z = 0.02`, and the room has geometry in
             exactly that plane: `ScreenTrim_*` spans z -0.005..0.025 and touches
             the picture along its whole border, and the published v2 asset also
             carried `SCREEN_REF_do_not_export`, an opaque near-black quad at

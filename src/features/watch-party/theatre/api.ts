@@ -11,19 +11,22 @@ export type { TheatreAssetManifest } from './types';
  * custom domain and the asset-set version are all baked into a deployed bundle
  * and cannot be changed without a frontend release.
  *
- * Letting the backend answer means the asset set can be rolled forward (v1 ->
- * v2) or moved to a different bucket while sessions are live, which matters for
- * a watch party where clients stay connected for hours.
+ * Since the room, chair and cafe became generated geometry, the only assets left
+ * are the rigged characters: they are skinned meshes with an armature and ten
+ * clips, which is the one thing in this feature that cannot be produced in code.
  *
  * Expected response shape:
  * ```json
  * {
  *   "version": "v1",
  *   "baseUrl": "https://assets.nightwatch.in",
- *   "models":     { "room": "...", "cafe": "...", "chair": "...", "avatar": "..." },
- *   "animations": { "locomotion": "...", "seating": "...", "dance": { "hiphop": "..." } }
+ *   "models":     { "avatar": "...", "avatars": ["...", "..."] },
+ *   "animations": { "clipsEmbedded": true, "locomotion": null, "seating": null, "dance": {} }
  * }
  * ```
+ *
+ * `models.room`, `models.cafe` and `models.chair` are ignored if the backend
+ * still sends them, so the frontend can ship ahead of the manifest being trimmed.
  */
 export async function getTheatreAssets(): Promise<TheatreAssetManifest> {
   return apiFetch<TheatreAssetManifest>('/api/theatre/assets');

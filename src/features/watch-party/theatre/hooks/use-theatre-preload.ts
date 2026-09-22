@@ -56,8 +56,8 @@ export function useTheatrePreload() {
   /**
    * Assets already on the machine, preserved across retries.
    *
-   * Without this, failing on the last of five files and hitting Retry would
-   * re-download the 30 MB that already succeeded.
+   * Without this, failing on the last file and hitting Retry would re-download
+   * every character model that had already arrived.
    */
   const completed = useRef<Set<string>>(new Set());
 
@@ -75,22 +75,20 @@ export function useTheatrePreload() {
     let cancelled = false;
 
     /**
-     * EVERY asset is required before 3D unlocks, including the characters.
+     * The characters are all that is left to download.
      *
-     * There is no "critical vs deferred" split. Entering a theatre whose chairs
-     * or avatars are still downloading means walking into a room that visibly
-     * assembles itself around you, and a peer whose model has not arrived simply
-     * is not there. Both are worse than waiting a few seconds.
+     * The room, the chair and the cafe used to be here too, and the rule was that
+     * EVERY asset had to land before 3D unlocked — walking into a room that
+     * visibly assembles itself around you is worse than waiting. That rule now
+     * costs almost nothing to keep: the room is generated in code, so the only
+     * transfer is the character models.
      *
-     * Every character model is fetched, not just the one this user picked: a peer
+     * Every published model is fetched, not just the one this user picked: a peer
      * may have chosen the other body and cannot be drawn without it.
      */
-    const urls = [
-      assets.models.room,
-      assets.models.chair,
-      assets.models.cafe,
-      ...avatarModels(assets),
-    ].filter((u): u is string => typeof u === 'string' && u.length > 0);
+    const urls = avatarModels(assets).filter(
+      (u): u is string => typeof u === 'string' && u.length > 0,
+    );
 
     if (urls.length === 0) {
       fail('No assets published');

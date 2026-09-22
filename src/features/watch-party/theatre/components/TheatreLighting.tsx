@@ -25,7 +25,7 @@ import { ensureRectAreaLights } from '../lib/rect-area-light';
  *
  * All positions and colours live in `lib/lighting.ts`, which also explains why
  * this rig has to exist at all: the 52 fixtures in the Blender scene are not in
- * `room.glb` and cannot be — glTF carries lights only through
+ * the room geometry and cannot be — glTF carried lights only through
  * `KHR_lights_punctual`, which the export omits and which cannot describe an
  * area light anyway. The room's emissive LED strips glow but illuminate nothing,
  * because three.js has no global illumination to bounce them.

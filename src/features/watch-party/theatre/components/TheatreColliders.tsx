@@ -1,16 +1,22 @@
 'use client';
 
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
-import { FLOORS, GATE, ROOM, SEATS, STAIRS } from '../lib/layout';
+import {
+  CHAIR_BACK,
+  CHAIR_FRONT,
+  CHAIR_HALF_WIDTH,
+  REAR_DETAIL_FACE_Z,
+} from '../lib/geometry';
+import { FLOORS, ROOM, SEATS, STAIRS } from '../lib/layout';
 
 /**
  * Static collision for the theatre.
  *
- * Built from `layout.ts` constants rather than a trimesh of `room.glb`, for
- * three reasons: boxes are far cheaper to query than a 20k-triangle trimesh,
- * the Draco-compressed geometry would have to be fully decoded before it could
- * be used as a collider, and a hand-specified set means walkable space is a
- * deliberate decision instead of a side effect of whatever art happens to exist.
+ * Built from `layout.ts` constants rather than a trimesh, for three reasons:
+ * boxes are far cheaper to query than a 20k-triangle trimesh, the room is now
+ * generated geometry with no mesh to derive a collider from anyway, and a
+ * hand-specified set means walkable space is a deliberate decision instead of a
+ * side effect of whatever art happens to exist.
  *
  * Coordinates are three.js space (+Y up, screen at z≈0, audience at +z).
  */
@@ -64,24 +70,6 @@ export function TheatreColliders() {
         z0={FLOORS.rearPlatform.minZ}
         z1={FLOORS.rearPlatform.maxZ}
       />
-      {/* gate threshold, continues the platform through the wall */}
-      <Box
-        x0={GATE.minX}
-        x1={GATE.maxX}
-        y0={-0.3}
-        y1={FLOORS.gateThreshold.y}
-        z0={FLOORS.gateThreshold.minZ}
-        z1={FLOORS.gateThreshold.maxZ}
-      />
-      {/* cafe floor */}
-      <Box
-        x0={-4.3}
-        x1={4.3}
-        y0={-0.3}
-        y1={FLOORS.cafe.y}
-        z0={FLOORS.cafe.minZ}
-        z1={FLOORS.cafe.maxZ}
-      />
 
       {/* ---------- aisle stairs ----------
           One box per tread, both sides. The controller's autostep is set to
@@ -130,14 +118,14 @@ export function TheatreColliders() {
         z0={-T}
         z1={0}
       />
-      {/* side walls, run the full depth including the cafe */}
+      {/* side walls, full depth of the auditorium */}
       <Box
         x0={ROOM.minX - T}
         x1={ROOM.minX}
         y0={0}
         y1={WALL_H}
         z0={-T}
-        z1={FLOORS.cafe.maxZ}
+        z1={ROOM.maxZ}
       />
       <Box
         x0={ROOM.maxX}
@@ -145,77 +133,39 @@ export function TheatreColliders() {
         y0={0}
         y1={WALL_H}
         z0={-T}
-        z1={FLOORS.cafe.maxZ}
+        z1={ROOM.maxZ}
       />
 
-      {/* back wall, split around the gate so the doorway is walkable */}
+      {/* back wall.
+          Stops at the rear DETAIL face, not at the wall plane. The handrail
+          stands 0.28 m proud of that wall, so a collider on the plane itself let
+          you walk through the rail, its brackets and the battens to reach it. */}
       <Box
         x0={ROOM.minX}
-        x1={GATE.minX}
-        y0={0}
-        y1={WALL_H}
-        z0={FLOORS.rearPlatform.maxZ}
-        z1={FLOORS.gateThreshold.maxZ}
-      />
-      <Box
-        x0={GATE.maxX}
         x1={ROOM.maxX}
         y0={0}
         y1={WALL_H}
-        z0={FLOORS.rearPlatform.maxZ}
-        z1={FLOORS.gateThreshold.maxZ}
+        z0={REAR_DETAIL_FACE_Z}
+        z1={ROOM.maxZ + T}
       />
-      {/* header above the gate opening */}
-      <Box
-        x0={GATE.minX}
-        x1={GATE.maxX}
-        y0={GATE.topY}
-        y1={WALL_H}
-        z0={FLOORS.rearPlatform.maxZ}
-        z1={FLOORS.gateThreshold.maxZ}
-      />
-
-      {/* ---------- cafe shell ---------- */}
-      <Box
-        x0={-4.3 - T}
-        x1={-4.3}
-        y0={0}
-        y1={3.4}
-        z0={FLOORS.cafe.minZ}
-        z1={FLOORS.cafe.maxZ + T}
-      />
-      <Box
-        x0={4.3}
-        x1={4.3 + T}
-        y0={0}
-        y1={3.4}
-        z0={FLOORS.cafe.minZ}
-        z1={FLOORS.cafe.maxZ + T}
-      />
-      <Box
-        x0={-4.3 - T}
-        x1={4.3 + T}
-        y0={0}
-        y1={3.4}
-        z0={FLOORS.cafe.maxZ}
-        z1={FLOORS.cafe.maxZ + T}
-      />
-      {/* cafe service counter — solid, you walk around it not through it */}
-      <Box x0={-3.7} x1={0.4} y0={0.45} y1={1.35} z0={12.1} z1={12.95} />
-      <Box x0={-3.95} x1={0.6} y0={0.45} y1={1.0} z0={13.8} z1={14.15} />
 
       {/* ---------- chairs ----------
           Blocks walking through the seating. Sitting is handled by the seat
-          pads in front, so the chair itself is solid. */}
+          pads in front, so the chair itself is solid.
+
+          Bounds match the generated recliner in `lib/geometry/recliner.ts`:
+          0.718 wide, 0.810 deep, 1.097 tall. The box stops at 0.8 because the
+          headrest above that is set well back and blocking it would keep you
+          further from the seat than the pad radius allows. */}
       {SEATS.map((seat) => (
         <Box
           key={`chair-${seat.id}`}
-          x0={seat.position.x - 0.36}
-          x1={seat.position.x + 0.36}
+          x0={seat.position.x - CHAIR_HALF_WIDTH}
+          x1={seat.position.x + CHAIR_HALF_WIDTH}
           y0={seat.position.y}
           y1={seat.position.y + 0.8}
-          z0={seat.position.z - 0.42}
-          z1={seat.position.z + 0.42}
+          z0={seat.position.z + CHAIR_FRONT}
+          z1={seat.position.z + CHAIR_BACK}
         />
       ))}
     </RigidBody>

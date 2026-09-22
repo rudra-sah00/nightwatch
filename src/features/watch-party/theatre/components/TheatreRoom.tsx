@@ -1,79 +1,60 @@
 'use client';
 
+import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
-import { Mesh } from 'three';
-import { useTheatreGltf } from '../hooks/use-theatre-gltf';
-import { GATE } from '../lib/layout';
-
-interface TheatreRoomProps {
-  /** room.glb url from the backend manifest */
-  url: string;
-  /** 0 shut, 1 fully open — swings the two cafe door leaves. */
-  gateProgress?: number;
-}
+import {
+  buildAuditorium,
+  buildStarfield,
+  disposeBuilt,
+  disposeStarfield,
+  updateStarfield,
+} from '../lib/geometry';
 
 /**
- * Auditorium shell: walls, floors, coffered ceiling, screen trim and masking,
- * 7.1 speaker cabinets, aisle stairs, wall panels and sconces.
+ * Auditorium shell: floors and carpet inlays, stepped tray ceiling with its
+ * starlight panel, walls with pilasters, framed panels, crown and plinth
+ * mouldings, sconce fixtures, the screen masking surround, LCR speaker cabinets,
+ * aisle stairs, and the battened rear wall with its lit niche and handrail.
  *
- * Exported from Blender with +Y up, so glb coordinates already match the values
- * in `lib/layout.ts` — no rotation correction here. If this model ever appears
- * rotated 90°, the export lost `export_yup`, and the fix belongs in the export,
- * not in a transform on this component.
+ * Generated in code — there is no `room.glb`. What used to be a 2.3 MB Blender
+ * export whose blockout measured 307 draw calls across 19 materials is now a batch
+ * of primitives drawing in about a dozen calls and costing zero bytes of transfer.
+ * Dimensions come from `layout.ts`, shared with the colliders and seat anchors.
+ *
+ * The screen aperture is deliberately left empty: `TheatreScreen` owns the video
+ * plane, and nothing here may sit in front of it.
  */
-export function TheatreRoom({ url, gateProgress = 0 }: TheatreRoomProps) {
-  const { scene } = useTheatreGltf(url);
+export function TheatreRoom() {
+  // Built once per mount. `useMemo` rather than module scope so leaving 3D
+  // actually frees the buffers, and so a remount gets clean geometry rather than
+  // meshes that may already have been disposed.
+  const meshes = useMemo(() => buildAuditorium(), []);
+  const stars = useMemo(() => buildStarfield(), []);
 
-  /**
-   * The two cafe door leaves, which are the only moving parts of the room.
-   *
-   * Found by name because they are nodes inside a single glb, not separate
-   * assets. Their node translations sit on the hinge jambs (x = ∓1.27), so a
-   * plain Y rotation swings them correctly with no pivot correction.
-   */
-  const leaves = useMemo(() => {
-    const left = scene.getObjectByName('Gate_Leaf_L') ?? null;
-    const right = scene.getObjectByName('Gate_Leaf_R') ?? null;
-    return { left, right };
-  }, [scene]);
+  useEffect(() => () => disposeBuilt(meshes), [meshes]);
+  useEffect(() => () => disposeStarfield(stars), [stars]);
 
-  useEffect(() => {
-    scene.traverse((child) => {
-      if (child instanceof Mesh) {
-        // The room is static: it receives shadows but never casts them, which
-        // keeps it out of the shadow pass entirely.
-        child.castShadow = false;
-        child.receiveShadow = true;
-        child.matrixAutoUpdate = false;
-        child.updateMatrix();
-      }
-    });
+  /*
+    Twinkle.
 
-    // ...except the doors. The traverse above freezes every mesh matrix, which
-    // is right for a static room and would silently make the leaves unmovable —
-    // rotation would be set every frame and never reach the GPU.
-    for (const leaf of [leaves.left, leaves.right]) {
-      if (!leaf) continue;
-      leaf.matrixAutoUpdate = true;
-      leaf.traverse((child) => {
-        child.matrixAutoUpdate = true;
-      });
-    }
-  }, [scene, leaves]);
+    Driven from the frame loop rather than a CSS-style animation because it writes
+    into a material's colour, and the material is additive — so this scales the
+    light each star ADDS rather than fading it toward grey.
+  */
+  useFrame((state) => {
+    updateStarfield(stars, state.clock.elapsedTime);
+  });
 
-  useEffect(() => {
-    const angle = ((GATE.openDegrees * Math.PI) / 180) * gateProgress;
-    /*
-      Opposite signs because the leaves are mirrored.
-
-      Left hinges at x = -1.27 with its slab running toward +x, right hinges at
-      +1.27 running toward -x. Rotating by θ about Y sends a local +x point to
-      (cos θ, -sin θ) in xz, so the left leaf needs a negative angle to swing
-      into the cafe at +z, and the right leaf a positive one.
-    */
-    if (leaves.left) leaves.left.rotation.y = -angle;
-    if (leaves.right) leaves.right.rotation.y = angle;
-  }, [leaves, gateProgress]);
-
-  return <primitive object={scene} />;
+  return (
+    <group name="auditorium">
+      {meshes.map((mesh) => (
+        <primitive key={mesh.uuid} object={mesh} />
+      ))}
+      <group name="starfield">
+        {stars.map((tier) => (
+          <primitive key={tier.mesh.uuid} object={tier.mesh} />
+        ))}
+      </group>
+    </group>
+  );
 }

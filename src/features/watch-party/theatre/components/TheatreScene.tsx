@@ -17,7 +17,6 @@ import { usePlayerContext } from '@/features/watch/player/context/PlayerContext'
 import type { RTMMessage } from '../../room/types/rtm-messages';
 import { useDanceMenu } from '../hooks/use-dance-menu';
 import { useDanceSpace } from '../hooks/use-dance-space';
-import { useGateInteraction } from '../hooks/use-gate-interaction';
 import { usePointerLook } from '../hooks/use-pointer-look';
 import { useSeatOccupancy } from '../hooks/use-seat-occupancy';
 import { useSeatedCamera } from '../hooks/use-seated-camera';
@@ -44,7 +43,6 @@ import { LocalAvatar } from './LocalAvatar';
 import { LocalPlayer } from './LocalPlayer';
 import { PassiveAvatars } from './PassiveAvatars';
 import { RemoteAvatars } from './RemoteAvatar';
-import { TheatreCafe } from './TheatreCafe';
 import { TheatreColliders } from './TheatreColliders';
 import { TheatreLighting } from './TheatreLighting';
 import { TheatreRoom } from './TheatreRoom';
@@ -149,14 +147,6 @@ export function TheatreScene({
     hovered: number | null;
   }>({ open: false, origin: { x: 0, y: 0 }, hovered: null });
 
-  /**
-   * Whether the local player is standing at the cafe doors.
-   *
-   * Reported up from inside the Canvas for the same reason as the wheel: the
-   * proximity test needs the live camera position, the prompt is DOM.
-   */
-  const [gateInRange, setGateInRange] = useState(false);
-
   const stats = useRef(createStats());
   useEffect(() => {
     const id = setInterval(() => {
@@ -231,19 +221,8 @@ export function TheatreScene({
         <TheatreLighting seated={mySeat !== null} cinema={cinema} />
 
         <Suspense fallback={null}>
-          <RoomWithDoors
-            url={assets.models.room}
-            onGateRangeChange={setGateInRange}
-          />
-          {/* The cafe through the gate. Downloaded since 3D shipped but never
-              mounted, which is why walking through the doors led into a dark
-              void — there was no geometry there to light. */}
-          <TheatreCafe url={assets.models.cafe} />
-          <TheatreSeating
-            url={assets.models.chair}
-            seatMap={seatMap}
-            highlightedSeat={null}
-          />
+          <TheatreRoom />
+          <TheatreSeating seatMap={seatMap} highlightedSeat={null} />
           <RemoteAvatars
             peerIds={peerIds}
             urls={avatarModels(assets)}
@@ -294,14 +273,6 @@ export function TheatreScene({
       />
       <TheatreStatsHud stats={stats} />
       <SitPrompt seatMap={seatMap} mySeat={mySeat} />
-      {/* Standing at the doors takes precedence in the prompt: the seat prompt
-          cannot be showing at the same time, because the gate is 1.3 m beyond
-          the furthest seat pad's radius. */}
-      {gateInRange && mySeat === null ? (
-        <div className="pointer-events-none absolute bottom-16 left-1/2 -translate-x-1/2 rounded-md bg-black/70 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-white/80">
-          Press E to open the cafe doors
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -319,30 +290,6 @@ export function TheatreScene({
  * <Physics />" on mount, which took out the page rather than just the dance
  * feature.
  */
-/**
- * The room, plus the cafe doors it contains.
- *
- * Exists only because `useGateInteraction` needs `useThree` to read the camera
- * position, and `TheatreScene` sits outside the Canvas — it renders it. The door
- * prompt is a DOM overlay outside the Canvas, so proximity is reported upwards
- * rather than rendered here.
- */
-function RoomWithDoors({
-  url,
-  onGateRangeChange,
-}: {
-  url: string;
-  onGateRangeChange: (inRange: boolean) => void;
-}) {
-  const gate = useGateInteraction(true);
-
-  useEffect(() => {
-    onGateRangeChange(gate.inRange);
-  }, [gate.inRange, onGateRangeChange]);
-
-  return <TheatreRoom url={url} gateProgress={gate.progress} />;
-}
-
 function DanceSpaceProbe({
   bodyRef,
   canDanceRef,

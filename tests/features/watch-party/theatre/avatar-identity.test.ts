@@ -18,9 +18,6 @@ function manifest(
     version: 'v1',
     baseUrl: 'https://assets.nightwatch.in',
     models: {
-      room: 'https://a/room.glb',
-      cafe: 'https://a/cafe.glb',
-      chair: 'https://a/chair.glb',
       avatar: 'https://a/avatar-boy.glb',
       ...models,
     },

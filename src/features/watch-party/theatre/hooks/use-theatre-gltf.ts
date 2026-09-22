@@ -10,7 +10,9 @@ import { attachKtx2, detectKtx2Support } from '../lib/ktx2';
  * Every theatre asset must come through here rather than calling `useGLTF`
  * directly. The `v3` set stores its textures as KTX2 (`KHR_texture_basisu`), and a
  * bare `GLTFLoader` throws on that extension instead of falling back — so a direct
- * `useGLTF` would fail to load the room, the chair or the avatars outright.
+ * `useGLTF` would fail to load the avatars outright. The room and the chairs are
+ * generated geometry now (`lib/geometry`), so the characters are the only models
+ * that still come through here.
  *
  * `detectKtx2Support` is called before `useGLTF`, in render order rather than in an
  * effect, because `useGLTF` suspends and begins parsing immediately: an effect

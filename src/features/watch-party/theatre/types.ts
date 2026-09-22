@@ -1,18 +1,20 @@
 /**
  * Theatre asset manifest, served by the backend at `/api/theatre/assets`.
  *
- * Nothing here is hardcoded on the client. The backend is the source of truth
- * for which bucket, which domain and which asset-set version a session uses.
+ * This used to carry the room, the cafe and the chair as well. All three are now
+ * generated in code (`lib/geometry`), so the manifest has one job left: telling the
+ * client which rigged character models are published.
+ *
+ * The avatars stay remote because they cannot be generated. They are skinned
+ * meshes with an armature and ten animation clips, and a capsule would be a
+ * downgrade rather than a port. Everything else about the room — 2.3 MB of
+ * `room.glb`, 311 KB of `chair.glb`, the cafe, the texture sets, the KTX2 pipeline
+ * and the whole `v1 -> v2` versioning dance — is gone.
+ *
  * Bucket configuration itself lives in `nightwatch-backend/infra/r2/`.
  */
 
 export interface TheatreModelUrls {
-  /** auditorium shell, coffered ceiling, screen trim, masking, 7.1 speakers, aisle stairs */
-  room: string;
-  /** cafe room, counter, popcorn + espresso machines, tables, seller, glazed gate */
-  cafe: string;
-  /** one recliner — instance per seat rather than loading eight copies */
-  chair: string;
   /**
    * Rigged character. Always present, and used when `avatars` is absent or
    * empty, so a manifest that predates character variety still works.
@@ -62,22 +64,15 @@ export interface TheatreAssetManifest {
   animations: TheatreAnimationUrls;
 }
 
-/** Needed before the scene can render at all. */
-export function criticalModels(m: TheatreAssetManifest): readonly string[] {
-  return [m.models.room, m.models.chair];
-}
-
-/** Fetched after first paint — the cafe sits behind a closed door. */
-export function deferredModels(m: TheatreAssetManifest): readonly string[] {
-  return [m.models.cafe, ...avatarModels(m)];
-}
-
 /**
  * Every character model the manifest offers, newest field first.
  *
  * Collapses the optional `avatars` list and the mandatory single `avatar` into
  * one deduplicated list, so callers never have to branch on which the backend
  * happened to send.
+ *
+ * This is also now the complete download set: with the room generated there is no
+ * critical-versus-deferred split left to make.
  */
 export function avatarModels(m: TheatreAssetManifest): readonly string[] {
   const list = m.models.avatars?.length ? m.models.avatars : [m.models.avatar];
