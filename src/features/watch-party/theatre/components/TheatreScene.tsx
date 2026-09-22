@@ -44,6 +44,7 @@ import { LocalAvatar } from './LocalAvatar';
 import { LocalPlayer } from './LocalPlayer';
 import { PassiveAvatars } from './PassiveAvatars';
 import { RemoteAvatars } from './RemoteAvatar';
+import { TheatreCafe } from './TheatreCafe';
 import { TheatreColliders } from './TheatreColliders';
 import { TheatreLighting } from './TheatreLighting';
 import { TheatreRoom } from './TheatreRoom';
@@ -223,6 +224,10 @@ export function TheatreScene({
             url={assets.models.room}
             onGateRangeChange={setGateInRange}
           />
+          {/* The cafe through the gate. Downloaded since 3D shipped but never
+              mounted, which is why walking through the doors led into a dark
+              void — there was no geometry there to light. */}
+          <TheatreCafe url={assets.models.cafe} />
           <TheatreSeating
             url={assets.models.chair}
             seatMap={seatMap}

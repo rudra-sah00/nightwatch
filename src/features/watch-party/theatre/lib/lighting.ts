@@ -271,6 +271,71 @@ export const COVES: readonly RectFixture[] = [
 ];
 
 /**
+ * Cafe fixtures.
+ *
+ * The cafe is a separate room behind the glazed gate at `z = 8.6`, and every
+ * fixture above is inside the auditorium — the furthest reaches `z = 8.1`. So the
+ * cafe had no light of its own at all and rendered as a dark box: `Cafe_Pendants`
+ * is emissive geometry, which in three.js glows on its own surface and
+ * illuminates nothing, exactly as the auditorium's LED strips do.
+ *
+ * Positions are taken from the modelled objects in `cafe.glb`, read out of the
+ * published asset rather than guessed:
+ *
+ *     Cafe_Shell          x -4.50..4.50  y 0.39..3.60  z  8.70..14.40
+ *     Cafe_Pendants       x -3.00..2.90  y 2.02..2.36  z  9.66..11.64
+ *     Cafe_Counter        x -3.70..0.40  y 0.45..1.35  z 12.10..12.95
+ *     Cafe_MenuBoard      x  0.91..3.89  y 1.63..2.57  z 14.17..14.19
+ *
+ * Two pendant lights stand in for the whole hanging cluster, on the same
+ * reasoning as the sconces: overlapping pools at this spacing make every other
+ * fixture invisible once `distance` is widened, and each point light is a fixed
+ * per-fragment cost.
+ *
+ * The pendant lights hang just BELOW the shades at `y = 1.95` rather than inside
+ * them, so the pool spreads down over the tables instead of lighting the lamp
+ * body from within. The menu board light is pulled 0.65 m off the board for the
+ * reason the sconces are mounted off the wall — a light at the surface meters it
+ * near 255 and erases the texture.
+ *
+ * These dim far less than the auditorium does. A real cinema lobby stays lit
+ * while the film runs, and the dim state only means THIS viewer sat down, so the
+ * cafe is either empty or holding someone else. Going dark would also read
+ * strangely through the glazed doors from the rear platform.
+ */
+export const CAFE: readonly PointFixture[] = [
+  {
+    id: 'cafe-pendant-front',
+    position: [-1.6, 1.95, 10.1],
+    colour: WARM,
+    level: { house: 10, dim: 3.6 },
+    distance: 7,
+  },
+  {
+    id: 'cafe-pendant-rear',
+    position: [1.6, 1.95, 11.3],
+    colour: WARM,
+    level: { house: 10, dim: 3.6 },
+    distance: 7,
+  },
+  {
+    // Servery: reaches the counter, the popcorn machine and the seller behind it.
+    id: 'cafe-counter',
+    position: [-1.65, 2.9, 12.5],
+    colour: WARM_PALE,
+    level: { house: 12, dim: 4.4 },
+    distance: 7,
+  },
+  {
+    id: 'cafe-menu-board',
+    position: [2.4, 2.35, 13.5],
+    colour: WARM_PALE,
+    level: { house: 6, dim: 2.4 },
+    distance: 4.5,
+  },
+];
+
+/**
  * Seconds for a full house-to-dim transition.
  *
  * Deliberately slow. Cinema house lights take a few seconds, and an instant
@@ -327,4 +392,5 @@ export const POINT_FIXTURES: readonly PointFixture[] = [
   ...CEILING,
   ...SCONCES,
   ...ACCENTS,
+  ...CAFE,
 ];
