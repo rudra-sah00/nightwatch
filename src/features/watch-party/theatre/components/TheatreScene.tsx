@@ -39,6 +39,7 @@ import { createStats } from '../lib/theatre-stats';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
 import { DanceWheel } from './DanceWheel';
+import { FrameLimiter } from './FrameLimiter';
 import { LocalAvatar } from './LocalAvatar';
 import { LocalPlayer } from './LocalPlayer';
 import { PassiveAvatars } from './PassiveAvatars';
@@ -216,12 +217,27 @@ export function TheatreScene({
           far: 100,
         }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
+        /*
+          The loop is driven by `FrameLimiter` below, not by r3f's own rAF.
+
+          rAF is already vsync-locked, so this changes nothing on a 60 Hz display.
+          It caps high-refresh ones: a 120 Hz ProMotion laptop was rendering twice
+          the frames for a scene that looks identical at 60, and this scene is
+          fragment-bound, so halving frames roughly halves GPU load. No quality is
+          traded — the skipped frames were never distinguishable.
+
+          `never` means nothing renders unless `advance` is called, so FrameLimiter
+          must stay mounted as the first child. See its docblock.
+        */
+        frameloop="never"
         onCreated={({ gl }) => {
           gl.toneMapping = ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.1;
           gl.outputColorSpace = SRGBColorSpace;
         }}
       >
+        <FrameLimiter fps={60} />
+
         {/* The screen is the primary light source (see TheatreScreen); this rig
             is the house lighting around it — ceiling downlights, sconces, cove
             wash, step and exit glow, standing in for the 52 Blender fixtures
