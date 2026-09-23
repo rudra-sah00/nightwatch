@@ -3,6 +3,7 @@
 import { useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Euler, MathUtils } from 'three';
+import { isTypingTarget } from '../lib/keyboard';
 
 /**
  * Pointer-locked mouse look for the walking camera.
@@ -46,16 +47,44 @@ export function usePointerLook({ enabled }: UsePointerLookOptions) {
   const pitch = useRef(0);
   const [locked, setLocked] = useState(false);
 
+  /*
+    Whether a text field currently has focus.
+
+    Pointer lock hides the cursor and swallows the mouse, which is exactly wrong
+    while somebody is typing: `Enter` opens the chat box from inside the scene (see
+    `useChatFocusHotkey`), and holding the lock through that leaves them writing a
+    message with no pointer and the room turning under every stray mouse movement.
+
+    Tracked by focus rather than by a flag passed down, so the scene does not need
+    to know which component owns the field — `isTypingTarget` already answers that
+    question for every keyboard consumer here.
+  */
+  const [typing, setTyping] = useState(false);
+  useEffect(() => {
+    function sync() {
+      setTyping(isTypingTarget(document.activeElement));
+    }
+    sync();
+    document.addEventListener('focusin', sync);
+    document.addEventListener('focusout', sync);
+    return () => {
+      document.removeEventListener('focusin', sync);
+      document.removeEventListener('focusout', sync);
+    };
+  }, []);
+
+  const active = enabled && !typing;
+
   // Seed from wherever the camera is currently aimed, so enabling look does not
   // snap the view. YXZ is the FPS order: yaw about world up, then pitch.
   const seeded = useRef(false);
   useEffect(() => {
-    if (!enabled || seeded.current) return;
+    if (!active || seeded.current) return;
     seeded.current = true;
     const e = new Euler().setFromQuaternion(camera.quaternion, 'YXZ');
     yaw.current = e.y;
     pitch.current = e.x;
-  }, [enabled, camera]);
+  }, [active, camera]);
 
   const requestLock = useCallback(() => {
     const el = gl.domElement;
@@ -66,7 +95,7 @@ export function usePointerLook({ enabled }: UsePointerLookOptions) {
   }, [gl]);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!active) {
       if (document.pointerLockElement) document.exitPointerLock();
       setLocked(false);
       return;
@@ -106,7 +135,7 @@ export function usePointerLook({ enabled }: UsePointerLookOptions) {
       document.removeEventListener('pointerlockchange', onLockChange);
       if (document.pointerLockElement === el) document.exitPointerLock();
     };
-  }, [enabled, gl, camera, requestLock]);
+  }, [active, gl, camera, requestLock]);
 
   return { locked, requestLock };
 }

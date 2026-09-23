@@ -64,6 +64,7 @@ Last synced with the code: 2026-09-23.
 | Seated camera | `theatre/hooks/use-seated-camera.ts` | Per-seat head cone clamp |
 | Asset manifest | `theatre/api.ts` + `hooks/use-theatre-assets.ts` | Backend-owned URLs. Characters only now the room is generated |
 | View modes | `theatre/lib/view-mode.ts` + `hooks/use-view-mode-hotkey.ts` | `V` cycles 2D → 3D → screen focus |
+| Chat from inside the room | `chat/hooks/use-chat-focus-hotkey.ts` | `Enter` to type, Enter to send, Escape to go back |
 | Opt-in download | `theatre/hooks/use-theatre-preload.ts` | Nothing fetched until enabled in settings. ~13 MB of characters, was ~38 MB |
 
 ### Not yet built
@@ -425,7 +426,18 @@ real sweep-and-slide handling.
 | `Shift` | Run |
 | `E` | Sit / stand, when within range of a free seat |
 | `R` | Hold to open the dance wheel, release toward a clip |
+| `Enter` | Open the chat box. Enter again sends and hands the keyboard back; Escape returns without sending |
 | Mouse drag | Camera orbit |
+
+`Enter` exists because the keyboard is shared with the avatar. The chat field
+cannot hold focus by default — `WASD` has to reach the player — and while walking
+the pointer is locked and the cursor hidden, so the mouse is not a way in either.
+Without it there is no way to start typing without leaving the room. Bound in 3D
+only, and it releases the pointer lock while the field has focus
+(`usePointerLook` watches focus rather than taking a flag, so it does not need to
+know which component owns the field). Sending blurs the field in 3D and not in 2D:
+there, the panel is an overlay on a video and losing focus after every line would
+be a nuisance.
 
 `W`, `A`, `S`, `D`, `E` and `R` are all unbound in the existing player, which
 uses `K`/`J`/`L`/`M`/`F`/`C`/`N`, Space, arrows and Escape. `F` is deliberately
@@ -658,7 +670,7 @@ order-independent rule gets the same convergence with neither — see §5.
 
 | Feature | 3D treatment |
 |---|---|
-| Chat | Floating speech bubbles above the speaker's avatar, plus the existing panel on a toggle key |
+| Chat | The floating panel, forced on in 3D because the sidebar is hidden there. `Enter` opens the box and sending hands the keyboard back (§5). Speech bubbles above the speaker's avatar |
 | Voice | Agora audio **panned by seat position** — this is what actually sells "sitting beside you" |
 | Emoji reactions | Spawn above the sender's avatar rather than over the video |
 | Soundboard | Unchanged, non-positional |
@@ -676,12 +688,25 @@ participants, RTM, and React. The GPU and main thread are already busy.
 
 | Metric | Target |
 |---|---|
-| Frame rate | 60 fps target, 30 fps floor |
+| Frame rate | **Uncapped** — r3f's own rAF, so whatever the display will do. 30 fps floor |
 | WebGL frame time | **< 8 ms** — leaves headroom for video decode and Agora |
 | Draw calls | < 80 |
 | Triangles | < 150k |
 | Total 3D payload | < 16 MB — characters only; the room is generated (§3) |
 | Screen-light sampling | Throttled to ~10 Hz, not per-frame |
+
+There was a `FrameLimiter` here, holding the loop to 60 by running
+`frameloop="never"` and calling `advance` on a budget — a 120 Hz panel was
+rendering twice the frames for a scene that looks the same, and this scene is
+fragment-bound, so halving frames roughly halved GPU load. It is gone: the room is
+comfortably inside budget now, and a high-refresh display should get the frames it
+can draw. The stats.js FPS panel went with it.
+
+One consequence worth knowing: `PerformanceMonitor` measures against the real
+refresh rate, not against 60, so on a 120 Hz panel that cannot hold 120 it steps
+`dpr` down sooner than it used to. Resolution is traded for frames, in that order.
+If that ever reads as too soft on a ProMotion display, the lever is `DPR_MIN` in
+`TheatreScene.tsx`, not the frame cap.
 
 ### Adaptive quality — measure, do not predict
 
@@ -823,7 +848,6 @@ src/features/watch-party/
 │   │   ├── TheatreSeating.tsx        generated chairs + seat pads
 │   │   ├── TheatreColliders.tsx      static boxes from layout.ts
 │   │   ├── TheatreLighting.tsx       house rig, dims when seated
-│   │   ├── FrameLimiter.tsx          drives the loop (frameloop="never")
 │   │   ├── LocalPlayer.tsx           Rapier capsule the camera rides
 │   │   ├── LocalAvatar.tsx           own body, shown only when the camera pulls back
 │   │   ├── RemoteAvatar.tsx          interpolated peer avatar

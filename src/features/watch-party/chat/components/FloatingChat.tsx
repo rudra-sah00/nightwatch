@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { ChatMessage } from '../../room/types';
 import { CHAT_SURFACE_ATTR } from '../../theatre/lib/keyboard';
+import { useTheatreView } from '../../theatre/lib/view-mode';
+import { useChatFocusHotkey } from '../hooks/use-chat-focus-hotkey';
 
 /** Props for the {@link FloatingChat} component. */
 interface FloatingChatProps {
@@ -40,6 +42,14 @@ export function FloatingChat({
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const prevCountRef = useRef(0);
+  /**
+   * Whether the 3D scene is on screen.
+   *
+   * The chat panel behaves differently there because the keyboard is shared with
+   * the avatar: Enter opens the box and sending hands the keys back. See
+   * `useChatFocusHotkey`.
+   */
+  const in3D = useTheatreView((s) => s.mode) !== '2d';
 
   /*
     Auto-scroll to the newest message.
@@ -69,10 +79,34 @@ export function FloatingChat({
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleSend();
+        /*
+          Hand the keyboard back, in 3D only.
+
+          Enter opened the box (`useChatFocusHotkey`), so Enter closing it again is
+          the convention people arrive with. It also matters mechanically: while the
+          field holds focus every theatre shortcut treats the region as text entry,
+          so `WASD` does not reach the avatar — staying focused after sending would
+          leave the player unable to move with no visible reason why.
+
+          In 2D the field is just an overlay on a video and blurring after every
+          line would be a nuisance, so it keeps focus there.
+        */
+        if (in3D) e.currentTarget.blur();
+        return;
+      }
+      if (e.key === 'Escape') {
+        // Back to the controls without sending. Stopped here because the player
+        // binds Escape to leaving fullscreen, and this one is not for it.
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.blur();
       }
     },
-    [handleSend],
+    [handleSend, in3D],
   );
+
+  // `Enter` to type, like a game. 3D only — see the hook.
+  useChatFocusHotkey(inputRef, in3D && canChat);
 
   /**
    * Clicking anywhere on the panel puts the caret in the message field.
