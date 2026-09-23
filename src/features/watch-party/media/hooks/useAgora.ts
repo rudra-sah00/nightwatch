@@ -527,10 +527,19 @@ export function useAgora({
         if (cleaned) return;
         try {
           const { getAgoraToken } = await import('../services/agora.api');
+          /*
+            The USER id, not the numeric Agora uid.
+
+            `String(uid)` was being sent as `guestId` — a decimal hash like
+            "3218476521", which identifies nobody. The backend mints the renewed
+            token from the authenticated `req.user.id` and ignores this field, so
+            nothing broke; it was a value that could only ever mislead whoever read
+            it next.
+          */
           const data = await getAgoraToken({
             channelName: channel,
-            guestId: String(uid),
-            guestName: String(uid),
+            guestId: userId ?? String(uid),
+            guestName: userId ?? String(uid),
           });
           if (!cleaned && clientRef.current === client) {
             await client.renewToken(data.token);
@@ -591,7 +600,7 @@ export function useAgora({
       setAudioEnabled(false);
       setVideoEnabled(false);
     };
-  }, [token, appId, channel, uid, tp]);
+  }, [token, appId, channel, uid, userId, tp]);
 
   /**
    * Toggles for local audio and video tracks.

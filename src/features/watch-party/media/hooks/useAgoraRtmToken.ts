@@ -15,6 +15,13 @@ interface UseAgoraRtmTokenOptions {
     token: string;
     appId: string;
     uid: string;
+    /**
+     * Channel the token was minted for, when the sender says.
+     *
+     * Present on anything the backend issues (`generateRtmToken` returns it);
+     * absent on older payloads, which are then trusted as-is.
+     */
+    channel?: string;
   };
 }
 
@@ -52,15 +59,30 @@ export function useAgoraRtmToken(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Optimization: If we already received a token via Socket.IO/JOIN payload, use it immediately
+    /*
+      A token handed to us by the join payload, used without a round trip.
+
+      The guard used to be `roomId === preFetched.uid?.split(':')[0]`, which asks
+      whether a USER id starts with a room code. For an authenticated user that is
+      never true, so the fast path was dead and every join paid for a token fetch
+      it already had; for a guest it was true only by coincidence of id format.
+
+      The question actually worth asking is whether this token belongs to the room
+      we are joining, and `channel` is the field that answers it. When the payload
+      does not say, trust it: the only producer is this room's own approval
+      message.
+    */
     const preFetched = options.initialTokenData;
+    const preFetchedChannel = preFetched?.channel?.toUpperCase();
     if (
       preFetched?.token &&
-      (roomId === preFetched.uid?.split(':')[0] || !roomId)
+      (!preFetchedChannel ||
+        !roomId ||
+        preFetchedChannel === roomId.toUpperCase())
     ) {
       setToken(preFetched.token);
       setAppId(preFetched.appId);
-      setChannel(roomId?.toUpperCase() || '');
+      setChannel(roomId?.toUpperCase() || preFetchedChannel || '');
       setUid(preFetched.uid);
       return;
     }

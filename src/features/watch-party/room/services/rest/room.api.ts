@@ -29,7 +29,10 @@ export async function checkRoomExists(roomId: string): Promise<{
     const data = await apiFetch<{
       exists: boolean;
       title: string;
-      type: 'movie' | 'series';
+      // Live TV parties are real and `checkRoom` returns their type verbatim;
+      // narrowing this to movie/series only made every livestream comparison
+      // against it a cast.
+      type: 'movie' | 'series' | 'livestream';
       season?: number;
       episode?: number;
       hostId?: string;

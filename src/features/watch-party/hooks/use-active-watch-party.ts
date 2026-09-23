@@ -4,6 +4,7 @@ import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { useAudioDucking } from '../media/hooks/useAudioDucking';
 import { useWatchPartyFullscreen } from '../room/hooks/useWatchPartyFullscreen';
 import { useWatchPartyHostSync } from '../room/hooks/useWatchPartyHostSync';
+import { resolveMemberPermissions } from '../room/permissions';
 import type { PartyEvent, WatchPartyRoom } from '../room/types';
 
 /**
@@ -22,6 +23,8 @@ interface UseActiveWatchPartyOptions {
   onPartyEvent: (event: PartyEvent) => void;
   /** Callback to update the room's content (e.g. switch episode or movie). */
   onUpdateContent: (content: {
+    /** Optional: the server preserves the room's existing id when omitted. */
+    contentId?: string;
     title: string;
     type: 'movie' | 'series';
     season?: number;
@@ -63,11 +66,17 @@ export function useActiveWatchParty({
     videoRef: contextVideoRef,
   } = useSketch();
 
-  const currentMember = room.members.find((m) => m.id === currentUserId);
-  const canDraw =
-    currentMember?.permissions?.canDraw ??
-    room.permissions?.canGuestsDraw ??
-    false;
+  /*
+    Drawing permission, from the one resolver everything else uses.
+
+    This used to re-implement the precedence inline — per-member override, then the
+    room default, then `false`. It happened to agree with
+    `resolveMemberPermissions` for today's values, which is the worst kind of
+    duplicate: the sidebar decides whether to show the sketch tab from the shared
+    resolver and the canvas decided whether to accept input from this copy, so the
+    two could only ever drift apart silently.
+  */
+  const canDraw = resolveMemberPermissions(room, currentUserId).canDraw;
 
   useEffect(() => {
     setIsHost(isHost);
@@ -191,9 +200,18 @@ export function useActiveWatchParty({
   const handleNextEpisode = useCallback(
     (season: number, episode: number) => {
       if (!isHost) return;
-      onUpdateContent({ title: room.title, type: 'series', season, episode });
+      // Same series, so the room's own contentId still identifies it. Stating it
+      // keeps the room's identity explicit rather than relying on the server to
+      // carry the previous value forward.
+      onUpdateContent({
+        contentId: room.contentId,
+        title: room.title,
+        type: 'series',
+        season,
+        episode,
+      });
     },
-    [isHost, room.title, onUpdateContent],
+    [isHost, room.contentId, room.title, onUpdateContent],
   );
 
   return {

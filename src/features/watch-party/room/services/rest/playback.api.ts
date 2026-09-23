@@ -22,10 +22,18 @@ export function syncPartyState(
   return postForSuccess(`/api/rooms/${roomId}/state`, payload);
 }
 
-/** Switch what the party is watching (host only). */
+/**
+ * Switch what the party is watching (host only).
+ *
+ * `contentId` is worth sending even though the server can resolve an episode from
+ * title plus season and episode: it is what the room is keyed on downstream (clip
+ * recording, a rejoining member's playlist lookup), and a switch that omits it
+ * leaves the server to preserve the old one rather than state the new one.
+ */
 export async function updatePartyContent(
   roomId: string,
   payload: {
+    contentId?: string;
     title: string;
     type: 'movie' | 'series';
     season?: number;
