@@ -51,10 +51,6 @@ export interface TheatreAnimationUrls {
 }
 
 /** True once locomotion clips are available from any source. */
-export function hasAnimations(m: TheatreAssetManifest): boolean {
-  return m.animations.clipsEmbedded || m.animations.locomotion !== null;
-}
-
 export interface TheatreAssetManifest {
   /** asset-set version, e.g. 'v1'. Informational — never build paths from it. */
   version: string;

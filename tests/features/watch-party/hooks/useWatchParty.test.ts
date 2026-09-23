@@ -54,17 +54,8 @@ const { mockRtmSendMessage, mockRtmSendMessageToPeer } = vi.hoisted(() => ({
   mockRtmSendMessageToPeer: vi.fn().mockResolvedValue(true),
 }));
 
-import type { RTMMessage } from '@/features/watch-party/room/types/rtm-messages';
-
-type RtmOptions = {
-  onMessage?: (msg: RTMMessage) => void;
-  onPresence?: (event: { action: string; userId: string }) => void;
-};
-
-let _capturedRtmOptions: RtmOptions = {};
 vi.mock('@/features/watch-party/media/hooks/useAgoraRtm', () => ({
-  useAgoraRtm: vi.fn((opts) => {
-    _capturedRtmOptions = opts;
+  useAgoraRtm: vi.fn(() => {
     return {
       isConnected: true,
       sendMessage: mockRtmSendMessage,

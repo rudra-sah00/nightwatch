@@ -100,7 +100,6 @@ vi.mock('@/features/watch-party/interactions/context/SketchContext', () => ({
 
 describe('SketchOverlay', () => {
   const mockRtmSendMessage = vi.fn();
-  const _mockRtmSendMessageToPeer = vi.fn();
   const mockContext = {
     currentTool: 'freehand',
     color: '#ff0000',

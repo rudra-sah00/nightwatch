@@ -353,21 +353,6 @@ export function seatCamera(
   };
 }
 
-/**
- * Convenience wrapper kept for callers that only want the lens.
- * Prefer {@link seatCamera}, which also reports the dolly needed.
- */
-export function seatFovDeg(framing: SeatFraming, aspect: number): number {
-  const fov = fovForHalfAngles(
-    { h: framing.halfAngleH, v: framing.halfAngleV },
-    aspect,
-  );
-  return Math.min(
-    SEAT_FOV_MAX_DEG,
-    Math.max(SEAT_FOV_MIN_DEG, (fov * 180) / Math.PI),
-  );
-}
-
 const ROW_GEOMETRY: Record<SeatRow, { floorY: number; z: number }> = {
   A: { floorY: 0.0, z: 4.5 },
   B: { floorY: 0.45, z: 6.2 },

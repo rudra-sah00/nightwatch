@@ -27,13 +27,3 @@ export function ensureRectAreaLights(): void {
   initialised = true;
   RectAreaLightUniformsLib.init();
 }
-
-/** Test seam: forget that init ran, so a test can observe the latch. */
-export function resetRectAreaLightsForTest(): void {
-  initialised = false;
-}
-
-/** True once the lookup tables have been requested. */
-export function rectAreaLightsReady(): boolean {
-  return initialised;
-}

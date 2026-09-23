@@ -15,11 +15,14 @@
  * @see {@link module:platforms/mobile/touch-ui-script} for the pre-paint script.
  */
 export {
-  isTouchPrimaryDevice,
   /**
-   * @deprecated Prefer `useIsTouchUi` — the name describes what is actually
-   * detected (touch-primary input), not a screen size.
+   * @deprecated Prefer `useIsTouchUi` from `@/platforms/mobile` — the name
+   * describes what is actually detected (touch-primary input), not a screen size.
+   *
+   * This alias is the only thing this module re-exports, because it is the only
+   * name anything imports from this path. `isTouchPrimaryDevice` and
+   * `useIsTouchUi` were re-exported here too and never imported from here; both
+   * are available from `@/platforms/mobile`.
    */
   useIsTouchUi as useMobileDetection,
-  useIsTouchUi,
 } from '@/platforms/mobile/use-touch-ui';

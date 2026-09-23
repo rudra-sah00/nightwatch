@@ -357,11 +357,8 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
 
         setConnectionState('CONNECTED');
         setIsConnected(true);
-      } catch (error) {
+      } catch {
         if (!cleaned) {
-          const _msg = error instanceof Error ? error.message : 'Unknown error';
-          if (process.env.NODE_ENV !== 'production') {
-          }
           toast.error(tp('failedConnectSignaling'));
           setConnectionState('DISCONNECTED');
           setIsConnected(false);
