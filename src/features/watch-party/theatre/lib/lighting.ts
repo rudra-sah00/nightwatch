@@ -226,11 +226,20 @@ export const ACCENTS: readonly PointFixture[] = [
  * `y = 4.32`, 34 W) — the fixtures that uplight the side walls and sell the
  * room's height.
  *
- * Kept as rect area lights because a point light cannot produce a long soft
- * band, and the LTC tables are loaded for the screen light anyway so the shader
- * cost is already paid. They light `MeshStandardMaterial` only, which is what
- * the glTF loader produces, so the room responds to them and nothing else needs
- * to.
+ * Kept as rect area lights because a point light cannot produce a long soft band.
+ * They light `MeshStandardMaterial` only, which is what the glTF loader produces,
+ * so the room responds to them and nothing else needs to.
+ *
+ * COST, corrected. This used to claim "the LTC tables are loaded for the screen
+ * light anyway so the shader cost is already paid". That conflates two different
+ * costs. Loading the tables is a ONE-TIME upload of two lookup textures, and the
+ * screen light does pay that. The LTC integration itself is per light, PER PIXEL,
+ * every frame — so these two coves cost their own full evaluation on every
+ * fragment they reach, and a `RectAreaLight` runs several times the per-pixel work
+ * of a point light.
+ *
+ * With the screen light that is three rect lights in the shader loop, which is the
+ * dominant fragment cost in the scene. Worth knowing before adding a fourth.
  */
 export interface RectFixture {
   id: string;

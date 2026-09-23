@@ -73,6 +73,36 @@ interface TheatreSceneProps {
   memberNames?: Record<string, string>;
 }
 
+/**
+ * Resolution bounds for the adaptive dpr.
+ *
+ * `DPR_MAX` is the measured ceiling, not a guess — see the note where it is used.
+ * `DPR_MIN` is deliberately below 1: on a Retina panel a 0.75 buffer is still
+ * upscaled from more pixels than a non-Retina 1.0 and is far better than dropping
+ * frames.
+ */
+/**
+ * Whether to ask for MSAA.
+ *
+ * Off on high-density displays. MSAA resolves geometry edges by supersampling
+ * them, and on a panel dense enough that one CSS pixel is already 2+ device
+ * pixels, the edge it is smoothing is smaller than the eye can resolve — so it
+ * costs bandwidth for a difference nobody sees. This is the long-standing Retina
+ * finding in the three.js optimisation lists, not a guess.
+ *
+ * Kept ON for 1x displays, where an aliased edge is genuinely visible and the
+ * buffer is small enough that MSAA is affordable.
+ *
+ * Read once at module scope because `gl` is consumed when the renderer is
+ * constructed — changing it later would need a Canvas remount, which would drop
+ * the WebGL context and every uploaded texture with it.
+ */
+const USE_MSAA =
+  typeof window === 'undefined' ? true : window.devicePixelRatio < 2;
+
+const DPR_MIN = 0.75;
+const DPR_MAX = 1.5;
+
 export function TheatreScene({
   userId,
   rtmSendMessage,
@@ -167,19 +197,21 @@ export function TheatreScene({
   );
 
   /*
-    Resolution is now adaptive rather than a fixed ceiling.
+    Adaptive resolution, bounded ABOVE by the value that was already measured good.
 
-    1.5 was chosen as a compromise: the scene is fragment-bound (~12,000 triangles
-    lit by 16 point and area lights), so cost scales with pixels shaded, and dpr 2
-    on a Retina display renders 1.78x the pixels of 1.5. But a fixed cap
-    under-serves a machine that could afford 2 and still overwhelms a weak one.
+    The scene is fragment-bound (~12,000 triangles, and 3 RectAreaLights which each
+    cost several point lights per pixel), so cost scales almost purely with pixels
+    shaded. 1.5 was not an arbitrary cap: dpr 2 on a Retina display renders 1.78x
+    the pixels of 1.5, and 1.5 was chosen as the point where `antialias` still hides
+    the difference.
 
-    `PerformanceMonitor` measures the real frame rate against the display's refresh
-    and reports a 0..1 `factor`, which is mapped onto a dpr range here. Quality is
-    only given up on hardware that has demonstrated it cannot hold the rate, and it
-    is given back when the load drops — walking out of a crowded room, say.
+    An earlier version of this mapped the monitor's factor onto 1..2, which allowed
+    MORE pixels than that measured ceiling on any machine whose first few frames
+    looked healthy — trading away a known-good setting for an unvalidated one. The
+    range only goes down from 1.5 now: adaptivity is there to protect weak hardware,
+    not to spend more on strong hardware than the look requires.
   */
-  const [dpr, setDpr] = useState(1.5);
+  const [dpr, setDpr] = useState(DPR_MAX);
 
   if (isLoading) {
     return (
@@ -218,7 +250,7 @@ export function TheatreScene({
           near: 0.1,
           far: 100,
         }}
-        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        gl={{ antialias: USE_MSAA, powerPreference: 'high-performance' }}
         /*
           The loop is driven by `FrameLimiter` below, not by r3f's own rAF.
 
@@ -253,7 +285,11 @@ export function TheatreScene({
             onto 1..2 so capable hardware gets MORE than the old fixed 1.5 and weak
             hardware drops below it. */}
         <PerformanceMonitor
-          onChange={({ factor }) => setDpr(Math.round((1 + factor) * 10) / 10)}
+          onChange={({ factor }) =>
+            setDpr(
+              Math.round((DPR_MIN + factor * (DPR_MAX - DPR_MIN)) * 100) / 100,
+            )
+          }
         />
 
         {/* The screen is the primary light source (see TheatreScreen); this rig
