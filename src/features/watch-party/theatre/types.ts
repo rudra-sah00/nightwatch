@@ -50,6 +50,27 @@ export interface TheatreAnimationUrls {
   dance: Record<string, string>;
 }
 
+/**
+ * What opting in to 3D costs to download.
+ *
+ * Measured by the backend with a HEAD against the same objects the client will
+ * fetch, so it cannot drift from reality. Absent when nothing could be measured —
+ * treat that as "unknown", never as "free".
+ *
+ * Exists because the size has to be known *before* opt-in, to be shown on the
+ * settings toggle. Writing the figure into the UI by hand had already gone stale
+ * by 3x: the panel advertised "~35 MB" long after the room, cafe and chair
+ * stopped being served, when the real transfer is the two characters.
+ */
+export interface TheatreDownloadSize {
+  /** Sum over every published character — which is what a client transfers. */
+  totalBytes: number;
+  /** Per-URL bytes, for a client accounting for what it already has cached. */
+  bytes: Record<string, number>;
+  /** How many URLs were successfully measured. */
+  measured: number;
+}
+
 /** True once locomotion clips are available from any source. */
 export interface TheatreAssetManifest {
   /** asset-set version, e.g. 'v1'. Informational — never build paths from it. */
@@ -58,6 +79,22 @@ export interface TheatreAssetManifest {
   baseUrl: string;
   models: TheatreModelUrls;
   animations: TheatreAnimationUrls;
+  /** Undefined on an older backend, or when the size probe failed. */
+  download?: TheatreDownloadSize;
+}
+
+/**
+ * Total bytes a client will transfer to enter 3D, or null when unknown.
+ *
+ * Every published character is downloaded regardless of which body the user
+ * picked, because a peer may have chosen the other one and cannot be drawn
+ * without its model — so the total is over the whole published set, not one file.
+ */
+export function theatreDownloadBytes(
+  m: TheatreAssetManifest | undefined,
+): number | null {
+  const total = m?.download?.totalBytes;
+  return typeof total === 'number' && total > 0 ? total : null;
 }
 
 /**

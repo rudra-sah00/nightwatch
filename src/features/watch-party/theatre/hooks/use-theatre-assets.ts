@@ -30,14 +30,23 @@ export const THEATRE_ASSETS_KEY = ['theatre', 'assets'] as const;
  * Long `staleTime` because a manifest only changes when a new asset set is
  * published, and re-fetching mid-session would risk swapping URLs under a
  * loaded scene.
+ *
+ * @param options.enabled - Force the fetch on regardless of the 3D opt-in. The
+ *   settings panel passes this: it has to quote the download size *before* the
+ *   user commits, and the size lives in the manifest. That does not reopen the
+ *   problem the gate exists for — the gate stops the request firing for every
+ *   participant the moment a party mounts, whereas opening the settings panel is
+ *   a deliberate action by one person, and the manifest is a tiny edge-cached
+ *   JSON rather than the multi-megabyte models. Same query key, so the panel
+ *   warms the cache the preloader then reuses.
  */
-export function useTheatreAssets() {
+export function useTheatreAssets(options?: { enabled?: boolean }) {
   const optedIn = useTheatreView((s) => s.enabled);
 
   return useQuery<TheatreAssetManifest>({
     queryKey: THEATRE_ASSETS_KEY,
     queryFn: getTheatreAssets,
-    enabled: optedIn,
+    enabled: options?.enabled || optedIn,
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: 2,

@@ -1,7 +1,7 @@
 import { Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { cn, formatBytes } from '@/lib/utils';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import {
@@ -9,7 +9,9 @@ import {
   updatePartyPermissions,
 } from '../room/services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '../room/types';
+import { useTheatreAssets } from '../theatre/hooks/use-theatre-assets';
 import { useTheatreView } from '../theatre/lib/view-mode';
+import { theatreDownloadBytes } from '../theatre/types';
 
 // Simple Toggle Switch built with Tailwind
 interface SwitchProps {
@@ -76,6 +78,28 @@ export function WatchPartySettings({
   const disableTheatre = useTheatreView((s) => s.disable);
   const theatreCharacter = useTheatreView((s) => s.character);
   const setTheatreCharacter = useTheatreView((s) => s.setCharacter);
+
+  /*
+    Real download size for the 3D toggle, measured by the backend against the
+    same objects the client will fetch.
+
+    This label used to be the hardcoded string "Downloads ~35 MB of assets", and
+    it had gone stale by roughly 3x: 35 MB was the full v2 set, and the room, cafe
+    and chair stopped being served once the client began generating the auditorium
+    in code. What a client actually transfers is the two character models.
+
+    The manifest is fetched here rather than only after opt-in, because the whole
+    point is to tell the user the cost BEFORE they commit. Same query key as the
+    preloader, so this warms the cache instead of duplicating work.
+
+    Falls back to a figureless label rather than inventing a number, so an older
+    backend or a failed size probe cannot put a wrong figure back on screen.
+  */
+  const { data: theatreAssets } = useTheatreAssets({ enabled: true });
+  const theatreBytes = theatreDownloadBytes(theatreAssets);
+  const theatreDownloadLabel = theatreBytes
+    ? `Downloads ${formatBytes(theatreBytes)} of assets`
+    : 'Downloads character models on first use';
 
   const handleGlobalPermissionToggle = (
     key: keyof WatchPartyRoom['permissions'],
@@ -239,7 +263,7 @@ export function WatchPartySettings({
                           ? 'Ready — press V to change view'
                           : theatrePhase === 'error'
                             ? 'Download failed — toggle to retry'
-                            : 'Downloads ~35 MB of assets'}
+                            : theatreDownloadLabel}
                     </span>
                   </span>
                   <Switch
