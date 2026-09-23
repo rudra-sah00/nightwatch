@@ -1,6 +1,6 @@
 'use client';
 
-import { PerformanceMonitor, Stats } from '@react-three/drei';
+import { PerformanceMonitor } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Physics, type RapierRigidBody } from '@react-three/rapier';
 import type { RefObject } from 'react';
@@ -41,7 +41,6 @@ import type { StanceRef } from '../lib/stance';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
 import { DanceWheel } from './DanceWheel';
-import { FrameLimiter } from './FrameLimiter';
 import { LocalAvatar } from './LocalAvatar';
 import { LocalPlayer } from './LocalPlayer';
 import { PassiveAvatars } from './PassiveAvatars';
@@ -329,34 +328,25 @@ export function TheatreScene({
         }}
         gl={{ antialias: USE_MSAA, powerPreference: 'high-performance' }}
         /*
-          The loop is driven by `FrameLimiter` below, not by r3f's own rAF.
+          r3f's own rAF drives the loop, at whatever the display will do.
 
-          rAF is already vsync-locked, so this changes nothing on a 60 Hz display.
-          It caps high-refresh ones: a 120 Hz ProMotion laptop was rendering twice
-          the frames for a scene that looks identical at 60, and this scene is
-          fragment-bound, so halving frames roughly halves GPU load. No quality is
-          traded — the skipped frames were never distinguishable.
+          This used to be `frameloop="never"` with a `FrameLimiter` calling
+          `advance` on a 60 Hz budget, to stop a 120 Hz panel rendering twice the
+          frames for a scene that looks the same. The room is comfortably inside
+          budget now, so the cap is gone and a high-refresh display gets the frames
+          it can draw. rAF is vsync-locked either way, so nothing here spins.
 
-          `never` means nothing renders unless `advance` is called, so FrameLimiter
-          must stay mounted as the first child. See its docblock.
+          `PerformanceMonitor` below is what protects a weak machine, and it now
+          measures against the real refresh rate rather than against 60 — so on a
+          120 Hz panel that cannot hold 120 it steps `dpr` down sooner than it used
+          to. That is the intended trade: resolution first, frames second.
         */
-        frameloop="never"
         onCreated={({ gl }) => {
           gl.toneMapping = ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.1;
           gl.outputColorSpace = SRGBColorSpace;
         }}
       >
-        <FrameLimiter fps={60} />
-
-        {/* Frame-rate readout, from drei's stats.js panel. This replaces a
-            hand-rolled HUD: stats.js is the reference implementation, already
-            samples inside the render loop, and one fewer bespoke component is one
-            fewer thing to get the units wrong in — the custom probe read 0 fps for
-            a while because it trusted a delta the loop was feeding it in the wrong
-            unit. */}
-        <Stats />
-
         {/* Adaptive resolution. Headless: it only reports, and `setDpr` applies.
             `factor` runs 0..1 as measured frames approach the refresh rate, mapped
             onto 1..2 so capable hardware gets MORE than the old fixed 1.5 and weak
