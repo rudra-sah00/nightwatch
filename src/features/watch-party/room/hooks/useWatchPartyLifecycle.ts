@@ -347,6 +347,35 @@ export function useWatchPartyLifecycle({
       });
       // Small buffer to ensure message delivery before backend destroys room
       await new Promise((resolve) => setTimeout(resolve, 300));
+    } else if (rtmSendMessage && userId) {
+      /*
+        Tell the room, explicitly, that this person is gone.
+
+        Nothing used to send `MEMBER_LEFT` from the frontend at all. The backend
+        emits it — `MembershipService.leaveRoom` fires both `MEMBERS_UPDATED` and
+        `MEMBER_LEFT` to `room:<id>` — but over Socket.IO, and a guest's socket is
+        never in that room because it carries no verifiable membership. So for the
+        commonest case, a guest pressing Leave, the ONLY signal other clients got
+        was an Agora presence LEAVE, which merely flags the member `disconnected`
+        and arrives whenever Agora gets round to it (a dropped socket surfaces as
+        REMOTE_TIMEOUT, not REMOTE_LEAVE).
+
+        In 2D that is a greyed-out row a few seconds late. In the 3D theatre it is
+        a body still sitting in a chair, and a seat claim that outlives its owner —
+        and because the deterministic rule favours the EARLIEST timestamp, a ghost
+        claim beats every later one and reserves that chair for somebody who has
+        left the building.
+
+        Sent before the REST call, because this client is navigating away the
+        moment it resolves and an unsubscribed RTM channel publishes nothing.
+        Every consumer of this event is idempotent, so the presence path and the
+        socket path arriving later cost nothing.
+      */
+      rtmSendMessage({ type: 'MEMBER_LEFT', userId });
+      // One tick, so the publish is actually handed to the socket before the page
+      // starts tearing down. Far shorter than the host's 300 ms: nothing here is
+      // waiting on the backend to destroy anything.
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
 
     const response = await leavePartyRoom(room.id);

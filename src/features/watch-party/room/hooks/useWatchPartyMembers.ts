@@ -100,10 +100,27 @@ export function useWatchPartyMembers({
             };
           }
 
-          // Notify the approved member directly so they can connect to streams/RTM
+          const next: WatchPartyRoom = {
+            ...prev,
+            pendingMembers: prev.pendingMembers.filter(
+              (m) => m?.id !== memberId,
+            ),
+            members: [...prev.members, { ...member, joinedAt: Date.now() }],
+          };
+
+          /*
+            Notify the approved member with the room they are NOW in.
+
+            This used to send `prev` — the roster from before they were added — so
+            the guest's own copy of the room did not list them as a member. Every
+            capability is resolved through `resolveMemberPermissions`, which denies
+            everything to a non-member, so for the window until `MEMBER_JOINED`
+            arrived the guest had no chat composer, no sketch, no soundboard, and
+            did not appear in their own participant list.
+          */
           rtmSendMessageToPeer?.(memberId, {
             type: 'JOIN_APPROVED',
-            room: prev,
+            room: next,
             streamToken: streamToken || '',
             initialState: {
               currentTime:
@@ -128,13 +145,7 @@ export function useWatchPartyMembers({
             },
           });
 
-          return {
-            ...prev,
-            pendingMembers: prev.pendingMembers.filter(
-              (m) => m?.id !== memberId,
-            ),
-            members: [...prev.members, member],
-          };
+          return next;
         });
       } else {
         toast.error(response.error || tp('failedApprove'));
@@ -247,6 +258,12 @@ export function useWatchPartyMembers({
           disconnectTimersRef.current[event.userId] = setTimeout(() => {
             const currentRoom = roomRef.current;
             if (!currentRoom) return;
+            delete disconnectTimersRef.current[event.userId];
+            // Still the host? Two minutes is long enough for that to have changed
+            // (the party can end, or this client can stop being the host), and
+            // kicking is an authority the backend will refuse anyway — better to
+            // not ask, and not show a removal toast for something that will fail.
+            if (currentRoom.hostId !== userId) return;
             const isStillMember = currentRoom.members.some(
               (m) => m?.id === event.userId,
             );
@@ -254,7 +271,6 @@ export function useWatchPartyMembers({
               toast.info(tp('autoRemoving'));
               kickUser(event.userId).catch(() => {});
             }
-            delete disconnectTimersRef.current[event.userId];
           }, 120000);
         }
       } else if (event.action === 'JOIN') {
@@ -281,7 +297,7 @@ export function useWatchPartyMembers({
         }
       }
     },
-    [isHost, room?.id, room?.hostId, kickUser, tp, setRoom],
+    [isHost, userId, room?.id, room?.hostId, kickUser, tp, setRoom],
   );
 
   // Listen for optimistic local updates from WatchPartySettings via CustomEvent

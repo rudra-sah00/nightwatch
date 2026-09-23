@@ -17,7 +17,7 @@ import {
   getPartyStreamToken,
 } from '../services/watch-party.api';
 import type { PartyStateUpdate, RoomMember, WatchPartyRoom } from '../types';
-import { isPartyHost, normalizeRoomUrls } from '../utils';
+import { isPartyHost, mergeMembers, normalizeRoomUrls } from '../utils';
 import { useClockSync } from './useClockSync';
 import { useWatchPartyLifecycle } from './useWatchPartyLifecycle';
 import { useWatchPartyMembers } from './useWatchPartyMembers';
@@ -354,6 +354,81 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       socket.emit('watch-party:leave_room', syncRoomId);
     };
   }, [socket, syncRoomId, userId, closeParty]);
+
+  /*
+    Authoritative membership, over Socket.IO.
+
+    The backend already publishes this and nothing was listening. Every mutation
+    in `MembershipService` emits `MEMBERS_UPDATED` to `room:<id>`, and `leaveRoom`
+    and `kickMember` follow it with `MEMBER_LEFT` — the server's own statement that
+    a member is gone from Redis, which is a stronger claim than anything RTM
+    carries. RTM is fire-and-forget: a `MEMBER_LEFT` broadcast by a client that is
+    already navigating away can be dropped, and Agora presence only ever says a
+    connection went quiet, which is why it merely sets `disconnected`.
+
+    In 2D a missed departure is a stale sidebar row. In the 3D theatre it is a body
+    left sitting in a chair and a seat claim that outlives its owner — and the
+    deterministic claim rule favours the EARLIEST timestamp, so that chair becomes
+    untakeable for the rest of the party.
+
+    Socket.IO redelivers on reconnect, so this also closes the window where a
+    client was offline for the departure entirely.
+
+    `mergeMembers` rather than a straight replace: the server does not know about
+    `disconnected`, so taking its list verbatim would resurrect someone whose tab
+    had died as present, and put their avatar back in a seat. Membership comes from
+    the server, liveness stays local.
+
+    Authenticated members only, for the same reason as `watch-party:closed` above:
+    a guest's socket is not in `room:<id>`. Guests are covered by the RTM
+    `MEMBER_LEFT` that `useWatchPartyLifecycle` now broadcasts on leave, and by
+    presence.
+  */
+  /*
+    Held in a ref so the Socket.IO effect below does not depend on its identity.
+
+    `handleIncomingRtmMessage` is rebuilt whenever `onMemberJoined` changes, and
+    that is a caller-supplied callback — an inline one means a new identity every
+    render. With it in the dependency array the two listeners were torn down and
+    re-registered on every render of the party, and an event arriving in the gap
+    between `off` and `on` was simply lost.
+  */
+  const membersHandlerRef = useRef(members.handleIncomingRtmMessage);
+  membersHandlerRef.current = members.handleIncomingRtmMessage;
+
+  useEffect(() => {
+    if (!(socket && syncRoomId && userId) || userId.startsWith('guest')) return;
+
+    const onMembersUpdated = (payload: { members?: RoomMember[] }) => {
+      const incoming = payload?.members;
+      if (!incoming) return;
+      setRoom((prev) =>
+        prev
+          ? { ...prev, members: mergeMembers(prev.members, incoming) }
+          : prev,
+      );
+    };
+
+    const onMemberLeft = (payload: { userId?: string }) => {
+      const gone = payload?.userId;
+      if (!gone) return;
+      // Reuse the RTM path rather than filtering the roster here: it already
+      // removes the member and shows the toast, and `sonner` collapses the
+      // duplicate if the RTM broadcast lands too. Both arriving is normal.
+      membersHandlerRef.current({ type: 'MEMBER_LEFT', userId: gone });
+      // Then the local event bus, so the 3D theatre despawns the avatar and frees
+      // the seat through the same subscribers an RTM departure reaches.
+      dispatchRtmMessage({ type: 'MEMBER_LEFT', userId: gone });
+    };
+
+    socket.on('MEMBERS_UPDATED', onMembersUpdated);
+    socket.on('MEMBER_LEFT', onMemberLeft);
+
+    return () => {
+      socket.off('MEMBERS_UPDATED', onMembersUpdated);
+      socket.off('MEMBER_LEFT', onMemberLeft);
+    };
+  }, [socket, syncRoomId, userId]);
 
   // Stream token auto-renewal: refresh at 3.5h to prevent 4h expiry
   useEffect(() => {

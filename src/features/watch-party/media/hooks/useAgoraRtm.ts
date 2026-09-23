@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import type { RTMMessage } from '../../room/types/rtm-messages';
+import { presenceMemberEvents, type RtmPresenceEvent } from '../lib/presence';
 
 /**
  * Connection states for the Agora RTM client.
@@ -241,28 +242,19 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
           }
         };
 
-        // Presence events
-        const handlePresence = (event: {
-          eventType: string;
-          channelName: string;
-          publisher: string;
-        }) => {
+        /*
+          Presence events.
+
+          The mapping lives in `lib/presence.ts`, which explains why four event
+          types matter and not the two this used to handle: a batched `INTERVAL`
+          replaces the per-user events under load, and `SNAPSHOT` is the only thing
+          that tells a joining client who is already here.
+        */
+        const handlePresence = (event: RtmPresenceEvent) => {
           if (cleaned) return;
           if (event.channelName !== channelRef.current) return;
-
-          if (event.eventType === 'REMOTE_JOIN') {
-            onPresenceRef.current?.({
-              action: 'JOIN',
-              userId: event.publisher,
-            });
-          } else if (
-            event.eventType === 'REMOTE_LEAVE' ||
-            event.eventType === 'REMOTE_TIMEOUT'
-          ) {
-            onPresenceRef.current?.({
-              action: 'LEAVE',
-              userId: event.publisher,
-            });
+          for (const change of presenceMemberEvents(event, userId)) {
+            onPresenceRef.current?.(change);
           }
         };
 

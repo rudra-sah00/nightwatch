@@ -3,6 +3,7 @@ import type { WatchPartyRoom } from '@/features/watch-party/room/types';
 import {
   generateRoomId,
   isPartyHost,
+  mergeMembers,
   normalizeRoomUrls,
 } from '@/features/watch-party/room/utils';
 
@@ -166,5 +167,61 @@ describe('normalizeRoomUrls', () => {
       );
       expect(out.captionUrl).toContain(`/api/stream/cdn/${TOKEN}/`);
     });
+  });
+});
+
+describe('mergeMembers', () => {
+  /**
+   * Membership comes from the server, liveness stays local.
+   *
+   * The backend emits `MEMBERS_UPDATED` on every membership change and is the only
+   * signal that somebody has genuinely been removed. It knows nothing about
+   * `disconnected`, which the presence layer maintains — so a straight replace
+   * would resurrect a member whose tab had died as present, and in the 3D theatre
+   * put their avatar straight back into a chair.
+   */
+  it('takes the server roster', () => {
+    const merged = mergeMembers(
+      [{ id: 'a' }, { id: 'gone' }],
+      [{ id: 'a' }, { id: 'new' }],
+    );
+    expect(merged.map((m) => m.id)).toEqual(['a', 'new']);
+  });
+
+  it('keeps a local disconnected flag the server cannot know about', () => {
+    const merged = mergeMembers(
+      [{ id: 'a' }, { id: 'b', disconnected: true }],
+      [{ id: 'a' }, { id: 'b' }],
+    );
+    expect(merged.find((m) => m.id === 'b')?.disconnected).toBe(true);
+  });
+
+  it('clears the flag once presence says they are back', () => {
+    const merged = mergeMembers(
+      [{ id: 'b', disconnected: false }],
+      [{ id: 'b', disconnected: true }],
+    );
+    expect(merged.find((m) => m.id === 'b')?.disconnected).toBe(false);
+  });
+
+  it('trusts the server for someone it has never seen', () => {
+    const merged = mergeMembers([], [{ id: 'new', disconnected: true }]);
+    expect(merged[0].disconnected).toBe(true);
+  });
+
+  it('survives a roster with holes in it', () => {
+    // Members arrive asynchronously; nulls and id-less rows are real.
+    const merged = mergeMembers(
+      [null, undefined, { name: 'no id' } as { id?: string }],
+      [{ id: 'a' }],
+    );
+    expect(merged.map((m) => m.id)).toEqual(['a']);
+  });
+
+  it('returns the same object when nothing changed, so React can bail out', () => {
+    const row = { id: 'a', disconnected: false };
+    expect(mergeMembers([{ id: 'a', disconnected: false }], [row])[0]).toBe(
+      row,
+    );
   });
 });

@@ -40,10 +40,47 @@ export function isPartyHost(
 }
 
 /**
+ * Fold the server's authoritative member list into the local one.
+ *
+ * The backend emits `MEMBERS_UPDATED` to `room:<id>` whenever membership changes,
+ * and it is the only signal that a member has genuinely been REMOVED — Agora
+ * presence merely reports that someone's connection went away, which is a
+ * different claim and is why `disconnected` exists.
+ *
+ * The two must not overwrite each other. Taking the server list verbatim would
+ * wipe every local `disconnected` flag, which is worse than ignoring the event
+ * entirely: the flag is what excludes someone from `presentMemberIds`, so a
+ * member whose tab died would be resurrected as present, and the 3D theatre would
+ * put their avatar back in a chair for the rest of the party.
+ *
+ * So membership comes from the server and liveness stays local: rows present in
+ * both keep whatever the presence layer last decided about them.
+ *
+ * @param local - The member list this client currently holds.
+ * @param incoming - The list the server just published.
+ * @returns The server's roster, carrying local presence flags forward.
+ */
+export function mergeMembers<
+  T extends { id?: string | null; disconnected?: boolean },
+>(local: readonly (T | null | undefined)[], incoming: readonly T[]): T[] {
+  const flags = new Map<string, boolean | undefined>();
+  for (const m of local) {
+    if (!m || typeof m.id !== 'string') continue;
+    flags.set(m.id, m.disconnected);
+  }
+
+  return incoming.map((m) => {
+    if (!m || typeof m.id !== 'string') return m;
+    if (!flags.has(m.id)) return m; // new to us — take the server's word for it
+    const disconnected = flags.get(m.id);
+    return disconnected === m.disconnected ? m : { ...m, disconnected };
+  });
+}
+
+/**
  * Generate a random alphanumeric room ID
  * Format: 10 characters (e.g. 5x9a2b7c1d)
- */
-export function generateRoomId(): string {
+ */ export function generateRoomId(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   for (let i = 0; i < 10; i++) {

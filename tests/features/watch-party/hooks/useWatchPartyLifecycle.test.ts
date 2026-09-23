@@ -132,4 +132,71 @@ describe('useWatchPartyLifecycle', () => {
     expect(api.leavePartyRoom).toHaveBeenCalledWith('room-1');
     expect(props.setRequestStatus).toHaveBeenCalledWith('idle');
   });
+
+  describe('announcing a departure', () => {
+    /*
+      Nothing in the frontend used to emit MEMBER_LEFT, so the only signal a guest
+      had gone was an Agora presence LEAVE — which merely flags the member
+      `disconnected`, and for a dropped socket arrives as a REMOTE_TIMEOUT whenever
+      Agora gets round to it. In the 3D theatre that leaves a body sitting in a
+      chair and a seat claim that outlives its owner; because the deterministic
+      claim rule favours the EARLIEST timestamp, that chair then refuses every
+      later claim.
+    */
+    it('tells the channel a guest has left, before calling the backend', async () => {
+      vi.mocked(api.leavePartyRoom).mockResolvedValue({ success: true });
+      const rtmSendMessage = vi.fn();
+      const order: string[] = [];
+      rtmSendMessage.mockImplementation(() => order.push('rtm'));
+      vi.mocked(api.leavePartyRoom).mockImplementation(async () => {
+        order.push('rest');
+        return { success: true };
+      });
+
+      const { result } = renderHook(() =>
+        useWatchPartyLifecycle({
+          ...props,
+          room: { id: 'room-1', hostId: 'host-1' } as WatchPartyRoom,
+          userId: 'guest-9',
+          rtmSendMessage,
+        }),
+      );
+
+      await act(async () => {
+        await result.current.leaveRoom();
+      });
+
+      expect(rtmSendMessage).toHaveBeenCalledWith({
+        type: 'MEMBER_LEFT',
+        userId: 'guest-9',
+      });
+      // Published while still subscribed: an unsubscribed channel sends nothing,
+      // and this client navigates away the moment the REST call resolves.
+      expect(order).toEqual(['rtm', 'rest']);
+    });
+
+    it('sends PARTY_CLOSED and no MEMBER_LEFT when the host ends the party', async () => {
+      // The host's leave destroys the room for everybody, so a per-member
+      // departure is noise — and the guests are gone before it could matter.
+      vi.mocked(api.leavePartyRoom).mockResolvedValue({ success: true });
+      const rtmSendMessage = vi.fn();
+
+      const { result } = renderHook(() =>
+        useWatchPartyLifecycle({
+          ...props,
+          room: { id: 'room-1', hostId: 'host-1' } as WatchPartyRoom,
+          userId: 'host-1',
+          rtmSendMessage,
+        }),
+      );
+
+      await act(async () => {
+        await result.current.leaveRoom();
+      });
+
+      const types = rtmSendMessage.mock.calls.map((c) => c[0].type);
+      expect(types).toContain('PARTY_CLOSED');
+      expect(types).not.toContain('MEMBER_LEFT');
+    });
+  });
 });
