@@ -11,6 +11,7 @@ import { useIsMobile } from '@/platforms/mobile/use-is-mobile';
 import { isTV } from '@/platforms/smart-tv/lib/detection';
 import { TvWatchTogether } from '@/platforms/smart-tv/pages/TvWatchTogether';
 import { useDesktopNotifications } from '../hooks/use-desktop-notifications';
+import { useSingleTabClaim } from '../hooks/use-single-tab-claim';
 import { useWatchPartyClient } from '../hooks/use-watch-party-client';
 
 // Dynamic imports for heavy watch party components
@@ -131,15 +132,9 @@ export function WatchPartyClient({
   const isMobile = useIsMobile();
   const [isTvMode] = useState(() => isTV());
 
-  // Multi-tab detection — prevent duplicate RTM/RTC connections
-  const [isBlockedByOtherTab, setIsBlockedByOtherTab] = useState(false);
-  useEffect(() => {
-    if (typeof BroadcastChannel === 'undefined') return;
-    const bc = new BroadcastChannel(`watch-party:${roomId}`);
-    bc.postMessage('TAB_ACTIVE');
-    bc.onmessage = () => setIsBlockedByOtherTab(true);
-    return () => bc.close();
-  }, [roomId]);
+  // Single-tab ownership — two RTM clients on one channel double every event.
+  // See `useSingleTabClaim` for the claim protocol and what it replaced.
+  const isBlockedByOtherTab = useSingleTabClaim(roomId);
 
   if (isBlockedByOtherTab) {
     return <WatchPartyLoading message={t('loading.otherTab')} />;
