@@ -102,13 +102,52 @@ describe('FrameLimiter', () => {
     expect(advance.mock.calls.length).toBeLessThanOrEqual(72);
   });
 
-  it('passes the frame timestamp through, since advance drives useFrame deltas', () => {
+  /*
+    The unit bug, pinned.
+
+    With frameloop="never" r3f derives the frame delta as
+    `timestamp - state.clock.elapsedTime`, and `elapsedTime` is a three.js Clock
+    value — SECONDS. Passing rAF's millisecond timestamp made every delta ~1000x
+    too large: the HUD read 0 fps at a ~16,000 ms frame time, and every useFrame
+    consumer in the scene (walking speed, remote-avatar interpolation, dance
+    timing, the laser auto-clear) integrated against it.
+  */
+  it('advances in seconds, not milliseconds', () => {
+    render(<FrameLimiter fps={60} />);
+
+    tick(3, 1000 / 60);
+
+    const stamps = advance.mock.calls.map(([t]) => t as number);
+    // Three frames at 60 fps is ~0.033 s. In milliseconds it would be ~33.
+    expect(stamps[stamps.length - 1]).toBeLessThan(1);
+    for (let i = 1; i < stamps.length; i += 1) {
+      expect(stamps[i] - stamps[i - 1]).toBeCloseTo(1 / 60, 3);
+    }
+  });
+
+  it('starts the clock near zero so the first delta is not the page age', () => {
+    // A session twenty seconds old: rAF timestamps are ~20000 ms by now.
+    let t = 20_000;
+    render(<FrameLimiter fps={60} />);
+    for (let i = 0; i < 2; i++) {
+      const cb = callbacks.shift();
+      if (!cb) break;
+      t += 1000 / 60;
+      cb(t);
+    }
+
+    const [first] = advance.mock.calls[0];
+    // Relative to the first frame, so r3f's clock does not see a 20-second jump.
+    expect(first).toBe(0);
+  });
+
+  it('passes a monotonically increasing timestamp', () => {
     render(<FrameLimiter fps={60} />);
 
     tick(2, 1000 / 60);
 
     expect(advance).toHaveBeenCalledWith(expect.any(Number));
-    // Monotonic: a non-increasing timestamp would produce zero or negative deltas.
+    // A non-increasing timestamp would produce zero or negative deltas.
     const [first] = advance.mock.calls[0];
     const [second] = advance.mock.calls[1];
     expect(second).toBeGreaterThan(first);

@@ -76,6 +76,15 @@ export function FrameLimiter({ fps = 60 }: { fps?: number }) {
 
     let raf = 0;
     let last = performance.now() - interval;
+    /**
+     * rAF timestamp of the first frame, so the clock starts near zero.
+     *
+     * Without this the first delta is the whole time since page load. r3f's
+     * `never` branch computes `delta = timestamp - clock.elapsedTime` against a
+     * clock still at 0, so opening 3D twenty seconds into a session handed every
+     * `useFrame` a 20-second delta on frame one.
+     */
+    let origin: number | null = null;
 
     const loop = (t: number) => {
       // Queued first, so an exception in `advance` cannot kill the loop and leave
@@ -83,8 +92,19 @@ export function FrameLimiter({ fps = 60 }: { fps?: number }) {
       raf = requestAnimationFrame(loop);
       if (t - last < interval - TOLERANCE_MS) return;
       last = t;
-      // Drives the whole frame: every useFrame callback, then the render.
-      advance(t);
+      if (origin === null) origin = t;
+      /*
+        SECONDS, not milliseconds.
+
+        With `frameloop="never"` r3f derives the frame delta as
+        `timestamp - state.clock.elapsedTime`, and `elapsedTime` is a three.js
+        Clock value, which is in seconds. Passing rAF's millisecond timestamp
+        therefore made every delta ~1000x too large: the FPS readout sat at 0
+        against a ~16,000 ms frame time, and far worse, every `useFrame` consumer
+        in the scene — walking speed, remote-avatar interpolation, dance timing,
+        the laser auto-clear — integrated against a delta a thousand times too big.
+      */
+      advance((t - origin) / 1000);
     };
 
     raf = requestAnimationFrame(loop);
