@@ -14,7 +14,7 @@ import {
  * Auditorium shell: floors and carpet inlays, stepped tray ceiling with its
  * starlight panel, walls with pilasters, framed panels, crown and plinth
  * mouldings, sconce fixtures, the screen masking surround, LCR speaker cabinets,
- * aisle stairs, and the battened rear wall with its lit niche and handrail.
+ * aisle stairs, and the battened rear wall with its handrail.
  *
  * Generated in code — there is no `room.glb`. What used to be a 2.3 MB Blender
  * export whose blockout measured 307 draw calls across 19 materials is now a batch

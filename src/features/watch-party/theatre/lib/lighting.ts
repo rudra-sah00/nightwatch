@@ -74,8 +74,6 @@ export interface PointFixture {
 const WARM = '#ffdaab';
 /** Blender's linear `(1.0, 0.72, 0.42)` — the slightly paler wash fixtures. */
 const WARM_PALE = '#ffdcae';
-/** Exit sign green, Blender linear `(0.18, 1.0, 0.40)`. */
-const EXIT_GREEN = '#73ffab';
 /** Cool bounce for the shadow key, as the old rig had it. */
 const KEY_COLOUR = '#aab6d4';
 
@@ -109,7 +107,7 @@ export { KEY_COLOUR };
  * is widened. The kept positions are the midpoints of the pairs.
  *
  * Intensity is deliberately modest, and the lights are mounted well off the
- * wall — 0.85 m in, not at the 3.65 m the modelled sconce bodies sit at. A point
+ * wall — 0.79 m in, not at the 4.74 m wall face the modelled sconce bodies sit on. A point
  * light 0.35 m from plaster is a blowout: inverse-square metered the wall at 251
  * of 255 right beside the fixture, which erases the walnut grain the texture
  * exists to show and barely dimmed when the house lights went down. Pulling the
@@ -119,28 +117,28 @@ export { KEY_COLOUR };
 export const SCONCES: readonly PointFixture[] = [
   {
     id: 'sconce-L-front',
-    position: [-3.15, 2.2, 2.65],
+    position: [-3.95, 2.2, 2.65],
     colour: WARM,
     level: { house: 8, dim: 2.0 },
     distance: 8,
   },
   {
     id: 'sconce-L-rear',
-    position: [-3.15, 2.2, 6.45],
+    position: [-3.95, 2.2, 6.45],
     colour: WARM,
     level: { house: 8, dim: 2.0 },
     distance: 8,
   },
   {
     id: 'sconce-R-front',
-    position: [3.15, 2.2, 2.65],
+    position: [3.95, 2.2, 2.65],
     colour: WARM,
     level: { house: 8, dim: 2.0 },
     distance: 8,
   },
   {
     id: 'sconce-R-rear',
-    position: [3.15, 2.2, 6.45],
+    position: [3.95, 2.2, 6.45],
     colour: WARM,
     level: { house: 8, dim: 2.0 },
     distance: 8,
@@ -153,7 +151,8 @@ export const SCONCES: readonly PointFixture[] = [
  *
  * Point lights, not spots: a spot's cone is barely legible against a coffered
  * ceiling at this intensity, and `SpotLight` costs more. Placed on the coffer
- * rib lines at `|x| = 1.87` so the pools line up with the modelled geometry.
+ * rib lines, at `|x| = 2.4` for this 9.6 m room so the pools line up with the
+ * modelled geometry and reach the outer seats, which now sit at `|x| = 2.4`.
  *
  * These carry most of the "walking" look, so they have the widest house/dim
  * ratio in the rig — they are the fixtures an audience expects to go out.
@@ -166,28 +165,28 @@ export const SCONCES: readonly PointFixture[] = [
 export const CEILING: readonly PointFixture[] = [
   {
     id: 'ceiling-L-front',
-    position: [-1.87, 4.2, 1.9],
+    position: [-2.4, 4.2, 1.9],
     colour: WARM,
     level: { house: 34, dim: 4.5 },
     distance: 12,
   },
   {
     id: 'ceiling-R-front',
-    position: [1.87, 4.2, 1.9],
+    position: [2.4, 4.2, 1.9],
     colour: WARM,
     level: { house: 34, dim: 4.5 },
     distance: 12,
   },
   {
     id: 'ceiling-L-rear',
-    position: [-1.87, 4.2, 6.3],
+    position: [-2.4, 4.2, 6.3],
     colour: WARM,
     level: { house: 34, dim: 4.5 },
     distance: 12,
   },
   {
     id: 'ceiling-R-rear',
-    position: [1.87, 4.2, 6.3],
+    position: [2.4, 4.2, 6.3],
     colour: WARM,
     level: { house: 34, dim: 4.5 },
     distance: 12,
@@ -206,7 +205,9 @@ export const CEILING: readonly PointFixture[] = [
  * the 0.1 m of Blender's `StepAccent`, which at this intensity metered the riser
  * at 252 of 255 and did not visibly dim at all.
  *
- * The exit glow is the green wall niche on the back wall (`BW_ExitGlow`).
+ * The green exit glow that used to sit beside this is gone with the rear-wall
+ * niche it lit: a green pool on a plain batten field lit nothing and read as a
+ * colour cast with no source.
  */
 export const ACCENTS: readonly PointFixture[] = [
   {
@@ -215,13 +216,6 @@ export const ACCENTS: readonly PointFixture[] = [
     colour: WARM_PALE,
     level: { house: 2.6, dim: 1.9 },
     distance: 5,
-  },
-  {
-    id: 'exit-glow',
-    position: [0, 2.3, 8.1],
-    colour: EXIT_GREEN,
-    level: { house: 3.2, dim: 2.4 },
-    distance: 4.5,
   },
 ];
 
@@ -250,7 +244,7 @@ export interface RectFixture {
 export const COVES: readonly RectFixture[] = [
   {
     id: 'cove-L',
-    position: [-3.8, 4.25, 4.25],
+    position: [-4.6, 4.25, 4.25],
     // Long axis down the room, tilted to throw across the ceiling
     rotation: [0, Math.PI / 2, -Math.PI / 2.6],
     width: 7.9,
@@ -260,7 +254,7 @@ export const COVES: readonly RectFixture[] = [
   },
   {
     id: 'cove-R',
-    position: [3.8, 4.25, 4.25],
+    position: [4.6, 4.25, 4.25],
     rotation: [0, -Math.PI / 2, Math.PI / 2.6],
     width: 7.9,
     height: 0.5,

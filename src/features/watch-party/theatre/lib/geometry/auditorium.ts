@@ -31,8 +31,24 @@ const TRAY_Y = ROOM.ceilingY + 0.3;
 const TRAY_INSET_X = 1.05;
 const TRAY_INSET_Z = 1.05;
 
-/** Inner face of the side walls, and the pilaster/panel runs along them. */
-const WALL_FACE = 3.94;
+/**
+ * Inner face of the side walls, and the pilaster/panel runs along them.
+ *
+ * Derived, not typed. It was a literal 3.94 fitted to an 8.0 m room, and when the
+ * room widened to 9.6 that one number silently stranded the pilasters, panels,
+ * plinth, crown and sconces 0.8 m inboard of the wall they are supposed to be
+ * mounted on. The walls are 0.12 thick centred on ROOM.width / 2.
+ */
+const WALL_T = 0.12;
+const WALL_FACE = ROOM.width / 2 - WALL_T / 2;
+/**
+ * The real obstruction for anything standing against the wall.
+ *
+ * The plinth mouldings stand proud of WALL_FACE — 0.10 wide over y 0-0.12 — so a
+ * cabinet pushed to WALL_FACE would sit inside its own skirting, which is exactly
+ * the defect Blender's own scene has.
+ */
+const SKIRT_FACE = WALL_FACE - 0.1;
 const PILASTER_Z = [1.7, 3.6, 5.5, 7.4] as const;
 const PANEL_Z = [2.65, 4.55, 6.45] as const;
 
@@ -48,20 +64,29 @@ const BATTEN_TOP = 4.12;
  * and six wall surrounds as well, but a screening room reads correctly off the LCR
  * alone and the corner subs were the two boxes with no visible purpose.
  *
- * X is fitted to this room's wall build rather than copied from Blender, whose
- * `SPK_Front_R` reaches 3.940 while its own `Plinth_R_0` occupies 3.900-4.000 —
- * the reference cabinet is buried in its own skirting. Here the plinth mouldings
- * stand proud of the 3.94 wall face to x 3.84, so 3.84 is the real obstruction.
- * The screen ends at 3.50. The cabinet sits in that slot: 0.32 wide, 3.52-3.84.
+ * The cabinet sits against the skirting, which is as far out as it goes, and the
+ * picture stops well inboard of it — `SCREEN.width` is limited by what the outer
+ * seats can frame, not by this slot (see layout.ts). At 9.6 m that is a cabinet
+ * across 4.26-4.64 against a picture edge at 3.70.
+ *
+ * Blender is no use as a reference here: its `SPK_Front_R` reaches 3.940 while its
+ * own `Plinth_R_0` occupies 3.900-4.000, so the reference cabinet is buried.
  */
-const SPK_X = 3.68;
-const SPK_W = 0.32;
+const SPK_W = 0.38;
+const SPK_X = SKIRT_FACE - SPK_W / 2;
 const SPK_FRONT = 0.46;
 const SPK_TOP = 2.4;
 
-/** Centre channel, under the picture. Blender SPK_Center, 1.5 wide, 0.16-0.48. */
+/**
+ * Centre channel, under the picture.
+ *
+ * Widened from Blender's 1.5 to 1.8: under an 8.48 m picture the narrower cabinet
+ * read as a soundbar. Still clear of the screen foot, which is now at 0.52.
+ */
 const CTR_FRONT = 0.42;
 const CTR_Y = 0.32;
+const CTR_W = 1.8;
+const CTR_BAFFLE = CTR_W - 0.06;
 
 /**
  * Build the auditorium.
@@ -107,11 +132,15 @@ export function buildAuditorium(): Mesh[] {
     b.box(M.floorInlay, t, 0.006, zFar - zNear, -halfX, y, (zNear + zFar) / 2);
     b.box(M.floorInlay, t, 0.006, zFar - zNear, halfX, y, (zNear + zFar) / 2);
   };
-  inlayRing(3.6, 0.4, 4.5, 0.004);
-  inlayRing(3.45, 0.55, 4.35, 0.004);
-  inlayRing(2.9, 1.1, 3.8, 0.004);
-  inlayRing(3.6, 5.7, 8.1, platformY + 0.004);
-  inlayRing(3.45, 5.85, 7.95, platformY + 0.004);
+  // Widths track the skirting rather than being retyped per room width.
+  const inlayOut = SKIRT_FACE - 0.24;
+  const inlayMid = SKIRT_FACE - 0.39;
+  const inlayIn = SKIRT_FACE - 0.94;
+  inlayRing(inlayOut, 0.4, 4.5, 0.004);
+  inlayRing(inlayMid, 0.55, 4.35, 0.004);
+  inlayRing(inlayIn, 1.1, 3.8, 0.004);
+  inlayRing(inlayOut, 5.7, 8.1, platformY + 0.004);
+  inlayRing(inlayMid, 5.85, 7.95, platformY + 0.004);
 
   /*
     ─── CEILING: stepped tray with a recessed star panel ─────────────────────
@@ -191,7 +220,7 @@ export function buildAuditorium(): Mesh[] {
   for (const side of [-1, 1]) {
     b.box(
       M.wall,
-      0.12,
+      WALL_T,
       TRAY_Y + 0.2,
       ROOM.maxZ,
       side * (ROOM.width / 2),
@@ -478,14 +507,22 @@ function buildSpeakers(b: GeometryBatcher): void {
 
   // Centre channel. Horizontal two-and-a-half way, drivers symmetric about the
   // tweeter so the image sits centred on the screen rather than off to one side.
-  b.box(M.speakerDark, 1.5, 0.16, 0.3, 0, 0.08, 0.27);
-  b.box(M.speaker, 1.5, 0.32, 0.3, 0, CTR_Y, 0.27);
-  b.box(M.speakerDark, 1.44, 0.28, 0.02, 0, CTR_Y, CTR_FRONT);
-  for (const dx of [-0.48, 0.48]) driver(b, 0.092, dx, CTR_Y, CTR_FRONT);
-  for (const dx of [-0.22, 0.22]) driver(b, 0.054, dx, CTR_Y, CTR_FRONT);
+  b.box(M.speakerDark, CTR_W, 0.16, 0.3, 0, 0.08, 0.27);
+  b.box(M.speaker, CTR_W, 0.32, 0.3, 0, CTR_Y, 0.27);
+  b.box(M.speakerDark, CTR_BAFFLE, 0.28, 0.02, 0, CTR_Y, CTR_FRONT);
+  for (const dx of [-0.6, 0.6]) driver(b, 0.092, dx, CTR_Y, CTR_FRONT);
+  for (const dx of [-0.28, 0.28]) driver(b, 0.054, dx, CTR_Y, CTR_FRONT);
   driver(b, 0.032, 0, CTR_Y, CTR_FRONT, false);
-  grilleFrame(b, 0, CTR_Y, 1.44, 0.28, CTR_FRONT + 0.016);
-  b.box(M.ledWarm, 0.045, 0.012, 0.008, 0.68, CTR_Y, CTR_FRONT + 0.012);
+  grilleFrame(b, 0, CTR_Y, CTR_BAFFLE, 0.28, CTR_FRONT + 0.016);
+  b.box(
+    M.ledWarm,
+    0.045,
+    0.012,
+    0.008,
+    CTR_BAFFLE / 2 - 0.05,
+    CTR_Y,
+    CTR_FRONT + 0.012,
+  );
 }
 
 /*
@@ -582,25 +619,24 @@ function buildStairs(
 /*
   ─── REAR WALL ──────────────────────────────────────────────────────────────
 
-  Ported from the Blender scene's BW_* assembly: felt panel, 32 battens on 0.26
-  centres with the middle nine cut short, a recessed niche with a lit border, a
-  rail on two brackets, and rail/skirt/cove LED strips.
+  Ported from the Blender scene's BW_* assembly, reduced to the batten design: a
+  felt panel, a full-width batten field, and a rail on two brackets.
 
   Blender is Z-up with the room running toward -Y; this file is Y-up with the room
   running toward +Z. The mapping is (bx, by, bz) -> (bx, bz, -by), which is why
   every height below is Blender's Z verbatim.
 
-  Three deliberate departures:
-    - Blender's room is 8.6 wide against this one's 8.0, so full-width pieces are
-      clamped to ROOM.width and the outermost batten each side falls outside.
-    - Blender puts the skirt LED at 0.14 and the batten feet at 0.22, both buried
-      under this room's 0.45 rear platform. They are lifted to sit on it.
-    - Blender's niche border is BW_GreenGlow and its niche signage is
-      NEO_ExitSign, both green. The border is warm here and the signage dropped.
+  Departures from Blender, all deliberate:
+    - Its room is 8.6 wide against this one's 9.6, so the batten count and origin
+      are derived here instead of its fixed 32 on a fixed origin.
+    - It puts the skirt LED at 0.14 and the batten feet at 0.22, both buried under
+      this room's 0.45 rear platform. The battens are lifted to sit on it.
+    - Its niche (BW_GreenGlow border, NEO_ExitSign signage) and the two full-width
+      LED strips are dropped entirely. The brief is the batten design on its own,
+      so the only emissive left on this wall is the rail's underside wash.
 */
 function buildRearWall(b: GeometryBatcher, platformY: number): void {
   const M = theatreMaterials();
-  const accent = M.ledWarm;
 
   b.box(
     M.felt,
@@ -613,41 +649,41 @@ function buildRearWall(b: GeometryBatcher, platformY: number): void {
   );
 
   /*
-    32 battens on 0.26 centres, from Blender's x = -4.0975 + i * 0.26.
+    Battens on 0.26 centres, count and origin derived so the field always reaches
+    both corners. Blender fixes them at x = -4.0975 + i * 0.26 for 32, which only
+    ever suited its own 8.6 m wall — at 9.6 m that leaves a 0.75 m bald strip in
+    each corner.
 
-    The middle nine (12-20) are short and stop above the niche. That gap is the
-    whole composition: it is what makes the niche read as set into the batten field
-    rather than hung in front of it. Blender stops those nine at 2.85, which is
-    below the top of the niche border at 2.94 — so their cut ends show as a row of
-    stubs inside the frame. They start at the border here instead.
+    All of them run the full height. Nine in the middle used to stop at 2.94 to
+    clear the niche, and with the niche gone that notch would read as a bite taken
+    out of the field for no reason.
   */
-  for (let i = 0; i < 32; i += 1) {
-    const x = -4.0975 + i * 0.26;
-    if (x < ROOM.minX + 0.1 || x > ROOM.maxX - 0.1) continue;
-    const short = i >= 12 && i <= 20;
-    const y0 = short ? 2.94 : platformY;
+  const battenPitch = 0.26;
+  const battenCount = Math.floor((ROOM.width - 0.2) / battenPitch);
+  const battenX0 = -((battenCount - 1) * battenPitch) / 2;
+  for (let i = 0; i < battenCount; i += 1) {
+    const x = battenX0 + i * battenPitch;
     b.box(
       M.batten,
       0.085,
-      BATTEN_TOP - y0,
+      BATTEN_TOP - platformY,
       0.075,
       x,
-      (y0 + BATTEN_TOP) / 2,
+      (platformY + BATTEN_TOP) / 2,
       REAR_FACE - 0.0575,
     );
   }
 
-  // Niche: a recessed plate inside a lit border, centred over the rear aisle.
-  b.box(M.niche, 2.1, 0.98, 0.08, 0, 2.37, REAR_FACE - 0.06);
-  for (const s of [-1, 1]) {
-    b.box(accent, 0.06, 1.14, 0.04, s * 1.11, 2.37, REAR_FACE - 0.1);
-  }
-  b.box(accent, 2.28, 0.06, 0.04, 0, 2.91, REAR_FACE - 0.1);
-  b.box(accent, 2.28, 0.06, 0.04, 0, 1.83, REAR_FACE - 0.1);
+  /*
+    Rail across the back of the platform, on two brackets, washed underneath.
 
-  // Rail across the back of the platform, on two brackets, washed underneath.
-  b.box(M.railMetal, 6.6, 0.07, 0.16, 0, 1.015, REAR_FACE - 0.08);
-  b.box(M.ledWarm, 6.48, 0.03, 0.06, 0, 0.955, REAR_FACE - 0.09);
+    Width tracks the room: the old literal 6.6 left a 1.5 m stub of bare wall at
+    each end once the room widened. This is also the frontmost thing on the wall,
+    which is what REAR_DETAIL_FACE_Z below is measured from.
+  */
+  const railW = ROOM.width - 1.4;
+  b.box(M.railMetal, railW, 0.07, 0.16, 0, 1.015, REAR_FACE - 0.08);
+  b.box(M.ledWarm, railW - 0.12, 0.03, 0.06, 0, 0.955, REAR_FACE - 0.09);
   for (const s of [-1, 1]) {
     // Blender's bracket spans 0.16-0.98; lifted to start at the platform.
     b.box(
@@ -655,23 +691,11 @@ function buildRearWall(b: GeometryBatcher, platformY: number): void {
       0.08,
       0.98 - platformY,
       0.1,
-      s * 3.06,
+      s * (railW / 2 - 0.24),
       (platformY + 0.98) / 2,
       REAR_FACE - 0.08,
     );
   }
-
-  // Skirt and cove strips, both clamped to this room's width.
-  b.box(
-    M.ledWarm,
-    ROOM.width - 0.2,
-    0.04,
-    0.04,
-    0,
-    platformY + 0.05,
-    REAR_FACE - 0.05,
-  );
-  b.box(M.ledWarm, ROOM.width - 0.2, 0.04, 0.03, 0, 3.68, REAR_FACE - 0.025);
 }
 
 /**

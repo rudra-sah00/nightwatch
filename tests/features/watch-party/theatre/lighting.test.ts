@@ -222,23 +222,28 @@ const SURFACES: Array<{
   },
   {
     name: 'carpet @ corner',
-    p: [-3.5, 0, 8.2],
+    p: [ROOM.minX + 0.5, 0, 8.2],
     n: [0, 1, 0],
     albedo: CARPET_ALBEDO,
   },
   {
     name: 'wall at sconce',
-    p: [-4, 2.2, 2.65],
+    p: [ROOM.minX, 2.2, 2.65],
     n: [1, 0, 0],
     albedo: WALL_ALBEDO,
   },
   {
     name: 'wall between',
-    p: [-4, 1.5, 4.5],
+    p: [ROOM.minX, 1.5, 4.5],
     n: [1, 0, 0],
     albedo: WALL_ALBEDO,
   },
-  { name: 'wall high', p: [-4, 3.2, 4.5], n: [1, 0, 0], albedo: WALL_ALBEDO },
+  {
+    name: 'wall high',
+    p: [ROOM.minX, 3.2, 4.5],
+    n: [1, 0, 0],
+    albedo: WALL_ALBEDO,
+  },
   { name: 'back wall', p: [0, 1.5, 8.5], n: [0, 0, -1], albedo: WALL_ALBEDO },
   // The riser face looks toward the screen, so its normal is -Z.
   { name: 'riser face', p: [0, 0.2, 5.3], n: [0, 0, -1], albedo: RISER_ALBEDO },

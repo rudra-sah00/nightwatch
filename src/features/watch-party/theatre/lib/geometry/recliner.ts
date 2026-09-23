@@ -246,7 +246,7 @@ export function buildRecliner(
 }
 
 /**
- * Build all eight recliners as one batch.
+ * Build all ten recliners as one batch.
  *
  * Deliberately not one mesh per seat reused eight times: that would cost eight
  * draw calls per material instead of one, and the chairs never move. Seat pads are

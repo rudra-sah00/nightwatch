@@ -19,9 +19,9 @@
 
 /** Interior shell of the auditorium, three.js space. */
 export const ROOM = {
-  width: 8.0,
-  minX: -4.0,
-  maxX: 4.0,
+  width: 9.6,
+  minX: -4.8,
+  maxX: 4.8,
   /** screen wall at z≈0, back wall at z=8.5 */
   minZ: 0.0,
   maxZ: 8.5,
@@ -31,16 +31,40 @@ export const ROOM = {
   ceilingY: 4.35,
 } as const;
 
-/** Projection screen. 7.00 x 2.929 m, 2.39:1 CinemaScope. */
+/**
+ * Projection screen. 7.40 x 3.096 m, 2.39:1 CinemaScope.
+ *
+ * WIDTH IS SET BY THE WORST SEAT, NOT BY THE WALL.
+ *
+ * The wall would take 8.48 m — that is where the speaker towers start, and an
+ * earlier pass sized it exactly there. Every framing guarantee in
+ * `tests/.../seat-framing.test.ts` broke: the front-row outer seats crop the
+ * picture at narrow window aspects, 16:9 needed a 77° lens against the 65° bar,
+ * and 4:3 started dollying the view backwards.
+ *
+ * Solved by sweeping width against the real `seatCamera` for all ten seats at
+ * every aspect from 21:9 to 0.5. 7.40 m is the largest that passes; at 7.41 m the
+ * worst seat (A1) exceeds the 65° limit. It is deliberately at that edge — A1
+ * needs 63.8° at 16:9, so there is about 1.2° of headroom and no more.
+ *
+ * Five seats a row is what tightened this. The outer pair moved from |x| 1.8 to
+ * 2.4, so they sit further off axis and frame the screen at a wider angle than any
+ * seat did before — the limit got harder even though the room got wider.
+ *
+ * `bottomY` 0.52 rather than the old 0.62: the screen is 0.167 m taller than it
+ * was, and dropping the foot keeps `centreY` at 2.068 (against 2.084 before) so a
+ * seated viewer's sightline is unchanged. It still clears the centre channel,
+ * whose cabinet tops out at 0.48.
+ */
 export const SCREEN = {
-  width: 7.0,
-  height: 2.929,
+  width: 7.4,
+  height: 3.096,
   aspect: 2.39,
-  minX: -3.5,
-  maxX: 3.5,
-  bottomY: 0.62,
-  topY: 3.549,
-  centreY: 2.084,
+  minX: -3.7,
+  maxX: 3.7,
+  bottomY: 0.52,
+  topY: 3.616,
+  centreY: 2.068,
   /** plane sits 20 mm off the wall */
   z: 0.02,
 } as const;
@@ -63,10 +87,10 @@ export const FLOORS = {
  * Aisle stairs, 3 risers of 0.15 m with 0.30 m treads.
  * There is NO centre aisle — these are the only way between levels.
  *
- * Narrowed from 2.2 m to 1.2 m per run. The old inner edge at 1.8 m is where the
- * outer seats now sit (their edge reaches 2.16 m at the 1.20 m pitch), so the
- * stairs had to give the width back. 1.2 m is still a comfortable single-file
- * run, and the outer edge stays flush to the side wall at 4.0 m.
+ * 1.4 m per run, with the outer edge flush to the side wall at 4.8 m. Both bounds
+ * moved with the room: at five seats a row the outer chair edge reaches 2.76 m, so
+ * an inner edge at the old 2.8 m would have left the end seats overhanging the run
+ * by almost nothing and the aisle unwalkable. 3.4 m gives 0.64 m of clearance.
  *
  * `minZ`/`maxZ` bound the whole run. Only TWO of the three rises are stair
  * geometry — surfaces at 0.15 and 0.30 — because the rear platform edge at
@@ -77,8 +101,8 @@ export const STAIRS = {
   riserHeight: 0.15,
   treadDepth: 0.3,
   /** present on both sides at these |x| bounds */
-  innerX: 2.8,
-  outerX: 4.0,
+  innerX: 3.4,
+  outerX: 4.8,
   minZ: 4.69,
   maxZ: 5.29,
 } as const;
@@ -140,7 +164,7 @@ export const STANDING_EYE_HEIGHT = 1.654;
  * instantly breaks presence.
  *
  * 55° yaw is the comfortable seated head turn. Verified against the real
- * screen geometry: from every one of the 8 seats both screen edges fall
+ * screen geometry: from every one of the 10 seats both screen edges fall
  * inside this cone, so nobody has to strain to see the picture.
  */
 export const HEAD_LIMITS = {
@@ -150,7 +174,17 @@ export const HEAD_LIMITS = {
 } as const;
 
 export type SeatRow = 'A' | 'B';
-export type SeatId = 'A1' | 'A2' | 'A3' | 'A4' | 'B1' | 'B2' | 'B3' | 'B4';
+export type SeatId =
+  | 'A1'
+  | 'A2'
+  | 'A3'
+  | 'A4'
+  | 'A5'
+  | 'B1'
+  | 'B2'
+  | 'B3'
+  | 'B4'
+  | 'B5';
 
 export interface SeatView {
   /** three.js Y-rotation, radians, that aims the camera at screen centre */
@@ -361,13 +395,21 @@ const ROW_GEOMETRY: Record<SeatRow, { floorY: number; z: number }> = {
 /**
  * Seat pitch is 1.20 m, x ordered left-to-right from the audience's view.
  *
- * Was 0.90 m, which left only 0.18 m between 0.719 m wide chairs — they read as
- * a bench rather than separate recliners. 1.20 m gives 0.48 m. The outer chair
- * edge lands at 2.16 m, which is why the aisle stairs were narrowed to start at
- * 2.8 m: at the old 1.8 m they would now overlap the end seats.
+ * FIVE a row, ten in all, and that is what the room widened for. At the 1.20 m
+ * pitch the outer pair reach |x| 2.76, which needs 9.6 m of room to keep a 1.88 m
+ * aisle either side — at the old 8.0 m they would have sat in the stair runs.
+ *
+ * The pitch itself is unchanged and stays the point: it was 0.90 m, which left
+ * only 0.18 m between 0.719 m wide chairs and read as a bench rather than separate
+ * recliners. 1.20 m gives 0.48 m.
+ *
+ * Adding a fifth seat a row widens `SeatId`, which travels over RTM in seat
+ * claims. A client on an older build treats 'A5'/'B5' as unknown and ignores the
+ * claim, so a mixed-version party degrades to that person appearing unseated
+ * rather than to anything breaking.
  */
 export const SEAT_PITCH = 1.2;
-export const SEAT_X = [-1.8, -0.6, 0.6, 1.8] as const;
+export const SEAT_X = [-2.4, -1.2, 0, 1.2, 2.4] as const;
 
 function buildSeats(): Seat[] {
   const seats: Seat[] = [];
@@ -502,7 +544,7 @@ export function seatedAvatarPose(seatId: SeatId): {
  * chair when they toggle 3D on and off, instead of the room reshuffling.
  *
  * Seats already claimed by someone in 3D are excluded: two avatars in one chair
- * looks worse than one person missing. Overflow beyond the eight seats is
+ * looks worse than one person missing. Overflow beyond the ten seats is
  * dropped for the same reason.
  */
 export function assignPassiveSeats(

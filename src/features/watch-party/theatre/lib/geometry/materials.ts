@@ -38,7 +38,6 @@ export interface TheatreMaterials {
   sconce: MeshStandardMaterial;
   batten: MeshStandardMaterial;
   felt: MeshStandardMaterial;
-  niche: MeshStandardMaterial;
   railMetal: MeshStandardMaterial;
   nosing: MeshStandardMaterial;
 
@@ -83,7 +82,6 @@ function create(): TheatreMaterials {
     // Blender BW_Batten / BW_Felt, from the rear wall assembly.
     batten: new MeshStandardMaterial({ color: 0x36322f, roughness: 0.55 }),
     felt: new MeshStandardMaterial({ color: 0x272524, roughness: 0.92 }),
-    niche: new MeshStandardMaterial({ color: 0x191b1a, roughness: 0.8 }),
     // Blender BW_Metal, metalness 0.85 there. See the note above.
     railMetal: new MeshStandardMaterial({
       color: 0x5a554e,

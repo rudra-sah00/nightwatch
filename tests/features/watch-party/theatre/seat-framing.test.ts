@@ -32,7 +32,11 @@ describe('seat spacing', () => {
   });
 
   it('is symmetric about the room centre line', () => {
-    const sum = SEAT_X.reduce((a, b) => a + b, 0);
+    // `reduce<number>` explicitly: SEAT_X is a readonly tuple of literals, and now
+    // that five seats a row puts an exact 0 in it, the seed 0 became assignable to
+    // that union — so TS picks the overload whose accumulator must itself be a seat
+    // coordinate, and rejects the running sum. The type argument pins it to number.
+    const sum = SEAT_X.reduce<number>((a, b) => a + b, 0);
     expect(sum).toBeCloseTo(0, 6);
   });
 
@@ -103,11 +107,15 @@ describe('computed seat aim', () => {
   });
 
   it('is mirror-symmetric left to right', () => {
+    // Five a row, so the outer pair mirror each other, the inner pair mirror each
+    // other, and seat 3 is the centre seat with nothing to pair with. These were
+    // A1/A4 and A2/A3 when rows held four — with five that pairing is simply
+    // wrong, since A4 is now the mirror of A2 and A3 sits on the axis.
     const pairs: Array<[string, string]> = [
-      ['A1', 'A4'],
-      ['A2', 'A3'],
-      ['B1', 'B4'],
-      ['B2', 'B3'],
+      ['A1', 'A5'],
+      ['A2', 'A4'],
+      ['B1', 'B5'],
+      ['B2', 'B4'],
     ];
     for (const [l, r] of pairs) {
       const ls = SEATS.find((s) => s.id === l);
@@ -117,6 +125,16 @@ describe('computed seat aim', () => {
       if (!ls || !rs) continue;
       expect(ls.view.yaw).toBeCloseTo(-rs.view.yaw, 6);
       expect(ls.view.pitch).toBeCloseTo(rs.view.pitch, 6);
+    }
+
+    // The centre seat of an odd row must aim dead ahead, which is the thing an
+    // even row could never check.
+    for (const id of ['A3', 'B3']) {
+      const centre = SEATS.find((s) => s.id === id);
+      expect(centre, id).toBeDefined();
+      if (!centre) continue;
+      expect(centre.position.x, id).toBeCloseTo(0, 6);
+      expect(centre.view.yaw, id).toBeCloseTo(0, 6);
     }
   });
 
