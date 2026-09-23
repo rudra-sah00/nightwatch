@@ -35,14 +35,29 @@ export const AVATAR_CLIPS: Record<Exclude<AvatarState, 'dance'>, string> = {
 };
 
 /**
- * Dance clips are registered separately because there will be many and they
- * should lazy-load. Use IN-PLACE variants only — travelling clips walk the
- * avatar out of its chair.
+ * Clips the dance wheel offers, in wheel order.
+ *
+ * Use IN-PLACE variants only — travelling clips walk the avatar out of its chair.
+ *
+ * **Append, never reorder or insert.** The chosen clip travels over RTM as an INDEX
+ * into this array (`d` on `AVATAR_TRANSFORM`, see `use-theatre-network`), not as a
+ * name, so changing the order changes what every already-running client renders.
+ * Appending is safe in both directions: an older client receiving an index it does
+ * not have falls back to the first clip (`clipNameFor`) rather than breaking, and a
+ * newer client understands everything an older one can send.
+ *
+ * `Emote.Cheer` and `Emote.Clap` are emotes rather than dances, and they are here
+ * because the wheel is the only mechanism the room has for "perform this clip" —
+ * two separate radial menus for five options would be worse. They were authored and
+ * shipped inside both character glbs from the start and simply never registered, so
+ * every client has been downloading them and had no way to play them.
  */
 export const DANCE_CLIPS: readonly string[] = [
   'Dance.Sway',
   'Dance.Bounce',
   'Dance.Twist',
+  'Emote.Cheer',
+  'Emote.Clap',
 ];
 
 /** Crossfade duration in seconds, per destination state. */

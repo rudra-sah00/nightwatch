@@ -10,6 +10,8 @@ export const DANCE_LABELS: Readonly<Record<string, string>> = {
   'Dance.Sway': 'Sway',
   'Dance.Bounce': 'Bounce',
   'Dance.Twist': 'Twist',
+  'Emote.Cheer': 'Cheer',
+  'Emote.Clap': 'Clap',
 };
 
 export interface DanceMenuState {
