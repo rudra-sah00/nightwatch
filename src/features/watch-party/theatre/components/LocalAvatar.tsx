@@ -8,7 +8,11 @@ import { useAvatarAnimation } from '../hooks/use-avatar-animation';
 import { CAPSULE_CENTRE_TO_FEET } from '../hooks/use-avatar-controls';
 import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 import { DANCE_CLIPS } from '../lib/animation';
-import { applyIdentityColour, instantiateAvatar } from '../lib/avatar-instance';
+import {
+  applyIdentityColour,
+  disposeAvatarInstance,
+  instantiateAvatar,
+} from '../lib/avatar-instance';
 
 interface LocalAvatarProps {
   /** Avatar glb url, the same one peers see for you. */
@@ -78,6 +82,11 @@ export function LocalAvatar({
   useEffect(() => {
     force(clip ? 'dance' : 'idle', clip ?? undefined);
   }, [clip, force]);
+
+  // This component mounts and unmounts every time the dance camera pulls back
+  // and returns, so its cloned identity material is the one most likely to pile
+  // up. See `disposeAvatarInstance`.
+  useEffect(() => () => disposeAvatarInstance(instance), [instance]);
 
   useFrame(() => {
     const g = group.current;

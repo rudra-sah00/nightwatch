@@ -112,6 +112,13 @@ export function identityColour(userId: string): string {
 }
 
 /**
+ * Marks a material this module created, so `disposeAvatarInstance` can tell it
+ * apart from the glb's own shared materials — which must never be disposed,
+ * because every other avatar and the GLTF cache are still using them.
+ */
+const CLONED = 'nightwatchClonedMaterial';
+
+/**
  * Tint an avatar instance's shirt so players are telling apart at a glance.
  *
  * Materials are CLONED first. The glb's materials are shared across every
@@ -130,8 +137,33 @@ export function applyIdentityColour(root: Object3D, userId: string): void {
       if (m.name !== 'AVATAR_Identity') return m;
       const clone = m.clone();
       clone.color.copy(colour);
+      clone.userData[CLONED] = true;
       return clone;
     });
     child.material = Array.isArray(child.material) ? next : next[0];
+  });
+}
+
+/**
+ * Release the GPU resources an avatar instance owns.
+ *
+ * Only the materials `applyIdentityColour` cloned, and deliberately nothing else:
+ * `SkeletonUtils.clone` shares the source geometry and the rest of the materials
+ * by reference with the GLTF cache, so disposing those would blank every other
+ * avatar in the room and leave the cached glb unusable for the next one.
+ *
+ * Without this, a cloned material — and the shader program compiled for it —
+ * outlived its avatar. Every peer who left and rejoined, and every trip from 2D to
+ * 3D and back, added one more to the renderer's cache for the life of the tab.
+ */
+export function disposeAvatarInstance(root: Object3D): void {
+  root.traverse((child) => {
+    if (!(child instanceof Mesh) && !(child instanceof SkinnedMesh)) return;
+    const mats = Array.isArray(child.material)
+      ? child.material
+      : [child.material];
+    for (const m of mats) {
+      if (m?.userData?.[CLONED]) m.dispose();
+    }
   });
 }

@@ -10,6 +10,7 @@ import { type AvatarState, DANCE_CLIPS } from '../lib/animation';
 import {
   applyIdentityColour,
   avatarUrlFor,
+  disposeAvatarInstance,
   instantiateAvatar,
 } from '../lib/avatar-instance';
 import type { Pose } from '../lib/interpolation';
@@ -72,6 +73,9 @@ function RemoteAvatar({
 
   useEffect(() => {
     instance.name = `avatar-${peerId}`;
+    // The cloned identity material is this component's to release; the glb's own
+    // shared resources are not. See `disposeAvatarInstance`.
+    return () => disposeAvatarInstance(instance);
   }, [instance, peerId]);
 
   useFrame(() => {

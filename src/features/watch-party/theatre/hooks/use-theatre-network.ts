@@ -305,14 +305,27 @@ export function useTheatreNetwork({
   useEffect(() => {
     if (!enabled) return;
     const id = setInterval(() => {
-      let changed = false;
+      const dropped: string[] = [];
       for (const [peer, buf] of buffers.current) {
-        if (buf.isStale()) {
-          buffers.current.delete(peer);
-          changed = true;
-        }
+        if (buf.isStale()) dropped.push(peer);
       }
-      if (changed) setPeerIds([...buffers.current.keys()]);
+      if (dropped.length === 0) return;
+      for (const peer of dropped) buffers.current.delete(peer);
+      setPeerIds([...buffers.current.keys()]);
+      // Their chosen body goes too. The roster reconcile above already does this;
+      // this path did not, so a session where people dropped rather than left grew
+      // the map for its whole life.
+      setPeerCharacters((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const peer of dropped) {
+          if (peer in next) {
+            delete next[peer];
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
     }, 5000);
     return () => clearInterval(id);
   }, [enabled]);

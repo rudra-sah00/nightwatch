@@ -7,6 +7,7 @@ import { useTheatreGltf } from '../hooks/use-theatre-gltf';
 import {
   applyIdentityColour,
   avatarUrlFor,
+  disposeAvatarInstance,
   instantiateAvatar,
 } from '../lib/avatar-instance';
 import {
@@ -133,6 +134,9 @@ function PassiveAvatar({
   useEffect(() => {
     instance.name = `passive-avatar-${userId}`;
     force('sitIdle');
+    // Passive avatars churn the most of any layer — every member who toggles 3D
+    // mounts or unmounts one — so releasing the cloned material matters here.
+    return () => disposeAvatarInstance(instance);
   }, [instance, userId, force]);
 
   const pose = seatedAvatarPose(seatId);

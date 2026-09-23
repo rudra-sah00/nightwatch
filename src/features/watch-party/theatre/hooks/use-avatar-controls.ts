@@ -46,6 +46,15 @@ export const CAPSULE_CENTRE_TO_FEET =
 type Keys = Record<string, boolean>;
 
 /**
+ * World up, shared.
+ *
+ * The yaw basis is rebuilt every frame from the camera, and this was a
+ * `new Vector3(0, 1, 0)` inside that cross product — one allocation per frame per
+ * player, in the one function in this feature that must never wait for a GC.
+ */
+const WORLD_UP = new Vector3(0, 1, 0);
+
+/**
  * WASD locomotion with real collision.
  *
  * Uses Rapier's kinematic character controller rather than hand-rolled
@@ -118,7 +127,6 @@ export function useAvatarControls(
   const forward = useMemo(() => new Vector3(), []);
   const right = useMemo(() => new Vector3(), []);
   const wish = useMemo(() => new Vector3(), []);
-
   useFrame((_, rawDelta) => {
     const rb = body.current;
     if (!enabled || !rb) return;
@@ -135,10 +143,7 @@ export function useAvatarControls(
     forward.y = 0;
     if (forward.lengthSq() < 1e-6) forward.set(0, 0, -1);
     forward.normalize();
-    right
-      .crossVectors(new Vector3(0, 1, 0), forward)
-      .normalize()
-      .negate();
+    right.crossVectors(WORLD_UP, forward).normalize().negate();
 
     wish.set(0, 0, 0);
     if (k.w || k.arrowup) wish.add(forward);
