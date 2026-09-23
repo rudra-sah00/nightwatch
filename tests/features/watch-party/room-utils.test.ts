@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { WatchPartyRoom } from '@/features/watch-party/room/types';
 import {
   generateRoomId,
+  isPartyHost,
   normalizeRoomUrls,
 } from '@/features/watch-party/room/utils';
 
@@ -36,6 +37,48 @@ function room(overrides: Partial<WatchPartyRoom> = {}): WatchPartyRoom {
 describe('generateRoomId', () => {
   it('returns 10 lowercase alphanumeric characters', () => {
     expect(generateRoomId()).toMatch(/^[a-z0-9]{10}$/);
+  });
+});
+
+describe('isPartyHost', () => {
+  it('is true only when both ids exist and match', () => {
+    expect(isPartyHost(room({ hostId: 'H1' }), 'H1')).toBe(true);
+  });
+
+  it('is false for a different user', () => {
+    expect(isPartyHost(room({ hostId: 'H1' }), 'G1')).toBe(false);
+  });
+
+  /*
+    The regression this function exists for.
+
+    `user?.id === room?.hostId` is `undefined === undefined` before the room
+    loads, so every viewer — including a guest, who has no `user` at all — was
+    briefly reported as host. That window is exactly when `JOIN_APPROVED` delivers
+    a guest's `initialState`, and `onStateUpdate` drops updates while the viewer
+    is believed to be host (the host must not apply its own broadcasts).
+
+    On VOD the guest recovered the moment the host touched the scrubber. On live
+    TV the host never touches anything, so the guest stayed on the "Host controls
+    playback" lock overlay — which is deliberately not clickable for guests — for
+    the whole party, with a healthy stream loaded underneath.
+  */
+  it('is false while the room has not loaded, for a guest with no user id', () => {
+    expect(isPartyHost(null, undefined)).toBe(false);
+    expect(isPartyHost(undefined, undefined)).toBe(false);
+  });
+
+  it('is false while the room has not loaded, for an authenticated viewer', () => {
+    expect(isPartyHost(null, 'H1')).toBe(false);
+  });
+
+  it('is false when the room has no host id', () => {
+    expect(isPartyHost({ hostId: '' }, '')).toBe(false);
+    expect(isPartyHost({ hostId: '' }, 'H1')).toBe(false);
+  });
+
+  it('accepts a bare hostId holder, not just a full room', () => {
+    expect(isPartyHost({ hostId: 'H9' }, 'H9')).toBe(true);
   });
 });
 

@@ -5,182 +5,44 @@ import type {
   IAgoraRTCRemoteUser,
   ICameraVideoTrack,
   IMicrophoneAudioTrack,
-  IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { crashLog, reportError, trackEvent } from '@/lib/analytics';
+import {
+  AUDIO_ENCODER_CONFIG,
+  getAgoraRTC,
+  VIDEO_ENCODER_CONFIG,
+  VIDEO_OPTIMIZATION_MODE,
+} from '../lib/agora-sdk';
+import type {
+  AgoraParticipant,
+  ConnectionState,
+  MediaDevice,
+  NetworkQuality,
+  UseAgoraOptions,
+} from '../lib/agora-types';
+import { generateNumericUid, handleDeviceError } from '../lib/agora-uid';
 
-/**
- * Agora SDK configuration and global handlers.
- * Logs are suppressed in production.
- */
+/*
+  The SDK loader, the encoder presets, the domain types and the pure UID/error
+  helpers now live in `../lib`. This file is the engine itself: the connection
+  lifecycle, the local tracks, and the participant state derived from them.
 
-// Set log level: 0 (DEBUG), 1 (INFO), 2 (WARNING), 3 (ERROR), 4 (NONE)
-// Production must remain silent for Agora RTC logs.
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const AGORA_LOG_LEVEL = IS_PRODUCTION
-  ? 4
-  : process.env.NEXT_PUBLIC_AGORA_DEBUG === 'true'
-    ? 0
-    : 2;
-
-/** Lazily resolved Agora SDK default export. */
-let _AgoraRTC: typeof import('agora-rtc-sdk-ng').default | null = null;
-export async function getAgoraRTC() {
-  if (!_AgoraRTC) {
-    const mod = await import('agora-rtc-sdk-ng');
-    _AgoraRTC = mod.default;
-    _AgoraRTC.setLogLevel(AGORA_LOG_LEVEL);
-  }
-  return _AgoraRTC;
-}
-
-/** @internal Reset/inject for testing. */
-export function resetAgoraState(
-  mock?: typeof import('agora-rtc-sdk-ng').default,
-) {
-  _AgoraRTC = mock ?? null;
-}
-
-/**
- * Audio and Video encoding presets optimized for watch party sidebar tiles.
- */
-
-/**
- * Voice-optimized audio config for watch party chat.
- * - 48kHz sample rate for clarity
- * - Mono channel (stereo not needed for voice)
- * - 40kbps bitrate — efficient bandwidth while maintaining quality
- * Ref: https://docs.agora.io/en/video-calling/enhance-call-quality/configure-audio-encoding
- */
-const AUDIO_ENCODER_CONFIG = 'music_standard' as const;
-
-/**
- * Video config sized for sidebar tile rendering (small tiles).
- * - 480×360 @ 15fps — sufficient for sidebar participant views
- * - motion optimization → prioritize smoothness over clarity
- * - bitrateMin prevents quality dropping too low on bad networks
- * Ref: https://docs.agora.io/en/video-calling/enhance-call-quality/configure-video-encoding
- */
-const VIDEO_ENCODER_CONFIG = {
-  width: 480,
-  height: 360,
-  frameRate: 15,
-  bitrateMin: 200,
-  bitrateMax: 600,
-} as const;
-
-/**
- * Prioritize smooth video for watch party sidebar tiles.
- * Ref: https://docs.agora.io/en/video-calling/enhance-call-quality/video-transmission-optimization
- */
-const VIDEO_OPTIMIZATION_MODE = 'motion' as const;
-
-/**
- * Possible connection states with the project's Agora RTC client.
- */
-
-type ConnectionState =
-  | 'DISCONNECTED'
-  | 'CONNECTING'
-  | 'CONNECTED'
-  | 'RECONNECTING'
-  | 'DISCONNECTING';
-
-interface NetworkQuality {
-  /** 0=unknown, 1=excellent, 2=good, 3=poor, 4=bad, 5=very bad, 6=down */
-  uplink: number;
-  /** 0=unknown, 1=excellent, 2=good, 3=poor, 4=bad, 5=very bad, 6=down */
-  downlink: number;
-}
-
-export interface MediaDevice {
-  deviceId: string;
-  label: string;
-  kind: 'audioinput' | 'videoinput' | 'audiooutput';
-}
-
-export interface AgoraParticipant {
-  uid: string;
-  identity: string;
-  name: string;
-  isSpeaking: boolean;
-  isMicrophoneEnabled: boolean;
-  isCameraEnabled: boolean;
-  metadata?: string;
-  /** Video track for rendering */
-  videoTrack?: ICameraVideoTrack | IRemoteVideoTrack;
-  /** True if this is the local user */
-  isLocal: boolean;
-  /** Audio level 0-1 */
-  audioLevel: number;
-}
-
-interface MemberInfo {
-  id: string;
-  name: string;
-  profilePhoto?: string;
-}
-
-interface UseAgoraOptions {
-  token: string | null;
-  appId: string;
-  channel: string;
-  uid: number;
-  /** Room members — used to map Agora numeric UIDs back to real user IDs/names */
-  /** Room members — used to map Agora numeric UIDs back to real user IDs/names */
-  members?: MemberInfo[];
-  /** Current user identity string used to identify "You" in the participant list */
-  userId?: string;
-}
-
-// ============================================
-// Helpers
-// ============================================
-
-/**
- * Deterministic numeric UID from a string userId.
- * Must match the backend's `generateNumericUid` in agora.service.ts exactly.
- */
-function generateNumericUid(userId: string): number {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i++) {
-    const char = userId.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  // Ensure 32-bit unsigned integer (0 to 4,294,967,295) and non-zero
-  return hash >>> 0 || 1;
-}
-
-/** Build a map from Agora numeric UID → member info. */
-function _buildUidToMemberMap(members: MemberInfo[]): Map<string, MemberInfo> {
-  const map = new Map<string, MemberInfo>();
-  for (const m of members) {
-    map.set(String(generateNumericUid(m.id)), m);
-  }
-  return map;
-}
-
-/** Convert a media‐device error message into a user‐friendly toast. */
-function handleDeviceError(
-  error: unknown,
-  deviceType: 'Microphone' | 'Camera',
-  t: (key: string, params?: Record<string, string>) => string,
-) {
-  const message = error instanceof Error ? error.message : String(error);
-  if (message.includes('Permission') || message.includes('NotAllowed')) {
-    toast.error(t('permissionDenied', { device: deviceType }));
-  } else if (
-    message.includes('NotFound') ||
-    message.includes('Device not found')
-  ) {
-    toast.error(t('deviceNotFound', { device: deviceType.toLowerCase() }));
-  } else {
-    toast.error(t('deviceAccessFailed', { device: deviceType.toLowerCase() }));
-  }
-}
+  Re-exported below because roughly a dozen modules already import these names
+  from this path.
+*/
+export { getAgoraRTC, resetAgoraState } from '../lib/agora-sdk';
+export type {
+  AgoraParticipant,
+  ConnectionState,
+  MediaDevice,
+  MemberInfo,
+  NetworkQuality,
+  UseAgoraOptions,
+} from '../lib/agora-types';
+export { generateNumericUid } from '../lib/agora-uid';
 
 /**
  * Main hook for managing Agora RTC lifecycle, including channel connection,

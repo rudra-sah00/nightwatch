@@ -8,6 +8,7 @@ import type {
   PartyStateUpdate,
   RoomPreview,
 } from '@/features/watch-party/room/types';
+import { isPartyHost } from '@/features/watch-party/room/utils';
 import { trackEvent } from '@/lib/analytics';
 import { useDesktopApp } from '@/platforms/desktop/use-desktop-app';
 import { useAuth } from '@/providers/auth-provider';
@@ -164,7 +165,16 @@ export function useWatchPartyClient({
     videoRef,
   });
 
-  const isHost = user?.id === room?.hostId;
+  /**
+   * Whether this viewer is the host.
+   *
+   * Via {@link isPartyHost} rather than `user?.id === room?.hostId`: that form is
+   * `undefined === undefined` — i.e. `true` — for the whole window before the
+   * room lands, which is exactly when a guest receives `JOIN_APPROVED`'s
+   * `initialState`. `onStateUpdate` drops updates while `isHostRef` is set, so
+   * the guest's first and (on live TV) only party state was thrown away.
+   */
+  const isHost = isPartyHost(room, user?.id);
   isHostRef.current = isHost;
 
   const { applyState } = usePredictiveSync(

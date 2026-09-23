@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/providers/auth-provider';
 // Modular Hooks
@@ -15,7 +15,7 @@ import {
   getPartyStreamToken,
 } from '../services/watch-party.api';
 import type { PartyStateUpdate, RoomMember, WatchPartyRoom } from '../types';
-import { normalizeRoomUrls } from '../utils';
+import { isPartyHost, normalizeRoomUrls } from '../utils';
 import { useClockSync } from './useClockSync';
 import { useWatchPartyLifecycle } from './useWatchPartyLifecycle';
 import { useWatchPartyMembers } from './useWatchPartyMembers';
@@ -55,6 +55,27 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
 
   const requestStatusRef = useRef(requestStatus);
   requestStatusRef.current = requestStatus;
+
+  /**
+   * Whether any authoritative party state has reached this client yet.
+   *
+   * Drives the `SYNC_REQUEST` retry below, so it is written on EVERY state
+   * update — including the one carried by `JOIN_APPROVED` — before the update is
+   * handed on.
+   */
+  const hasPartyStateRef = useRef(false);
+
+  /**
+   * Records that party state arrived, then forwards it unchanged.
+   *
+   * Stable identity: `useWatchPartySync` lists `onStateUpdate` in the deps of its
+   * RTM handler, and a new function every render would rebuild that handler on
+   * every render of the party.
+   */
+  const handlePartyStateUpdate = useCallback((state: PartyStateUpdate) => {
+    hasPartyStateRef.current = true;
+    optionsRef.current.onStateUpdate?.(state);
+  }, []);
 
   const { user } = useAuth();
   // 0. Agora RTM Signaling
@@ -114,7 +135,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
                   calibrate(initialState.serverTime);
                 }
 
-                optionsRef.current.onStateUpdate?.({
+                handlePartyStateUpdate({
                   currentTime: initialState.currentTime ?? 0,
                   videoTime:
                     initialState.videoTime ?? initialState.currentTime ?? 0,
@@ -212,7 +233,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     room,
     setRoom,
     userId: options.userId,
-    isHost: userId === room?.hostId,
+    isHost: isPartyHost(room, userId),
     rtmSendMessage,
     rtmSendMessageToPeer,
     onMemberJoined: options.onMemberJoined,
@@ -226,18 +247,31 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     setRoom,
     userId: options.userId,
     rtmSendMessage,
-    onStateUpdate: options.onStateUpdate,
+    onStateUpdate: handlePartyStateUpdate,
     normalizeRoomUrls,
     rtmSendMessageToPeer,
-    isHost: userId === room?.hostId,
+    isHost: isPartyHost(room, userId),
     videoRef: options.videoRef,
   });
 
   // Clock Synchronization
   const { clockOffset, isCalibrated, calibrate } = useClockSync();
 
+  /*
+    Read as primitives, not off `room`, so the sync-request effect below is keyed
+    on the two fields it actually cares about. `room` itself changes identity on
+    every state tick and every membership change, which would restart the retry
+    cycle several times a minute.
+  */
+  const syncRoomId = room?.id;
+  const syncHostId = room?.hostId;
+
   // Stream token auto-renewal: refresh at 3.5h to prevent 4h expiry
   useEffect(() => {
+    // Narrow fields, not the room object: this effect must not restart every
+    // time a member joins or the playback state ticks. Safe against the
+    // `undefined === undefined` trap that `isPartyHost` exists for, because it
+    // also requires `room?.id`.
     const isHost = userId === room?.hostId;
     if (!isHost || !room?.id || room.type === 'livestream') return;
 
@@ -255,20 +289,63 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     return () => clearTimeout(timer);
   }, [room?.id, room?.hostId, room?.type, userId, rtmSendMessage]);
 
-  // Handle Guest Initial Sync Request
+  /*
+    Guest initial sync request — retried until real state arrives.
+    A guest's playback state comes from exactly one place: the host's `SYNC`
+    reply to this request. `JOIN_APPROVED` also carries `initialState`, but that
+    is a PEER message and a pending guest is not on the RTM channel yet (its RTM
+    token is derived from `room.id`, which it does not have until it is approved),
+    so the guest is normally admitted over Socket.IO `JOIN_RESULT` and never sees
+    it.
+
+    This used to be a single `setTimeout`. RTM channel messages are fire and
+    forget, and one sent a second after connect can be dropped — as can the
+    host's reply — so a lost packet left the guest with no state at all. On VOD
+    that self-heals the moment the host touches the scrubber. On live TV nobody
+    ever touches anything, so the guest sat on the locked overlay for the rest of
+    the party with a healthy stream loaded underneath.
+
+    Bounded, not indefinite: `hasPartyStateRef` is set by
+    {@link handlePartyStateUpdate} on the first update from any source, which
+    stops the retries. If none of the attempts land, the party has a problem that
+    resending cannot fix, and a permanent 3 s poll would be RTM traffic per guest
+    for the whole session.
+  */
   useEffect(() => {
-    const isHost = userId === room?.hostId;
-    if (isRtmConnected && !isHost && room?.id && userId) {
-      // Small delay to ensure host is ready to process RTM messages
-      const timer = setTimeout(() => {
-        rtmSendMessage?.({
-          type: 'SYNC_REQUEST',
-          userId,
-        });
-      }, 1000);
-      return () => clearTimeout(timer);
+    if (
+      !(isRtmConnected && syncRoomId && userId) ||
+      isPartyHost({ hostId: syncHostId ?? '' }, userId)
+    ) {
+      return;
     }
-  }, [isRtmConnected, room?.id, userId, rtmSendMessage, room?.hostId]);
+
+    let attempts = 0;
+    const MAX_ATTEMPTS = 5;
+    const RETRY_MS = 3000;
+
+    const request = () => {
+      if (hasPartyStateRef.current) return true;
+      rtmSendMessage?.({ type: 'SYNC_REQUEST', userId });
+      attempts += 1;
+      return false;
+    };
+
+    // First attempt keeps the original 1 s grace so the host has settled its own
+    // RTM subscription before we ask it anything.
+    const initial = setTimeout(request, 1000);
+    const interval = setInterval(() => {
+      if (hasPartyStateRef.current || attempts >= MAX_ATTEMPTS) {
+        clearInterval(interval);
+        return;
+      }
+      request();
+    }, RETRY_MS);
+
+    return () => {
+      clearTimeout(initial);
+      clearInterval(interval);
+    };
+  }, [isRtmConnected, syncRoomId, syncHostId, userId, rtmSendMessage]);
 
   // On connect/reconnect: fetch initial messages
   useEffect(() => {

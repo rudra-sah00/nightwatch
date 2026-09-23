@@ -26,7 +26,9 @@ Decentralized peer-to-peer watch party system built on Agora RTM (Real-Time Mess
 
 **Signaling layer:** All real-time events (play, pause, seek, chat, sketch, emoji, soundboard) are transmitted as JSON-encoded Agora RTM channel messages. The discriminated union type `RTMMessage` in `room/types/rtm-messages.ts` defines every possible message shape.
 
-**Backend persistence:** State mutations that require validation (join, approve, kick, content update) use REST calls via `room/services/watch-party.api.ts`. RTM handles the real-time broadcast; REST handles the durable write.
+**Backend persistence:** State mutations that require validation (join, approve, kick, content update) use REST calls under `room/services/rest/`, re-exported from `room/services/watch-party.api.ts`. RTM handles the real-time broadcast; REST handles the durable write.
+
+**Live TV** is the one mode that behaves differently throughout — its URL is not ours, its timeline is not shared, and its host never touches the controls. See [WATCH_PARTY_LIVE_TV.md](./WATCH_PARTY_LIVE_TV.md).
 
 ## Directory Structure
 
@@ -65,18 +67,31 @@ src/features/watch-party/
 │   │   ├── useClockSync.ts           # Server clock offset calibration
 │   │   └── useWatchPartyFullscreen.ts
 │   ├── services/
-│   │   └── watch-party.api.ts        # REST API + RTM event dispatcher
+│   │   ├── watch-party.api.ts        # Barrel — re-exports everything below
+│   │   ├── rest/
+│   │   │   ├── client.ts             # Shared `{ error }` folding
+│   │   │   ├── room.api.ts           # exists / detail / create
+│   │   │   ├── membership.api.ts     # join, approve, reject, kick, leave, pending
+│   │   │   ├── playback.api.ts       # state, content switch, stream token
+│   │   │   ├── permissions.api.ts    # global + per-member permissions
+│   │   │   ├── chat.api.ts           # message history
+│   │   │   └── soundboard.api.ts     # sound catalogue
+│   │   └── rtm-events.ts             # RTM event bus + every `on*` subscriber
 │   ├── types.ts                      # Room, member, state, event types
 │   ├── types/
 │   │   └── rtm-messages.ts           # Full RTM message union type
-│   └── utils.ts                      # Room ID generator
+│   └── utils.ts                      # Room ID generator, host check, URL normalisation
 ├── media/                # Agora RTC/RTM integration
 │   ├── hooks/
-│   │   ├── useAgora.ts               # RTC voice/video engine
+│   │   ├── useAgora.ts               # RTC engine: connection, tracks, participants
 │   │   ├── useAgoraRtm.ts           # RTM channel messaging
 │   │   ├── useAgoraToken.ts         # RTC token fetcher
 │   │   ├── useAgoraRtmToken.ts      # RTM token fetcher
 │   │   └── useAudioDucking.ts       # Lower video volume when someone speaks
+│   ├── lib/
+│   │   ├── agora-sdk.ts             # Lazy SDK loader + encoder presets
+│   │   ├── agora-types.ts           # Participant/device/quality types
+│   │   └── agora-uid.ts             # Numeric UID hash, device error mapping
 │   └── services/
 │       └── agora.api.ts
 └── interactions/         # Fun overlays
@@ -288,7 +303,104 @@ Drift = expected - actual
 | > 0.2s | ±5% fine correction |
 | ≤ 0.2s | Restore normal rate |
 
-Runs a 2s polling interval to enforce play/pause state and correct drift. For livestreams, only syncs play/pause (no time-based seeking). Handles pending updates when the video element isn't mounted yet.
+Runs a 2s interval to enforce play/pause state and correct drift. For livestreams, only syncs play/pause (no time-based seeking).
+
+**Seeks are clamped to `video.seekable`.** Assigning a `currentTime` outside the
+seekable range does not throw — it stalls silently, and nothing downstream can tell
+that apart from "still buffering". Live streams make this routine, because each
+client holds its own sliding window and the host's position is frequently outside
+the guest's. Three outcomes: a usable range clamps the target (keeping
+`SEEKABLE_MARGIN_S` clear of a live edge that is still moving); no range *reported*
+assigns directly, since an unknown window is not a reason to refuse a seek; a range
+reported as *empty* does not seek at all.
+
+**Held updates are applied on element events, not on a deadline.** A state update
+that arrives before the element can take it (`readyState < 1`) is kept and applied
+on the next `loadedmetadata` / `loadeddata` / `canplay` / `durationchange`, with a
+500 ms poll only to (re)bind when the element itself has not mounted yet.
+
+This used to poll every 250 ms and **give up after 10 s**, on the reasoning that
+"reconnection sync timers will handle it by then" — but there are none for a guest
+that has never had state. When the deadline passed, `stateRef` was still null, which
+also disables the 2 s enforcement loop (it returns early without state), so the guest
+was left with a paused video, no state, and nothing that would ever set either. A
+live channel served through the backend playlist proxy — resolve upstream, fetch,
+rewrite, then fetch a segment — routinely misses a 10 s window on a cold cache.
+
+### Blocked autoplay
+
+`video.play()` rejects with `NotAllowedError` whenever the document has no user
+activation, which is the normal state for someone who opened an invite link and was
+approved without ever clicking inside the page.
+
+Every `play()` call in the party used to swallow that rejection, and the guest's
+centre overlay is deliberately inert (`disabled`, so a guest cannot drive the
+party) — so the refusal was terminal. There was no way, automatic or manual, to
+start the video, and the guest sat on the "Host controls playback" lock badge over a
+black frame for the rest of the session.
+
+`usePredictiveSync` now recovers it:
+
+1. On `NotAllowedError`, retry **muted**. Muted playback is exempt from the policy
+   in every browser that implements one.
+2. Dispatch `PARTY_PLAYBACK_BLOCKED_EVENT` on `window`, with
+   `detail.muted` reporting whether the muted retry worked.
+
+`PlayerOverlays` in `WatchPartyVideoArea` consumes it:
+
+| `detail.muted` | Meaning | UI |
+|----------------|---------|-----|
+| `true` | Picture running, sound withheld | Toast with an "Enable Audio" action that unmutes |
+| `false` | Nothing is playing | The centre overlay becomes **tappable** and prompts for one gesture |
+
+The tap is local only — it starts and unmutes *this* element and never touches
+party state, so it does not hand a guest control of the room. `usePredictiveSync`
+re-asserts the host's authoritative state immediately afterwards.
+
+A window event rather than props: refusal is a local browser decision discovered
+deep in a hook, and the component that must react to it is neither a parent nor a
+child — threading it through `useWatchPartyClient` → `ActiveWatchParty` →
+`WatchPartyVideoArea` would couple three layers to a browser policy detail.
+
+### Guest playback: how a guest learns the party is playing
+
+There is exactly one authoritative source, and this is the sequence that was
+failing for live TV:
+
+1. **`JOIN_APPROVED`** carries `initialState`. But this is a *peer* RTM message, and
+   a pending guest is not on the RTM channel yet — its RTM token is derived from
+   `room.id`, which it does not have until approved — so a guest normally never
+   sees it. Admission arrives over Socket.IO `JOIN_RESULT` instead.
+2. **`SYNC_REQUEST` → host `SYNC` reply.** This is the real path, and it is
+   retried: up to 5 attempts, 3 s apart, stopping as soon as any state update
+   lands. It used to be a single `setTimeout`. RTM channel messages are fire and
+   forget, so one sent a second after connect can be dropped — as can the host's
+   reply — and a lost packet left the guest with **no state at all**. On VOD that
+   self-heals the moment the host touches the scrubber; on live TV nobody ever
+   touches anything.
+3. **The room's persisted `state`,** which the backend now initialises to
+   `isPlaying: true` for live rooms. See
+   [the backend's watch-party doc](../../../nightwatch-backend/docs/architecture/watch-party.md#live-rooms-start-playing).
+
+### Host derivation
+
+`room/utils.ts` → `isPartyHost(room, userId)`
+
+A one-line function with its own name because the obvious inline form is wrong in a
+way that is invisible on the host and breaks every guest:
+
+```ts
+const isHost = user?.id === room?.hostId; // true while room is null!
+```
+
+Before the room lands both sides are `undefined`, so `undefined === undefined`
+reports the viewer as host. That window is precisely when a guest receives its first
+party state, and `onStateUpdate` is gated on `if (isHostRef.current) return` because
+the host must not apply its own broadcasts. So the one update telling a guest the
+party was already playing got dropped, and `usePredictiveSync` skipped registering
+its apply/enforce effects for the same reason.
+
+A missing id on either side means "not the host", never "maybe".
 
 ### useWatchPartyHostSync
 
@@ -366,6 +478,28 @@ Fetches an Agora RTC token for the given room and user. Handles both authenticat
 
 Full Agora RTC engine: joins channel, publishes local audio/video tracks, subscribes to remote tracks, manages device selection, provides `toggleAudio`, `toggleVideo`, `toggleDeafen`, `switchAudioDevice`, `switchVideoDevice`.
 
+The stateless parts live in `media/lib/`, so a component that renders a participant
+tile can name an `AgoraParticipant` without pulling in a 900-line hook that loads a
+400 KB SDK:
+
+| Module | Contents |
+|--------|----------|
+| `media/lib/agora-sdk.ts` | Lazy memoised SDK loader (`getAgoraRTC`), log level, audio/video encoder presets |
+| `media/lib/agora-types.ts` | `AgoraParticipant`, `MediaDevice`, `NetworkQuality`, `ConnectionState`, `MemberInfo`, `UseAgoraOptions` |
+| `media/lib/agora-uid.ts` | `generateNumericUid`, `buildUidToMemberMap`, `handleDeviceError` |
+
+`useAgora` re-exports all of those, so existing imports from
+`media/hooks/useAgora` are unchanged.
+
+**`generateNumericUid` is a cross-repo contract.** Agora channels identify users by a
+32-bit integer, so the backend mints a token for the uid *it* derives in
+`agora.service.ts` and the client joins as the uid it derives here. If the two ever
+disagree the join is rejected, which presents as "voice chat silently never
+connects" with nothing visibly wrong in either repo. Both sides have vector tests
+pinning the output — `tests/features/watch-party/media/agora-uid.test.ts` here and
+`tests/modules/agora/agora.uid.test.ts` in the backend. Change one and the other
+fails.
+
 ### useAudioDucking
 
 `media/hooks/useAudioDucking.ts`
@@ -439,7 +573,29 @@ Defined in `room/types/rtm-messages.ts` as a discriminated union:
 
 ## REST API Endpoints
 
-All calls go through `apiFetch` (cookie-authenticated). Defined in `room/services/watch-party.api.ts`:
+All calls go through `apiFetch` (cookie-authenticated). Split by concern under
+`room/services/rest/` and re-exported from `room/services/watch-party.api.ts`, which
+stays the import path for the ~16 modules that already use it:
+
+| Module | Endpoints |
+|--------|-----------|
+| `rest/room.api.ts` | `exists`, room detail, `create` |
+| `rest/membership.api.ts` | `join`, `approve`, `reject`, `kick`, `leave`, `pending` |
+| `rest/playback.api.ts` | `state`, `content`, `stream-token` |
+| `rest/permissions.api.ts` | `permissions`, `members/:mid/permissions` |
+| `rest/chat.api.ts` | `messages` |
+| `rest/soundboard.api.ts` | `/api/soundboard`, `/api/soundboard/search` |
+| `rest/client.ts` | Shared `{ error }` folding — internal, not re-exported |
+
+None of these throw. A watch party is a live session with other people in it, so the
+right response to a failed `kick` or `syncPartyState` is a toast, not an unmounted
+player; failures come back as data and each caller decides what it means. That
+`try/catch` was copy-pasted into all fourteen helpers and now lives once in
+`rest/client.ts` (`attempt`, `postForSuccess`).
+
+The RTM event bus moved out to `room/services/rtm-events.ts` — a module-level pub/sub
+singleton and a set of stateless fetch wrappers have nothing in common but the word
+"service".
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|

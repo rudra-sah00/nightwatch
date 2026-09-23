@@ -40,6 +40,38 @@ function parseManualQualityHeight(label: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+/**
+ * Resolve a possibly root-relative stream URL to an absolute one.
+ *
+ * Root-relative stream URLs are not an accident: the live-TV playlist proxy path
+ * (`/api/livestream/iptv/proxy-playlist/<id>`) is stored in watch-party rooms and
+ * replayed by every member, so it has to resolve against each member's own
+ * origin rather than the host's.
+ *
+ * - Browser: resolving against `location.origin` reproduces exactly what the
+ *   browser would have done with the relative URL, and the Next rewrite forwards
+ *   `/api/*` to the backend.
+ * - Capacitor WebView: there is no useful document origin, and the frontend
+ *   domain sits behind CF Access which blocks media requests, so it must be
+ *   aimed at the backend directly.
+ *
+ * Absolute URLs and non-browser environments are returned untouched.
+ *
+ * @param url - A stream URL, absolute or starting with `/`.
+ * @returns An absolute URL, or `url` unchanged when it already is one.
+ */
+export function toAbsoluteStreamUrl(url: string): string {
+  if (!url.startsWith('/') || typeof window === 'undefined') return url;
+
+  const isNativePlatform = !!window.Capacitor?.isNativePlatform?.();
+  const base =
+    isNativePlatform && process.env.NEXT_PUBLIC_BACKEND_URL
+      ? process.env.NEXT_PUBLIC_BACKEND_URL
+      : window.location.origin;
+
+  return `${base.replace(/\/$/, '')}${url}`;
+}
+
 interface UseHlsOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
   streamUrl: string | null;
@@ -178,6 +210,19 @@ export function useHls({
     const video = videoRef.current;
     const isNativePlatform =
       typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.();
+
+    /**
+     * The URL both engines load, resolved to an absolute one.
+     *
+     * See {@link toAbsoluteStreamUrl}. Resolution has to happen for BOTH engines,
+     * and it used to live only in the native-HLS branch below — a branch live
+     * streams never take, because the `Hls.isSupported()` condition deliberately
+     * keeps live on hls.js *even on Capacitor* (AVPlayer cannot follow the
+     * proxied playlist's rewritten paths). So on iOS and Android the one case
+     * that needs absolutising was the one case that never got it, and live TV in
+     * a watch party failed to load while VOD was fine.
+     */
+    const absoluteStreamUrl = toAbsoluteStreamUrl(streamUrl);
 
     let cancelled = false;
     // Capture native HLS handler so the cleanup closure can remove it
@@ -344,7 +389,7 @@ export function useHls({
         const hls = new Hls(finalConfig);
         hlsRef.current = hls;
 
-        hls.loadSource(streamUrl);
+        hls.loadSource(absoluteStreamUrl);
         hls.attachMedia(video);
 
         /**
@@ -971,17 +1016,10 @@ export function useHls({
           dispatch({ type: 'SET_BUFFERING', isBuffering: false });
         };
 
-        // Native AVPlayer doesn't resolve relative URLs against the WKWebView
-        // origin automatically. On Capacitor, resolve against the backend API URL
-        // directly — the frontend domain is behind CF Access which blocks AVPlayer.
-        let absoluteStreamUrl = streamUrl;
-        if (streamUrl.startsWith('/') && typeof window !== 'undefined') {
-          const baseUrl =
-            isNativePlatform && process.env.NEXT_PUBLIC_BACKEND_URL
-              ? process.env.NEXT_PUBLIC_BACKEND_URL
-              : window.location.origin;
-          absoluteStreamUrl = `${baseUrl}${streamUrl}`;
-        }
+        // `absoluteStreamUrl` is resolved once at the top of the effect — native
+        // AVPlayer cannot resolve a relative URL against the WebView origin at
+        // all, and on Capacitor it must point at the backend rather than the
+        // frontend domain, which sits behind CF Access.
         video.src = absoluteStreamUrl;
         video.addEventListener('loadedmetadata', nativeLoadedMetadataHandler);
         video.addEventListener('error', nativeErrorHandler);
@@ -1059,11 +1097,13 @@ export function useHls({
         const wasPlaying = video ? !video.paused : false;
 
         if (levelIndex === -1) {
-          hlsRef.current.loadSource(streamUrl || manualQualities[0].url);
+          hlsRef.current.loadSource(
+            toAbsoluteStreamUrl(streamUrl || manualQualities[0].url),
+          );
         } else {
           const selected = manualQualities[levelIndex];
           if (selected) {
-            hlsRef.current.loadSource(selected.url);
+            hlsRef.current.loadSource(toAbsoluteStreamUrl(selected.url));
           } else {
             return;
           }

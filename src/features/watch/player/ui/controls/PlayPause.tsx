@@ -87,6 +87,34 @@ interface CenterPlayButtonProps {
   };
   /** When `true`, shows a "Host controls playback" lock badge instead of the resume prompt (watch-party guest). */
   disabled?: boolean;
+  /**
+   * Set when the browser refused to start playback for this viewer.
+   *
+   * Autoplay policy is a LOCAL decision, so it has to be recoverable locally
+   * even when the viewer has no control over the party. A guest's overlay is
+   * otherwise inert by design — see `disabled` — which meant a refused
+   * `play()` left them staring at the lock badge over a black frame with no way
+   * out, automatic or manual. When this is set the overlay becomes clickable and
+   * asks for the one gesture the browser is waiting for.
+   *
+   * `muted: true` means playback did start, but silently; the gesture restores
+   * sound rather than starting the video.
+   */
+  playbackBlocked?: { muted: boolean } | null;
+  /**
+   * Handles the recovery gesture described by {@link playbackBlocked}.
+   *
+   * Local only: it starts or unmutes THIS element and never touches party state,
+   * so it does not hand a guest control of the room.
+   */
+  onPlaybackBlockedTap?: () => void;
+  /**
+   * Prompt shown in place of the lock badge while {@link playbackBlocked} is set.
+   *
+   * Passed in rather than translated here so this component keeps a single
+   * translation namespace and the party can word it for its own context.
+   */
+  blockedLabel?: string;
 }
 
 /**
@@ -107,9 +135,20 @@ export function CenterPlayButton({
   metadata,
   disabled = false,
   isLoading = false,
+  playbackBlocked = null,
+  onPlaybackBlockedTap,
+  blockedLabel,
 }: CenterPlayButtonProps & { isLoading?: boolean }) {
   const t = useTranslations('watch.player');
   const isMobile = useMobileDetection();
+
+  /**
+   * Whether this overlay is offering local playback recovery.
+   *
+   * Only meaningful for a guest: the host's overlay already toggles playback, so
+   * their refused autoplay is recovered by the normal resume prompt.
+   */
+  const canRecoverPlayback = Boolean(playbackBlocked && onPlaybackBlockedTap);
 
   // On mobile, don't show the pause overlay — controls handle play/pause
   if (isMobile) return null;
@@ -117,8 +156,14 @@ export function CenterPlayButton({
   const handleClick = (e: React.MouseEvent) => {
     // Don't propagate clicks to video element
     e.stopPropagation();
-    // Prevent toggle if disabled or still loading
-    if (!disabled && !isLoading) {
+    if (isLoading) return;
+    // A refused autoplay is the guest's own browser blocking them, not the host
+    // withholding control, so this gesture is allowed even while `disabled`.
+    if (canRecoverPlayback) {
+      onPlaybackBlockedTap?.();
+      return;
+    }
+    if (!disabled) {
       onToggle();
     }
   };
@@ -140,7 +185,7 @@ export function CenterPlayButton({
         !isPlaying && !isLoading
           ? 'opacity-100'
           : 'opacity-0 pointer-events-none',
-        (disabled || isLoading) && 'cursor-default',
+        (disabled || isLoading) && !canRecoverPlayback && 'cursor-default',
       )}
       style={{ pointerEvents: isPlaying || isLoading ? 'none' : 'auto' }}
       onClick={handleClick}
@@ -214,7 +259,15 @@ export function CenterPlayButton({
 
             {/* Paused indicator - enhanced for guests */}
             <div className="flex items-center gap-2 mt-2 sm:mt-4 flex-shrink-0">
-              {disabled ? (
+              {canRecoverPlayback ? (
+                /* Autoplay was refused by this browser — one tap fixes it */
+                <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-neo-yellow border-[3px] border-border">
+                  <Play className="w-5 h-5 sm:w-6 sm:h-6 text-foreground fill-current stroke-[3px]" />
+                  <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
+                    {blockedLabel || t('tapToResume')}
+                  </span>
+                </div>
+              ) : disabled ? (
                 /* Guest locked view - premium aesthetic */
                 <div className="flex flex-col items-center gap-2">
                   <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">
@@ -249,7 +302,14 @@ export function CenterPlayButton({
       {/* Fallback for no metadata */}
       {!metadata ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none">
-          {disabled ? (
+          {canRecoverPlayback ? (
+            <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-neo-yellow border-[3px] border-border">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 text-foreground fill-current stroke-[3px]" />
+              <span className="text-foreground text-xs sm:text-sm font-black font-headline uppercase tracking-widest leading-none">
+                {blockedLabel || t('tapToResume')}
+              </span>
+            </div>
+          ) : disabled ? (
             /* Guest locked view */
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-background border-[3px] border-border ">

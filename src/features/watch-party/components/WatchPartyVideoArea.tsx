@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
@@ -16,6 +16,10 @@ import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
+import {
+  PARTY_PLAYBACK_BLOCKED_EVENT,
+  type PartyPlaybackBlockedDetail,
+} from '../room/hooks/usePredictiveSync';
 import type { WatchPartyRoom } from '../room/types';
 import { memberNames, presentMemberIds } from '../theatre/lib/roster';
 import { useTheatreView } from '../theatre/lib/view-mode';
@@ -70,7 +74,69 @@ function PlayerOverlays({
     isHost,
     onNextEpisode,
   );
-  const { metadata, playerHandlers } = usePlayerContext();
+  const { metadata, playerHandlers, videoRef } = usePlayerContext();
+  const tp = useTranslations('party.toasts');
+  const tPlayer = useTranslations('watch.player');
+
+  /**
+   * Set when this viewer's browser refused to start playback.
+   *
+   * Autoplay policy is per-document and per-browser, so it is not party state and
+   * cannot be fixed by the host. A guest's centre overlay is inert by design, so
+   * without this the refusal was terminal: the lock badge sat over a black frame
+   * for the rest of the session while the stream was loaded and healthy
+   * underneath. See `PARTY_PLAYBACK_BLOCKED_EVENT`.
+   */
+  const [playbackBlocked, setPlaybackBlocked] =
+    useState<PartyPlaybackBlockedDetail | null>(null);
+
+  useEffect(() => {
+    const onBlocked = (event: Event) => {
+      const detail = (event as CustomEvent<PartyPlaybackBlockedDetail>).detail;
+      if (detail?.muted) {
+        // Picture is running, only the sound was withheld. Nothing is stuck, so
+        // this is a toast rather than a blocking overlay.
+        setPlaybackBlocked(null);
+        toast.info(tp('enableAudio'), {
+          id: 'party-playback-muted',
+          action: {
+            label: tp('enableAudioAction'),
+            onClick: () => {
+              const video = videoRef.current;
+              if (video) video.muted = false;
+            },
+          },
+        });
+        return;
+      }
+      setPlaybackBlocked(detail ?? { muted: false });
+    };
+
+    window.addEventListener(PARTY_PLAYBACK_BLOCKED_EVENT, onBlocked);
+    return () =>
+      window.removeEventListener(PARTY_PLAYBACK_BLOCKED_EVENT, onBlocked);
+  }, [tp, videoRef]);
+
+  // Once anything is playing the refusal is history, whoever resolved it.
+  useEffect(() => {
+    if (state.isPlaying) setPlaybackBlocked(null);
+  }, [state.isPlaying]);
+
+  /**
+   * Start playback from the viewer's own gesture.
+   *
+   * Local only — it touches this element and nothing else, so a guest does not
+   * gain control of the party by using it. `usePredictiveSync` immediately
+   * re-asserts the host's authoritative state over the top.
+   */
+  const handleBlockedTap = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    video.play().catch(() => {
+      // Still refused. Leave the prompt up so it can be tried again.
+    });
+  }, [videoRef]);
 
   const pauseOverlayMetadata = {
     title: metadata.title,
@@ -104,6 +170,9 @@ function PlayerOverlays({
         metadata={pauseOverlayMetadata}
         disabled={!isHost}
         isLoading={state.isLoading}
+        playbackBlocked={playbackBlocked}
+        onPlaybackBlockedTap={handleBlockedTap}
+        blockedLabel={tPlayer('tapToResume')}
       />
 
       {/* Next episode overlay — host triggers party content update; guests see it read-only */}
