@@ -142,11 +142,7 @@ export function useWatchPartyChat({
 
       // Persist to backend
       const response = await sendPartyMessage(room.id, content);
-      if (response.error) {
-        toast.error(t('messageFailed'));
-        // Rollback optimistic update
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
-      } else if (response.message) {
+      if (response.message) {
         // Swap temp ID with real DB ID
         setMessages((prev) =>
           prev.map((m) =>
@@ -155,6 +151,25 @@ export function useWatchPartyChat({
               : m,
           ),
         );
+      } else {
+        /*
+          Keyed on the absence of a persisted message rather than on
+          `response.error`, because those are not the same condition: a 2xx whose
+          body lacked `message` — no error string either — left the optimistic copy
+          in the list under its `temp-` id forever, neither confirmed nor rolled
+          back. The one invariant worth branching on is whether the server stored
+          anything.
+
+          The server's own words are preferred over the generic fallback, as the
+          approve/reject/kick paths already do. Now that `canChat` is enforced
+          server-side, the likeliest failure here is a host-imposed mute ("Chat is
+          disabled for you in this room") rather than a network fault — and this
+          path only opens at all when the host mutes someone mid-keystroke, since
+          `WatchPartySidebar` otherwise hides the composer. Reporting that as
+          "message failed" told the member to retry something that will never work.
+        */
+        toast.error(response.error || t('messageFailed'));
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
       }
     },
     [room?.id, userId, currentUserName, rtmSendMessage, t, setMessages],

@@ -7,6 +7,7 @@ import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { useAgora } from '../media/hooks/useAgora';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import { useAgoraToken } from '../media/hooks/useAgoraToken';
+import { resolveMemberPermissions } from '../room/permissions';
 import type { WatchPartyRoom } from '../room/types';
 
 /** Sidebar tab identifier type. */
@@ -62,20 +63,19 @@ export function useWatchPartySidebar({
       ? t('fallback.guest')
       : t('participant.you'));
 
-  const canDraw =
-    currentMember?.permissions?.canDraw ??
-    room.permissions?.canGuestsDraw ??
-    false;
-
-  const canPlaySound =
-    currentMember?.permissions?.canPlaySound ??
-    room.permissions?.canGuestsPlaySounds ??
-    true;
-
-  const canChat =
-    currentMember?.permissions?.canChat ??
-    room.permissions?.canGuestsChat ??
-    true;
+  /*
+    Resolved by the shared helper rather than inline, because the same three-level
+    precedence existed in three components and the copies had drifted: this one
+    omitted the host, so a host who had switched drawing off for guests found the
+    sketch tool disabled for themselves until `WatchPartySidebar` happened to
+    re-add `isHost ||` at the call site. The helper is also what
+    `isRtmMessageAllowed` uses to vet inbound traffic, so what a member is offered
+    and what their peers will accept from them can no longer disagree.
+  */
+  const { canDraw, canPlaySound, canChat } = resolveMemberPermissions(
+    room,
+    currentUserId,
+  );
 
   const stableMembers = useMemo(
     () =>

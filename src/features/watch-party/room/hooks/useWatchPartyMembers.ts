@@ -31,8 +31,10 @@ interface UseWatchPartyMembersProps {
  * Manages watch party membership: approve/reject join requests, kick members,
  * handle RTM member events, and auto-kick disconnected guests after a grace period.
  *
- * Also listens for Socket.IO `PENDING_MEMBERS_UPDATED` events (host only)
- * and local `CustomEvent` permission updates from the settings panel.
+ * Also listens for the host-only Socket.IO `PENDING_MEMBERS_UPDATED` event and
+ * local `CustomEvent` permission updates from the settings panel. Joining the
+ * server's `room:<id>` broadcast room is *not* done here — `useWatchParty` owns
+ * that for every member.
  *
  * @returns Approve, reject, kick callbacks, and RTM/presence event handlers.
  */
@@ -338,17 +340,25 @@ export function useWatchPartyMembers({
     };
   }, [setRoom]);
 
-  // Handle Watch Party Socket.IO connection for real-time join request updates
+  /*
+    Host-only: keep the pending-join queue live.
+
+    This effect used to also `emit('watch-party:join_room')` and emit
+    `leave_room` on cleanup. It no longer does — `useWatchParty` now owns the
+    socket room for every authenticated member, because *every* server-side party
+    broadcast goes to `room:<id>` and this host-gated effect was the only thing
+    that ever joined it. Two owners of one join meant the host's cleanup here
+    could drop it out of the room while the other effect still believed it was in.
+
+    What remains is genuinely host-only: nobody but the host may see or act on
+    pending join requests.
+  */
   useEffect(() => {
     let active = true;
 
     if (!room?.id || room.hostId !== userId || !socket) {
       return;
     }
-
-    const onReconnect = () => {
-      socket.emit('watch-party:join_room', room.id);
-    };
 
     const onPendingUpdated = (payload: { pendingMembers?: RoomMember[] }) => {
       if (payload?.pendingMembers) {
@@ -383,8 +393,6 @@ export function useWatchPartyMembers({
 
     const setupSocketListeners = () => {
       if (!active) return;
-      socket.emit('watch-party:join_room', room.id);
-      socket.on('connect', onReconnect);
       socket.on('PENDING_MEMBERS_UPDATED', onPendingUpdated);
     };
 
@@ -419,9 +427,7 @@ export function useWatchPartyMembers({
 
     return () => {
       active = false;
-      socket.off('connect', onReconnect);
       socket.off('PENDING_MEMBERS_UPDATED', onPendingUpdated);
-      socket.emit('watch-party:leave_room', room.id);
     };
   }, [room?.id, room?.hostId, userId, setRoom, socket, tp]);
 
