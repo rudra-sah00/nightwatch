@@ -88,34 +88,44 @@ export function useDesktopNotifications({
     }
   }, []);
 
-  const prevMessagesLength = useRef(messages?.length || 0);
+  /*
+    The newest message this hook has already accounted for.
+
+    Was a LENGTH comparison, which is not monotonic: the chat list is capped, so
+    once it is full an arriving message evicts an old one and the length does not
+    change — every notification after that point was dropped. Loading older history
+    moves it the other way, and would have reported a whole page of scrollback as
+    unread.
+
+    An id answers the only question being asked — is the newest message one we have
+    not seen? — and is immune to both.
+  */
+  const lastNotifiedId = useRef<string | null>(null);
 
   useEffect(() => {
-    if (messages && messages.length > prevMessagesLength.current) {
-      if (!isWindowFocusedRef.current) {
-        // Taskbar Bounce
-        setUnreadCount((c) => {
-          const added = messages.length - prevMessagesLength.current;
-          const next = c + added;
-          desktopBridge.setUnreadBadge(next);
-          return next;
-        });
+    const latestMsg = messages?.[messages.length - 1];
+    if (!latestMsg) return;
 
-        // Trigger Real OS Native Toast Notification for the latest message
-        const latestMsg = messages[messages.length - 1];
-        // We only want to show toasts for actual human text messages (not 'User joined' system messages)
-        if (
-          latestMsg &&
-          latestMsg.userId !== currentUserId &&
-          !latestMsg.isSystem
-        ) {
-          desktopBridge.showNotification({
-            title: latestMsg.userName || td('newMessage'),
-            body: latestMsg.content,
-          });
-        }
-      }
+    const seen = lastNotifiedId.current;
+    lastNotifiedId.current = latestMsg.id;
+    // First render of a party: adopt the tail rather than announcing the backlog.
+    if (seen === null || seen === latestMsg.id) return;
+    if (isWindowFocusedRef.current) return;
+
+    // Taskbar Bounce
+    setUnreadCount((c) => {
+      const next = c + 1;
+      desktopBridge.setUnreadBadge(next);
+      return next;
+    });
+
+    // Trigger Real OS Native Toast Notification for the latest message
+    // Human text only — not 'User joined' system notices, and not our own lines.
+    if (latestMsg.userId !== currentUserId && !latestMsg.isSystem) {
+      desktopBridge.showNotification({
+        title: latestMsg.userName || td('newMessage'),
+        body: latestMsg.content,
+      });
     }
-    prevMessagesLength.current = messages?.length || 0;
   }, [messages, currentUserId, td]);
 }

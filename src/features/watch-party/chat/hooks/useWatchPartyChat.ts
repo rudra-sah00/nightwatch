@@ -12,6 +12,29 @@ import {
 import type { ChatMessage, WatchPartyRoom } from '../../room/types';
 
 /**
+ * One `Audio` for the whole tab, reused.
+ *
+ * A busy room with the chat panel closed used to construct a fresh `Audio` per
+ * message, each one fetching and decoding the same file. Rewinding a single
+ * element is both cheaper and what browsers expect for a notification sound.
+ *
+ * Lazily created because this module is imported during SSR, where `Audio` does
+ * not exist.
+ */
+let chime: HTMLAudioElement | null = null;
+
+function playChatChime() {
+  if (typeof window === 'undefined') return;
+  try {
+    if (!chime) chime = new Audio('/msg-received.mp3');
+    chime.currentTime = 0;
+    void chime.play().catch(() => {});
+  } catch {
+    // Autoplay policy, or no audio device. A missing chime is not worth a throw.
+  }
+}
+
+/**
  * Configuration options for the {@link useWatchPartyChat} hook.
  */
 interface UseWatchPartyChatOptions {
@@ -47,12 +70,24 @@ export function useWatchPartyChat({
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const isLoadingMoreRef = useRef(false);
+  /*
+    How many messages the list may hold, which GROWS as history is loaded.
+
+    The cap exists to stop a long party accumulating thousands of DOM nodes, and it
+    trims from the front — the oldest. That is right for the live tail and exactly
+    wrong for scrollback: loading 40 older messages and then receiving one new line
+    ran the trim and threw all 40 away again, so the user's history vanished the
+    moment anybody spoke. Raising the ceiling by what was prepended keeps both
+    properties: the live tail is still bounded, and read history is not silently
+    discarded underneath the person reading it.
+  */
+  const capRef = useRef(MAX_CHAT_MESSAGES);
   const setMessages = useCallback(
     (update: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
       _setMessages((prev) => {
         const next = typeof update === 'function' ? update(prev) : update;
-        return next.length > MAX_CHAT_MESSAGES
-          ? next.slice(next.length - MAX_CHAT_MESSAGES)
+        return next.length > capRef.current
+          ? next.slice(next.length - capRef.current)
           : next;
       });
     },
@@ -74,19 +109,61 @@ export function useWatchPartyChat({
     };
   }, []);
 
+  /*
+    What is currently rendered, for code that needs to READ the list.
+
+    `loadMoreMessages` used to read it by calling the setter with an updater that
+    captured `prev.length` and returned `prev` unchanged. That does not work: React
+    runs an updater when it processes the queue, not at the moment it is called, so
+    the value was read after the request had already been sent — normally still 0.
+    The cursor was therefore almost always "from the newest message", and load-more
+    fetched the page the client already had, every time.
+
+    Synced from an effect rather than written inside the updater, because an updater
+    must stay a pure function of its argument. By the time a user can click
+    load-more the effect has long since run.
+  */
+  const messagesRef = useRef<ChatMessage[]>([]);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  /*
+    ---- load older messages ----
+
+    Paged on the OLDEST message we hold (`beforeId`), not on how many messages are
+    in the list. The count was wrong in two further ways even once read correctly,
+    because the backend reads `before` as an offset from the END of an append-only
+    Redis list:
+
+     - Any message that arrived while the request was in flight appended to that
+       list and shifted the whole window, so the page overlapped what we already
+       had. The dedup filter hid the overlap and the page silently came back short.
+     - The list is capped, so past the cap `messages.length` stopped growing while
+       the true offset kept growing. The offset then pointed at a window we already
+       held, every page was fully deduplicated away, and load-more appeared to do
+       nothing at all for the rest of the party.
+
+    A message id is stable under appends and independent of what this client has
+    trimmed, so none of the three failures is reachable. `before` is still sent as a
+    fallback for a backend that predates `beforeId`.
+  */
   const loadMoreMessages = useCallback(async () => {
     if (!room?.id || isLoadingMoreRef.current || !hasMoreMessages) return;
     isLoadingMoreRef.current = true;
     setIsLoadingMore(true);
     try {
-      let count = 0;
-      _setMessages((prev) => {
-        count = prev.length;
-        return prev;
-      });
+      const held = messagesRef.current;
+      const oldest = held[0];
+      // A `temp-` id is an unconfirmed local message and exists on no server, so
+      // it can never be a cursor. It is also always at the tail, never the head.
+      const oldestId =
+        oldest && !oldest.id.startsWith('temp-') ? oldest.id : undefined;
+
       const response = await getPartyMessages(room.id, {
         limit: 40,
-        before: count,
+        before: held.length,
+        beforeId: oldestId,
       });
       if (response.messages) {
         if (response.messages.length === 0) {
@@ -97,6 +174,14 @@ export function useWatchPartyChat({
             const newMsgs = response.messages!.filter(
               (m) => !existingIds.has(m.id),
             );
+            // Nothing new means we are at the start of the backlog, whatever the
+            // page length said.
+            if (newMsgs.length === 0) {
+              setHasMoreMessages(false);
+              return prev;
+            }
+            // Read history must survive the live-tail trim — see `capRef`.
+            capRef.current += newMsgs.length;
             return [...newMsgs, ...prev];
           });
         }
@@ -116,9 +201,13 @@ export function useWatchPartyChat({
       lastSendTimeRef.current = now;
 
       // Optimistically add to UI
+      // One id, used for both fields. Two `Date.now()` calls could disagree, and
+      // `clientId` is the React key — a key that changes when the server id lands
+      // remounts the row instead of updating it.
+      const tempId = `temp-${Date.now()}`;
       const optimisticMsg: ChatMessage = {
-        id: `temp-${Date.now()}`,
-        clientId: `temp-${Date.now()}`,
+        id: tempId,
+        clientId: tempId,
         roomId: room.id,
         userId: userId,
         userName: currentUserName,
@@ -196,24 +285,26 @@ export function useWatchPartyChat({
     (msg: RTMMessage) => {
       switch (msg.type) {
         case 'CHAT': {
+          /*
+            Whether to chime, decided BEFORE the state update rather than inside it.
+
+            This used to query the DOM and construct an `Audio` from within the
+            `setMessages` updater. An updater must be a pure function of its
+            argument — React may call it more than once — so a side effect in there
+            can play the sound twice, and a DOM read in there is a layout read at
+            whatever moment React happens to schedule the update.
+          */
+          const fromSomeoneElse = msg.userId !== userId;
+          const chatVisible =
+            !!document.getElementById('wp-floating-chat') ||
+            document
+              .getElementById('wp-sidebar-chat-container')
+              ?.getAttribute('data-active') === 'true';
+
+          let appended = false;
           setMessages((prev) => {
             if (prev.some((m) => m.id === msg.messageId)) return prev;
-            if (msg.userId !== userId) {
-              // Check if user is actively watching the chat (floating chat or sidebar chat tab)
-              const isFloatingChatVisible =
-                !!document.getElementById('wp-floating-chat');
-              const sidebarChat = document.getElementById(
-                'wp-sidebar-chat-container',
-              );
-              const isSidebarChatVisible =
-                sidebarChat?.getAttribute('data-active') === 'true';
-
-              // Only play sound if chat is hidden completely
-              if (!isFloatingChatVisible && !isSidebarChatVisible) {
-                new Audio('/msg-received.mp3').play().catch(() => {});
-              }
-            }
-
+            appended = true;
             return [
               ...prev,
               {
@@ -227,6 +318,8 @@ export function useWatchPartyChat({
               },
             ];
           });
+
+          if (appended && fromSomeoneElse && !chatVisible) playChatChime();
           break;
         }
 

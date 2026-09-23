@@ -33,14 +33,20 @@ export async function sendPartyMessage(
 /**
  * Read chat history.
  *
- * @param options.before - Offset from the newest message, for "load more".
+ * @param options.beforeId - Id of the oldest message already held. The cursor
+ *   that "load more" should use: it is stable while new messages append, and
+ *   independent of what this client has trimmed from its own list.
+ * @param options.before - Offset from the newest message. Kept as a fallback for
+ *   a backend that predates `beforeId`, and ignored by one that does not.
  */
 export async function getPartyMessages(
   roomId: string,
-  options?: { limit?: number; before?: number },
+  options?: { limit?: number; before?: number; beforeId?: string },
 ): Promise<{ messages?: ChatMessage[]; error?: string }> {
   let url = `/api/rooms/${roomId}/messages?limit=${options?.limit ?? DEFAULT_PAGE_SIZE}`;
   if (options?.before !== undefined) url += `&before=${options.before}`;
+  if (options?.beforeId)
+    url += `&beforeId=${encodeURIComponent(options.beforeId)}`;
 
   return attempt(
     () => apiFetch<{ messages: ChatMessage[] }>(url),

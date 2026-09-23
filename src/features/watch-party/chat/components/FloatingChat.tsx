@@ -41,16 +41,21 @@ export function FloatingChat({
   const rootRef = useRef<HTMLDivElement>(null);
   const prevCountRef = useRef(0);
 
-  // Auto-scroll to the newest message after each render where count grew.
-  // No dep array — biome-safe pattern: refs are compared inside, so this
-  // is effectively a no-op on renders that don't add new messages.
+  /*
+    Auto-scroll to the newest message.
+
+    Keyed on the message count, which is the only thing it reacts to. It used to
+    have no dependency array at all — so it ran after every render, including every
+    keystroke in the composer — with a ref comparison inside standing in for the
+    dependency React was already willing to track.
+  */
   useEffect(() => {
     const count = messages.length;
     if (count === prevCountRef.current) return;
     prevCountRef.current = count;
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  });
+  }, [messages.length]);
 
   const handleSend = useCallback(() => {
     const trimmed = input.trim();
