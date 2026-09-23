@@ -4,7 +4,11 @@ import { useEffect, useMemo } from 'react';
 import { MathUtils } from 'three';
 import { useAvatarAnimation } from '../hooks/use-avatar-animation';
 import { useTheatreGltf } from '../hooks/use-theatre-gltf';
-import { applyIdentityColour, instantiateAvatar } from '../lib/avatar-instance';
+import {
+  applyIdentityColour,
+  avatarUrlFor,
+  instantiateAvatar,
+} from '../lib/avatar-instance';
 import {
   assignPassiveSeats,
   type SeatId,
@@ -42,8 +46,18 @@ interface PassiveAvatarsProps {
   selfId: string;
   /** seatId -> userId, for seats already claimed by someone in 3D. */
   seatMap: Record<string, string | null>;
-  /** Model to draw them with. */
-  url: string | null;
+  /**
+   * Every published character model.
+   *
+   * One per member is chosen by hashing their id, NOT a single shared body. A
+   * member who never enabled 3D broadcasts no pose, so there is no character to
+   * read from them — and this layer previously drew all of them with one hardcoded
+   * model, which made a party of five look like five clones. The hash is the same
+   * one `RemoteAvatars` falls back to and `identityColour` uses, so the same person
+   * is the same character on every client and stays that character if they later
+   * switch 3D on.
+   */
+  urls: readonly string[];
   names?: Record<string, string>;
   bubbles?: Record<string, string>;
 }
@@ -53,7 +67,7 @@ export function PassiveAvatars({
   livePeerIds,
   selfId,
   seatMap,
-  url,
+  urls,
   names,
   bubbles,
 }: PassiveAvatarsProps) {
@@ -62,20 +76,26 @@ export function PassiveAvatars({
     [memberIds, livePeerIds, selfId, seatMap],
   );
 
-  if (!url || placements.length === 0) return null;
+  if (urls.length === 0 || placements.length === 0) return null;
 
   return (
     <group name="passive-avatars">
-      {placements.map(({ id, seatId }) => (
-        <PassiveAvatar
-          key={id}
-          userId={id}
-          seatId={seatId}
-          url={url}
-          name={names?.[id]}
-          message={bubbles?.[id] ?? null}
-        />
-      ))}
+      {placements.map(({ id, seatId }) => {
+        const url = avatarUrlFor(urls, id);
+        // Nothing published — render nothing rather than throwing inside
+        // useGLTF with an empty url.
+        if (!url) return null;
+        return (
+          <PassiveAvatar
+            key={id}
+            userId={id}
+            seatId={seatId}
+            url={url}
+            name={names?.[id]}
+            message={bubbles?.[id] ?? null}
+          />
+        );
+      })}
     </group>
   );
 }

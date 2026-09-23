@@ -284,6 +284,33 @@ export function useTheatreNetwork({
     return () => clearTimeout(id);
   }, [enabled, send]);
 
+  /*
+    ---- re-announce when this user changes body ----
+
+    The character rides on the pose message, but `quantise` covers only position,
+    yaw, state and dance — so `exceedsDeadBand` cannot see a character change. A
+    player who switches body while standing still produces an identical pose, the
+    dead band drops it, and peers keep drawing the old model until something else
+    forces a send.
+
+    This was already happening to work, for a reason too fragile to rely on:
+    `send` is rebuilt when `character` changes, which re-ran the entry effect
+    above and pushed a forced pose 150 ms later. That is incidental to an effect
+    whose stated job is announcing arrival, and it would break the moment someone
+    gave that effect a stable dependency. So the re-announce is explicit here.
+
+    `force` bypasses the dead band but NOT the rate cap, so a player mid-walk may
+    still have this send dropped; the 2 s heartbeat is the backstop.
+  */
+  const lastAnnouncedCharacter = useRef(character);
+  useEffect(() => {
+    if (!enabled) return;
+    if (lastAnnouncedCharacter.current === character) return;
+    lastAnnouncedCharacter.current = character;
+    const pose = lastPose.current;
+    if (pose) send(pose, true);
+  }, [enabled, character, send]);
+
   // ---- latency probes ----
   // Answer everyone else's probe immediately. Replying is what makes THEIR
   // measurement possible, so this runs regardless of whether we are measuring.

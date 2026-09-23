@@ -6,7 +6,7 @@ import {
   type RapierRigidBody,
   RigidBody,
 } from '@react-three/rapier';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { PerspectiveCamera, Vector3 } from 'three';
 import {
   CAPSULE_CENTRE_TO_FEET,
@@ -14,7 +14,7 @@ import {
   useAvatarControls,
 } from '../hooks/use-avatar-controls';
 import { useDanceCamera } from '../hooks/use-dance-camera';
-import { SPAWN, STANDING_EYE_HEIGHT } from '../lib/layout';
+import { STANDING_EYE_HEIGHT, spawnFor } from '../lib/layout';
 
 interface LocalPlayerProps {
   enabled: boolean;
@@ -33,6 +33,14 @@ interface LocalPlayerProps {
   dancing?: boolean;
   /** Reports how far the camera pulled back, so the caller can reveal the avatar. */
   onCameraDistance?: (metres: number) => void;
+  /**
+   * This player's id, which picks their spawn slot.
+   *
+   * Every client used to start on the same square metre, and since avatars carry
+   * no colliders nothing pushed them apart — eight people entering a party stood
+   * inside one another.
+   */
+  selfId: string;
   /** Called with the local pose so the network layer can broadcast it. */
   onPose?: (pose: {
     x: number;
@@ -53,11 +61,13 @@ interface LocalPlayerProps {
  */
 export function LocalPlayer({
   enabled,
+  selfId,
   onPose,
   bodyRef,
   dancing = false,
   onCameraDistance,
 }: LocalPlayerProps) {
+  const spawn = useMemo(() => spawnFor(selfId), [selfId]);
   const own = useRef<RapierRigidBody>(null);
   const body = bodyRef ?? own;
   const camera = useThree((s) => s.camera);
@@ -113,8 +123,8 @@ export function LocalPlayer({
       ref={body}
       type="kinematicPosition"
       colliders={false}
-      // spawn the capsule so its feet land on the platform
-      position={[SPAWN.x, SPAWN.y + CAPSULE_CENTRE_TO_FEET, SPAWN.z]}
+      // spawn the capsule so its feet land on the platform, in this player's slot
+      position={[spawn.x, spawn.y + CAPSULE_CENTRE_TO_FEET, spawn.z]}
       name="local-player"
     >
       <CapsuleCollider

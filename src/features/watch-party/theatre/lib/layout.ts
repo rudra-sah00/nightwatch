@@ -83,7 +83,50 @@ export const STAIRS = {
   maxZ: 5.29,
 } as const;
 
+/**
+ * Where a player appears when they enter 3D.
+ *
+ * `SPAWN` is the nominal point — rear platform, on the centreline, facing the
+ * screen. Use `spawnFor(userId)` for an actual player: everyone arriving on the
+ * same square metre stacks them inside one another, and because avatars carry no
+ * colliders nothing pushes them apart again.
+ */
 export const SPAWN = { x: 0, y: 0.45, z: 7.8 } as const;
+
+/**
+ * Spawn slots across the rear platform, widest first from the centre.
+ *
+ * 0.8 m apart, which clears the 0.56 m player capsule with margin. Ordered
+ * outward from the middle so the first arrivals get the centre and the room fills
+ * symmetrically rather than from one wall.
+ *
+ * All eight sit at `SPAWN.z`, behind Row B (which ends at z 6.67) and well clear
+ * of the stair runs (z 4.69-5.29), so nobody spawns inside furniture.
+ */
+const SPAWN_SLOT_X = [0, 0.8, -0.8, 1.6, -1.6, 2.4, -2.4, 3.2] as const;
+
+/**
+ * A player's spawn point, derived from their id.
+ *
+ * Deterministic so a reconnect returns you to the same slot rather than teleporting
+ * you across the platform, and so two clients agree on where a given person
+ * started. Hash-derived rather than index-derived on purpose: an index into the
+ * member list would shift every existing player's slot each time someone joined.
+ *
+ * Collisions are possible and harmless — two people share a slot and overlap,
+ * which is what ALL eight did before this existed.
+ */
+export function spawnFor(userId: string): { x: number; y: number; z: number } {
+  let hash = 0;
+  for (let i = 0; i < userId.length; i += 1) {
+    hash = (hash * 31 + userId.charCodeAt(i)) | 0;
+  }
+  const slot = Math.abs(hash) % SPAWN_SLOT_X.length;
+  return { x: SPAWN_SLOT_X[slot], y: SPAWN.y, z: SPAWN.z };
+}
+
+/** Number of distinct spawn slots, for tests and capacity checks. */
+export const SPAWN_SLOT_COUNT = SPAWN_SLOT_X.length;
 
 /** Seated eye height above the seat's own floor, from the seated avatar mesh. */
 export const SEATED_EYE_HEIGHT = 1.254;

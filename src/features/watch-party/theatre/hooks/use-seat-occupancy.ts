@@ -1,15 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { onMemberLeft, onSeatClaim } from '../../room/services/watch-party.api';
+import {
+  onMemberJoined,
+  onMemberLeft,
+  onSeatClaim,
+} from '../../room/services/watch-party.api';
 import type { RTMMessage } from '../../room/types/rtm-messages';
-import { SEAT_IDS, type SeatId } from '../lib/layout';
-
-interface Claim {
-  userId: string;
-  /** Claim timestamp, used only to resolve two people grabbing one seat. */
-  at: number;
-}
+import type { SeatId } from '../lib/layout';
+import {
+  applyClaim as applyClaimTo,
+  type ClaimMap,
+  isSeatId,
+  type SeatClaim,
+  seatOf,
+  toSeatMap,
+  vacate as vacateIn,
+} from '../lib/seat-claims';
 
 interface UseSeatOccupancyOptions {
   userId: string;
@@ -37,57 +44,34 @@ export function useSeatOccupancy({
   rtmSendMessage,
   enabled,
 }: UseSeatOccupancyOptions) {
-  const claims = useRef<Map<SeatId, Claim>>(new Map());
+  const claims = useRef<ClaimMap>(new Map());
   const [seatMap, setSeatMap] = useState<Record<string, string | null>>({});
   const [mySeat, setMySeat] = useState<SeatId | null>(null);
 
   const publish = useCallback(() => {
-    const next: Record<string, string | null> = {};
-    for (const id of SEAT_IDS) {
-      next[id] = claims.current.get(id)?.userId ?? null;
-    }
-    setSeatMap(next);
-    let mine: SeatId | null = null;
-    for (const [seat, claim] of claims.current) {
-      if (claim.userId === userId) mine = seat;
-    }
-    setMySeat(mine);
+    setSeatMap(toSeatMap(claims.current));
+    setMySeat(seatOf(claims.current, userId));
   }, [userId]);
 
-  /** Apply a claim under the deterministic rule. Returns true if it stuck. */
+  /**
+   * Apply a claim under the deterministic rule. Returns true if it stuck.
+   *
+   * The rule itself lives in `lib/seat-claims.ts` so it can be tested without a
+   * React tree — it is the thing that makes this design work without a referee,
+   * and order-independence is not a property you want to take on trust.
+   */
   const applyClaim = useCallback(
     (seat: SeatId, claimant: string, at: number): boolean => {
-      // a person occupies at most one seat; vacate any previous one
-      for (const [s, c] of claims.current) {
-        if (c.userId === claimant && s !== seat) claims.current.delete(s);
-      }
-      const existing = claims.current.get(seat);
-      if (existing && existing.userId !== claimant) {
-        const incomingWins =
-          at < existing.at ||
-          (at === existing.at && claimant < existing.userId);
-        if (!incomingWins) {
-          publish();
-          return false;
-        }
-      }
-      claims.current.set(seat, { userId: claimant, at });
+      const stuck = applyClaimTo(claims.current, seat, claimant, at);
       publish();
-      return true;
+      return stuck;
     },
     [publish],
   );
 
   const vacate = useCallback(
     (claimant: string) => {
-      let changed = false;
-      for (const [s, c] of claims.current) {
-        if (c.userId === claimant) {
-          claims.current.delete(s);
-          changed = true;
-        }
-      }
-      if (changed) publish();
+      if (vacateIn(claims.current, claimant)) publish();
     },
     [publish],
   );
@@ -120,8 +104,8 @@ export function useSeatOccupancy({
         vacate(c.userId);
         return;
       }
-      if (!SEAT_IDS.includes(c.seatId as SeatId)) return;
-      applyClaim(c.seatId as SeatId, c.userId, c.at);
+      if (!isSeatId(c.seatId)) return;
+      applyClaim(c.seatId, c.userId, c.at);
     });
     // someone leaving the party frees their seat immediately
     const offLeave = onMemberLeft((id) => vacate(id));
@@ -130,6 +114,42 @@ export function useSeatOccupancy({
       offLeave();
     };
   }, [enabled, userId, applyClaim, vacate]);
+
+  /*
+    ---- re-assert our own seat when somebody new arrives ----
+
+    Claims are only ever broadcast at the moment they happen, so a member who
+    joins later never hears the ones that already fired and starts with every seat
+    apparently free. That is worse than cosmetic: they can claim an occupied chair
+    and it STICKS locally, because their client knows of no earlier claim to lose
+    to. Everyone else rejects it on timestamp, so the newcomer believes they are
+    seated in a chair the rest of the room shows as someone else's, and two avatars
+    end up in one seat. Their passive-avatar layer would also seat 2D members into
+    chairs it thinks are empty.
+
+    Each client re-asserting its OWN claim is the fix that preserves the no-referee
+    design: broadcasting a whole SEAT_MAP would mean electing an authority to own
+    it, which is the host-arbitrated model this hook deliberately avoids.
+
+    The original timestamp is re-sent, never a fresh one. `at` is what the
+    deterministic rule compares, so re-announcing with `Date.now()` would make a
+    sitting player lose their own seat to whoever claimed it most recently.
+  */
+  useEffect(() => {
+    if (!enabled || !rtmSendMessage) return;
+    return onMemberJoined(() => {
+      const seat = seatOf(claims.current, userId);
+      if (seat === null) return;
+      const claim: SeatClaim | undefined = claims.current.get(seat);
+      if (!claim) return;
+      rtmSendMessage({
+        type: 'SEAT_CLAIM',
+        userId,
+        seatId: seat,
+        at: claim.at,
+      });
+    });
+  }, [enabled, rtmSendMessage, userId]);
 
   useEffect(() => {
     if (enabled) return;

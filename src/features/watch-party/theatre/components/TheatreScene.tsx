@@ -31,9 +31,9 @@ import type { Pose } from '../lib/interpolation';
 import {
   ROOM,
   type SeatId,
-  SPAWN,
   STANDING_EYE_HEIGHT,
   seatedAvatarPose,
+  spawnFor,
 } from '../lib/layout';
 import { createStats } from '../lib/theatre-stats';
 import { useTheatreView } from '../lib/view-mode';
@@ -141,6 +141,14 @@ export function TheatreScene({
    * state that drives it depends on physics (clearance) and the seated camera,
    * both of which only exist inside. SceneInterior therefore reports upward.
    */
+  /**
+   * This player's spawn slot, so the camera starts where their capsule does.
+   *
+   * Both used to read SPAWN directly, which put every client on the same square
+   * metre — and avatars carry no colliders, so nothing separated them again.
+   */
+  const spawn = useMemo(() => spawnFor(userId), [userId]);
+
   const [wheel, setWheel] = useState<{
     open: boolean;
     origin: { x: number; y: number };
@@ -199,7 +207,7 @@ export function TheatreScene({
         dpr={[1, 1.5]}
         shadows
         camera={{
-          position: [SPAWN.x, SPAWN.y + STANDING_EYE_HEIGHT, SPAWN.z],
+          position: [spawn.x, spawn.y + STANDING_EYE_HEIGHT, spawn.z],
           fov: 60,
           near: 0.1,
           far: 100,
@@ -243,14 +251,14 @@ export function TheatreScene({
             livePeerIds={peerIds}
             selfId={userId}
             seatMap={seatMap}
-            url={resolveCharacterModel('man')}
+            urls={avatarModels(assets)}
             names={names}
             bubbles={bubbles}
           />
           <SceneInterior
             videoRef={videoRef}
             userId={userId}
-            avatarUrl={resolveCharacterModel('man')}
+            avatarUrl={resolveCharacterModel(character)}
             onTogglePlay={readOnly ? undefined : playerHandlers.togglePlay}
             seatMap={seatMap}
             mySeat={mySeat}
@@ -498,6 +506,7 @@ function SceneInterior({
         />
         <LocalPlayer
           enabled={walking}
+          selfId={userId}
           onPose={recordAndPublish}
           bodyRef={playerBody}
           dancing={Boolean(dance) && walking}
