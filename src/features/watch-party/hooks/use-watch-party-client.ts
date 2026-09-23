@@ -209,7 +209,22 @@ export function useWatchPartyClient({
       }
     };
     const interval = setInterval(checkDuration, 60 * 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      /*
+        The 3 s grace before the redirect belongs to this effect too.
+
+        Only the movie-end effect below used to clear `movieEndTimerRef`, so a
+        party that hit the 3 h cap and was left by hand within those three seconds
+        ran `leaveRoom()` and `goBackOrHome()` from a component that no longer
+        existed — a second leave request, and a navigation on top of the one the
+        user had already made.
+      */
+      if (movieEndTimerRef.current) {
+        clearTimeout(movieEndTimerRef.current);
+        movieEndTimerRef.current = null;
+      }
+    };
   }, [room, isHost, leaveRoom, goBackOrHome, t]);
 
   useEffect(() => {
