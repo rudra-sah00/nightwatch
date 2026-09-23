@@ -275,6 +275,121 @@ describe('useWatchPartyMembers', () => {
     vi.useRealTimers();
   });
 
+  /**
+   * The host's presence used to be ignored outright.
+   *
+   * `handlePresenceEvent` returned early on `event.userId === room.hostId`, on the
+   * grounds that `useWatchPartySync` handles host drops. It does own the UX — the
+   * countdown toast and the redirect — but it never touches `room.members`, so the
+   * host's row was never flagged `disconnected`. Anything deriving presence from
+   * the roster therefore still believed the host was in the room: the 3D theatre
+   * kept drawing their avatar in its chair, and the Smart TV member list kept
+   * listing them.
+   */
+  it('handlePresenceEvent marks the HOST disconnected on LEAVE', () => {
+    const roomWithHost = {
+      ...mockRoom,
+      members: [
+        { id: 'host-1', name: 'Host' } as unknown as RoomMember,
+        { id: 'guest-2', name: 'Guest' } as unknown as RoomMember,
+      ],
+    };
+    const captured: { room: WatchPartyRoom | null } = { room: null };
+    const localMockSetRoom = vi.fn((updater) => {
+      if (typeof updater === 'function') captured.room = updater(roomWithHost);
+    });
+
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({
+        ...defaultProps,
+        room: roomWithHost,
+        setRoom: localMockSetRoom,
+      }),
+    );
+
+    act(() => {
+      result.current.handlePresenceEvent({
+        action: 'LEAVE',
+        userId: 'host-1',
+      });
+    });
+
+    expect(localMockSetRoom).toHaveBeenCalled();
+    const host = captured.room?.members.find((m) => m?.id === 'host-1');
+    expect(host?.disconnected).toBe(true);
+    // Everyone else is untouched.
+    const guest = captured.room?.members.find((m) => m?.id === 'guest-2');
+    expect(guest?.disconnected).toBeUndefined();
+  });
+
+  it('handlePresenceEvent clears the HOST flag on rejoin', () => {
+    // Otherwise a host who blipped would stay flagged and stay invisible in 3D.
+    const roomWithHost = {
+      ...mockRoom,
+      members: [
+        {
+          id: 'host-1',
+          name: 'Host',
+          disconnected: true,
+        } as unknown as RoomMember,
+      ],
+    };
+    const captured: { room: WatchPartyRoom | null } = { room: null };
+    const localMockSetRoom = vi.fn((updater) => {
+      if (typeof updater === 'function') captured.room = updater(roomWithHost);
+    });
+
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({
+        ...defaultProps,
+        room: roomWithHost,
+        setRoom: localMockSetRoom,
+      }),
+    );
+
+    act(() => {
+      result.current.handlePresenceEvent({ action: 'JOIN', userId: 'host-1' });
+    });
+
+    const host = captured.room?.members.find((m) => m?.id === 'host-1');
+    expect(host?.disconnected).toBe(false);
+  });
+
+  it('never starts an auto-kick timer for the host', async () => {
+    // You cannot kick the host out of their own party; useWatchPartySync already
+    // redirects guests when the grace period expires.
+    vi.useFakeTimers();
+    const roomWithHost = {
+      ...mockRoom,
+      members: [{ id: 'host-1', name: 'Host' } as unknown as RoomMember],
+    };
+    const localMockSetRoom = vi.fn((updater) => {
+      if (typeof updater === 'function') return updater(roomWithHost);
+    });
+
+    const { result } = renderHook(() =>
+      useWatchPartyMembers({
+        ...defaultProps,
+        room: roomWithHost,
+        setRoom: localMockSetRoom,
+      }),
+    );
+
+    act(() => {
+      result.current.handlePresenceEvent({
+        action: 'LEAVE',
+        userId: 'host-1',
+      });
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(130000);
+    });
+
+    expect(api.kickMember).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
   it('handlePresenceEvent should clear timeout if guest rejoins', async () => {
     vi.useFakeTimers();
     const roomWithGuest = {

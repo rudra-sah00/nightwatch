@@ -21,6 +21,17 @@ import {
 interface UseSeatOccupancyOptions {
   userId: string;
   rtmSendMessage?: (msg: RTMMessage) => void;
+  /**
+   * Ids the party roster says are present right now, already excluding
+   * `disconnected` members (see `presentMemberIds`).
+   *
+   * Seats are reconciled against this for the same reason avatars are: a seat held
+   * by someone who is no longer in the room is worse than a stale avatar, because
+   * the deterministic rule makes it UNTAKEABLE. A ghost claim carries an early
+   * timestamp, so every later claim on that chair loses to it and the seat is
+   * reserved for somebody who left.
+   */
+  memberIds?: readonly string[];
   enabled: boolean;
 }
 
@@ -42,6 +53,7 @@ interface UseSeatOccupancyOptions {
 export function useSeatOccupancy({
   userId,
   rtmSendMessage,
+  memberIds,
   enabled,
 }: UseSeatOccupancyOptions) {
   const claims = useRef<ClaimMap>(new Map());
@@ -150,6 +162,39 @@ export function useSeatOccupancy({
       });
     });
   }, [enabled, rtmSendMessage, userId]);
+
+  /*
+    ---- release seats held by people who are no longer here ----
+
+    `MEMBER_LEFT` covers a deliberate exit, but the common case is a closed tab or
+    a dropped connection, which only ever surfaces as an Agora presence LEAVE —
+    that marks the member `disconnected` and leaves them in `room.members`. No
+    MEMBER_LEFT is emitted, so this hook never heard about it and their claim
+    stayed in the map for the rest of the session.
+
+    A stale claim is worse than a stale avatar. The deterministic rule compares
+    timestamps, so a ghost claim made minutes ago beats every fresh claim on that
+    chair: the seat looks empty, and refuses to be taken.
+
+    Reconciling against the roster is idempotent and self-healing, exactly as it is
+    for poses — it does not matter which signal fired or whether one was missed.
+
+    `memberIds.length === 0` is treated as "not loaded yet", not "nobody is here".
+    The local user is always a member of their own party, so a genuinely populated
+    roster is never empty, and without this guard the first pass would evict
+    everyone including ourselves.
+  */
+  useEffect(() => {
+    if (!enabled || !memberIds || memberIds.length === 0) return;
+
+    const present = new Set(memberIds);
+    let changed = false;
+    for (const [, claim] of claims.current) {
+      if (present.has(claim.userId)) continue;
+      if (vacateIn(claims.current, claim.userId)) changed = true;
+    }
+    if (changed) publish();
+  }, [enabled, memberIds, publish]);
 
   useEffect(() => {
     if (enabled) return;

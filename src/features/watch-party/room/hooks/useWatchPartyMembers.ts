@@ -206,8 +206,23 @@ export function useWatchPartyMembers({
 
   const handlePresenceEvent = useCallback(
     (event: { action: 'JOIN' | 'LEAVE'; userId: string }) => {
-      // Ignore host drops (handled by useWatchPartySync for Guests)
-      if (event.userId === room?.hostId) return;
+      /*
+        The `disconnected` flag is maintained for EVERY member, host included.
+
+        This used to bail out entirely on `event.userId === room.hostId`, on the
+        grounds that `useWatchPartySync` owns host-drop handling. It does own the
+        UX — the countdown toast and the redirect — but it never touches
+        `room.members`, so the host's row was never flagged. Anything deriving
+        presence from the roster therefore believed the host was still in the room:
+        the 3D theatre kept drawing their avatar sitting in its chair (see
+        `presentMemberIds`), and the Smart TV member list kept listing them.
+
+        Marking the flag and acting on it are separate concerns. What must stay
+        host-exempt is the auto-kick below — you cannot kick the host out of their
+        own party, and `useWatchPartySync` already redirects guests when the grace
+        period expires.
+      */
+      const isHostMember = event.userId === room?.hostId;
 
       if (event.action === 'LEAVE') {
         // Mark user as disconnected in the members list for all clients
@@ -221,8 +236,9 @@ export function useWatchPartyMembers({
           };
         });
 
-        // Host: start 2-minute grace period before auto-kicking
-        if (isHost && room?.id) {
+        // Host: start 2-minute grace period before auto-kicking. Never for the
+        // host themselves.
+        if (!isHostMember && isHost && room?.id) {
           if (disconnectTimersRef.current[event.userId]) {
             clearTimeout(disconnectTimersRef.current[event.userId]);
           }
@@ -240,7 +256,8 @@ export function useWatchPartyMembers({
           }, 120000);
         }
       } else if (event.action === 'JOIN') {
-        // Guest reconnected — restore their status
+        // Reconnected — restore their status. Applies to the host too, or a host
+        // who dropped and came back would stay flagged and stay invisible in 3D.
         setRoom((prev) => {
           if (!prev) return null;
           return {
@@ -252,7 +269,11 @@ export function useWatchPartyMembers({
         });
 
         // Host: cancel the auto-kick
-        if (isHost && disconnectTimersRef.current[event.userId]) {
+        if (
+          !isHostMember &&
+          isHost &&
+          disconnectTimersRef.current[event.userId]
+        ) {
           clearTimeout(disconnectTimersRef.current[event.userId]);
           delete disconnectTimersRef.current[event.userId];
         }

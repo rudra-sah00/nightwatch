@@ -107,6 +107,9 @@ export function TheatreScene({
   const { seatMap, mySeat, claimSeat } = useSeatOccupancy({
     userId,
     rtmSendMessage,
+    // Same roster the avatars reconcile against, so a dropped member's chair is
+    // released rather than staying reserved for the rest of the session.
+    memberIds,
     enabled: true,
   });
 
