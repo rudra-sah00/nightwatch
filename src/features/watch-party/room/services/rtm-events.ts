@@ -138,14 +138,6 @@ export const onSeatClaim = (
     }),
   );
 
-/** Host-authoritative seat occupancy map. */
-export const onSeatMap = (
-  callback: (seats: Record<string, string | null>) => void,
-) =>
-  subscribe('SEAT_MAP', (msg) =>
-    callback(msg.seats as Record<string, string | null>),
-  );
-
 /**
  * Party roster changes, used to spawn and despawn 3D avatars.
  *

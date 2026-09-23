@@ -336,20 +336,6 @@ export interface RtmSeatClaim {
   at: number;
 }
 
-/** Host -> channel. Full map, broadcast only when it actually changes. */
-export interface RtmSeatMap {
-  type: 'SEAT_MAP';
-  /** seatId -> userId, or null when free */
-  seats: Record<string, string | null>;
-}
-
-/** Host -> claimant. Seat was taken between the prompt and the claim. */
-export interface RtmSeatDenied {
-  type: 'SEAT_DENIED';
-  seatId: string;
-  reason: 'taken' | 'invalid';
-}
-
 export type RTMMessage =
   | RtmPlayEvent
   | RtmPauseEvent
@@ -384,12 +370,4 @@ export type RTMMessage =
   | RtmAvatarTransform
   | RtmAvatarPing
   | RtmAvatarPong
-  | RtmSeatClaim
-  | RtmSeatMap
-  | RtmSeatDenied;
-
-/** Narrow the message type for specific handling */
-export type RTMMessageOfType<T extends RTMMessage['type']> = Extract<
-  RTMMessage,
-  { type: T }
->;
+  | RtmSeatClaim;

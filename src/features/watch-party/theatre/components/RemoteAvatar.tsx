@@ -43,7 +43,7 @@ interface RemoteAvatarProps {
  * `animations.clipsEmbedded`), and `AnimationClip`s are safe to share across
  * mixers because the per-avatar state lives in the actions, not the clip.
  */
-export function RemoteAvatar({
+function RemoteAvatar({
   peerId,
   url,
   sample,

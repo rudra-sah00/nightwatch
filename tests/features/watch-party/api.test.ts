@@ -93,7 +93,7 @@ describe('Watch Party API (REST)', () => {
         json: async () => ({ success: true }),
       } as Response);
 
-      const _result = await kickMember('R1', 'U1');
+      await kickMember('R1', 'U1');
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/rooms/R1/kick'),
         expect.objectContaining({

@@ -1,5 +1,5 @@
 import type { AnimationClip, Object3D } from 'three';
-import { Bone, Color, Mesh, MeshStandardMaterial, SkinnedMesh } from 'three';
+import { Color, Mesh, MeshStandardMaterial, SkinnedMesh } from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 /**
@@ -25,47 +25,6 @@ export function instantiateAvatar(source: Object3D): Object3D {
     }
   });
   return instance;
-}
-
-/** Fingers are invisible at conversational distance in a dim room. */
-const FINGER_PATTERN = /(thumb|index|middle|ring|pinky|pinkie)/i;
-
-/**
- * Detach finger bones to cut per-frame skinning cost.
- *
- * A Mixamo rig ships ~65 bones, well over half of them fingers. With 8+ avatars
- * on screen that is real CPU time spent on geometry nobody can resolve. Bones
- * are only detached, never deleted, so any clip that targets them simply has no
- * effect rather than throwing.
- *
- * Call this on the SOURCE model once, before instantiating, so every clone
- * inherits the reduced skeleton.
- */
-export function stripFingerBones(root: Object3D): number {
-  const doomed: Bone[] = [];
-  root.traverse((child) => {
-    if (child instanceof Bone && FINGER_PATTERN.test(child.name)) {
-      doomed.push(child);
-    }
-  });
-  let removed = 0;
-  for (const bone of doomed) {
-    // skip any whose parent is itself being removed; detaching the top of a
-    // finger chain takes its children with it
-    if (bone.parent && !doomed.includes(bone.parent as Bone)) {
-      bone.parent.remove(bone);
-      removed += 1;
-    }
-  }
-  return removed;
-}
-
-export function countBones(root: Object3D): number {
-  let n = 0;
-  root.traverse((child) => {
-    if (child instanceof Bone) n += 1;
-  });
-  return n;
 }
 
 /**

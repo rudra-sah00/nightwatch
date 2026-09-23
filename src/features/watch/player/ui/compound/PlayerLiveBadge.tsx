@@ -2,12 +2,6 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { usePlayerLiveBadge } from './hooks/use-player-live-badge';
 
-/**
- * How many seconds behind the buffered live edge counts as "you are live".
- * Most real live players use 10–30 s; 15 s is a comfortable middle ground.
- */
-const _LIVE_EDGE_THRESHOLD_S = 15;
-
 export function PlayerLiveBadge() {
   const { isAtLiveEdge, handleGoLive, metadata } = usePlayerLiveBadge();
   const t = useTranslations('watch.player');

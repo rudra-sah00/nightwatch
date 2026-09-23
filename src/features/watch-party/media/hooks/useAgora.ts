@@ -30,19 +30,15 @@ import { generateNumericUid, handleDeviceError } from '../lib/agora-uid';
   helpers now live in `../lib`. This file is the engine itself: the connection
   lifecycle, the local tracks, and the participant state derived from them.
 
-  Re-exported below because roughly a dozen modules already import these names
-  from this path.
+  Re-exported below because several modules already import these names from this
+  path. Only the ones actually imported are re-exported — the list used to carry
+  `getAgoraRTC`, `generateNumericUid`, `ConnectionState`, `MemberInfo`,
+  `NetworkQuality` and `UseAgoraOptions` as well, and nothing imported any of them
+  from here. Reach for `../lib/agora-sdk`, `../lib/agora-uid` or
+  `../lib/agora-types` directly for anything not listed.
 */
-export { getAgoraRTC, resetAgoraState } from '../lib/agora-sdk';
-export type {
-  AgoraParticipant,
-  ConnectionState,
-  MediaDevice,
-  MemberInfo,
-  NetworkQuality,
-  UseAgoraOptions,
-} from '../lib/agora-types';
-export { generateNumericUid } from '../lib/agora-uid';
+export { resetAgoraState } from '../lib/agora-sdk';
+export type { AgoraParticipant, MediaDevice } from '../lib/agora-types';
 
 /**
  * Main hook for managing Agora RTC lifecycle, including channel connection,
