@@ -72,7 +72,6 @@ Last synced with the code: 2026-09-23.
 |---|---|
 | `TheatreScreen` + `use-video-texture` | None — next piece of work. The in-scene screen is currently a lit placeholder; audio plays because `Player.Root` stays mounted. |
 | `use-screen-light` (average-colour driver) | Depends on the video texture |
-| `E` to sit, `use-seat-authority` | RTM message types exist (`SEAT_CLAIM` / `SEAT_MAP` / `SEAT_DENIED`); arbitration not written |
 | `SitDown` / `StandUp` clips | Need authoring on the existing rig |
 | Dance clips | Need authoring; `THEATRE_DANCE_CLIPS` on the backend gates publishing |
 | Spatial audio, speech bubbles | Not started |
@@ -432,16 +431,38 @@ holds both control roles.
 the first joiner. A watch party with one person shows one avatar standing and
 eight visibly empty chairs, and that person may sit anywhere they like.
 
-Seat state is a single map, `Record<SeatId, string | null>`, held by the host
-and broadcast as `SEAT_MAP`. `null` means free.
+Seat state is a `Map<SeatId, { userId, at }>` held independently by **every**
+client (`theatre/lib/seat-claims.ts`, driven by `use-seat-occupancy.ts`), not by
+the host.
+
+**There is no arbiter.** Admission to the party is already the permission
+boundary — once the host has approved a member they may sit anywhere — so routing
+every claim through the host would add a round trip and a single point of failure
+to guard something that is not actually restricted. Claims are broadcast and
+applied optimistically.
+
+Two people can therefore grab the same seat in the same instant, and it has to
+resolve identically on every machine with nobody adjudicating. The rule:
+
+- Earliest `at` wins.
+- An exact tie breaks on the lower `userId` — arbitrary, but identical
+  everywhere. Ties are not hypothetical: `Date.now()` is millisecond-resolution
+  and two clicks can land on the same one.
+- The rule is **order-independent** — apply the same set of claims in any
+  sequence and every client lands on the same occupant. That property is what
+  makes a referee unnecessary, and it is what `seat-claims.test.ts` covers.
+- A person holds at most one seat, so a new claim vacates their previous one
+  first. Otherwise standing up and sitting elsewhere leaves a phantom occupant
+  that blocks the chair for everyone.
 
 Flow:
 
 1. Proximity check against `SEATPAD_<id>` positions, ~1.0 m radius
 2. Nearest **free** seat's pad brightens and a `Press E to sit` prompt appears
-3. `E` → `SEAT_CLAIM` to host (§6)
-4. Host validates against its seat map, replies `SEAT_MAP` or `SEAT_DENIED`
-5. On grant: disable controller, play `SitDown`, lerp avatar to the seat anchor
+3. `E` → broadcast `SEAT_CLAIM` with the seat id and `at`
+4. Every client, including the claimant, applies the deterministic rule. A
+   claimant that loses is bounced back to standing
+5. Disable controller, play `SitDown`, lerp avatar to the seat anchor
 6. Camera transitions from third-person follow to a seated near-first-person
    view facing the screen
 7. `E` again → stand, seat returns to `null`, avatar is placed back on its pad
@@ -459,8 +480,24 @@ sit-trigger zones: a defined anchor transform plus a proximity volume, rather
 than clicking the chair mesh itself. It stays readable at a distance and does
 not depend on precise aim.
 
-On disconnect, the host frees that user's seat and rebroadcasts `SEAT_MAP`, so
-a dropped guest never leaves a phantom occupant.
+Seats are reconciled against the party roster (`presentMemberIds`, which already
+excludes `disconnected` members). A seat held by someone no longer in the room is
+worse than a stale avatar, because the deterministic rule makes it
+**untakeable** — a ghost claim carries an early timestamp, so every later claim
+on that chair loses to it and the seat stays reserved for somebody who left.
+
+A member who joins late never heard the claims that already fired, so each
+sitting client re-asserts its **own** claim on `MEMBER_JOINED`, re-sending the
+original timestamp rather than a fresh one. Re-announcing with `Date.now()` would
+make a sitting player lose their own seat to whoever claimed most recently.
+Re-asserting per-client is what preserves the no-referee design; broadcasting a
+whole seat map would mean electing an authority to own it.
+
+> Earlier revisions of this document described a host-arbitrated model with
+> `SEAT_MAP` and `SEAT_DENIED` messages. That approach was rejected for the
+> reasons above, and those two message types — never sent by anything — have been
+> removed from the `RTMMessage` union along with the unused `onSeatMap`
+> subscriber.
 
 ### Camera
 
@@ -491,21 +528,16 @@ interface RtmAvatarTransform {
 interface RtmSeatClaim {
   type: 'SEAT_CLAIM';
   userId: string;
-  seatId: string;
-}
-
-interface RtmSeatMap {
-  type: 'SEAT_MAP';
-  seats: Record<string, string | null>;
-  serverTime: number;
-}
-
-interface RtmSeatDenied {
-  type: 'SEAT_DENIED';
-  seatId: string;
-  reason: 'occupied' | 'invalid';
+  /** seat id to take, or null to stand up */
+  seatId: string | null;
+  /** claim timestamp, ms — the only field the contest is decided on */
+  at: number;
 }
 ```
+
+There is no `SEAT_MAP` or `SEAT_DENIED`. Both existed in the union as leftovers
+from the rejected host-arbitrated design (§5) and were never sent; they have been
+removed.
 
 **No `Y` in the transform.** Floor height is derived locally from `(x, z)`. This
 saves bandwidth and prevents desync artefacts on the step.
@@ -517,17 +549,17 @@ saves bandwidth and prevents desync artefacts on the step.
 | Transform broadcast rate | **10 Hz**, matching the proven cursor throttle in `use-sketch-overlay.ts` |
 | Remote smoothing | Interpolation buffer — render remote avatars ~100 ms in the past, interpolate between snapshots |
 | Packet gaps | Dead reckoning from last known velocity |
-| Seat authority | **Host-authoritative.** Host owns the seat map, validates claims, broadcasts `SEAT_MAP` on every change. |
+| Seat authority | **No arbiter.** Claims are broadcast and applied optimistically; conflicts resolve by a deterministic, order-independent rule on every client (§5). |
 | Movement authority | **Client-authoritative.** No cheating incentive in a watch party; authoritative server movement is unjustified complexity. |
 
 Seats are the only genuinely conflicting state in the feature — two people
-cannot occupy `A3`. Everything else is conflict-tolerant. Host arbitration
-matches the existing host-authority model for playback and needs zero backend
-work.
+cannot occupy `A3`. Everything else is conflict-tolerant.
 
-`SEAT_MAP` is broadcast in full rather than as deltas. Eight seats is small
-enough that deltas are not worth the complexity, and full broadcasts make late
-joiners trivial.
+Host arbitration was the original plan, on the grounds that it matched the
+existing host-authority model for playback. It was rejected: party admission is
+already the permission boundary, so arbitrating a claim guards nothing, and it
+would add a round trip plus a single point of failure. A deterministic
+order-independent rule gets the same convergence with neither — see §5.
 
 ### Lifecycle hooks
 
@@ -535,8 +567,8 @@ joiners trivial.
 |---|---|
 | RTM presence `JOIN` | Spawn avatar at spawn point |
 | RTM presence `LEAVE` | Despawn avatar, host releases their seat |
-| Guest joins | Host sends current `SEAT_MAP` |
-| Host disconnect (existing 60 s grace) | Seat map freezes; no new claims resolve until reconnect |
+| Guest joins | Each seated client re-asserts its own claim, with the original timestamp |
+| Host disconnect (existing 60 s grace) | Seats keep resolving — no client depends on the host to arbitrate |
 
 ---
 
@@ -755,8 +787,8 @@ Unresolved. Do not treat as decided.
    **RESOLVED — client-side preference, not a room mode.** 3D is chosen per
    participant, so rooms are mixed-mode: the host may be in 3D while a guest
    sits in 2D, in the same room, with the same host-authoritative sync, chat and
-   voice. A 2D client still receives `SEAT_MAP` and can render it as text
-   ("Rudra is in seat B3").
+   voice. A 2D client receives the same `SEAT_CLAIM` stream and could render it
+   as text ("Rudra is in seat B3").
 
    Rationale: a watch party is social. Gating by device would mean a guest whose
    machine cannot cope is excluded from their friends' party, which is a worse
@@ -788,7 +820,7 @@ Follow `docs/TESTING.md`. Specific to this feature:
   tall, a backrest tilted the wrong way, a cup-holder wider than its armrest, and
   pilasters with their feet buried under the rear platform.
 - **Integration** — RTM message round trip for `AVATAR_TRANSFORM` and
-  `SEAT_MAP`; mode gating in `WatchPartyClient`
+  `SEAT_CLAIM`; mode gating in `WatchPartyClient`
 - **Not unit-testable** — anything requiring a WebGL context. Rendering, the
   character controller, and animation blending need manual or Playwright
   verification. Do not mock a GL context to chase coverage.
