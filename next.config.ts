@@ -5,8 +5,12 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Standalone output for Docker deployment (staging/dev)
-  output: 'standalone',
+  // Standalone output for Docker deployment (staging/dev) only — opt in with
+  // BUILD_STANDALONE=1 (see docker/Dockerfile.staging).
+  // Must stay OFF for Vercel: Vercel's builder does its own packaging/tracing,
+  // and standalone breaks its Next adapter in `onBuildComplete` with
+  // "ENOENT ... .next/next-server.js.nft.json".
+  output: process.env.BUILD_STANDALONE === '1' ? 'standalone' : undefined,
   // Disable React Strict Mode to prevent double-invocation of effects in dev.
   // Strict Mode mounts every component twice, causing duplicate API calls and
   // session conflicts (e.g. stream:revoked on S2 playback).

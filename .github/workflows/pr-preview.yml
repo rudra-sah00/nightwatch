@@ -52,6 +52,8 @@ jobs:
       - name: Build Preview
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
         env:
+          # See release.yml: opt out of @vercel/next's new adapter packaging path.
+          NEXT_ENABLE_ADAPTER: '0'
           NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
           NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
