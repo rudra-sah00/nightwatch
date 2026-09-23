@@ -1,7 +1,9 @@
 import { Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { cn, formatBytes } from '@/lib/utils';
+import { useModalFocus } from '../hooks/use-modal-focus';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import {
@@ -69,6 +71,15 @@ export function WatchPartySettings({
   const t = useTranslations('party');
   const { isOpen, setIsOpen } = useWatchPartySettings();
 
+  /*
+    Keyboard containment, same as the leave dialog.
+
+    This overlay sits above the sidebar's media controls, and Tab used to walk
+    straight onto them through the backdrop.
+  */
+  const close = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const settingsRef = useModalFocus<HTMLDivElement>(isOpen, close);
+
   // 3D theatre opt-in lives in a store so settings, the video area and the V
   // hotkey all read one source of truth.
   const theatreEnabled = useTheatreView((s) => s.enabled);
@@ -105,6 +116,10 @@ export function WatchPartySettings({
     key: keyof WatchPartyRoom['permissions'],
     value: boolean,
   ) => {
+    // Guarded here as well as in the markup. The backend refuses a non-host, so
+    // this is not the security boundary — it stops a guest reaching a control that
+    // can only ever fail, and being shown an error for it.
+    if (!isHost) return;
     // Direct update with no mapping needed - backend schema now matches frontend types
     updatePartyPermissions(room.id, { [key]: value })
       .then((response) => {
@@ -132,6 +147,7 @@ export function WatchPartySettings({
     key: keyof NonNullable<RoomMember['permissions']>,
     value: boolean,
   ) => {
+    if (!isHost) return;
     const member = room.members.find((m) => m.id === memberId);
     if (!member) return;
 
@@ -189,24 +205,31 @@ export function WatchPartySettings({
       </button>
 
       {isOpen ? (
-        <div
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/70"
-          onClick={() => setIsOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setIsOpen(false);
-          }}
-          role="dialog"
-          tabIndex={-1}
-        >
+        <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/70">
+          {/* Click-to-dismiss. A button, so it is keyboard-operable by
+              construction, and hidden from assistive tech because it duplicates
+              the Done button below — Escape closes too, via useModalFocus. */}
+          <button
+            type="button"
+            aria-hidden="true"
+            tabIndex={-1}
+            onClick={() => setIsOpen(false)}
+            className="absolute inset-0 cursor-default"
+          />
           <div
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={() => {}}
-            role="document"
-            className="flex flex-col items-center gap-6 w-full max-w-sm px-4 max-h-[80vh] overflow-y-auto no-scrollbar"
+            ref={settingsRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="wp-settings-title"
+            tabIndex={-1}
+            className="relative flex flex-col items-center gap-6 w-full max-w-sm px-4 max-h-[80vh] overflow-y-auto no-scrollbar"
           >
             <div className="flex flex-col items-center gap-2">
               <Settings className="w-8 h-8 text-white stroke-[3px]" />
-              <h2 className="font-black font-headline uppercase tracking-tight text-xl text-white">
+              <h2
+                id="wp-settings-title"
+                className="font-black font-headline uppercase tracking-tight text-xl text-white"
+              >
                 {t('settings.title')}
               </h2>
             </div>

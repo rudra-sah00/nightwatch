@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
+import { useModalFocus } from '../hooks/use-modal-focus';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import { resolveMemberPermissions } from '../room/permissions';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../room/types';
@@ -177,6 +178,22 @@ export function ActiveWatchParty({
   const { user } = useAuth();
   const t = useTranslations('party');
   const tAria = useTranslations('party.aria');
+
+  /*
+    Keyboard containment for the leave confirmation.
+
+    It is a plain overlay div, so without this Tab walked out of the dialog and onto
+    the sidebar and player controls behind the backdrop — a keyboard user could
+    operate the party they had just been asked whether to leave.
+  */
+  const closeLeaveDialog = useCallback(
+    () => onShowLeaveDialog(false),
+    [onShowLeaveDialog],
+  );
+  const leaveDialogRef = useModalFocus<HTMLDivElement>(
+    showLeaveDialog,
+    closeLeaveDialog,
+  );
   const currentMember = room.members.find((m) => m.id === currentUserId);
   const currentUserName =
     currentMember?.name ||
@@ -295,25 +312,44 @@ export function ActiveWatchParty({
 
       {/* Leave Confirmation Dialog */}
       {showLeaveDialog ? (
-        <div
-          className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/40"
-          onClick={() => onShowLeaveDialog(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') onShowLeaveDialog(false);
-          }}
-          role="dialog"
-        >
+        <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/40">
+          {/*
+            Click-to-dismiss, as a real button rather than a div with a click
+            handler — a button is keyboard-operable by construction, which is what
+            the lint rule about interactive static elements is protecting.
+
+            Hidden from assistive tech and out of the tab order on purpose: it is a
+            duplicate of the Cancel button below, and Escape closes the dialog too
+            (see `useModalFocus`). Announcing it would add a control that says
+            nothing.
+          */}
+          <button
+            type="button"
+            aria-hidden="true"
+            tabIndex={-1}
+            onClick={() => onShowLeaveDialog(false)}
+            className="absolute inset-0 cursor-default"
+          />
           <div
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={() => {}}
+            ref={leaveDialogRef}
             role="alertdialog"
-            className="flex flex-col items-center gap-4 text-center"
+            aria-modal="true"
+            aria-labelledby="wp-leave-title"
+            aria-describedby="wp-leave-desc"
+            tabIndex={-1}
+            className="relative flex flex-col items-center gap-4 text-center"
           >
             <span className="text-6xl mb-2">{isHost ? '🫠' : '👋'}</span>
-            <h2 className="font-black font-headline uppercase tracking-tight text-xl text-white">
+            <h2
+              id="wp-leave-title"
+              className="font-black font-headline uppercase tracking-tight text-xl text-white"
+            >
               {isHost ? t('dialog.endTitle') : t('dialog.leaveTitle')}
             </h2>
-            <p className="text-white/40 text-xs font-headline font-bold uppercase tracking-wider max-w-xs">
+            <p
+              id="wp-leave-desc"
+              className="text-white/40 text-xs font-headline font-bold uppercase tracking-wider max-w-xs"
+            >
               {isHost ? t('dialog.endDesc') : t('dialog.leaveDesc')}
             </p>
             <div className="flex items-center gap-6 mt-4">
