@@ -32,6 +32,9 @@ function press(
   const event = new KeyboardEvent('keydown', {
     key,
     bubbles: true,
+    // Cancelable, or `preventDefault` is a no-op and every assertion about it
+    // passes for the wrong reason.
+    cancelable: true,
     ...options.init,
   });
   (options.on ?? window).dispatchEvent(event);

@@ -65,6 +65,7 @@ Last synced with the code: 2026-09-23.
 | Asset manifest | `theatre/api.ts` + `hooks/use-theatre-assets.ts` | Backend-owned URLs. Characters only now the room is generated |
 | View modes | `theatre/lib/view-mode.ts` + `hooks/use-view-mode-hotkey.ts` | `V` cycles 2D → 3D → screen focus |
 | Chat from inside the room | `chat/hooks/use-chat-focus-hotkey.ts` | `Enter` to type, Enter to send, Escape to go back |
+| Controls card | `theatre/components/ControlsCard.tsx` + `hooks/use-controls-help.ts` + `lib/controls.ts` | `H` or `?`. Shown unasked on a first visit, once per browser |
 | Opt-in download | `theatre/hooks/use-theatre-preload.ts` | Nothing fetched until enabled in settings. ~13 MB of characters, was ~38 MB |
 
 ### Not yet built
@@ -427,7 +428,22 @@ real sweep-and-slide handling.
 | `E` | Sit / stand, when within range of a free seat |
 | `R` | Hold to open the dance wheel, release toward a clip |
 | `Enter` | Open the chat box. Enter again sends and hands the keyboard back; Escape returns without sending |
+| `H` or `?` | Show or hide the controls card |
 | Mouse drag | Camera orbit |
+
+**The keys are written down in the room.** `lib/controls.ts` is the one list, and
+`ControlsCard` renders it — so this table and the UI cannot drift, and
+`controls.test.ts` asserts the list covers every binding the hooks read and claims
+none of the player's. The card appears unasked on a first visit (once per browser,
+`localStorage`), and after that a quiet `H — Controls` chip in the corner is the only
+reminder. Nothing else in the room ever advertised `R` or `V`: `WASD` is guessable,
+those two are not, and `E` announces itself only once you are already standing on a
+seat pad.
+
+It deliberately does not take focus or release the pointer lock — it is a reference
+you read while still walking, not a dialog — which is why it carries its own closing
+instruction rather than a close button nobody could click while the pointer is
+captured.
 
 `Enter` exists because the keyboard is shared with the avatar. The chat field
 cannot hold focus by default — `WASD` has to reach the player — and while walking

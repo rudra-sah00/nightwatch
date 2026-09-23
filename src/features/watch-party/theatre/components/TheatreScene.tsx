@@ -17,6 +17,7 @@ import { ACESFilmicToneMapping, MathUtils, SRGBColorSpace } from 'three';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import type { RTMMessage } from '../../room/types/rtm-messages';
 import { CAPSULE_CENTRE_TO_FEET } from '../hooks/use-avatar-controls';
+import { useControlsHelp } from '../hooks/use-controls-help';
 import { useDanceMenu } from '../hooks/use-dance-menu';
 import { useDanceSpace } from '../hooks/use-dance-space';
 import { usePointerLook } from '../hooks/use-pointer-look';
@@ -40,6 +41,7 @@ import {
 import type { StanceRef } from '../lib/stance';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
+import { ControlsCard, ControlsHint } from './ControlsCard';
 import { DanceWheel } from './DanceWheel';
 import { LocalAvatar } from './LocalAvatar';
 import { LocalPlayer } from './LocalPlayer';
@@ -258,6 +260,13 @@ export function TheatreScene({
     hovered: number | null;
   }>({ open: false, origin: { x: 0, y: 0 }, hovered: null });
 
+  /*
+    The controls card. Owned out here because it is a DOM overlay like the dance
+    wheel, and because its hotkey must work whether the player is walking, seated or
+    in screen focus — none of which `SceneInterior` is mounted for uniformly.
+  */
+  const { open: helpOpen } = useControlsHelp(true);
+
   const handlePose = useCallback(
     (pose: Pose) => {
       publishPose(pose);
@@ -420,6 +429,10 @@ export function TheatreScene({
         hovered={wheel.hovered}
       />
       <SitPrompt seatMap={seatMap} mySeat={mySeat} />
+      {/* The keys, written down. Shown unasked on a first visit — nothing else in
+          the room tells you `R` or `V` exist. See `use-controls-help`. */}
+      <ControlsCard open={helpOpen} />
+      <ControlsHint hidden={helpOpen || wheel.open} />
     </div>
   );
 }
