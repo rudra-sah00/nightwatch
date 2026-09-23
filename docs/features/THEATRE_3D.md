@@ -54,7 +54,7 @@ Last synced with the code: 2026-09-23.
 |---|---|---|
 | Scene constants | `theatre/lib/layout.ts` | Single source of truth |
 | Room + chair geometry | `theatre/lib/geometry/` | Generated in code — no `room.glb`, no `chair.glb`. 22 draw calls (§3) |
-| Canvas + room + seating | `theatre/components/TheatreScene/TheatreRoom/TheatreSeating.tsx` | Room and all eight chairs batched per material |
+| Canvas + room + seating | `theatre/components/TheatreScene/TheatreRoom/TheatreSeating.tsx` | Room and all ten chairs batched per material |
 | Walking | `theatre/hooks/use-avatar-controls.ts` + `components/LocalPlayer.tsx` | Rapier kinematic controller, WASD + Shift |
 | Collision | `theatre/components/TheatreColliders.tsx` | Static boxes from `layout.ts`, not a trimesh |
 | Networking | `theatre/hooks/use-theatre-network.ts` | Agora RTM, 8 Hz + dead band |
@@ -120,7 +120,7 @@ Three.js convention: **Y up, metres, right-handed.**
 
 | Dimension | Value |
 |---|---|
-| Width | 8.0 m (`X` from −4.0 to +4.0) |
+| Width | 9.6 m (`X` from −4.8 to +4.8) |
 | Depth | 8.5 m (`Z` 0 → 8.5) |
 | Wall top | 4.6 m |
 | Ceiling soffit | 4.35 m (coffered) |
@@ -133,11 +133,16 @@ scene pass — see §3.
 
 | Property | Value |
 |---|---|
-| Width | 7.0 m |
-| Aspect | 2.39:1 → height 2.929 m |
-| Bottom edge | `Y = 1.20` |
-| Top edge | `Y = 3.29` |
-| Centre | `(0, 2.245, 0.02)` |
+| Width | 7.40 m |
+| Aspect | 2.39:1 → height 3.096 m |
+| Bottom edge | `Y = 0.52` |
+| Top edge | `Y = 3.616` |
+| Centre | `(0, 2.068, 0.02)` |
+
+Width is set by the **worst seat, not by the wall**. The wall would take 8.48 m
+(where the speaker towers start), but at that size the front-row outer seats crop
+the picture on narrow windows and 16:9 needs a 77° lens. 7.40 m is the largest
+width all ten seats can frame — at 7.41 m seat A1 breaches the 65° limit.
 
 The `+0.02` Z offset places the video plane just in front of the modelled
 masking frame to avoid z-fighting.
@@ -148,12 +153,12 @@ border around it and must leave that area flat and unobstructed.
 
 ### Seating
 
-Two rows, four seats each. Rear row on a raised platform.
+Two rows, **five** seats each — ten in all. Rear row on a raised platform.
 
 | Row | Floor `Y` | `Z` | Seat `X` positions |
 |---|---|---|---|
-| A (front) | 0.00 | 4.5 | −1.8, −0.6, +0.6, +1.8 |
-| B (rear) | 0.45 | 6.2 | −1.8, −0.6, +0.6, +1.8 |
+| A (front) | 0.00 | 4.5 | −2.4, −1.2, 0, +1.2, +2.4 |
+| B (rear) | 0.45 | 6.2 | −2.4, −1.2, 0, +1.2, +2.4 |
 
 - Seat spacing **1.2 m** (`SEAT_PITCH`), premium recliner pitch, not multiplex.
   The chair is 0.719 m wide, so that leaves a 0.48 m gap to walk between them.
@@ -162,13 +167,17 @@ Two rows, four seats each. Rear row on a raised platform.
 - Rear platform spans `Z` 5.3 → 8.5 at `Y = 0.45`
 
 **There is no centre aisle.** The seats are contiguous, so the only route between
-levels is the aisle stairs at `|X|` 1.80–4.00 — three risers of 0.15 m with
+levels is the aisle stairs at `|X|` 3.40–4.80 — three risers of 0.15 m with
 0.30 m treads, spanning `Z` 4.69 → 5.29. This is enforced in physics: a collider
 across the riser face between the stairs blocks the shortcut, and the character
 controller's slope limit stops you walking up the drop.
 
-Seat IDs are `A1`–`A4` and `B1`–`B4`, numbered left to right from the
-audience's point of view (i.e. `A1` is at `X = −1.8`).
+Seat IDs are `A1`–`A5` and `B1`–`B5`, numbered left to right from the
+audience's point of view (i.e. `A1` is at `X = −2.4`, `A3` is on the centre line).
+
+`SeatId` travels over RTM in seat claims, so a client on an older build treats
+`A5`/`B5` as unknown and ignores the claim — a mixed-version party degrades to
+that person appearing unseated rather than to anything breaking.
 
 Each seat also carries a **`SEATPAD_<id>`** marker: a thin emissive floor pad
 0.52 m in front of the chair, at the spot an avatar stands to sit down. These
@@ -203,9 +212,9 @@ and destroys presence.
 | Pitch | +30° / −35° |
 
 Each seat's neutral aim points at screen centre, so off-axis seats are pre-rotated
-(A1 −16.77°, A2 −5.74°, B1 −12.32°, B2 −4.16°, mirrored for 3/4). **Verified: from
-all eight seats both screen edges fall inside the cone**, so the clamp never fights
-the thing you are there to watch.
+(A1 −28.18°, A2 −15.00°, A3 0°, B1 −21.22°, B2 −10.99°, mirrored for 4/5).
+**Verified: from all ten seats both screen edges fall inside the cone**, so the
+clamp never fights the thing you are there to watch.
 
 Anchors are `SEATVIEW_<id>` transforms in `layout.ts`, carrying each seat's
 neutral aim and its head-cone limits.
@@ -215,7 +224,7 @@ neutral aim and its head-cone limits.
 - Spawn at `(0, 0.45, 7.8)` — rear platform, facing the screen (`SPAWN`)
 - Players walk forward and **step down** into Row A via the aisle stairs, which
   gives the natural "walking down the aisle" feel
-- Seats span |x| ≤ 2.16 in an 8.0 m room, leaving the 1.2 m stair runs each side
+- Seats span |x| ≤ 2.76 in a 9.6 m room, leaving the 1.4 m stair runs each side
 
 ### Reachability — tighter than it looks
 
@@ -429,7 +438,7 @@ holds both control roles.
 
 **Every seat starts empty.** Nobody is auto-seated, ever — not the host, not
 the first joiner. A watch party with one person shows one avatar standing and
-eight visibly empty chairs, and that person may sit anywhere they like.
+ten visibly empty chairs, and that person may sit anywhere they like.
 
 Seat state is a `Map<SeatId, { userId, at }>` held independently by **every**
 client (`theatre/lib/seat-claims.ts`, driven by `use-seat-occupancy.ts`), not by
@@ -636,7 +645,7 @@ the unshadowed primary source (§4).
 **Done, by generating the room instead of exporting it.** The Blender blockout
 spent **307 draw calls across only 19 materials** — its coffered ceiling alone was
 229 objects sharing 4. `GeometryBatcher` (§3) merges per material, so the whole
-auditorium is **22 draw calls** and the eight chairs cost the same as one.
+auditorium is **22 draw calls** and the ten chairs cost the same as one.
 
 Geometry is not the constraint: the room is well under the 150k triangle budget,
 so detail should be spent, not cut. The constraint is **light count** — see below.
