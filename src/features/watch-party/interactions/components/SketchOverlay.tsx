@@ -103,14 +103,40 @@ export function SketchOverlay({
 
   const { color, strokeWidth, currentTool, cursors, stageRef } = useSketch();
 
+  /*
+    A pending "blur dismissed the text box" timer — see `handleInputBlur`.
+
+    Declared up here because both that handler and the effect below touch it.
+  */
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (blurTimer.current) clearTimeout(blurTimer.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (pendingText) {
+      // A dismissal scheduled by the previous box's blur must not fire against
+      // this one — see `handleInputBlur`.
+      if (blurTimer.current) {
+        clearTimeout(blurTimer.current);
+        blurTimer.current = null;
+      }
       setInputValue('');
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [pendingText]);
 
-  // Handle transformer selection
+  /*
+    Handle transformer selection.
+
+    The `else` matters: with only the positive branch the transformer kept a
+    reference to the node it was last attached to after the selection was cleared.
+    The handles vanish because the component unmounts, but the stale node reference
+    outlived the shape itself — so an undo or a clear left the transformer holding
+    something no longer on the stage.
+  */
   useEffect(() => {
     if (isSketchMode && currentTool === 'select' && selectedId) {
       const stage = transformerRef.current?.getStage();
@@ -119,7 +145,10 @@ export function SketchOverlay({
         transformerRef.current?.nodes([selectedNode]);
         transformerRef.current?.getLayer()?.batchDraw();
       }
+      return;
     }
+    transformerRef.current?.nodes([]);
+    transformerRef.current?.getLayer()?.batchDraw();
   }, [isSketchMode, currentTool, selectedId]);
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -137,9 +166,20 @@ export function SketchOverlay({
     }
   };
 
+  /*
+    Blur dismisses the text box — but only the one that was open.
+
+    The 120 ms delay exists so an Enter keydown can confirm before blur tears the
+    box down. Unconditionally cancelling after it, though, cancels whatever is
+    pending THEN: press Enter and click the canvas again inside 120 ms and the
+    timer fired against the second text box, silently discarding it. The timer is
+    cleared whenever `pendingText` changes, so it can only ever cancel the box it
+    was scheduled for.
+  */
   const handleInputBlur = () => {
-    // Small delay so Enter keydown can fire confirmText before blur dismisses
-    setTimeout(() => {
+    if (blurTimer.current) clearTimeout(blurTimer.current);
+    blurTimer.current = setTimeout(() => {
+      blurTimer.current = null;
       cancelText();
       setInputValue('');
     }, 120);

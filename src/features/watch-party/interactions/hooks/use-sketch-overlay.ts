@@ -331,7 +331,16 @@ export function useSketchOverlay({
     if (!allowed || !uid) return;
 
     const current = actionsRef.current;
-    const idx = current.findLastIndex((a) => !a.userId || a.userId === uid);
+    /*
+      Only ever undo something this user drew.
+
+      The predicate used to be `!a.userId || a.userId === uid`, which made every
+      action with no author undoable by anybody in the room. Actions arriving from
+      `SKETCH_SYNC_STATE` are exactly the ones that can lack an author — they come
+      from whatever build the sender is running — so on a mixed-version party one
+      person could reach into another's strokes.
+    */
+    const idx = current.findLastIndex((a) => a.userId === uid);
     if (idx === -1) return;
 
     const undone = current[idx];
@@ -344,17 +353,52 @@ export function useSketchOverlay({
     });
   }, [undoTrigger, setActions, setSelectedId]);
 
-  // Automatically clear laser pointer actions after 2 seconds
+  /*
+    ---- laser strokes fade themselves after 2 s ----
+
+    Keyed on WHICH lasers exist, not on the action list, and one timer per laser.
+
+    The previous version depended on `actions`, which changes on every pointer-move
+    of every stroke anybody in the party is drawing. The effect re-ran ~60 times a
+    second and cleared its own pending timer each time, so a laser never reached
+    two seconds while any drawing was in progress and hung on screen until the room
+    went completely still. A single shared timer had the same flaw in miniature: a
+    laser drawn later extended the life of every earlier one.
+  */
+  const laserTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
   useEffect(() => {
-    const laserActions = (actions || []).filter((a) => a.type === 'laser');
-    if (laserActions.length === 0) return;
+    return () => {
+      for (const timer of laserTimers.current.values()) clearTimeout(timer);
+      laserTimers.current.clear();
+    };
+  }, []);
 
-    const timer = setTimeout(() => {
-      setActions((prev) => (prev || []).filter((a) => a.type !== 'laser'));
-    }, 2000);
+  const laserIds = (actions || [])
+    .filter((a) => a.type === 'laser')
+    .map((a) => a.id)
+    .join(',');
 
-    return () => clearTimeout(timer);
-  }, [actions, setActions]);
+  useEffect(() => {
+    const present = new Set(laserIds ? laserIds.split(',') : []);
+
+    // Something else removed it (undo, clear) — drop its timer.
+    for (const [id, timer] of laserTimers.current) {
+      if (present.has(id)) continue;
+      clearTimeout(timer);
+      laserTimers.current.delete(id);
+    }
+
+    for (const id of present) {
+      if (laserTimers.current.has(id)) continue;
+      const timer = setTimeout(() => {
+        laserTimers.current.delete(id);
+        setActions((prev) => (prev || []).filter((a) => a.id !== id));
+      }, 2000);
+      laserTimers.current.set(id, timer);
+    }
+  }, [laserIds, setActions]);
 
   const uuidv4 = useCallback(() => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
