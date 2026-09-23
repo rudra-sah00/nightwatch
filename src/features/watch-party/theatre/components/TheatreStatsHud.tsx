@@ -2,7 +2,7 @@
 
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useRef, useState } from 'react';
-import { packetHealth, type TheatreStats as Stats } from '../lib/theatre-stats';
+import type { TheatreStats as Stats } from '../lib/theatre-stats';
 
 /** How often the DOM readout refreshes. 5 Hz is readable without flickering. */
 const REFRESH_MS = 200;
@@ -36,18 +36,20 @@ export function StatsProbe({ stats }: { stats: React.RefObject<Stats> }) {
 }
 
 /**
- * The readout itself. A DOM overlay, outside the Canvas.
+ * Frame-rate readout. A DOM overlay, outside the Canvas.
  *
  * DOM rather than drei's `<Html>` or a 3D text mesh: this is instrumentation
  * about the scene, so it must not be affected by the scene's own camera, fog or
  * lighting, and it must stay legible when the render is struggling — which is
  * exactly when it is being read.
  *
- * There is intentionally no "ping" figure. See `theatre-stats.ts`: pose messages
- * carry the sender's wall clock, and browser clocks are not in sync, so any
- * latency computed from them would be skew, not delay. `NET` shows the age of the
- * newest packet, which is measured entirely on this machine's clock and is the
- * honest answer to "is this live".
+ * **FPS only.** This used to also show PING, NET (newest-packet age and packet
+ * rate), PEERS and SMOOTH (interpolation delay). All four were network
+ * diagnostics, and reading five numbers to answer "is it running smoothly" is
+ * worse than reading one. The underlying figures are still collected on the stats
+ * object by `use-theatre-network`, so anything that wants them can read them —
+ * nothing currently does, which means the AVATAR_PING / AVATAR_PONG round trip
+ * now has no consumer and is a candidate for removal on bandwidth grounds.
  */
 export function TheatreStatsHud({
   stats,
@@ -56,35 +58,16 @@ export function TheatreStatsHud({
   stats: React.RefObject<Stats>;
   visible?: boolean;
 }) {
-  const [view, setView] = useState<{
-    fps: number;
-    frameMs: number;
-    ageMs: number | null;
-    hz: number;
-    peers: number;
-    interpDelayMs: number;
-    rttMs: number | null;
-  } | null>(null);
+  const [view, setView] = useState<{ fps: number; frameMs: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!visible) return;
     function sample() {
       const s = stats.current;
       if (!s) return;
-      setView({
-        fps: s.fps,
-        frameMs: s.frameMs,
-        // Age is derived here, against the current time, so it keeps climbing
-        // when nothing is arriving instead of freezing at the last packet.
-        ageMs:
-          s.lastPacketAt === null
-            ? null
-            : Math.max(0, Date.now() - s.lastPacketAt),
-        hz: s.packetHz,
-        peers: s.peers,
-        interpDelayMs: s.interpDelayMs,
-        rttMs: s.rttMs,
-      });
+      setView({ fps: s.fps, frameMs: s.frameMs });
     }
     sample();
     const id = setInterval(sample, REFRESH_MS);
@@ -93,25 +76,7 @@ export function TheatreStatsHud({
 
   if (!visible || !view) return null;
 
-  const health = packetHealth(view.ageMs);
-  const netColour =
-    health === 'good'
-      ? 'text-emerald-400'
-      : health === 'late'
-        ? 'text-amber-400'
-        : health === 'stalled'
-          ? 'text-red-400'
-          : 'text-white/40';
-  // Round-trip bands. 100 ms RTT is imperceptible for avatar motion, 300 ms is
-  // where interpolation stops hiding it, beyond that movement visibly lags.
-  const pingColour =
-    view.rttMs === null
-      ? 'text-white/40'
-      : view.rttMs <= 100
-        ? 'text-emerald-400'
-        : view.rttMs <= 300
-          ? 'text-amber-400'
-          : 'text-red-400';
+  // 50+ reads as smooth, 30-49 as playable, below 30 as a problem.
   const fpsColour =
     view.fps >= 50
       ? 'text-emerald-400'
@@ -122,37 +87,10 @@ export function TheatreStatsHud({
   return (
     <div className="pointer-events-none absolute bottom-3 right-3 z-50 rounded-md bg-black/70 px-2.5 py-2 font-mono text-[10px] leading-relaxed tabular-nums text-white/70 backdrop-blur-sm">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-white/40">PING</span>
-        <span className={pingColour}>
-          {view.rttMs === null ? '—' : `${view.rttMs}ms`}
-          {view.rttMs !== null ? (
-            <span className="text-white/30">
-              {' '}
-              / {Math.round(view.rttMs / 2)}ms one-way
-            </span>
-          ) : null}
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
         <span className="text-white/40">FPS</span>
         <span className={fpsColour}>
           {view.fps} <span className="text-white/30">/ {view.frameMs}ms</span>
         </span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-white/40">NET</span>
-        <span className={netColour}>
-          {view.ageMs === null ? '—' : `${view.ageMs}ms`}
-          <span className="text-white/30"> / {view.hz}Hz</span>
-        </span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-white/40">PEERS</span>
-        <span className="text-white/60">{view.peers}</span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-white/40">SMOOTH</span>
-        <span className="text-white/60">{view.interpDelayMs}ms</span>
       </div>
     </div>
   );
