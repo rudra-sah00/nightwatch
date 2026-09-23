@@ -5,8 +5,8 @@ import {
 } from '@/features/watch-party/theatre/lib/controls';
 
 /**
- * The card is the only place the room's keys are written down, so the thing worth
- * testing is that it stays true: every binding listed, nothing listed that the
+ * The hint line is the only place the room's keys are written down, so the thing
+ * worth testing is that it stays true: every binding listed, nothing listed that the
  * player underneath already owns.
  */
 
@@ -21,7 +21,6 @@ const THEATRE_BINDINGS = [
   'R',
   'V',
   'Enter',
-  'H',
 ] as const;
 
 /**
@@ -68,12 +67,11 @@ describe('CONTROLS', () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it('gives every row a label and no trailing full stop', () => {
+  it('keeps every label to a single word, so the line does not wrap into the film', () => {
     for (const row of CONTROLS) {
       expect(row.label.length).toBeGreaterThan(0);
-      expect(row.label.endsWith('.')).toBe(false);
+      expect(row.label.trim().split(/\s+/)).toHaveLength(1);
       expect(row.keys.length).toBeGreaterThan(0);
-      if (row.note) expect(row.note.endsWith('.')).toBe(false);
     }
   });
 

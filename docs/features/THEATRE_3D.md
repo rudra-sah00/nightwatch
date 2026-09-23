@@ -65,7 +65,7 @@ Last synced with the code: 2026-09-23.
 | Asset manifest | `theatre/api.ts` + `hooks/use-theatre-assets.ts` | Backend-owned URLs. Characters only now the room is generated |
 | View modes | `theatre/lib/view-mode.ts` + `hooks/use-view-mode-hotkey.ts` | `V` cycles 2D → 3D → screen focus |
 | Chat from inside the room | `chat/hooks/use-chat-focus-hotkey.ts` | `Enter` to type, Enter to send, Escape to go back |
-| Controls card | `theatre/components/ControlsCard.tsx` + `hooks/use-controls-help.ts` + `lib/controls.ts` | `H` or `?`. Shown unasked on a first visit, once per browser |
+| Controls hint | `theatre/components/ControlsHint.tsx` + `lib/controls.ts` | Borderless text, always on screen. No card, no popup, no button |
 | Opt-in download | `theatre/hooks/use-theatre-preload.ts` | Nothing fetched until enabled in settings. ~13 MB of characters, was ~38 MB |
 
 ### Not yet built
@@ -428,22 +428,29 @@ real sweep-and-slide handling.
 | `E` | Sit / stand, when within range of a free seat |
 | `R` | Hold to open the dance wheel, release toward a clip |
 | `Enter` | Open the chat box. Enter again sends and hands the keyboard back; Escape returns without sending |
-| `H` or `?` | Show or hide the controls card |
 | Mouse drag | Camera orbit |
 
-**The keys are written down in the room.** `lib/controls.ts` is the one list, and
-`ControlsCard` renders it — so this table and the UI cannot drift, and
-`controls.test.ts` asserts the list covers every binding the hooks read and claims
-none of the player's. The card appears unasked on a first visit (once per browser,
-`localStorage`), and after that a quiet `H — Controls` chip in the corner is the only
-reminder. Nothing else in the room ever advertised `R` or `V`: `WASD` is guessable,
-those two are not, and `E` announces itself only once you are already standing on a
-seat pad.
+**The keys are written down in the room**, as one quiet borderless line along the
+bottom. `lib/controls.ts` is the single list and `ControlsHint` renders it, so this
+table and the UI cannot drift; `controls.test.ts` asserts the list covers every
+binding the hooks read and claims none of the player's. Nothing else in the room ever
+advertised `R` or `V`: `WASD` is guessable, those two are not, and `E` announces
+itself only once you are already standing on a seat pad.
 
-It deliberately does not take focus or release the pointer lock — it is a reference
-you read while still walking, not a dialog — which is why it carries its own closing
-instruction rather than a close button nobody could click while the pointer is
-captured.
+Two earlier attempts are recorded here so they are not rebuilt. A **card shown
+unasked on a first visit** put a popup between the viewer and the room they had just
+walked into. A **button to open that card on demand** was still a bordered box in the
+corner of a film. Text is the form that interrupts nothing, and it matches the
+convention used by the dance wheel's "release to cancel" label and the floating chat
+transcript: no background, no border, low opacity, `text-shadow` for legibility over
+a bright frame.
+
+`pointer-events-none`, because it is a label rather than a control — so it never
+competes with the scene for the cursor and does not care whether the pointer is
+locked. Labels are one word each for the same reason: anything longer wraps into the
+picture. The caveats that would otherwise sit under them are delivered where they
+matter instead — `SitPrompt` names the seat requirement as you approach one, and
+`useDanceMenu` toasts the real reason when it refuses.
 
 `Enter` exists because the keyboard is shared with the avatar. The chat field
 cannot hold focus by default — `WASD` has to reach the player — and while walking
