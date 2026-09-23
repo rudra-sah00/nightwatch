@@ -240,6 +240,38 @@ Transparent overlay (no background) rendered over the video when the sidebar is 
 | `useWatchPartyChat` (UI) | `chat/hooks/use-watch-party-chat.ts` | Local UI state: input value, emoji picker visibility, auto-scroll on new messages, typing indicator signaling with 3s debounce, Enter-to-send. |
 | `useChatScroll` | `chat/hooks/use-chat-scroll.ts` | Scrolls to bottom on initial render. |
 
+### Reading older messages
+
+Live chat travels over RTM; the backlog is a Redis list served by
+`GET /:id/messages`. "Load more" pages on **`beforeId`** — the id of the oldest
+message the client holds — not on a count, and three separate bugs are why:
+
+- **The count was never read.** It came from calling the state setter with an
+  updater that captured `prev.length` and returned `prev` unchanged. React runs an
+  updater when it processes the queue, not when it is called, so the value was read
+  after the request had already gone out: normally `0`. Load-more asked for the
+  newest page, every time. The list is now mirrored into a ref from an effect, so
+  reads are of what is actually rendered.
+- **An offset from the end of an append-only list is not a cursor.** Anything sent
+  while the request was in flight shifted the window, so the page overlapped what
+  the client already had and came back short after de-duplication.
+- **The client caps its list**, so past the cap `messages.length` stopped growing
+  while the true offset kept growing — every page was then fully de-duplicated away
+  and load-more did nothing at all for the rest of the party.
+
+The backend still honours the numeric `before` for older clients;
+`ChatService.getMessages` prefers `beforeId` and locates it with one bounded read,
+since the backlog is capped at 500.
+
+The 200-message cap also **grows by whatever history is loaded**. It trims the
+front of the list, which is right for the live tail and wrong for scrollback:
+loading 40 older messages and then receiving one new line ran the trim and threw
+all 40 away, so history vanished the moment anybody spoke.
+
+The notification chime is one reused `Audio` element, and both the DOM visibility
+check and playback happen *outside* the state updater — an updater must be a pure
+function of its argument, and React may call it more than once.
+
 ## Room Hooks
 
 ### useWatchParty
@@ -296,7 +328,16 @@ an enabled control that silently fails.
 
 This used to be written inline in `ActiveWatchParty`, `use-watch-party-sidebar` and
 `WatchPartySettings`, and the copies had drifted — only one treated the host as
-always-permitted.
+always-permitted. One more copy survived in `use-active-watch-party`, which is what
+sets `canDraw` on the `SketchContext`: it agreed with the resolver for today's
+values, which is the worst kind of duplicate, since the sidebar decided whether to
+*show* the sketch tab from the shared resolver while the canvas decided whether to
+*accept input* from its own copy. That one is gone too.
+
+The host-only permission mutations in `WatchPartySettings` also check `isHost`
+themselves rather than relying on the markup that hides them. The backend is the
+boundary and refuses a non-host; the local guard is so a guest cannot reach a
+control that could only ever fail and be shown an error for it.
 
 ### Where each permission is enforced
 
@@ -355,14 +396,40 @@ network fault.
 Manages room creation, join requests, approval polling (Socket.IO for pending state with HTTP polling fallback), and leaving. Key flows:
 - **Pending state polling**: Opens a temporary Socket.IO connection that listens for `JOIN_RESULT` events while the request is pending. Falls back to periodic HTTP polling if the socket connection fails, ensuring guests are never stuck in a pending state.
 - **`requestJoin`**: POST to `/api/rooms/:id/join`, handles `pending` (stores guest token) and `joined` (normalizes URLs, sets room state).
-- **`leaveRoom`**: Broadcasts `PARTY_CLOSED` via RTM if host, then calls REST leave endpoint.
+- **`leaveRoom`**: A host broadcasts `PARTY_CLOSED`; anybody else broadcasts RTM
+  `MEMBER_LEFT` with their own id. Both go out *before* the REST call, because the
+  client navigates away as soon as it resolves and an unsubscribed RTM channel
+  publishes nothing. See *How a departure propagates* below.
+
+### How a departure propagates
+
+Three independent signals, because no single one of them is reliable:
+
+| Signal | Covers | Weakness |
+|---|---|---|
+| RTM `MEMBER_LEFT`, from the leaver in `useWatchPartyLifecycle.leaveRoom` | everyone, guests included | fire-and-forget, sent while the client is navigating away |
+| Socket.IO `MEMBER_LEFT` / `MEMBERS_UPDATED`, from `MembershipService` | authenticated members | a guest's socket is not in `room:<id>`, so it never reaches them |
+| Agora presence `REMOTE_LEAVE` / `REMOTE_TIMEOUT` / batched `INTERVAL` | everyone | only sets `disconnected`; a dropped socket surfaces as a timeout, whenever Agora notices |
+
+Until 2026-09-23 only the third existed. Nothing in the frontend emitted
+`MEMBER_LEFT` and nothing listened for the backend's socket events, which the
+server had been emitting to `room:<id>` all along — so a guest pressing Leave was
+announced only by Agora presence, and in the 3D theatre their avatar stayed sitting
+in its chair while their seat claim outlived them.
+
+All three paths are idempotent and converge on the same roster, so arriving
+together costs nothing. The socket path folds the server's list in with
+`mergeMembers`, which keeps local `disconnected` flags: the server does not know
+about that flag, so replacing the list verbatim would resurrect a dead tab as
+present and put its avatar back in a seat.
 
 ### useWatchPartyMembers
 
 `room/hooks/useWatchPartyMembers.ts`
 
 Manages membership: approve/reject/kick via REST + RTM broadcast. Features:
-- **Auto-kick**: Host starts a 2-minute grace timer when a guest's RTM presence drops. If they don't reconnect, they're auto-kicked.
+- **Auto-kick**: Host starts a 2-minute grace timer when a guest's RTM presence drops. If they don't reconnect, they're auto-kicked. The timer re-checks that this client is *still* the host before firing — two minutes is long enough for that to have changed, and the backend would refuse the kick anyway.
+- **`JOIN_APPROVED` carries the post-approval roster.** It used to send the room from *before* the member was added, so the approved guest's own copy did not list them — and every capability resolves through `resolveMemberPermissions`, which denies everything to a non-member. Until `MEMBER_JOINED` arrived they had no composer, no sketch, no soundboard, and did not appear in their own participant list.
 - **Socket.IO listener**: Host receives `PENDING_MEMBERS_UPDATED` events for real-time join request notifications.
 - **Permission updates**: Listens for `LOCAL_PERMISSIONS_UPDATED` and `LOCAL_MEMBER_PERMISSIONS_UPDATED` CustomEvents from the settings panel.
 - **RTM handler**: Processes `MEMBER_JOINED`, `MEMBER_LEFT`, `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`.
@@ -670,6 +737,38 @@ Defined in `room/types/rtm-messages.ts` as a discriminated union:
 | Permissions | `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`, `CONTENT_UPDATED` |
 | Stream | `STREAM_TOKEN` |
 
+### The local event bus dispatches once
+
+`room/services/rtm-events.ts` bridges incoming RTM messages to local subscribers.
+It used to make a second pass for `INTERACTION` — "also dispatch to the generic
+INTERACTION listener" — but the generic pass already matched it: the message's own
+`type` **is** `'INTERACTION'`, so both passes walked the same Set and every
+subscriber ran twice.
+
+That was audible, not theoretical. `use-soundboard` reacts to each event by
+stopping whatever remote clip is playing and starting a new one, so one soundboard
+press played, cut itself off a few milliseconds in, and restarted. The emoji layer
+survived only because `use-floating-emojis` de-duplicates on `messageId`, which
+quietly turned a real bug into a hidden one.
+
+### Presence: four event types, not two
+
+`media/lib/presence.ts` maps an Agora RTM presence event onto JOIN/LEAVE
+membership changes. `useAgoraRtm` only hands each result to its `onPresence`
+callback, so the mapping is pure and unit-tested.
+
+| Event type | Meaning |
+|---|---|
+| `REMOTE_JOIN` | one user arrived |
+| `REMOTE_LEAVE` / `REMOTE_TIMEOUT` | one user left. **A dropped socket is a timeout**, and that is the commonest way anybody leaves |
+| `SNAPSHOT` | delivered once on subscribe, listing everyone already in the channel |
+| `INTERVAL` | batched join/leave/timeout lists, sent **instead of** the per-user events when the channel is busy |
+
+The last two were dropped. Without `SNAPSHOT` a joining client learned about
+existing members only when they next spoke or moved — a silent member did not exist
+at all, and in the 3D theatre their chair stood empty. Without `INTERVAL` a client
+in batched mode sees no departures whatsoever.
+
 ## REST API Endpoints
 
 All calls go through `apiFetch` (cookie-authenticated). Split by concern under
@@ -685,6 +784,43 @@ stays the import path for the ~16 modules that already use it:
 | `rest/chat.api.ts` | `messages` |
 | `rest/soundboard.api.ts` | `/api/soundboard`, `/api/soundboard/search` |
 | `rest/client.ts` | Shared `{ error }` folding — internal, not re-exported |
+
+### What the server guarantees
+
+Lives in `nightwatch-backend/src/modules/watch-party`. Four rules the frontend
+relies on and that used to be enforced inconsistently or not at all:
+
+- **A guest token is scoped to one room.** `authMiddleware` has always recorded the
+  token's `roomId` "to prevent guests from accessing resources outside their
+  designated room", and only the websocket handler ever compared it — so a guest JWT
+  for `ABC123` authenticated against every `/api/rooms/XYZ789/*` endpoint and each
+  controller was left to catch that on its own. `requireGuestRoomScope` now runs
+  after every auth middleware that can admit a guest, on every route except
+  `POST /:id/join` — a stale token is a legitimate identity for joining elsewhere,
+  and that route issues a fresh one.
+- **One member cap.** `resolveMaxMembers(room)` in `lib/permissions.ts`, clamped to
+  `MAX_ROOM_MEMBERS`. Three places held their own answer before: the lobby
+  advertised `isFull` from a private constant of 10, approval enforced a different
+  private constant, and the permissions schema accepted a `maxMembers` of up to 50.
+  A host who set 20 got a lobby that called the room full at 10 and an approval path
+  that admitted 20 — into a theatre with ten chairs.
+- **A content switch preserves what it does not state.** The "next episode" request
+  carries a title plus season and episode; the server resolves the rest. Those
+  fields were declared required on `UpdateContentInput`, the controller cast the
+  parsed body to it, and `RoomService.updateContent` assigned them straight onto the
+  room — so an omitted `contentId` was written as `undefined` and the party kept
+  playing while no longer knowing what it was playing. The cast is gone, the type is
+  honest, and absent fields are preserved.
+- **Chat expires with its room.** `ChatService.addMessage` reset the backlog's TTL to
+  a fresh six hours on every message, so a room five hours into its life left its
+  chat behind for another six, and a party with steady chat renewed the key
+  indefinitely. It now matches the room key's remaining TTL, the way
+  `atomicRoomUpdate` already did.
+
+Member names are also stripped of markup at the schema (`JoinPartyRequestSchema`).
+React escapes on render so this was never a browser XSS, but the name is echoed into
+the room document, RTM messages and the 3D avatar labels, and chat was already
+sanitised while names were not.
 
 None of these throw. A watch party is a live session with other people in it, so the
 right response to a failed `kick` or `syncPartyState` is a toast, not an unmounted
@@ -732,12 +868,27 @@ singleton and a set of stateless fetch wrappers have nothing in common but the w
 | Resource | Cap/Strategy | Location |
 |----------|--------------|----------|
 | Sketch actions | Max 200, FIFO eviction | `SketchContext.tsx` |
-| Chat messages | Max 200, FIFO eviction | `useWatchPartyChat.ts` |
+| Chat messages | Max 200 live tail, FIFO eviction; the cap grows by whatever history "load more" prepends, so read scrollback is not trimmed away | `useWatchPartyChat.ts` |
+| Chat chime | One reused `Audio` element per tab, rewound rather than reconstructed | `useWatchPartyChat.ts` |
 | Remote cursors | Pruned every 5s (stale > 5s removed); broadcast throttled to ~10fps | `use-sketch-overlay.ts` |
 | Floating emojis | Auto-remove after 4.5s animation | `use-floating-emojis.ts` |
+| Laser strokes | One 2s timer **per stroke**, keyed on the set of laser ids. Depending on the whole action list re-ran the effect ~60×/s while anybody was drawing and cleared its own pending timer, so a laser never expired until the room went still | `use-sketch-overlay.ts` |
 | Soundboard audio | Dedicated ref per source (local + remote) | `use-soundboard.ts` |
+| Avatar materials | The identity material is cloned per avatar and **disposed on unmount** (`disposeAvatarInstance`). The glb's shared geometry and materials are deliberately left alone — the GLTF cache and every other avatar still use them | `theatre/lib/avatar-instance.ts` |
 | Gesture detection | Disabled by default (opt-in via `enabled` prop) | `useGestureDetection.ts` |
 | Particle reactions | Self-terminating rAF loop, single instance | `SketchOverlay.tsx` |
+
+### Accessibility of the two hand-rolled modals
+
+The leave confirmation and the settings panel are overlay divs, not a dialog
+primitive, and neither trapped focus: Tab walked out onto the sidebar buttons and
+player controls behind the backdrop, so a keyboard user could operate the party they
+had just been asked whether to leave. `hooks/use-modal-focus.ts` supplies the three
+things they were missing — an initial focus target, Tab containment in both
+directions (including pulling focus back in when it has escaped), and Escape — plus
+focus restoration to whatever opened the dialog. The backdrop itself is a real
+`<button>` rather than a div with a click handler, `aria-hidden` because it
+duplicates the panel's own cancel control.
 
 ### Render Optimization
 

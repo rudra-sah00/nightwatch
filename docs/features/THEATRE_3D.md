@@ -91,7 +91,11 @@ manifest reports `animations.clipsEmbedded: true`.
 Two export traps worth remembering:
 
 - **Draco must be off for the avatar.** It can drop joint/weight attributes on
-  skinned meshes. Textures still go through WebP, which is where the size win is.
+  skinned meshes. Textures go through **KTX2**, which is where the size win is —
+  this said WebP until 2026-09-23, from before the KTX2 migration, and §3's own
+  `gltf-transform` command below already said `--texture-compress ktx2`. §4b
+  explains why KTX2 and not WebP: WebP shrinks the download but decodes to `RGBA8`
+  on GPU upload, so it does nothing for texture memory.
 - **`export_apply` must be `false`.** Applying modifiers bakes away the armature
   and silently produces an unrigged mesh.
 
@@ -436,9 +440,49 @@ holds both control roles.
 
 ### Sit interaction
 
-**Every seat starts empty.** Nobody is auto-seated, ever — not the host, not
-the first joiner. A watch party with one person shows one avatar standing and
-ten visibly empty chairs, and that person may sit anywhere they like.
+**Everyone is seated on entry.** This is the opposite of what this document said
+until 2026-09-23, and the reversal was a product decision: `SPAWN` is on the rear
+platform *behind both rows*, so an unseated arrival's first frame of a cinema is
+the backs of other people's heads with the picture below eye line. Walking is
+something you then choose to do, by pressing `E` to stand.
+
+Which chair is `pickAutoSeat(userId, seatMap)` — the first free seat in a
+per-user order derived from the id (`autoSeatOrder`). Derived rather than fixed
+because a fixed preference list would have every simultaneous arrival reach for
+`A1`, lose the contest in turn, and be visibly bounced out of the same chair
+before retrying. It is a courtesy on arrival, not a rule, and it stops applying
+once you have stood up of your own accord or once the room is genuinely full.
+
+**Seat state lives above the renderer.** `useSeatOccupancy` is mounted by
+`WatchPartyVideoArea`, not by `TheatreScene`, because a claim is party state and
+the scene is unmounted the whole time the view mode is `2d`. Owning it inside the
+scene caused every bug in the 2D↔3D round trip: your own seat was destroyed on
+the way out, nothing ever broadcast `SEAT_CLAIM null` so peers kept your claim
+(and the earliest-timestamp rule made that chair *untakeable*), and everyone
+else's claims went stale while you were away. Nothing in the hook touches
+three.js and `layout.ts` is dependency-free constants, so this costs the 2D
+bundle arithmetic and no renderer.
+
+A **walking** position has no such home — it is ephemeral and 60 Hz — so
+`WatchPartyVideoArea` holds it in a ref and passes it down (`theatre/lib/stance.ts`
+is now just the type). Same owner as the claim, deliberately: "where I am in the
+room" then has exactly one lifetime, and it is the party's rather than the
+renderer's. It was a module-level singleton first, which also survives a mode
+switch, but that made the lifetime depend on webpack module identity instead of on
+a React tree a test can mount and assert.
+
+`TheatreScene` resolves its entry point once per mount, in priority order:
+
+1. **the seat you hold** — camera at that seat's own eye anchor, body at the seat,
+   so a returning viewer opens their eyes in the chair. Seeding from the spawn slot
+   and letting `useSeatedCamera` lerp there is what made a re-entry *look* like a
+   reset even when the claim had survived: for the first half second you were back
+   behind both rows, watching the room slide past.
+2. **the remembered standing position and facing.**
+3. **your spawn slot**, which is only ever right the first time.
+
+Without any of it, `V` twice put you back on the rear platform however far you had
+walked — every single time, which is the form of the bug that gets noticed.
 
 Seat state is a `Map<SeatId, { userId, at }>` held independently by **every**
 client (`theatre/lib/seat-claims.ts`, driven by `use-seat-occupancy.ts`), not by
@@ -470,11 +514,18 @@ Flow:
 2. Nearest **free** seat's pad brightens and a `Press E to sit` prompt appears
 3. `E` → broadcast `SEAT_CLAIM` with the seat id and `at`
 4. Every client, including the claimant, applies the deterministic rule. A
-   claimant that loses is bounced back to standing
+   claimant that loses is bounced back to standing — and if the seat it lost was
+   the automatic one, the next free seat in its own order is tried, so a
+   contested entry does not leave people standing at random
 5. Disable controller, play `SitDown`, lerp avatar to the seat anchor
 6. Camera transitions from third-person follow to a seated near-first-person
    view facing the screen
-7. `E` again → stand, seat returns to `null`, avatar is placed back on its pad
+7. `E` again → stand, seat returns to `null`, and the physics body is moved onto
+   that seat's `SEATPAD_<id>`. That last step is load-bearing now that everyone
+   arrives seated: the walk controller is off while sitting, so the capsule is
+   still wherever it was when you sat down, which for most people is the spawn
+   slot they have never walked away from. Standing without it teleported you
+   behind both rows.
 
 Seat pad tint encodes state, so the room reads at a glance:
 
@@ -494,6 +545,23 @@ excludes `disconnected` members). A seat held by someone no longer in the room i
 worse than a stale avatar, because the deterministic rule makes it
 **untakeable** — a ghost claim carries an early timestamp, so every later claim
 on that chair loses to it and the seat stays reserved for somebody who left.
+
+There are now three independent signals that someone has gone, because no single
+one of them is reliable:
+
+| Signal | Who it covers | Weakness |
+|---|---|---|
+| RTM `MEMBER_LEFT`, broadcast by the leaver in `useWatchPartyLifecycle.leaveRoom` | everyone, including guests | fire-and-forget, and sent while the client is navigating away |
+| Socket.IO `MEMBER_LEFT` / `MEMBERS_UPDATED` from `MembershipService` | authenticated members | a guest's socket is not in `room:<id>`, so it never reaches them |
+| Agora presence `REMOTE_LEAVE` / `REMOTE_TIMEOUT` | everyone | only sets `disconnected`; a dropped socket surfaces as a timeout, whenever Agora notices |
+
+Until 2026-09-23 only the third existed: nothing in the frontend emitted
+`MEMBER_LEFT` and nothing listened for the backend's socket events, so a guest
+pressing Leave left a body sitting in a chair. All three paths are idempotent and
+converge on the same result, so arriving together costs nothing. The socket path
+folds the server's roster in with `mergeMembers`, which keeps local
+`disconnected` flags — replacing the list verbatim would resurrect a dead tab as
+present and put its avatar back in a seat.
 
 A member who joins late never heard the claims that already fired, so each
 sitting client re-asserts its **own** claim on `MEMBER_JOINED`, re-sending the
@@ -555,9 +623,11 @@ saves bandwidth and prevents desync artefacts on the step.
 
 | Concern | Decision |
 |---|---|
-| Transform broadcast rate | **10 Hz**, matching the proven cursor throttle in `use-sketch-overlay.ts` |
-| Remote smoothing | Interpolation buffer — render remote avatars ~100 ms in the past, interpolate between snapshots |
+| Transform broadcast rate | **8 Hz** (`THEATRE_NET.SEND_HZ`). `layout.ts` and `interpolation.ts` are the source of truth for every figure in this table; this said 10 Hz until 2026-09-23, from the era when it was matched to the cursor throttle in `use-sketch-overlay.ts` |
+| Remote smoothing | Interpolation buffer, rendering remote avatars **160 ms** in the past (`INTERP_DELAY_MS`) and interpolating between snapshots. It must comfortably exceed the 125 ms send interval or the buffer runs dry between packets |
+| Liveness | A forced pose every **2 s** (`HEARTBEAT_MS`) pushes a motionless avatar through the dead band, so a stationary player is visible and a late joiner sees everyone within one heartbeat with no request/reply handshake |
 | Packet gaps | Dead reckoning from last known velocity |
+| Staleness sweep | **30 s** (`STALE_MS`), a connection-loss fallback only — normal departures come from membership. It must exceed `HEARTBEAT_MS` by a wide margin or idle players are culled while still present |
 | Seat authority | **No arbiter.** Claims are broadcast and applied optimistically; conflicts resolve by a deterministic, order-independent rule on every client (§5). |
 | Movement authority | **Client-authoritative.** No cheating incentive in a watch party; authoritative server movement is unjustified complexity. |
 
@@ -575,8 +645,11 @@ order-independent rule gets the same convergence with neither — see §5.
 | Event | Behaviour |
 |---|---|
 | RTM presence `JOIN` | Spawn avatar at spawn point |
-| RTM presence `LEAVE` | Despawn avatar, host releases their seat |
+| RTM presence `LEAVE` | Member flagged `disconnected`, which drops them from `presentMemberIds`; every client's reconcile pass despawns the avatar and frees the seat. No client waits for the host to do it |
+| RTM / Socket.IO `MEMBER_LEFT` | Same, immediately, without waiting for Agora to notice |
 | Guest joins | Each seated client re-asserts its own claim, with the original timestamp |
+| Enter 3D | Camera and body placed from: the seat you hold, else the remembered standing position, else your spawn slot. Unseated and undecided, you are seated by `pickAutoSeat` |
+| Leave 3D for 2D | Nothing is released. The claim and the stance are both owned by `WatchPartyVideoArea`, above the renderer |
 | Host disconnect (existing 60 s grace) | Seats keep resolving — no client depends on the host to arbitrate |
 
 ---
@@ -731,40 +804,75 @@ Requirements and gotchas:
 
 ---
 
-## 10. Proposed File Layout
+## 10. File Layout
+
+> This was a *proposal* and had drifted into fiction: it listed
+> `use-seat-authority.ts` (a design that was rejected — §5),
+> `use-spatial-audio.ts` and `use-screen-light.ts` (never built), `SpeechBubble.tsx`
+> (the file is `AvatarLabel.tsx`, and it renders both the name tag and the bubble)
+> and `use-animation-state.ts` (it is `use-avatar-animation.ts`), while omitting
+> most of what exists. Below is the inventory as built.
 
 ```
 src/features/watch-party/
-├── theatre/                          ← new, self-contained
+├── theatre/                          ← self-contained, dynamically imported
 │   ├── components/
-│   │   ├── TheatreScene.tsx          Canvas root, lighting rig, post-processing
+│   │   ├── TheatreScene.tsx          Canvas root, dpr, entry stance, SceneInterior
 │   │   ├── TheatreRoom.tsx           generated shell + starfield
-│   │   ├── TheatreScreen.tsx         video plane + VideoTexture
+│   │   ├── TheatreScreen.tsx         video plane + VideoTexture + screen light
 │   │   ├── TheatreSeating.tsx        generated chairs + seat pads
 │   │   ├── TheatreColliders.tsx      static boxes from layout.ts
-│   │   ├── LocalAvatar.tsx           controlled avatar
+│   │   ├── TheatreLighting.tsx       house rig, dims when seated
+│   │   ├── FrameLimiter.tsx          drives the loop (frameloop="never")
+│   │   ├── LocalPlayer.tsx           Rapier capsule the camera rides
+│   │   ├── LocalAvatar.tsx           own body, shown only when the camera pulls back
 │   │   ├── RemoteAvatar.tsx          interpolated peer avatar
-│   │   └── SpeechBubble.tsx
+│   │   ├── PassiveAvatars.tsx        members who never enabled 3D, seated
+│   │   ├── AvatarLabel.tsx           name tag + speech bubble
+│   │   ├── DanceWheel.tsx            DOM overlay, outside the Canvas
+│   │   └── TheatreDownloadToast.tsx  opt-in asset download progress
 │   ├── hooks/
 │   │   ├── use-video-texture.ts
-│   │   ├── use-screen-light.ts       average-colour light driver
-│   │   ├── use-avatar-controls.ts    WASD + E, Rapier controller
-│   │   ├── use-animation-state.ts    AnimationMixer crossfade machine
+│   │   ├── use-avatar-controls.ts    WASD, Rapier character controller
+│   │   ├── use-sit-interaction.ts    E, proximity against the seat pads
+│   │   ├── use-seat-occupancy.ts     claims — MOUNTED ABOVE THE SCENE, see §5
+│   │   ├── use-seated-camera.ts      per-seat head cone
+│   │   ├── use-pointer-look.ts       pointer-locked mouse look while walking
+│   │   ├── use-dance-menu.ts         R wheel; use-dance-camera / use-dance-space
+│   │   ├── use-avatar-animation.ts   AnimationMixer crossfade machine
 │   │   ├── use-theatre-network.ts    AVATAR_TRANSFORM broadcast + interp buffer
-│   │   ├── use-seat-authority.ts     host-side seat arbitration
-│   │   └── use-spatial-audio.ts
+│   │   ├── use-theatre-assets.ts     manifest; use-theatre-gltf, use-theatre-preload
+│   │   ├── use-speech-bubbles.ts
+│   │   └── use-view-mode-hotkey.ts   V
 │   ├── lib/
-│   │   ├── layout.ts                 seat table + room constants from §2
-│   │   ├── geometry/                 the room itself — no asset
-│   │   │   ├── batch.ts              GeometryBatcher: merge per material
-│   │   │   ├── materials.ts          shared flat palette
-│   │   │   ├── auditorium.ts         shell, walls, stairs, speakers, rear wall
-│   │   │   ├── recliner.ts           the chair, x8 into one batch
-│   │   │   └── starfield.ts          3 instanced tiers, 630 stars
-│   │   └── interpolation.ts          snapshot buffer, dead reckoning
+│   │   ├── layout.ts                 seats, room constants, auto-seat order
+│   │   ├── seat-claims.ts            the deterministic, order-independent rule
+│   │   ├── stance.ts                 walking position across a 2D↔3D switch
+│   │   ├── roster.ts                 presence + names from room.members
+│   │   ├── view-mode.ts              zustand: mode, character, download phase
+│   │   ├── interpolation.ts          snapshot buffer, dead reckoning, THEATRE_NET
+│   │   ├── animation.ts              clip names + dance list
+│   │   ├── avatar-instance.ts        SkeletonUtils clone, identity colour, dispose
+│   │   ├── lighting.ts               the rig's constants
+│   │   ├── asset-download.ts         retry/backoff/abort + byte accounting
+│   │   ├── ktx2.ts                   loader singleton
+│   │   ├── keyboard.ts               isTypingTarget
+│   │   ├── dance-rules.ts            wheel maths, clearance rule
+│   │   └── geometry/                 the room itself — no asset
+│   │       ├── batch.ts              GeometryBatcher: merge per material
+│   │       ├── materials.ts          shared flat palette
+│   │       ├── auditorium.ts         shell, walls, stairs, speakers, rear wall
+│   │       ├── recliner.ts           the chair, ×10 into one batch
+│   │       └── starfield.ts          3 instanced tiers, 630 stars
+│   ├── api.ts                        GET /api/theatre/assets
 │   └── types.ts
-└── room/types/rtm-messages.ts        ← extend union (§6)
+├── components/WatchPartyVideoArea.tsx  ← owns useSeatOccupancy (§5)
+└── room/types/rtm-messages.ts          ← AVATAR_TRANSFORM, SEAT_CLAIM (§6)
 ```
+
+Not built: `use-screen-light.ts` as a separate hook (the average-colour driver
+lives in `TheatreScreen.tsx`), `use-spatial-audio.ts`, `SitDown`/`StandUp` and
+dance clips. See §1b.
 
 No `public/models/`. The room is generated; the character models are fetched from
 R2 at the URLs the backend publishes (§3).
@@ -790,7 +898,7 @@ Deliberately front-loads risk. Each phase is independently verifiable.
 | **3** | Rapier character controller, `WASD`, step traversal | Movement feels good, no clipping |
 | **4** | Animation state machine with crossfades | No hard animation cuts |
 | **5** | Networked avatars over RTM with interpolation | Two browsers, smooth remote movement |
-| **6** | Seat claims with host authority, `E` to sit, camera transition | No double-occupancy under concurrent claims |
+| **6** | Seat claims, `E` to sit, camera transition. **No host authority** — that was the original plan and was rejected; see §5 | No double-occupancy under concurrent claims |
 | **7** | Spatial voice panning | Direction is audibly correct |
 | **8** | Chat bubbles, emoji repositioning | — |
 | **9** | Look-dev: textures, materials, final post | — |
@@ -837,8 +945,11 @@ Unresolved. Do not treat as decided.
 6. **Late joiner seat contention** — if two guests claim the same seat within one
    RTM round trip, host arbitration resolves it, but what does the loser see?
    Needs a UX answer, not just a protocol one.
-7. **Idle timeout** — should an avatar that never sits be auto-seated? Standing
-   in the aisle for a 2h movie is a plausible but odd state.
+7. ~~**Idle timeout** — should an avatar that never sits be auto-seated?~~
+   **RESOLVED — everyone is seated on entry instead.** No timeout is needed if the
+   default is a chair rather than the aisle. Standing is now the state you choose
+   with `E`, and once chosen it is respected for the rest of the session — nobody
+   is pulled into a seat mid-stride. See §5.
 
 ---
 
