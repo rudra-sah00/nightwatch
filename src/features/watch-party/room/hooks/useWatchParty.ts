@@ -5,10 +5,12 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/providers/auth-provider';
+import { useSocket } from '@/providers/socket-provider';
 // Modular Hooks
 import { useWatchPartyChat } from '../../chat/hooks/useWatchPartyChat';
 import { useAgoraRtm } from '../../media/hooks/useAgoraRtm';
 import { useAgoraRtmToken } from '../../media/hooks/useAgoraRtmToken';
+import { isRtmMessageAllowed } from '../permissions';
 import {
   dispatchRtmMessage,
   getPartyMessages,
@@ -57,6 +59,26 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   requestStatusRef.current = requestStatus;
 
   /**
+   * Tear down this client's party session and leave the page.
+   *
+   * Shared by the RTM `PARTY_CLOSED` broadcast and the Socket.IO
+   * `watch-party:closed` event below, because either can arrive first and
+   * whichever does must produce the same result. Idempotent: a second call with
+   * the room already cleared is a no-op apart from a duplicate toast, which
+   * `sonner` collapses by id.
+   */
+  const closeParty = useCallback(() => {
+    toast.info(t('partyFinished'), { id: 'party-closed' });
+    setRoom(null);
+    setIsConnected(false);
+    setRequestStatus('idle');
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('guest_token');
+    }
+    router.push(userId ? '/home' : '/continue');
+  }, [router, userId, t]);
+
+  /**
    * Whether any authoritative party state has reached this client yet.
    *
    * Drives the `SYNC_REQUEST` retry below, so it is written on EVERY state
@@ -78,6 +100,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   }, []);
 
   const { user } = useAuth();
+  const { socket } = useSocket();
   // 0. Agora RTM Signaling
   const currentUserName =
     room?.members.find((m) => m.id === userId)?.name ||
@@ -100,7 +123,33 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     token: rtmToken.token || '',
     channel: rtmToken.channel,
     userId: rtmToken.uid,
-    onMessage: (msg) => {
+    onMessage: (msg, senderId) => {
+      /*
+        Receiver-side permission enforcement.
+
+        Sketch and soundboard traffic never touches our backend — it is RTM
+        channel data, peer to peer, which is what makes the overlay feel
+        immediate. That left both permissions enforced only by whether the
+        sender's own UI offered the control: a guest with drawing switched off
+        could still publish `SKETCH_CLEAR mode:'all'` and wipe the host's canvas
+        for the whole party, and a guest barred from the soundboard could still
+        publish an `INTERACTION` that every client dutifully played.
+
+        For data that is never persisted the receiver is the right authority and
+        is as strong as a server check would be: every client already holds the
+        room's authoritative permissions, and a message all receivers drop has
+        left nothing behind. `senderId` is the Agora publisher id, so it is the
+        authenticated channel identity rather than a payload field a sender could
+        edit.
+
+        Chat is gated here too, on top of the server check in
+        `ChatService.addMessage`. The two stop different things: the server keeps a
+        muted guest out of the durable Redis backlog that late joiners read, and
+        this keeps the same line out of the live panel, which RTM would otherwise
+        deliver without the server ever seeing it.
+      */
+      if (!isRtmMessageAllowed(room, senderId, msg)) return;
+
       // Route messages to sub-hooks
       chat.handleIncomingRtmMessage(msg);
       members.handleIncomingRtmMessage(msg);
@@ -184,14 +233,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         }
 
         case 'PARTY_CLOSED': {
-          toast.info(t('partyFinished'));
-          setRoom(null);
-          setIsConnected(false);
-          setRequestStatus('idle');
-          if (typeof window !== 'undefined') {
-            sessionStorage.removeItem('guest_token');
-          }
-          router.push(userId ? '/home' : '/continue');
+          closeParty();
           break;
         }
       }
@@ -265,6 +307,53 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   */
   const syncRoomId = room?.id;
   const syncHostId = room?.hostId;
+
+  /*
+    Authoritative party closure, over Socket.IO.
+
+    RTM `PARTY_CLOSED` is how a host tells its guests it is ending the party, and
+    it is the fast path — but it is one fire-and-forget channel message sent
+    moments before the host's own client navigates away. A guest whose RTM
+    subscription was mid-reconnect simply never saw it, and sat in a party whose
+    Redis room the backend had meanwhile deleted: no state updates, no chat
+    history, every REST call 404ing, and no explanation on screen.
+
+    `watch-party:closed` is the server's own statement that the room is gone,
+    emitted from `MembershipService.leaveRoom` when the host leaves or the last
+    member goes. Socket.IO redelivers on reconnect, so it closes the gap the RTM
+    broadcast leaves.
+
+    Joining `room:<id>` is what makes this reachable at all: the only place that
+    ever emitted `watch-party:join_room` for an active party was the host-only
+    effect in `useWatchPartyMembers`, so no other member was in the server's
+    broadcast room and *none* of the server's party events — `MEMBERS_UPDATED`,
+    `MEMBER_LEFT`, `CONTENT_UPDATED`, `PERMISSIONS_UPDATED`, this one — could
+    reach them.
+
+    Authenticated members only. A guest's socket is opened by
+    `use-watch-party-client` before `requestJoin` has run, so it carries no
+    `guest_token` and the backend cannot verify it is a member of this room —
+    `watch-party:join_room` rejects it with `NOT_A_MEMBER`. Guests therefore still
+    depend on the RTM broadcast. Closing that gap means re-initialising the shared
+    socket with the guest token after approval, which is a change to the socket
+    provider used by friends and presence, not to watch party.
+  */
+  useEffect(() => {
+    if (!(socket && syncRoomId && userId) || userId.startsWith('guest')) return;
+
+    const join = () => socket.emit('watch-party:join_room', syncRoomId);
+    const onClosed = () => closeParty();
+
+    join();
+    socket.on('connect', join);
+    socket.on('watch-party:closed', onClosed);
+
+    return () => {
+      socket.off('connect', join);
+      socket.off('watch-party:closed', onClosed);
+      socket.emit('watch-party:leave_room', syncRoomId);
+    };
+  }, [socket, syncRoomId, userId, closeParty]);
 
   // Stream token auto-renewal: refresh at 3.5h to prevent 4h expiry
   useEffect(() => {

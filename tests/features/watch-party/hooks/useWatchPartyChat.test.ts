@@ -116,7 +116,49 @@ describe('useWatchPartyChat', () => {
       await result.current.sendMessage('Hi');
     });
 
-    expect(toast.error).toHaveBeenCalledWith('messageFailed');
+    // The server's own words win over the generic fallback, as the
+    // approve/reject/kick paths already do.
+    expect(toast.error).toHaveBeenCalledWith('Failed');
     expect(result.current.messages).toHaveLength(0); // Rolled back
+  });
+
+  /*
+    The server enforces `canChat` now, so the likeliest POST failure is a
+    host-imposed mute rather than a network fault. Reporting that as
+    "message failed" told the member to retry something that will never work.
+  */
+  it('surfaces a host-imposed mute instead of a generic failure', async () => {
+    vi.mocked(api.sendPartyMessage).mockResolvedValue({
+      error: 'Chat is disabled for you in this room',
+    });
+
+    const { result } = renderHook(() => useWatchPartyChat(defaultProps));
+
+    await act(async () => {
+      await result.current.sendMessage('Hi');
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(
+      'Chat is disabled for you in this room',
+    );
+    expect(result.current.messages).toHaveLength(0);
+  });
+
+  /*
+    A 2xx whose body lacked `message` — and carried no error string either — used to
+    leave the optimistic copy in the list forever under its `temp-` id, neither
+    confirmed nor rolled back. The invariant is whether the server stored anything.
+  */
+  it('rolls back when the server returns neither a message nor an error', async () => {
+    vi.mocked(api.sendPartyMessage).mockResolvedValue({});
+
+    const { result } = renderHook(() => useWatchPartyChat(defaultProps));
+
+    await act(async () => {
+      await result.current.sendMessage('Hi');
+    });
+
+    expect(toast.error).toHaveBeenCalledWith('messageFailed');
+    expect(result.current.messages).toHaveLength(0);
   });
 });

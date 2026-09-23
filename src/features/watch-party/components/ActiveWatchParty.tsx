@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
+import { resolveMemberPermissions } from '../room/permissions';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../room/types';
 import { useTheatrePreload } from '../theatre/hooks/use-theatre-preload';
 import { useViewModeHotkey } from '../theatre/hooks/use-view-mode-hotkey';
@@ -187,11 +188,7 @@ export function ActiveWatchParty({
         ? t('roles.guest')
         : t('roles.member'));
 
-  const canChatInParty =
-    isHost ||
-    (currentMember?.permissions?.canChat ??
-      room.permissions?.canGuestsChat ??
-      true);
+  const canChatInParty = resolveMemberPermissions(room, currentUserId).canChat;
 
   // ── Render ────────────────────────────────────────────────────────────────
   // 3D forces the sidebar closed and the tiles off, but WITHOUT mutating the
