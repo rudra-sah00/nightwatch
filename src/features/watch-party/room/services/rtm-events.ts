@@ -25,22 +25,26 @@ type RtmListener = (data: Record<string, unknown>) => void;
 const rtmListeners: Record<string, Set<RtmListener>> = {};
 
 /**
- * Internal: Dispatch an incoming RTM message to all local subscribers
+ * Internal: Dispatch an incoming RTM message to all local subscribers.
+ *
+ * One dispatch per message, and exactly one. There used to be a second pass for
+ * `INTERACTION` — "also dispatch to the generic INTERACTION listener" — but the
+ * generic pass above already matches it: the message's `type` IS `'INTERACTION'`,
+ * so `rtmListeners[eventType]` and `rtmListeners.INTERACTION` were the same Set
+ * and every subscriber was called twice.
+ *
+ * That was audible. `use-soundboard` reacts to each event by stopping whatever
+ * remote clip is playing and starting a new one, so a single soundboard press
+ * played, cut itself off after a few milliseconds, and restarted. The emoji layer
+ * survived it only because `use-floating-emojis` de-duplicates on `messageId`,
+ * which quietly turned a real bug into a hidden one.
  */
 export function dispatchRtmMessage(msg: RTMMessage) {
   const msgRecord = msg as unknown as Record<string, unknown>;
   const eventType = msgRecord.type as string;
-  if (rtmListeners[eventType]) {
-    rtmListeners[eventType].forEach((cb) => {
-      cb(msgRecord);
-    });
-  }
-  // Also dispatch to the generic "INTERACTION" listener if it's an interaction
-  if (eventType === 'INTERACTION' && rtmListeners.INTERACTION) {
-    rtmListeners.INTERACTION.forEach((cb) => {
-      cb(msgRecord);
-    });
-  }
+  const listeners = rtmListeners[eventType];
+  if (!listeners) return;
+  for (const cb of listeners) cb(msgRecord);
 }
 
 function subscribe(event: string, callback: RtmListener) {
