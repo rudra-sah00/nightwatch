@@ -1,5 +1,6 @@
 'use client';
 
+import { PerformanceMonitor, Stats } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Physics, type RapierRigidBody } from '@react-three/rapier';
 import type { RefObject } from 'react';
@@ -35,7 +36,6 @@ import {
   seatedAvatarPose,
   spawnFor,
 } from '../lib/layout';
-import { createStats } from '../lib/theatre-stats';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
 import { DanceWheel } from './DanceWheel';
@@ -49,7 +49,6 @@ import { TheatreLighting } from './TheatreLighting';
 import { TheatreRoom } from './TheatreRoom';
 import { TheatreScreen } from './TheatreScreen';
 import { TheatreSeating } from './TheatreSeating';
-import { StatsProbe, TheatreStatsHud } from './TheatreStatsHud';
 
 interface TheatreSceneProps {
   userId: string;
@@ -114,8 +113,8 @@ export function TheatreScene({
     enabled: true,
   });
 
-  const { peerIds, publishPose, samplePeer, peerCharacter, netStats } =
-    useTheatreNetwork({
+  const { peerIds, publishPose, samplePeer, peerCharacter } = useTheatreNetwork(
+    {
       userId,
       rtmSendMessage,
       character,
@@ -123,7 +122,8 @@ export function TheatreScene({
       // despawned, so a departure lands in 3D whichever membership signal fired.
       memberIds,
       enabled: true,
-    });
+    },
+  );
 
   // Maps a peer's chosen body onto one of the already-loaded models.
   const resolveCharacterModel = useCallback(
@@ -159,24 +159,27 @@ export function TheatreScene({
     hovered: number | null;
   }>({ open: false, origin: { x: 0, y: 0 }, hovered: null });
 
-  const stats = useRef(createStats());
-  useEffect(() => {
-    const id = setInterval(() => {
-      const n = netStats();
-      stats.current.lastPacketAt = n.lastPacketAt;
-      stats.current.packetHz = n.packetHz;
-      stats.current.rttMs = n.rttMs;
-      stats.current.peers = peerIds.length;
-    }, 200);
-    return () => clearInterval(id);
-  }, [netStats, peerIds.length]);
-
   const handlePose = useCallback(
     (pose: Pose) => {
       publishPose(pose);
     },
     [publishPose],
   );
+
+  /*
+    Resolution is now adaptive rather than a fixed ceiling.
+
+    1.5 was chosen as a compromise: the scene is fragment-bound (~12,000 triangles
+    lit by 16 point and area lights), so cost scales with pixels shaded, and dpr 2
+    on a Retina display renders 1.78x the pixels of 1.5. But a fixed cap
+    under-serves a machine that could afford 2 and still overwhelms a weak one.
+
+    `PerformanceMonitor` measures the real frame rate against the display's refresh
+    and reports a 0..1 `factor`, which is mapped onto a dpr range here. Quality is
+    only given up on hardware that has demonstrated it cannot hold the rate, and it
+    is given back when the load drops — walking out of a crowded room, say.
+  */
+  const [dpr, setDpr] = useState(1.5);
 
   if (isLoading) {
     return (
@@ -208,8 +211,7 @@ export function TheatreScene({
           This is the cheapest frame-time win available here and it costs no asset
           work.
         */
-        dpr={[1, 1.5]}
-        shadows
+        dpr={dpr}
         camera={{
           position: [spawn.x, spawn.y + STANDING_EYE_HEIGHT, spawn.z],
           fov: 60,
@@ -237,6 +239,22 @@ export function TheatreScene({
         }}
       >
         <FrameLimiter fps={60} />
+
+        {/* Frame-rate readout, from drei's stats.js panel. This replaces a
+            hand-rolled HUD: stats.js is the reference implementation, already
+            samples inside the render loop, and one fewer bespoke component is one
+            fewer thing to get the units wrong in — the custom probe read 0 fps for
+            a while because it trusted a delta the loop was feeding it in the wrong
+            unit. */}
+        <Stats />
+
+        {/* Adaptive resolution. Headless: it only reports, and `setDpr` applies.
+            `factor` runs 0..1 as measured frames approach the refresh rate, mapped
+            onto 1..2 so capable hardware gets MORE than the old fixed 1.5 and weak
+            hardware drops below it. */}
+        <PerformanceMonitor
+          onChange={({ factor }) => setDpr(Math.round((1 + factor) * 10) / 10)}
+        />
 
         {/* The screen is the primary light source (see TheatreScreen); this rig
             is the house lighting around it — ceiling downlights, sconces, cove
@@ -288,8 +306,6 @@ export function TheatreScene({
           />
         </Suspense>
 
-        <StatsProbe stats={stats} />
-
         <fog attach="fog" args={['#05060a', ROOM.maxZ, ROOM.maxZ + 8]} />
       </Canvas>
 
@@ -298,7 +314,6 @@ export function TheatreScene({
         origin={wheel.origin}
         hovered={wheel.hovered}
       />
-      <TheatreStatsHud stats={stats} />
       <SitPrompt seatMap={seatMap} mySeat={mySeat} />
     </div>
   );

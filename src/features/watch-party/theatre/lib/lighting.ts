@@ -88,10 +88,12 @@ export const HEMI_SKY = '#2a3550';
 export const HEMI_GROUND = '#1a1410';
 
 /**
- * The only shadow-casting light, by design.
+ * The key light. Formerly the scene's only shadow caster.
  *
- * `RectAreaLight` cannot cast shadows in three.js and point lights need a
- * cubemap (six passes), so contact shadows under avatars have to come from a
+ * Nothing casts shadows any more — see `TheatreLighting`. Kept for the record,
+ * because the reasoning still constrains any future attempt: `RectAreaLight`
+ * cannot cast shadows in three.js and point lights need a cubemap (six passes),
+ * so contact shadows under avatars could only ever have come from a
  * directional. THEATRE_3D.md §8 caps shadowed lights at two; one is enough.
  */
 export const KEY: LightLevel = { house: 1.05, dim: 0.34 };

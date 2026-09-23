@@ -93,7 +93,7 @@ describe('GeometryBatcher', () => {
     mat.dispose();
   });
 
-  it('freezes matrices and keeps the room out of the shadow pass', () => {
+  it('freezes matrices and stays out of the shadow pass entirely', () => {
     const mat = new MeshStandardMaterial();
     const batcher = new GeometryBatcher();
     batcher.box(mat, 1, 1, 1, 0, 0, 0);
@@ -101,7 +101,13 @@ describe('GeometryBatcher', () => {
 
     expect(mesh.matrixAutoUpdate).toBe(false);
     expect(mesh.castShadow).toBe(false);
-    expect(mesh.receiveShadow).toBe(true);
+    /*
+      Was `true`. The room received shadows from the single directional key light,
+      which no longer casts — a 1024x1024 depth pass over the whole room every frame
+      bought contact shadows under the avatars and nothing else. With nothing
+      casting, `receiveShadow` is a shader branch that can never produce anything.
+    */
+    expect(mesh.receiveShadow).toBe(false);
 
     disposeBuilt([mesh]);
     mat.dispose();

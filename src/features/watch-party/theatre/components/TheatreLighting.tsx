@@ -137,17 +137,20 @@ export function TheatreLighting({ seated, cinema }: TheatreLightingProps) {
       />
 
       {/* Shadow key: above the rear of the room aiming at the screen wall, so
-          avatars are lit from behind-above like a real projector throw. The
-          only shadow caster in the scene — see lib/lighting.ts. */}
+          avatars are lit from behind-above like a real projector throw.
+
+          No longer casts. It was the scene's only shadow caster, and a 1024x1024
+          depth pass over the whole room every frame bought contact shadows under
+          the avatars and nothing else — the room already never cast, only
+          received. Dropped deliberately: nobody entering a browser theatre is
+          looking for their own shadow, and this is the single largest per-frame
+          cost the scene had. */}
       <directionalLight
         ref={key}
         position={[1.5, ROOM.ceilingY - 0.2, ROOM.maxZ - 1.5]}
         target-position={[0, 0, SCREEN.z]}
         intensity={levelValue(KEY, initial)}
         color={KEY_COLOUR}
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
       />
 
       {/* Ceiling downlights, sconces, step and exit glow. */}

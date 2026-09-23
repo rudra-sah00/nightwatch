@@ -134,7 +134,7 @@ export class GeometryBatcher {
    *
    * Matrices are frozen: this geometry never moves, so leaving
    * `matrixAutoUpdate` on would recompute a world matrix per mesh per frame for
-   * nothing. The room receives shadows but never casts them, which keeps it out
+   * nothing. The room neither casts nor receives shadows, which keeps it out
    * of the shadow pass entirely.
    */
   build(): Mesh[] {
@@ -146,7 +146,9 @@ export class GeometryBatcher {
       if (!geometry) continue;
       const mesh = new Mesh(geometry, material);
       mesh.castShadow = false;
-      mesh.receiveShadow = true;
+      // Nothing casts any more, so receiving is a shader branch that can never
+      // produce anything. See TheatreLighting for why the key light stopped.
+      mesh.receiveShadow = false;
       mesh.matrixAutoUpdate = false;
       mesh.updateMatrix();
       meshes.push(mesh);

@@ -17,8 +17,13 @@ export function instantiateAvatar(source: Object3D): Object3D {
   const instance = cloneSkinned(source);
   instance.traverse((child) => {
     if (child instanceof SkinnedMesh) {
-      // shadows are per-instance state, not shared with the source
-      child.castShadow = true;
+      /*
+        Neither cast nor receive. The scene has no shadow-casting light any more,
+        so `castShadow` would flag the mesh for a depth pass that never runs —
+        harmless but misleading, and it comes straight back to life the moment
+        anyone re-enables `shadows` on the Canvas without meaning to.
+      */
+      child.castShadow = false;
       child.receiveShadow = false;
       // skinned bounds are wrong after cloning unless recomputed
       child.frustumCulled = false;
