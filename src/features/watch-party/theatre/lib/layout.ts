@@ -187,11 +187,7 @@ const SPAWN_SLOT_X = [0, 0.8, -0.8, 1.6, -1.6, 2.4, -2.4, 3.2] as const;
  * which is what ALL eight did before this existed.
  */
 export function spawnFor(userId: string): { x: number; y: number; z: number } {
-  let hash = 0;
-  for (let i = 0; i < userId.length; i += 1) {
-    hash = (hash * 31 + userId.charCodeAt(i)) | 0;
-  }
-  const slot = Math.abs(hash) % SPAWN_SLOT_X.length;
+  const slot = hashString(userId) % SPAWN_SLOT_X.length;
   return { x: SPAWN_SLOT_X[slot], y: SPAWN.y, z: SPAWN.z };
 }
 
@@ -589,9 +585,15 @@ export function seatedAvatarPose(seatId: SeatId): {
  * depending on who was looking. Assigning first also means a member keeps their
  * chair when they toggle 3D on and off, instead of the room reshuffling.
  *
- * Seats already claimed by someone in 3D are excluded: two avatars in one chair
- * looks worse than one person missing. Overflow beyond the ten seats is
- * dropped for the same reason.
+ * A member who HOLDS A CLAIM is drawn in that seat and nowhere else. This is what
+ * makes the 2D/3D switch invisible to everyone else: leaving 3D stops your pose
+ * traffic, so peers fall back to drawing you passively, and without this they
+ * would hand you some other free chair while the one you actually claimed sat
+ * empty and untakeable — one person rendered as two claims on the room. A claim
+ * outlives the renderer, so it is the authority here.
+ *
+ * Unclaimed members fill the remaining seats in order. Overflow beyond the ten
+ * seats is dropped rather than stacked two to a chair.
  */
 export function assignPassiveSeats(
   memberIds: readonly string[],
@@ -599,26 +601,82 @@ export function assignPassiveSeats(
   selfId: string,
   seatMap: Record<string, string | null>,
 ): readonly { id: string; seatId: SeatId }[] {
-  const taken = new Set(
-    Object.entries(seatMap)
-      .filter(([, occupant]) => occupant !== null)
-      .map(([seat]) => seat),
-  );
-  const free = SEAT_IDS.filter((s) => !taken.has(s));
+  /** userId -> the seat they have claimed. */
+  const claimed = new Map<string, SeatId>();
+  for (const [seat, occupant] of Object.entries(seatMap)) {
+    if (!occupant) continue;
+    if (!(SEAT_IDS as readonly string[]).includes(seat)) continue;
+    claimed.set(occupant, seat as SeatId);
+  }
+  const free = SEAT_IDS.filter((s) => !seatMap[s]);
 
   // Viewer-independent: sort every member, then hand out the free seats in order.
   const ordered = [...new Set(memberIds)].filter(Boolean).sort();
 
   const live = new Set(livePeerIds);
   const out: { id: string; seatId: SeatId }[] = [];
-  ordered.forEach((id, i) => {
-    if (i >= free.length) return; // no chair left for them
+  let next = 0;
+  for (const id of ordered) {
+    // A claim beats the deterministic fill, and costs none of the free slots —
+    // that seat was never in `free` to begin with.
+    const seatId = claimed.get(id) ?? free[next++];
+    if (!seatId) continue; // no chair left for them
     // Drawn elsewhere: self by LocalPlayer, live peers by RemoteAvatars. Their
     // slot is still consumed above so nobody else's chair moves.
-    if (id === selfId || live.has(id)) return;
-    out.push({ id, seatId: free[i] as SeatId });
-  });
+    if (id === selfId || live.has(id)) continue;
+    out.push({ id, seatId });
+  }
   return out;
+}
+
+/**
+ * The order this user tries seats in when they are seated automatically.
+ *
+ * Derived from the id, for two reasons. It must need no coordination — every
+ * client computes the same order for the same person, so a claim that arrives
+ * before the roster does still lands where everyone expects. And it must SPREAD:
+ * a fixed preference list would have every arrival reach for A1 first, so eight
+ * people entering together would contest one chair seven times over before
+ * settling, with seven of them visibly bounced out of it.
+ *
+ * Collisions still happen and are resolved the same way a manual claim is — by
+ * the deterministic rule in `seat-claims.ts`. This only makes them rare.
+ */
+export function autoSeatOrder(userId: string): readonly SeatId[] {
+  return [...SEAT_IDS].sort((a, b) => {
+    const ka = hashString(`${userId}:${a}`);
+    const kb = hashString(`${userId}:${b}`);
+    // Ties broken on the seat id so the order is total, never sort-unstable.
+    return ka === kb ? (a < b ? -1 : 1) : ka - kb;
+  });
+}
+
+/**
+ * The seat to sit this user in when they enter 3D and hold no seat, or null when
+ * the room is full.
+ *
+ * Every party member is seated on entry now — see docs/features/THEATRE_3D.md §5.
+ * Standing in the aisle is a state you choose by pressing `E`, not the state you
+ * arrive in, because arriving on the rear platform behind everybody is a worse
+ * first frame of a cinema than being in a chair facing the screen.
+ */
+export function pickAutoSeat(
+  userId: string,
+  seatMap: Record<string, string | null>,
+): SeatId | null {
+  for (const seat of autoSeatOrder(userId)) {
+    if (!seatMap[seat]) return seat;
+  }
+  return null;
+}
+
+/** Stable 32-bit string hash. Same one `spawnFor` uses. */
+function hashString(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
 }
 
 /** Clamp a yaw/pitch pair into a seat's allowed head cone. */

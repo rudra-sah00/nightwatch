@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
@@ -21,7 +21,9 @@ import {
   type PartyPlaybackBlockedDetail,
 } from '../room/hooks/usePredictiveSync';
 import type { WatchPartyRoom } from '../room/types';
+import { useSeatOccupancy } from '../theatre/hooks/use-seat-occupancy';
 import { memberNames, presentMemberIds } from '../theatre/lib/roster';
+import type { Stance } from '../theatre/lib/stance';
 import { useTheatreView } from '../theatre/lib/view-mode';
 
 const FloatingEmojis = dynamic(
@@ -302,6 +304,37 @@ export function WatchPartyVideoArea({
   const viewMode = useTheatreView((s) => s.mode);
   const is3D = viewMode !== '2d';
 
+  /*
+    Seat occupancy, mounted HERE rather than inside the scene.
+
+    A seat claim is party state, not scene state. `TheatreScene` is unmounted the
+    moment the view mode returns to `2d`, so owning the claim map down there meant
+    a 2D <-> 3D round trip destroyed your own seat, never told the room you had
+    left it, and came back with everyone else's claims stale. See the hook's
+    docblock. Nothing in it touches three.js.
+
+    `active` is the 3D flag and gates one thing only: the automatic seat on entry.
+  */
+  const { seatMap, mySeat, claimSeat } = useSeatOccupancy({
+    userId: userId ?? '',
+    rtmSendMessage,
+    // Same roster the avatars reconcile against, so a departed member's chair is
+    // released rather than staying reserved for the rest of the session.
+    memberIds: theatreMemberIds,
+    enabled: Boolean(userId),
+    active: is3D,
+  });
+
+  /*
+    Where this user was standing, kept alongside their seat.
+
+    Same owner as the claim above, for the same reason: `TheatreScene` is torn down
+    the moment the mode returns to `2d`, so anything describing where the user is in
+    the room has to live above it. A ref, not state — it is written every frame
+    while walking and nothing renders from it.
+  */
+  const stanceRef = useRef<Stance | null>(null);
+
   return (
     <Player.Root
       streamUrl={streamUrlOverride || room.streamUrl || null}
@@ -430,6 +463,19 @@ export function WatchPartyVideoArea({
               message, and showed a slice of the raw user id until then.
             */
             memberNames={theatreMemberNames}
+            /*
+              Seat state, owned above this component so it survives the switch
+              back to 2D — and so peers keep seeing you in your chair while you
+              are there.
+            */
+            seatMap={seatMap}
+            mySeat={mySeat}
+            claimSeat={claimSeat}
+            /*
+              Where they were standing. Owned here so it outlives the scene, the
+              same way the seat claim does.
+            */
+            stanceRef={stanceRef}
           />
         </div>
       ) : null}

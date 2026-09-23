@@ -13,13 +13,13 @@ import {
   useState,
 } from 'react';
 import { toast } from 'sonner';
-import { ACESFilmicToneMapping, SRGBColorSpace } from 'three';
+import { ACESFilmicToneMapping, MathUtils, SRGBColorSpace } from 'three';
 import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
 import type { RTMMessage } from '../../room/types/rtm-messages';
+import { CAPSULE_CENTRE_TO_FEET } from '../hooks/use-avatar-controls';
 import { useDanceMenu } from '../hooks/use-dance-menu';
 import { useDanceSpace } from '../hooks/use-dance-space';
 import { usePointerLook } from '../hooks/use-pointer-look';
-import { useSeatOccupancy } from '../hooks/use-seat-occupancy';
 import { useSeatedCamera } from '../hooks/use-seated-camera';
 import { useSitInteraction } from '../hooks/use-sit-interaction';
 import { useSpeechBubbles } from '../hooks/use-speech-bubbles';
@@ -30,12 +30,14 @@ import { DANCE_CLIPS } from '../lib/animation';
 import { DANCE_CLEARANCE_M } from '../lib/dance-rules';
 import type { Pose } from '../lib/interpolation';
 import {
+  getSeat,
   ROOM,
   type SeatId,
   STANDING_EYE_HEIGHT,
   seatedAvatarPose,
   spawnFor,
 } from '../lib/layout';
+import type { StanceRef } from '../lib/stance';
 import { useTheatreView } from '../lib/view-mode';
 import { avatarModelForCharacter, avatarModels } from '../types';
 import { DanceWheel } from './DanceWheel';
@@ -71,6 +73,27 @@ interface TheatreSceneProps {
    * name correctly. The roster is the same source the sidebar reads.
    */
   memberNames?: Record<string, string>;
+  /**
+   * Who is sitting where, owned by `WatchPartyVideoArea`.
+   *
+   * Deliberately not owned here. This component is unmounted whenever the view
+   * mode returns to `2d`, and a seat claim has to outlive that — otherwise a
+   * round trip through 2D loses your chair, leaves your old claim stuck on every
+   * peer, and resumes with a stale picture of everyone else's seats. See
+   * `use-seat-occupancy`.
+   */
+  seatMap: Record<string, string | null>;
+  mySeat: SeatId | null;
+  /** Take a seat, or stand up when passed null. */
+  claimSeat: (seat: SeatId | null) => void;
+  /**
+   * Where this user was standing last time, owned by `WatchPartyVideoArea`.
+   *
+   * Read once per mount to place the body and the camera, and written every frame
+   * while walking. Not owned here for the same reason the seat is not: this
+   * component is destroyed on every switch back to 2D. See `lib/stance.ts`.
+   */
+  stanceRef: StanceRef;
 }
 
 /**
@@ -109,6 +132,10 @@ export function TheatreScene({
   cinema = false,
   memberIds = [],
   memberNames,
+  seatMap,
+  mySeat,
+  claimSeat,
+  stanceRef,
 }: TheatreSceneProps) {
   const { data: assets, isLoading, error } = useTheatreAssets();
   const { bubbles, names: chatNames } = useSpeechBubbles(true);
@@ -133,15 +160,6 @@ export function TheatreScene({
 
   // Only one character body is ever fetched — see avatarModelsFor.
   const character = useTheatreView((s) => s.character);
-
-  const { seatMap, mySeat, claimSeat } = useSeatOccupancy({
-    userId,
-    rtmSendMessage,
-    // Same roster the avatars reconcile against, so a dropped member's chair is
-    // released rather than staying reserved for the rest of the session.
-    memberIds,
-    enabled: true,
-  });
 
   const { peerIds, publishPose, samplePeer, peerCharacter } = useTheatreNetwork(
     {
@@ -182,6 +200,58 @@ export function TheatreScene({
    * metre — and avatars carry no colliders, so nothing separated them again.
    */
   const spawn = useMemo(() => spawnFor(userId), [userId]);
+
+  /*
+    Where this entry into 3D starts, in priority order:
+
+      1. the seat this user holds — a claim outlives the scene, so if they were
+         sitting when they left they are sitting when they come back, AT the seat
+         rather than gliding to it from the rear platform;
+      2. where they were standing last time (`stanceRef`);
+      3. their spawn slot, which is only ever right the first time.
+
+    `spawnFor` alone is what this used to be, and it is why walking to the front
+    row, pressing `V` twice and coming back put you on the rear platform again —
+    every time, which is the form of the bug that gets noticed.
+
+    A mount-time snapshot on purpose, and in a ref rather than a memo with
+    dependencies: it seeds the physics body and the camera, and re-reading a value
+    that changes every frame would fight the character controller for ownership of
+    the player's position.
+  */
+  const entryRef = useRef<{
+    x: number;
+    y: number;
+    z: number;
+    /** Radians, for the camera. The stance stores degrees, as the wire does. */
+    yaw: number;
+    /** Camera eye — the seat's anchor when seated, eye height when standing. */
+    eye: { x: number; y: number; z: number };
+  } | null>(null);
+  if (entryRef.current === null) {
+    const seat = mySeat ? getSeat(mySeat) : null;
+    if (seat) {
+      const body = seatedAvatarPose(seat.id);
+      entryRef.current = {
+        x: body.x,
+        y: body.y,
+        z: body.z,
+        yaw: seat.view.yaw,
+        eye: seat.eye,
+      };
+    } else {
+      const remembered = stanceRef.current;
+      const base = remembered ?? spawn;
+      entryRef.current = {
+        x: base.x,
+        y: base.y,
+        z: base.z,
+        yaw: remembered ? MathUtils.degToRad(remembered.yaw) : 0,
+        eye: { x: base.x, y: base.y + STANDING_EYE_HEIGHT, z: base.z },
+      };
+    }
+  }
+  const entry = entryRef.current;
 
   const [wheel, setWheel] = useState<{
     open: boolean;
@@ -245,7 +315,14 @@ export function TheatreScene({
         */
         dpr={dpr}
         camera={{
-          position: [spawn.x, spawn.y + STANDING_EYE_HEIGHT, spawn.z],
+          // The seat's own eye anchor when seated, so a returning viewer opens
+          // their eyes in the chair instead of on the rear platform.
+          position: [entry.eye.x, entry.eye.y, entry.eye.z],
+          // Facing matters as much as position on a re-entry: coming back turned
+          // 180° from where you were looking is the same disorientation as being
+          // moved. `usePointerLook` and `useSeatedCamera` both seed themselves
+          // from the camera, so setting it here is enough.
+          rotation: [0, entry.yaw, 0],
           fov: 60,
           near: 0.1,
           far: 100,
@@ -331,6 +408,8 @@ export function TheatreScene({
           <SceneInterior
             videoRef={videoRef}
             userId={userId}
+            entry={entry}
+            stanceRef={stanceRef}
             avatarUrl={resolveCharacterModel(character)}
             onTogglePlay={readOnly ? undefined : playerHandlers.togglePlay}
             seatMap={seatMap}
@@ -403,16 +482,22 @@ function SceneInterior({
   onPose,
   onWheelChange,
   userId,
+  entry,
+  stanceRef,
   avatarUrl,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   onTogglePlay?: () => void;
   seatMap: Record<string, string | null>;
-  mySeat: ReturnType<typeof useSeatOccupancy>['mySeat'];
-  claimSeat: ReturnType<typeof useSeatOccupancy>['claimSeat'];
+  mySeat: SeatId | null;
+  claimSeat: (seat: SeatId | null) => void;
   cinema: boolean;
   /** Local user id, for the identity colour peers also see. */
   userId: string;
+  /** Feet position and yaw this entry into 3D starts from. */
+  entry: { x: number; y: number; z: number; yaw: number };
+  /** Where the walking position is remembered, owned above this component. */
+  stanceRef: StanceRef;
   /** Local user's avatar glb, or null when the manifest has none. */
   avatarUrl: string | null;
   onPose: (p: Pose) => void;
@@ -518,9 +603,26 @@ function SceneInterior({
   const recordAndPublish = useCallback(
     (pose: Pose) => {
       lastPoseRef.current = pose;
+      /*
+        Remember where we are standing, so the next entry into 3D resumes here
+        rather than at the spawn slot. Written every frame on purpose: a mode
+        switch can happen on any of them, and there is no event that says "the
+        user is about to press V". It is a plain object assignment into a module
+        variable — no state, no re-render.
+
+        Only the WALKING position is recorded. While seated this callback does not
+        run (the controller is switched off), which is correct: a seat is already
+        remembered, by the claim.
+      */
+      stanceRef.current = {
+        x: pose.x,
+        y: pose.y,
+        z: pose.z,
+        yaw: pose.r,
+      };
       publish(pose);
     },
-    [publish],
+    [publish, stanceRef],
   );
 
   /**
@@ -553,6 +655,43 @@ function SceneInterior({
   useSeatedCamera({ seatId: mySeat, enabled: seated || cinema });
 
   /*
+    ---- put the body back on the pad when you stand ----
+
+    The walk controller is switched off while sitting, so the capsule is still
+    wherever it was when you sat down — and now that everyone is SEATED ON ENTRY
+    (see `use-seat-occupancy`), for most people that is the spawn slot on the rear
+    platform, which they have never walked away from. Standing up without this
+    teleports you behind both rows, several metres from the chair you just left,
+    which reads as the room throwing you out.
+
+    The pad is the right target because it is the spot you stand on to sit: it is
+    0.52 m in front of the chair, inside the standing band, and already proven
+    reachable by `collision.test.ts`.
+
+    Tracked against the PREVIOUS seat, because by the time this runs the claim is
+    gone and only the seat you vacated says where to put you.
+  */
+  const lastSeat = useRef<SeatId | null>(mySeat);
+  useEffect(() => {
+    const previous = lastSeat.current;
+    lastSeat.current = mySeat;
+    if (mySeat !== null || previous === null) return;
+    const body = playerBody.current;
+    if (!body) return;
+    const { pad } = getSeat(previous);
+    // Rapier holds a capsule at its centre; the pad is a floor position.
+    body.setTranslation(
+      { x: pad.x, y: pad.y + CAPSULE_CENTRE_TO_FEET, z: pad.z },
+      true,
+    );
+    body.setNextKinematicTranslation({
+      x: pad.x,
+      y: pad.y + CAPSULE_CENTRE_TO_FEET,
+      z: pad.z,
+    });
+  }, [mySeat]);
+
+  /*
     How far the dance camera has pulled back, mirrored into state so the local
     avatar can be revealed.
 
@@ -577,6 +716,7 @@ function SceneInterior({
         <LocalPlayer
           enabled={walking}
           selfId={userId}
+          start={entry}
           onPose={recordAndPublish}
           bodyRef={playerBody}
           dancing={Boolean(dance) && walking}

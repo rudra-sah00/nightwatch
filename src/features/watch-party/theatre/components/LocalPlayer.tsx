@@ -41,6 +41,15 @@ interface LocalPlayerProps {
    * inside one another.
    */
   selfId: string;
+  /**
+   * Feet position this body starts at, overriding the id-derived spawn slot.
+   *
+   * Passed in rather than derived here because only the caller knows whether this
+   * is a first entry or a return from 2D. `spawnFor` is right once; after that the
+   * player expects to be where they left off, and rebuilding them on the rear
+   * platform on every `V` press was read as the room resetting itself.
+   */
+  start?: { x: number; y: number; z: number };
   /** Called with the local pose so the network layer can broadcast it. */
   onPose?: (pose: {
     x: number;
@@ -62,12 +71,14 @@ interface LocalPlayerProps {
 export function LocalPlayer({
   enabled,
   selfId,
+  start,
   onPose,
   bodyRef,
   dancing = false,
   onCameraDistance,
 }: LocalPlayerProps) {
-  const spawn = useMemo(() => spawnFor(selfId), [selfId]);
+  const slot = useMemo(() => spawnFor(selfId), [selfId]);
+  const spawn = start ?? slot;
   const own = useRef<RapierRigidBody>(null);
   const body = bodyRef ?? own;
   const camera = useThree((s) => s.camera);
