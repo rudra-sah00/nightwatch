@@ -7,7 +7,7 @@ import {
   CHAIR_HALF_WIDTH,
   REAR_DETAIL_FACE_Z,
 } from '../lib/geometry';
-import { FLOORS, ROOM, SEATS, STAIRS } from '../lib/layout';
+import { FLOORS, ROOM, SEATS, STAIRS, stairTreads } from '../lib/layout';
 
 /**
  * Static collision for the theatre.
@@ -72,28 +72,33 @@ export function TheatreColliders() {
       />
 
       {/* ---------- aisle stairs ----------
-          One box per tread, both sides. The controller's autostep is set to
-          clear a 0.15 m riser, so these are climbed rather than blocked. */}
+          One box per tread, both sides, from `stairTreads()` — the same table the
+          visible steps are built from in `lib/geometry/auditorium.ts`.
+
+          This used to compute its own z span as `STAIRS.maxZ - i * treadDepth`,
+          which ran the flight BACKWARDS: the 0.15 m surface landed at z 4.99-5.29
+          and the 0.30 m one at 4.69-4.99, so the collision staircase descended
+          towards the rear platform while the visible one climbed towards it.
+          Walking back from the screen you hit a 0.30 m step where the picture
+          showed 0.15 — above the 0.15 m autostep, so the foot of the stairs acted
+          as a wall — and higher up the collider was 0.15 where the step looked
+          0.30, so you walked through it. At the edges of the run the two
+          disagreed enough to let you walk up the side of the flight.
+
+          Boxes are solid from below, so a taller box at greater z forms the
+          staircase on its own; the autostep clears each 0.15 m riser. */}
       {[-1, 1].map((side) =>
-        Array.from({ length: STAIRS.risers - 1 }, (_, i) => {
-          const step = i + 1; // treads at 0.15 and 0.30; 0.45 is the platform
-          const top = step * STAIRS.riserHeight;
-          const z1 = STAIRS.maxZ - i * STAIRS.treadDepth;
-          const z0 = z1 - STAIRS.treadDepth;
-          const x0 = side < 0 ? -STAIRS.outerX : STAIRS.innerX;
-          const x1 = side < 0 ? -STAIRS.innerX : STAIRS.outerX;
-          return (
-            <Box
-              key={`stair-${side}-${step}`}
-              x0={x0}
-              x1={x1}
-              y0={-0.3}
-              y1={top}
-              z0={z0}
-              z1={z1}
-            />
-          );
-        }),
+        stairTreads().map((tread) => (
+          <Box
+            key={`stair-${side}-${tread.top}`}
+            x0={side < 0 ? -STAIRS.outerX : STAIRS.innerX}
+            x1={side < 0 ? -STAIRS.innerX : STAIRS.outerX}
+            y0={-0.3}
+            y1={tread.top}
+            z0={tread.z0}
+            z1={tread.z1}
+          />
+        )),
       )}
 
       {/* ---------- riser face ----------

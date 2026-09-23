@@ -15,6 +15,7 @@ import {
   SIT_PROMPT_RADIUS,
   SPAWN,
   STAIRS,
+  stairTreads,
 } from '@/features/watch-party/theatre/lib/layout';
 
 /**
@@ -126,7 +127,7 @@ describe('you cannot walk through the chairs', () => {
 describe('the stairs are the only way up', () => {
   it('blocks the riser face across the full width between the two runs', () => {
     /*
-      The rear platform is 0.45 up. The stairs occupy |x| 2.8-4.0 on both sides,
+      The rear platform is 0.45 up. The stairs occupy |x| 3.4-4.8 on both sides,
       and a collider spans the riser face between them — so the whole width is
       accounted for and there is no seam to walk up.
     */
@@ -216,6 +217,82 @@ describe('the room perimeter', () => {
         SPAWN.z > seat.position.z + CHAIR_FRONT &&
         SPAWN.z < seat.position.z + CHAIR_BACK;
       expect(insideX && insideZ, seat.id).toBe(false);
+    }
+  });
+});
+
+/**
+ * The stair run itself, tread by tread.
+ *
+ * The existing cases above assert the stair CONSTANTS — run widths summing to the
+ * room, autostep clearing the riser height, total rise matching the platform. All
+ * of them passed while the colliders were placing the flight backwards, because
+ * none of them looked at where a tread actually sits.
+ *
+ * `TheatreColliders` computed its own z span as `STAIRS.maxZ - i * treadDepth`,
+ * putting the 0.15 m surface at z 4.99-5.29 and the 0.30 m one at 4.69-4.99 — the
+ * mirror image of the visible steps, which climb towards the platform. Walking back
+ * from the screen you met a 0.30 m step where the picture showed 0.15, above the
+ * autostep limit, so the foot of the stairs behaved like a wall; higher up the
+ * collider was 0.15 where the step looked 0.30, so you walked through it. Both
+ * files now read `stairTreads()`.
+ */
+describe('stair treads ascend towards the rear platform', () => {
+  it('raises each successive tread', () => {
+    const treads = stairTreads();
+    for (let i = 1; i < treads.length; i += 1) {
+      expect(treads[i].top).toBeGreaterThan(treads[i - 1].top);
+      // and the higher tread is the one nearer the platform
+      expect(treads[i].z0).toBeGreaterThan(treads[i - 1].z0);
+    }
+  });
+
+  it('starts at the foot of the run with a single riser', () => {
+    const [first] = stairTreads();
+    expect(first.z0).toBeCloseTo(STAIRS.minZ, 6);
+    expect(first.top).toBeCloseTo(STAIRS.riserHeight, 6);
+  });
+
+  it('ends against the rear platform edge, within a gap the capsule bridges', () => {
+    const treads = stairTreads();
+    const last = treads[treads.length - 1];
+
+    expect(last.z1).toBeCloseTo(STAIRS.maxZ, 6);
+
+    /*
+      The top tread stops at 5.29 and the platform deck starts at 5.30. That 10 mm
+      is deliberate — it is where the platform's own riser face sits (5.290-5.310),
+      matching the Blender source. It is not a hole anyone can fall into: the player
+      capsule is 0.56 m across, twenty times the gap, so it always bridges. What
+      matters is that the gap stays far below the capsule radius, which is the
+      property asserted here rather than exact flushness.
+    */
+    const gap = FLOORS.rearPlatform.minZ - last.z1;
+    expect(gap).toBeGreaterThanOrEqual(0);
+    expect(gap).toBeLessThan(LOCOMOTION.CAPSULE_RADIUS);
+    expect(gap).toBeLessThanOrEqual(0.02);
+  });
+
+  it('leaves no gap or overlap between treads', () => {
+    const treads = stairTreads();
+    for (let i = 1; i < treads.length; i += 1) {
+      expect(treads[i].z0).toBeCloseTo(treads[i - 1].z1, 6);
+    }
+  });
+
+  it('builds one fewer tread than risers, the platform edge being the last', () => {
+    expect(stairTreads()).toHaveLength(STAIRS.risers - 1);
+  });
+
+  it('keeps every step within one autostep of the next surface', () => {
+    const treads = stairTreads();
+    const surfaces = [0, ...treads.map((t) => t.top), FLOORS.rearPlatform.y];
+    for (let i = 1; i < surfaces.length; i += 1) {
+      const rise = surfaces[i] - surfaces[i - 1];
+      // Every rise must be climbable, or the aisle dead-ends. The inverted
+      // collider run produced a 0.30 m first rise, double the autostep.
+      expect(rise).toBeLessThanOrEqual(LOCOMOTION.AUTOSTEP_HEIGHT);
+      expect(rise).toBeGreaterThan(0);
     }
   });
 });

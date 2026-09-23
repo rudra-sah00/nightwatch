@@ -1,5 +1,5 @@
 import type { Mesh } from 'three';
-import { FLOORS, ROOM, SCREEN, STAIRS } from '../layout';
+import { FLOORS, ROOM, SCREEN, STAIRS, stairTreads } from '../layout';
 import { GeometryBatcher } from './batch';
 import { theatreMaterials } from './materials';
 
@@ -583,17 +583,23 @@ function buildStairs(
     const cx = (side * (STAIRS.innerX + STAIRS.outerX)) / 2;
     const sw = STAIRS.outerX - STAIRS.innerX;
 
-    // Two solid carpeted steps.
-    for (const i of [0, 1]) {
-      const top = steps[i].y;
+    /*
+      Two solid carpeted steps, from the shared `stairTreads()` table.
+
+      Derived rather than read off `steps` so this and `TheatreColliders` cannot
+      disagree: they previously computed the run independently and the collider
+      copy had it inverted, which made the foot of the stairs behave as a wall and
+      let you walk through the upper step.
+    */
+    for (const tread of stairTreads()) {
       b.box(
         M.floor,
         sw,
-        top,
+        tread.top,
         STAIRS.treadDepth,
         cx,
-        top / 2,
-        steps[i].z + STAIRS.treadDepth / 2,
+        tread.top / 2,
+        tread.z0 + STAIRS.treadDepth / 2,
       );
     }
 

@@ -107,6 +107,52 @@ export const STAIRS = {
   maxZ: 5.29,
 } as const;
 
+/** One carpeted step: its walking surface and the z span it covers. */
+export interface StairTread {
+  /** Height of the surface you stand on, metres above the front floor. */
+  top: number;
+  /** Front edge, nearer the screen. */
+  z0: number;
+  /** Back edge, nearer the rear platform. */
+  z1: number;
+}
+
+/**
+ * The stair treads, ascending towards the rear platform.
+ *
+ * **The single source for both the visible steps and their colliders.** It exists
+ * because those were computed independently in `lib/geometry/auditorium.ts` and
+ * `components/TheatreColliders.tsx`, and the collider copy had the run inverted:
+ * it placed the 0.15 m surface at z 4.99-5.29 and the 0.30 m one at 4.69-4.99, so
+ * the physics staircase descended towards the platform while the visible one
+ * climbed.
+ *
+ * That is felt, not seen. Walking back from the screen you met a 0.30 m collider
+ * step where the picture showed a 0.15 m one — over the autostep limit, so the foot
+ * of the stairs behaved like a wall — and further up the collider was 0.15 where
+ * the visible step was 0.30, so you walked straight through the step you could see.
+ * At the edges of the run, where the capsule only partly overlaps a tread, the two
+ * disagreed enough to let you walk up the side of the flight.
+ *
+ * Only `risers - 1` treads are geometry. The last rise is the rear platform edge
+ * itself, which already has a collider and a visible riser face, so building a
+ * third tread here would double it up.
+ *
+ * Heights are the HEAD of each riser, not its foot. A previous build used
+ * `i * riserHeight + 0.04` — the foot — which left every tread 0.11 m low while the
+ * floor-height lookup returned the head, and you walked in the air above the steps.
+ */
+export function stairTreads(): readonly StairTread[] {
+  return Array.from({ length: STAIRS.risers - 1 }, (_, i) => {
+    const z0 = STAIRS.minZ + i * STAIRS.treadDepth;
+    return {
+      top: (i + 1) * STAIRS.riserHeight,
+      z0,
+      z1: z0 + STAIRS.treadDepth,
+    };
+  });
+}
+
 /**
  * Where a player appears when they enter 3D.
  *
