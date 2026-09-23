@@ -39,27 +39,41 @@ current bill.
 
 ### 1b. Latency we cannot reach on Agora
 
+**Measured 2026-09-24, and it weakens this argument — read before planning around it.**
+Agora's data-path edge for this region is **already in Mumbai**:
+`ap-web-1.agora.io`, `webrtc2-ap-web-1.agora.io` and `uap-ap-web-1.agora.io` all
+resolve to `ec2-15-206-47-129.ap-south-1.compute.amazonaws.com` (AWS ap-south-1),
+54.5 ms RTT from the Talcher box with 0.18 ms jitter. Only `api.agora.io` — the REST
+control plane, where latency is irrelevant — is in Singapore.
+
+So **there is no geographic win available.** A self-hosted Mumbai relay sits beside
+Agora's edge, not closer to the user than it. Note a relay crosses two legs
+(sender→edge, edge→receiver), so one-way latency is roughly the full RTT to the edge
+when both parties are equidistant: ~5–15 ms for a Mumbai user, and the same for a
+self-hosted box there.
+
 Peer motion lag decomposes as `sampling delay + network one-way + interpolation buffer`:
 
-| Component | Now | Owner |
-|---|---|---|
-| Sampling (pose age when sent, avg) | ~62 ms | us — 8 Hz |
-| Network one-way | ~40–75 ms (**unmeasured**) | Agora |
-| Interpolation buffer | 160 ms | us |
-| **Total** | **~260–300 ms** | |
+| Component | Agora now | Agora at 20 Hz | Own relay + datagrams |
+|---|---|---|---|
+| Sampling (pose age when sent, avg) | 62 ms | 25 ms | 25 ms |
+| Network one-way (Mumbai user) | ~15 ms | ~15 ms | ~10 ms |
+| Interpolation buffer | 160 ms | 120 ms | **50–60 ms** |
+| **Total** | **~237 ms** | ~160 ms | **~90 ms** |
 
-Three things stop us shrinking that on Agora:
+**The entire remaining prize is the buffer.** Geography contributes ~5 ms; the buffer
+contributes ~60–70 ms. Three things stop us shrinking it on Agora:
 
 1. **The SDK ignores calls beyond 20/second per client**, so 20 Hz is a hard ceiling
    on the send rate, which floors the buffer.
-2. The cost above.
+2. The cost in §1a — 20 Hz is roughly $28 per party.
 3. **The buffer must cover p99 jitter, not p50.** Signaling is WebSocket, so TCP, so
    a lost packet is retransmitted and everything behind it waits. That tail is what
    forces 160 ms. With unreliable datagrams a stale pose is dropped instead, the
    tail collapses, and the buffer can sit near p50.
 
-Point 3 is the whole prize: **~60 ms of buffer, available only with datagrams**, and
-no hosted pub/sub product offers them.
+Point 3 is the only structural argument left, and no hosted pub/sub product offers
+datagrams. Worth ~60 ms — decide whether that is worth the ops in §10.
 
 ### 1c. One source of truth for presence
 
@@ -86,6 +100,20 @@ Recorded so they are not repeated.
 plus a private `user:<id>` channel per client. Payloads are `JSON.stringify`, ~120
 bytes per pose, and Signaling meters in 1 KB units so size is irrelevant — only
 **message count** matters.
+
+**Agora's edge location** (measured from Talcher, 2026-09-24). ICMP, 5 packets:
+
+| Host | Resolves to | RTT | Jitter |
+|---|---|---|---|
+| `ap-web-1.agora.io` | `15.206.47.129` — **AWS Mumbai** | 54.5 ms | 0.18 ms |
+| `webrtc2-ap-web-1.agora.io` | same IP | 54.5 ms | 0.15 ms |
+| `uap-ap-web-1.agora.io` | same IP | 54.7 ms | 0.13 ms |
+| `api.agora.io` | `52.77.88.131` — AWS Singapore | 62.4 ms | control plane only |
+| `statscollector-1.agora.io` | `164.52.55.243` | 252–380 ms | 52 ms — telemetry, off the data path |
+
+The data path is in India. Compare Talcher→other Mumbai datacentres, below: Agora's
+edge is 11–22 ms further than Linode/Vultr Mumbai from this particular spur, which is
+peering, not distance.
 
 **Latency from the Talcher dev box** (BSNL AS9829, Odisha), server→city RTT, which is
 symmetric. Jitter was 0.2–0.3 ms mdev throughout:
@@ -323,10 +351,14 @@ Recorded so it is not relitigated.
   cannot carry QUIC datagrams to a browser — so it costs the ~60 ms of buffer that is
   the entire reason to self-host, and lands at ~160–180 ms. That is Durable Objects'
   number with a home server's failure modes.
-- **Not Durable Objects** — though it is the closest hosted alternative and the only
-  one whose billing does not punish fan-out (inbound only, WebSocket discounted 20:1,
-  outbound free). Rejected because it is still TCP, so still ~165 ms. Revisit if we
-  decide sub-100 ms is not worth the ops.
+- **Durable Objects — reconsider this.** It is the only hosted option whose billing
+  does not punish fan-out (inbound only, WebSocket discounted 20:1, outbound free), so
+  it fixes §1a outright. It is still TCP, so ~160–165 ms versus ~90 ms self-hosted.
+  The original rejection leaned partly on self-hosting being geographically closer to
+  users — and the §1b measurement shows it is not, since Agora is already in Mumbai
+  and so would we be. That leaves a straight trade: **~70 ms of buffer against running
+  a server.** If the answer to open question 2 is that p99 jitter on Indian mobile is
+  modest, take Durable Objects and skip the infrastructure entirely.
 - **Not the Talcher box in production.** §2.
 - **Not Agora RTC's `sendStreamMessage`** as a pose transport. Still SFU-relayed, own
   rate limits, no datagram semantics.
@@ -352,9 +384,11 @@ Recorded so it is not relitigated.
 
 ## 11. Open questions
 
-1. What is Agora's *actual* RTT for our users? Everything in §1b is estimated. If it
-   is already ~40 ms, the latency case weakens sharply and only the cost case remains
-   — which would argue for Durable Objects over a VPS.
+1. ~~What is Agora's actual RTT for our users?~~ **ANSWERED 2026-09-24.** The edge is
+   AWS Mumbai (§2), so the network leg is already short and a self-hosted Mumbai relay
+   is no closer. The latency case now rests entirely on the interpolation buffer, and
+   the cost case (§1a) stands alone as the reason to migrate. This is the correction
+   that makes Durable Objects a serious contender again — see §9.
 2. What is real p99 jitter on Indian mobile? It sets `INTERP_DELAY_MS`, and it is the
    single number that decides whether datagrams are worth the migration.
 3. Does WebTransport survive Indian carrier NATs at acceptable rates? Some networks
