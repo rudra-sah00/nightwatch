@@ -663,10 +663,39 @@ on an M4 at 2268x1111, shader compiles awaited:
 | 24 | 3.01 |
 | 32 | 7.78 |
 
-The rig in `lib/lighting.ts` is 12 point/area fixtures plus ambient, hemisphere,
-one directional and the screen's own `RectAreaLight`. `lighting.test.ts` holds the
+The rig in `lib/lighting.ts` is 9 point fixtures plus ambient, hemisphere, one
+directional and the screen's own `RectAreaLight`. `lighting.test.ts` holds the
 ceiling at 12. Adding fixtures is the easiest way to regress this feature's frame
 time, and a wall does not make a light behind it free.
+
+#### `RectAreaLight` is not a punctual light, and costs far more
+
+The table above counts punctual lights. A `RectAreaLight` is a different order of
+cost: it runs linearly-transformed-cosine integration with **two texture lookups
+per light, per pixel, every frame** — several times a point light.
+
+The rig used to carry three: the screen plus two cove uplights. That was the
+dominant fragment cost in the scene, and the room held 30-45 fps against a 60
+target. A comment in `lighting.ts` had reasoned that the coves were free because
+"the LTC tables are loaded for the screen light anyway so the shader cost is already
+paid" — which conflates a one-time upload of two lookup textures with per-pixel
+integration, and is very likely why two more were added without question.
+
+**The cove uplights are retired.** Only the screen is a `RectAreaLight` now. Note
+what was and was not lost:
+
+- The **visible glowing band was never those lights.** It is emissive geometry
+  tucked in the tray channel (`glowCove`, placed by `geometry/auditorium.ts`), and
+  it is still there, raised 0.85 -> 1.2.
+- What went is the soft **wash** onto the tray reveal and ceiling.
+- Compensated by raising `AMBIENT` (1.1 -> 1.45) and especially `HEMI`
+  (1.0 -> 1.55). A hemisphere light graduates sky colour above to ground colour
+  below, so it brightens upward-facing surfaces more than downward ones — the same
+  asymmetry an uplight produces, at a fraction of the per-pixel cost.
+
+`glowCove` is capped at 1.2 by `geometry.test.ts`, not by taste: past that these
+strips clip to flat white and read as cream plastic, which is what happened when
+Blender's literal 2.5 radiance figure was carried over verbatim.
 
 One trap worth repeating from §3: changing the light *count* at runtime forces a
 recompile of every material. If lights are ever culled dynamically, keep a fixed

@@ -135,7 +135,18 @@ function create(): TheatreMaterials {
     glowCove: new MeshStandardMaterial({
       color: 0x241c12,
       emissive: 0xffd9a8,
-      emissiveIntensity: 0.85,
+      /*
+        Raised from 0.85 to 1.2. This strip IS the cove now — the RectAreaLights
+        that used to wash the reveal beside it are gone, so the band has to read on
+        its own.
+
+        1.2 is the ceiling, not a preference: past it these strips clip to flat
+        white and read as cream plastic, which is what happened when Blender's
+        literal 2.5 radiance figure was carried over. `geometry.test.ts` guards it.
+        The rest of the compensation for the lost wash is in AMBIENT and HEMI, which
+        can absorb it without a clipping limit.
+      */
+      emissiveIntensity: 1.2,
     }),
     // Blender NEO_StepMarker: emission (1.00, 0.82, 0.58) at strength 1.35.
     glowStep: new MeshStandardMaterial({

@@ -78,12 +78,31 @@ const WARM_PALE = '#ffdcae';
 const KEY_COLOUR = '#aab6d4';
 
 /** Flat floor of visibility. The one knob to raise if the room reads too dark. */
-export const AMBIENT: LightLevel = { house: 1.1, dim: 0.3 };
+/*
+  Raised from 1.1 / 0.3 to carry part of what the cove rect lights used to add.
+
+  The coves threw a soft wash up the tray reveal and across the ceiling. Ambient is
+  a flat constant term with no direction, so it cannot reproduce that — it is the
+  floor of the compensation, with HEMI doing the directional half. Kept modest on
+  purpose: ambient lifts shadows uniformly, and too much of it flattens the room,
+  which is the opposite of what the coves were for.
+*/
+export const AMBIENT: LightLevel = { house: 1.45, dim: 0.42 };
 /** Warm bounce off carpet and seat fabric. */
 export const AMBIENT_COLOUR = '#3a3026';
 
 /** Top-down gradient so the ceiling is not the same value as the floor. */
-export const HEMI: LightLevel = { house: 1.0, dim: 0.26 };
+/*
+  Raised from 1.0 / 0.26, and doing most of the cove compensation.
+
+  A hemisphere light graduates from sky colour above to ground colour below, so it
+  is directional in the one axis that matters here: it brightens upward-facing
+  surfaces more than downward ones, which is the same asymmetry a cove uplight
+  produces. That makes it a far better stand-in for the removed wash than ambient,
+  and it costs a fraction of a RectAreaLight per pixel — no LTC integration, no
+  texture lookups, no attenuation.
+*/
+export const HEMI: LightLevel = { house: 1.55, dim: 0.4 };
 export const HEMI_SKY = '#2a3550';
 export const HEMI_GROUND = '#1a1410';
 
@@ -222,24 +241,27 @@ export const ACCENTS: readonly PointFixture[] = [
 ];
 
 /**
- * Cove wash, from Blender's `CoveLight_L` / `CoveLight_R` (AREA, 7.9 × 0.5 m,
- * `y = 4.32`, 34 W) — the fixtures that uplight the side walls and sell the
- * room's height.
+ * RETIRED. The cove wash is no longer a light.
  *
- * Kept as rect area lights because a point light cannot produce a long soft band.
- * They light `MeshStandardMaterial` only, which is what the glTF loader produces,
- * so the room responds to them and nothing else needs to.
+ * `CoveLight_L` / `CoveLight_R` were `RectAreaLight`s (7.9 x 0.5 m) uplighting the
+ * side walls to sell the room's height. They were the second and third
+ * `RectAreaLight` in the scene, and a `RectAreaLight` runs LTC integration with two
+ * texture lookups per light PER PIXEL, every frame — several times the per-pixel
+ * cost of a point light. Together with the screen light they dominated the fragment
+ * budget, and the room held 30-45 fps where it wanted 60.
  *
- * COST, corrected. This used to claim "the LTC tables are loaded for the screen
- * light anyway so the shader cost is already paid". That conflates two different
- * costs. Loading the tables is a ONE-TIME upload of two lookup textures, and the
- * screen light does pay that. The LTC integration itself is per light, PER PIXEL,
- * every frame — so these two coves cost their own full evaluation on every
- * fragment they reach, and a `RectAreaLight` runs several times the per-pixel work
- * of a point light.
+ * What is kept is the part you actually see. The visible glowing band was never
+ * these lights — it is emissive geometry tucked in the tray channel
+ * (`glowCove` in `geometry/materials.ts`, placed by `geometry/auditorium.ts`), and
+ * that is still there and now brighter. What is lost is the soft wash the lights
+ * threw onto the reveal and ceiling, compensated by the AMBIENT and HEMI bumps
+ * above — HEMI carrying most of it, because its sky-to-ground gradient brightens
+ * upward-facing surfaces the way an uplight does.
  *
- * With the screen light that is three rect lights in the shader loop, which is the
- * dominant fragment cost in the scene. Worth knowing before adding a fourth.
+ * The interface stays: the screen light in `TheatreScreen` is still a
+ * `RectAreaLight`, `ensureRectAreaLights()` is still required for it, and a future
+ * fixture may want this shape. Adding one back means paying that per-pixel cost
+ * again — measure before, not after.
  */
 export interface RectFixture {
   id: string;
@@ -251,28 +273,6 @@ export interface RectFixture {
   colour: string;
   level: LightLevel;
 }
-
-export const COVES: readonly RectFixture[] = [
-  {
-    id: 'cove-L',
-    position: [-4.6, 4.25, 4.25],
-    // Long axis down the room, tilted to throw across the ceiling
-    rotation: [0, Math.PI / 2, -Math.PI / 2.6],
-    width: 7.9,
-    height: 0.5,
-    colour: WARM,
-    level: { house: 3.4, dim: 0.85 },
-  },
-  {
-    id: 'cove-R',
-    position: [4.6, 4.25, 4.25],
-    rotation: [0, -Math.PI / 2, Math.PI / 2.6],
-    width: 7.9,
-    height: 0.5,
-    colour: WARM,
-    level: { house: 3.4, dim: 0.85 },
-  },
-];
 
 /**
  * Seconds for a full house-to-dim transition.

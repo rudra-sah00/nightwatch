@@ -2,13 +2,12 @@
 
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
-import type { DirectionalLight, PointLight, RectAreaLight } from 'three';
+import type { DirectionalLight, PointLight } from 'three';
 import { ROOM, SCREEN } from '../lib/layout';
 import {
   AMBIENT,
   AMBIENT_COLOUR,
   approach,
-  COVES,
   HEMI,
   HEMI_GROUND,
   HEMI_SKY,
@@ -54,7 +53,6 @@ export function TheatreLighting({ seated, cinema }: TheatreLightingProps) {
 
   const key = useRef<DirectionalLight>(null);
   const points = useRef<(PointLight | null)[]>([]);
-  const coves = useRef<(RectAreaLight | null)[]>([]);
   const ambient = useRef<{ intensity: number } | null>(null);
   const hemi = useRef<{ intensity: number } | null>(null);
 
@@ -92,13 +90,6 @@ export function TheatreLighting({ seated, cinema }: TheatreLightingProps) {
    * re-creating the Euler each render, and a light that never moves should not
    * pay for that.
    */
-  useEffect(() => {
-    COVES.forEach((fixture, i) => {
-      const l = coves.current[i];
-      if (!l) return;
-      l.rotation.set(...fixture.rotation);
-    });
-  }, []);
 
   useFrame((_, delta) => {
     const next = approach(level.current, target, delta);
@@ -111,10 +102,6 @@ export function TheatreLighting({ seated, cinema }: TheatreLightingProps) {
     for (let i = 0; i < POINT_FIXTURES.length; i += 1) {
       const l = points.current[i];
       if (l) l.intensity = levelValue(POINT_FIXTURES[i].level, next);
-    }
-    for (let i = 0; i < COVES.length; i += 1) {
-      const l = coves.current[i];
-      if (l) l.intensity = levelValue(COVES[i].level, next);
     }
   });
 
@@ -165,21 +152,6 @@ export function TheatreLighting({ seated, cinema }: TheatreLightingProps) {
           intensity={levelValue(fixture.level, initial)}
           distance={fixture.distance}
           decay={2}
-        />
-      ))}
-
-      {/* Cove uplight on the side walls. */}
-      {COVES.map((fixture, i) => (
-        <rectAreaLight
-          key={fixture.id}
-          ref={(l) => {
-            coves.current[i] = l;
-          }}
-          position={fixture.position}
-          width={fixture.width}
-          height={fixture.height}
-          color={fixture.colour}
-          intensity={levelValue(fixture.level, initial)}
         />
       ))}
     </group>

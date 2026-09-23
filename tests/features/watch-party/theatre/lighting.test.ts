@@ -3,7 +3,6 @@ import { ROOM } from '@/features/watch-party/theatre/lib/layout';
 import {
   AMBIENT,
   approach,
-  COVES,
   DIM_FADE_SECONDS,
   HEMI,
   KEY,
@@ -78,7 +77,7 @@ describe('approach', () => {
 
 describe('the rig itself', () => {
   it('is brighter walking than seated for every fixture', () => {
-    for (const f of [...POINT_FIXTURES, ...COVES]) {
+    for (const f of POINT_FIXTURES) {
       expect(f.level.house).toBeGreaterThan(f.level.dim);
     }
     for (const l of [AMBIENT, HEMI, KEY]) {
@@ -88,7 +87,7 @@ describe('the rig itself', () => {
 
   it('never fully extinguishes a fixture, so the room stays navigable', () => {
     // A real auditorium keeps step and aisle lighting on during the film.
-    for (const f of [...POINT_FIXTURES, ...COVES]) {
+    for (const f of POINT_FIXTURES) {
       expect(f.level.dim).toBeGreaterThan(0);
     }
     expect(AMBIENT.dim).toBeGreaterThan(0);
@@ -110,7 +109,7 @@ describe('the rig itself', () => {
   });
 
   it('places every fixture inside the room', () => {
-    for (const f of [...POINT_FIXTURES, ...COVES]) {
+    for (const f of POINT_FIXTURES) {
       const [x, y, z] = f.position;
       expect(Math.abs(x), f.id).toBeLessThanOrEqual(ROOM.maxX + 0.5);
       expect(y, f.id).toBeGreaterThan(ROOM.floorY);
@@ -130,17 +129,14 @@ describe('the rig itself', () => {
     // Plus ambient, hemisphere, one directional, and the screen's own
     // RectAreaLight in TheatreScreen.
     //
-    // Back down to 12 from 16 now the cafe and its four fixtures are gone.
-    // Every point light is a fixed per-fragment cost in a forward renderer
-    // whether or not it can reach the surface being shaded, so a wall does not
-    // make its light free. This is the cheapest lever in the whole rig: the
-    // cost curve is superlinear past roughly 16 punctual lights, where each
-    // extra one costs about twice the previous.
-    expect(POINT_FIXTURES.length + COVES.length).toBeLessThanOrEqual(12);
+    // Every point light is a fixed per-fragment cost in a forward renderer whether
+    // or not it can reach the surface being shaded, so a wall does not make its
+    // light free. The cost curve is superlinear past roughly 16 punctual lights.
+    expect(POINT_FIXTURES.length).toBeLessThanOrEqual(12);
   });
 
   it('has unique fixture ids, since they are React keys', () => {
-    const ids = [...POINT_FIXTURES, ...COVES].map((f) => f.id);
+    const ids = POINT_FIXTURES.map((f) => f.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
@@ -307,5 +303,43 @@ describe('measured illumination', () => {
     expect(riser).toBeDefined();
     if (!riser) return;
     expect(displayed(riser.p, riser.n, riser.albedo, 0)).toBeGreaterThan(100);
+  });
+});
+
+/**
+ * The cove wash was retired, not dimmed.
+ *
+ * `CoveLight_L` / `CoveLight_R` were `RectAreaLight`s, and a `RectAreaLight` runs
+ * LTC integration with two texture lookups per light PER PIXEL every frame —
+ * several times the per-pixel cost of a point light. With the screen light that was
+ * three of them dominating the fragment budget, and the room held 30-45 fps where it
+ * wanted 60.
+ *
+ * The visible glowing band was never those lights: it is emissive geometry in the
+ * tray channel (`glowCove`), which is still there and brighter. Only the wash went,
+ * compensated by AMBIENT and especially HEMI — whose sky-to-ground gradient
+ * brightens upward-facing surfaces the way an uplight does, at a fraction of the
+ * per-pixel cost.
+ */
+describe('cove wash retirement', () => {
+  it('leaves the screen as the only RectAreaLight in the scene', async () => {
+    const mod = await import('@/features/watch-party/theatre/lib/lighting');
+    expect('COVES' in mod).toBe(false);
+  });
+
+  it('compensates with ambient and hemisphere rather than leaving the room darker', () => {
+    // Both were raised when the wash went. HEMI carries more of it, because it is
+    // the one with a vertical gradient.
+    expect(HEMI.house).toBeGreaterThan(AMBIENT.house);
+    expect(HEMI.house).toBeGreaterThanOrEqual(1.5);
+    expect(AMBIENT.house).toBeGreaterThanOrEqual(1.4);
+  });
+
+  it('keeps the dim level proportionate, so sitting down still darkens the room', () => {
+    for (const l of [AMBIENT, HEMI]) {
+      expect(l.dim).toBeGreaterThan(0);
+      // Still a real dip, not a token one.
+      expect(l.dim / l.house).toBeLessThan(0.45);
+    }
   });
 });
