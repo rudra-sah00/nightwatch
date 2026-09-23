@@ -80,6 +80,7 @@ src/features/watch-party/
 │   ├── types.ts                      # Room, member, state, event types
 │   ├── types/
 │   │   └── rtm-messages.ts           # Full RTM message union type
+│   ├── permissions.ts                # canChat / canDraw / canPlaySound + inbound RTM gate
 │   └── utils.ts                      # Room ID generator, host check, URL normalisation
 ├── media/                # Agora RTC/RTM integration
 │   ├── hooks/
@@ -255,6 +256,98 @@ Composes all sub-hooks into a single API:
 
 Handles top-level RTM messages: `JOIN_APPROVED`, `JOIN_REJECTED`, `KICK`, `PARTY_CLOSED`. Sends `SYNC_REQUEST` on guest RTM connect. Fetches initial chat messages on join.
 
+It also owns two things that used to be missing or host-only:
+
+- **The inbound RTM permission gate.** Every message passes
+  `isRtmMessageAllowed(room, senderId, msg)` before any sub-hook or the event bus
+  sees it. See [Interaction permissions](#interaction-permissions).
+- **Socket.IO room membership, for every authenticated member.** It emits
+  `watch-party:join_room` on mount and on reconnect, `watch-party:leave_room` on
+  teardown, and handles `watch-party:closed` by tearing the session down and
+  navigating away. Previously the *only* place that joined `room:<id>` was a
+  host-gated effect in `useWatchPartyMembers`, so no other member was in the
+  server's broadcast room and none of the server's party events —
+  `MEMBERS_UPDATED`, `MEMBER_LEFT`, `CONTENT_UPDATED`, `PERMISSIONS_UPDATED`,
+  `watch-party:closed` — could reach them.
+
+  Authenticated members only. A guest's socket is opened by
+  `use-watch-party-client` *before* `requestJoin` has run, so it carries no
+  `guest_token` and the backend cannot verify it is a member of this room —
+  `watch-party:join_room` answers `NOT_A_MEMBER`. Guests still depend on the RTM
+  `PARTY_CLOSED` broadcast. Closing that gap means re-initialising the shared
+  socket with the guest token after approval, which is a change to the socket
+  provider that friends and presence also use.
+
+## Interaction permissions
+
+`room/permissions.ts`
+
+`resolveMemberPermissions(room, userId)` is the single client-side resolution of
+`canChat` / `canDraw` / `canPlaySound`. Precedence: per-member override, then room
+global, then built-in default (`canGuestsDraw` defaults false; chat and sounds
+default true). The host is never restricted — `canGuests*` is by its own name about
+guests.
+
+The tests on `undefined`, not falsiness, are load-bearing: a per-member override of
+`false` against a permissive global is the interesting case, and a `||` chain
+discards it. The backend resolves the identical precedence in
+`src/modules/watch-party/lib/permissions.ts`; the two must agree or a member sees
+an enabled control that silently fails.
+
+This used to be written inline in `ActiveWatchParty`, `use-watch-party-sidebar` and
+`WatchPartySettings`, and the copies had drifted — only one treated the host as
+always-permitted.
+
+### Where each permission is enforced
+
+| Permission | Durable server write? | Enforcement |
+|---|---|---|
+| `canChat` | Yes — Redis chat backlog | Server (`ChatService.addMessage`) **and** receiver |
+| `canDraw` | No — RTM only | Receiver |
+| `canPlaySound` | No — RTM only | Receiver |
+
+`isRtmMessageAllowed(room, senderId, message)` is the receiver-side gate, applied
+once in `useWatchParty`'s `onMessage` so it covers both the sub-hook handlers and
+the `rtm-events` bus. `senderId` is the Agora publisher id — the authenticated
+channel identity, not a payload field a sender could edit.
+
+Gated on `canDraw`: `SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_MOVE_Z`,
+`SKETCH_CURSOR_MOVE`, `SKETCH_REACTION`, `SKETCH_SYNC_STATE`. Gated on
+`canPlaySound`: `INTERACTION` with `kind: 'sound'`. Gated on `canChat`: `CHAT`.
+
+Not gated: `SKETCH_REQUEST_SYNC` (asking for the canvas is reading, not drawing —
+a member with drawing off still sees what others drew), emoji reactions (no
+permission exists for them), playback events, membership, and theatre traffic.
+
+Unknown senders and un-loaded rooms **pass**. Failing open is deliberate: the
+window before the room lands is exactly when a joining guest is catching up on the
+canvas, and a gate that dropped traffic then would blank the party for the case it
+exists to protect.
+
+#### Why the receiver, and why chat is different
+
+Sketch strokes and soundboard triggers never reach our backend — they are RTM
+channel messages that go peer to peer, which is what makes the overlay feel
+immediate. Routing them through REST so the server could vet them would mean a
+round trip per pointer-move event, trading the feature's entire latency design for
+a property the receiver can enforce itself. For data that is never persisted the
+receiver *is* the right authority and is as strong as a server check: every client
+already holds the room's authoritative permissions, and a message all receivers
+drop has left nothing behind.
+
+Before the gate existed, the only thing enforcing `canGuestsDraw` and
+`canGuestsPlaySounds` was whether the sender's own UI offered the button. A guest
+with drawing switched off could publish `SKETCH_CLEAR mode:'all'` by hand and wipe
+the host's canvas for the whole party.
+
+Chat is gated on the receiver **and** on the server, because the two block
+different things: the server keeps a muted guest's line out of the durable Redis
+backlog that late joiners read, and the receiver keeps the same line out of the
+live chat panel, which RTM delivers without the server ever being involved. A
+refused write now answers `403 CHAT_MUTED` (or `404 ROOM_NOT_FOUND`) rather than a
+blanket `ACTION_FAILED`, so a deliberate moderation action no longer looks like a
+network fault.
+
 ### useWatchPartyLifecycle
 
 `room/hooks/useWatchPartyLifecycle.ts`
@@ -273,6 +366,11 @@ Manages membership: approve/reject/kick via REST + RTM broadcast. Features:
 - **Socket.IO listener**: Host receives `PENDING_MEMBERS_UPDATED` events for real-time join request notifications.
 - **Permission updates**: Listens for `LOCAL_PERMISSIONS_UPDATED` and `LOCAL_MEMBER_PERMISSIONS_UPDATED` CustomEvents from the settings panel.
 - **RTM handler**: Processes `MEMBER_JOINED`, `MEMBER_LEFT`, `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`.
+- **Socket.IO**: host-only `PENDING_MEMBERS_UPDATED` only. It no longer emits
+  `watch-party:join_room` / `leave_room` — `useWatchParty` owns the socket room for
+  every authenticated member. Two owners of one join meant this hook's cleanup
+  could drop the host out of `room:<id>` while the other effect still believed it
+  was in.
 
 ### useWatchPartySync
 
@@ -463,6 +561,7 @@ resolves the playable URL server-side at room creation (see
 | `useMediaControls` | `hooks/use-media-controls.ts` | Audio/video device dropdown visibility state. |
 | `useDesktopNotifications` | `hooks/use-desktop-notifications.ts` | Discord Rich Presence, taskbar unread badge, native OS toast notifications for messages when window is blurred. |
 | `useWatchPartySettings` | `hooks/use-watch-party-settings.ts` | Settings overlay open/close state. |
+| `useSingleTabClaim` | `hooks/use-single-tab-claim.ts` | `BroadcastChannel` claim protocol giving one tab ownership of a room. See [Multi-Tab Safety](#multi-tab-safety). |
 
 ## Media Hooks
 
@@ -613,7 +712,7 @@ singleton and a set of stateless fetch wrappers have nothing in common but the w
 | `/api/rooms/:id/pending` | GET | Fetch pending requests (host) |
 | `/api/rooms/:id/permissions` | POST | Update global permissions |
 | `/api/rooms/:id/members/:mid/permissions` | POST | Update member permissions |
-| `/api/rooms/:id/messages` | GET/POST | Get/send chat messages |
+| `/api/rooms/:id/messages` | GET/POST | Get/send chat messages. POST is permission-checked server-side: `403 CHAT_MUTED` when the host has muted you, `404 ROOM_NOT_FOUND` when the room is gone. |
 | `/api/soundboard` | GET | Trending sounds |
 | `/api/soundboard/search` | GET | Search sounds |
 
@@ -653,11 +752,38 @@ singleton and a set of stateless fetch wrappers have nothing in common but the w
 
 ### Multi-Tab Safety
 
-`WatchPartyClient` uses `BroadcastChannel` with a timestamp-based claim protocol to prevent duplicate RTM/RTC connections:
-1. New tab sends `{ type: 'CLAIM', ts: Date.now() }`
-2. Existing tab responds `{ type: 'ALREADY_ACTIVE' }` if it has an older timestamp
-3. Newer tab yields (blocks itself) upon receiving `ALREADY_ACTIVE`
-4. Oldest tab always wins ownership
+`hooks/use-single-tab-claim.ts` — `useSingleTabClaim(roomId)`, consumed by
+`WatchPartyClient`. Two tabs on one room means two RTM clients on the same channel
+with the same uid: every event is handled twice, and Agora rejects the duplicate
+login often enough to break the tab that was working.
+
+`BroadcastChannel('watch-party:<roomId>')`, claim protocol:
+
+1. On mount a tab broadcasts `{ type: 'CLAIM', at: Date.now(), id: <random> }`.
+2. A tab that receives an **older** claim blocks itself.
+3. A tab that receives a **newer** claim answers with its own. `BroadcastChannel`
+   does not echo to the sender, so a tab that mounted later never heard the
+   incumbent's original announcement — without the reply it would take the room.
+4. Ties break on `id`. `Date.now()` cannot separate two tabs opened in the same
+   millisecond, and without the tie-break each would find the other "not older"
+   and both would claim ownership.
+5. On `pagehide` (and unmount) a tab broadcasts `{ type: 'TAB_CLOSING' }`. Any
+   blocked tab clears its block and re-claims; several blocked tabs settle it
+   between themselves on the resulting exchange of claims.
+
+The incumbent keeps the room and the newcomer blocks, which is also the intuitive
+outcome — the newcomer has nothing on screen yet to lose.
+
+This section previously described the protocol above, but the code implemented
+something much smaller: post `TAB_ACTIVE` on mount, block on receiving *any*
+message. That got both halves wrong. Only the already-mounted tab hears a
+newcomer, so opening a second tab blocked the **first** — the one actually
+playing — and handed the room to the new one. And nothing was ever posted after
+mount, so closing the winning tab left the other stuck on "open in another tab"
+permanently: closing the tab you did not want cost you the party in the tab you
+did. `pagehide` rather than `unload` because `unload` does not fire on iOS Safari
+or on entry to the back/forward cache, which are exactly the cases that would
+strand the remaining tab.
 
 ### Token Fetch Safety
 
@@ -680,13 +806,33 @@ All room state mutations use Redis `WATCH`/`MULTI`/`EXEC` optimistic locking wit
 
 This prevents lost updates when concurrent operations hit the same room (e.g., two members joining simultaneously, host approving while someone leaves).
 
-### Host Transfer
+### Host leaving ends the party
 
-When the host leaves a room with remaining members:
-1. Room is NOT deleted
-2. Host role transfers to the longest-tenured member (`min(joinedAt)`)
-3. `HOST_TRANSFERRED` event emitted via Socket.IO
-4. Room continues operating normally
+`POST /api/rooms/:id/leave` by the host deletes the room **and its chat backlog**,
+and the server emits `watch-party:closed` with `{ reason: 'HOST_LEFT' }` to
+`room:<id>`. The same delete happens with `reason: 'EMPTY'` when the last member
+leaves.
+
+This matches the only affordance that reaches the endpoint. The host's leave button
+opens the "End Watch Party?" dialog, whose own text is *"As the host, ending the
+watch party will close the room for all members. This action cannot be undone."*
+
+The backend used to **transfer** the host to `min(joinedAt)` and keep the room
+alive whenever anyone else was still listed as a member — and someone always was.
+`useWatchPartyLifecycle.leaveRoom` broadcasts RTM `PARTY_CLOSED` to evict every
+guest *before* calling the API, and guests evicted that way never call
+`POST /leave` themselves, so they all remained in `room.members`. The transfer
+branch therefore always won. Nothing could act on the resulting
+`HOST_TRANSFERRED`: only the host ever joined the Socket.IO room, and no client
+listened for the event. What survived was a room the user had been told was
+irreversibly closed — live in Redis for the rest of its 6-hour TTL, carrying the
+full chat backlog and a host id belonging to someone who had already navigated
+away, and re-enterable by anyone still holding the invite link.
+
+Host transfer is a reasonable feature, but the case that wants it is a host whose
+connection *drops* rather than one who deliberately ends the party — and a dropped
+host never reaches this endpoint. Implementing that needs server-side party
+presence, which does not exist.
 
 ### Security Measures
 
@@ -713,9 +859,18 @@ When the host leaves a room with remaining members:
 |----------|-------|
 | Playback | `PLAY_EVENT`, `PAUSE_EVENT`, `SEEK_EVENT`, `RATE_EVENT`, `SYNC`, `SYNC_REQUEST` |
 | Members | `JOIN_APPROVED`, `JOIN_REJECTED`, `MEMBER_JOINED`, `MEMBER_LEFT`, `PARTY_CLOSED`, `KICK` |
-| Host | `HOST_DISCONNECTED`, `HOST_RECONNECTED`, `HOST_TRANSFERRED` |
+| Host | `HOST_DISCONNECTED`, `HOST_RECONNECTED` |
 | Chat | `CHAT`, `TYPING_START`, `TYPING_STOP` |
 | Interactions | `INTERACTION` (emoji/sound/animation) |
 | Sketch | `SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_REQUEST_SYNC`, `SKETCH_SYNC_STATE`, `SKETCH_MOVE_Z`, `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION` |
 | Permissions | `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`, `CONTENT_UPDATED` |
 | Stream | `STREAM_TOKEN` |
+
+`HOST_TRANSFERRED` was listed here but was never an RTM message — it was a
+Socket.IO emit, and it no longer exists. See
+[Host leaving ends the party](#host-leaving-ends-the-party).
+
+Server-side Socket.IO events (distinct from the RTM channel above):
+`PENDING_MEMBERS_UPDATED`, `MEMBERS_UPDATED`, `MEMBER_LEFT`, `JOIN_RESULT`,
+`CONTENT_UPDATED`, `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`,
+`watch-party:closed`.
