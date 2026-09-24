@@ -3,9 +3,8 @@
  *
  * Every number here was MEASURED from the Blender scene (theatre_blockout.blend,
  * kept outside this repo — it is a ~158 MB binary), not copied from the design
- * doc. docs/features/THEATRE_3D.md §2 has drifted from the built scene (it still
- * describes a 6 m room with 0.70 m seat pitch); this file reflects what actually
- * exists and is the value to trust.
+ * doc. docs/features/watch-party/THEATRE_3D.md §3 documents these values; this
+ * file remains the authority, so update the doc when a number here changes.
  *
  * COORDINATE CONVENTION
  * Blender is Z-up. glTF/three.js are Y-up. The exporter converts:
@@ -655,7 +654,7 @@ export function autoSeatOrder(userId: string): readonly SeatId[] {
  * The seat to sit this user in when they enter 3D and hold no seat, or null when
  * the room is full.
  *
- * Every party member is seated on entry now — see docs/features/THEATRE_3D.md §5.
+ * Every party member is seated on entry now — see docs/features/watch-party/THEATRE_3D.md §5.
  * Standing in the aisle is a state you choose by pressing `E`, not the state you
  * arrive in, because arriving on the rear platform behind everybody is a worse
  * first frame of a cinema than being in a chair facing the screen.

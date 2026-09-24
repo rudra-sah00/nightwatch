@@ -12,63 +12,71 @@
 
 Welcome to the Nightwatch frontend repository. This is a Next.js (App Router) application designed for real-time, synchronized media playback and interactive collaboration.
 
-With over 680 modules spanning complex real-time domains, this project implements a highly optimized, edge-ready architecture mixing Server-Side Rendering (SSR) with heavy client-side Peer-to-Peer data sharing via WebRTC and Real-Time Messaging.
+Spanning roughly 600 TypeScript modules across several real-time domains, it mixes Server-Side Rendering with heavy client-side peer-to-peer data sharing over WebRTC and real-time messaging. It is a **single package** — platform variation (desktop, mobile, TV) is handled inside `src/platforms/`, not by separate workspace packages.
 
-## Documentation Index
+## Documentation
 
-Due to the scale of the application, our detailed technical documentation is split into domain-specific guides inside the `/docs` folder.
+Detailed technical documentation lives in [`/docs`](./docs/README.md), organized to mirror `src/`: cross-cutting guides in `docs/architecture/`, platform shells in `docs/platforms/`, and one folder per feature in `docs/features/<name>/` matching `src/features/<name>/`.
+
+**[→ Full documentation index](./docs/README.md)**
+
+### Start here
+- [Setup & Local Development](./docs/SETUP.md): environment variables, dependencies, local start.
+- [Contributing Guide](./docs/CONTRIBUTING.md): lint rules, conventions, commit format, release process.
+- [Architecture Overview](./docs/architecture/OVERVIEW.md): route guard, route groups, feature slicing, native bridges, player compound components.
 
 ### Core Architecture
-- [Setup & Local Development](./docs/SETUP.md): Instructions for environment variables, dependencies, and local start.
-- [High-Level Architecture](./docs/ARCHITECTURE.md): The Next.js framework, real-time topologies, React state strategies, platform layers, and player compound components.
-- [API Layer & Communication](./docs/API_LAYER.md): Integration with Node.js backend, Agora RTM/RTC, and WebRTC protocols.
-- [State Management Strategy](./docs/STATE_MANAGEMENT.md): Multi-tiered state management using TanStack Query, Zustand stores, Provider Contexts, and React hooks.
-- [Testing Methodology](./docs/TESTING.md): Unit, integration, and E2E testing strategies using Vitest and Playwright.
-- [UI & Styling Guidelines](./docs/UI_GUIDELINES.md): Neo-brutalist design rules, Tailwind utility constraints, and CVA component usage.
-- [Internationalization](./docs/I18N.md): 14 languages, 8 namespaces, cookie-based locale, RTL support, and next-intl integration.
+- [API Layer & Communication](./docs/architecture/API_LAYER.md): `apiFetch`, proactive token refresh, and the transports in use.
+- [State Management Strategy](./docs/architecture/STATE_MANAGEMENT.md): TanStack Query, Zustand, Context, and `useReducer`.
+- [Testing Methodology](./docs/architecture/TESTING.md): Vitest and Playwright layout, coverage thresholds, CI quality gate.
+- [UI & Styling Guidelines](./docs/architecture/UI_GUIDELINES.md): theme tokens, dark-mode palette remap, CVA variants.
+- [Global UI Shell](./docs/architecture/GLOBAL_UI.md): root layout composition, app chrome, shared hooks, onboarding tour, error boundaries, SEO.
+- [Analytics & Push](./docs/architecture/ANALYTICS.md): Firebase Analytics, Crashlytics, consent gating, event catalogue, push notifications.
+- [Internationalization](./docs/architecture/I18N.md): 14 languages, 8 namespaces, cookie-based locale, RTL.
+
+### Platforms
+- [Desktop Application](./docs/platforms/DESKTOP.md): Electron wrapper, system tray, Discord Rich Presence, media keys, auto-updates.
+- [Mobile Application](./docs/platforms/MOBILE.md): Capacitor setup, 21 native plugins, mobile bridge API, dev workflow.
+- [Smart TV](./docs/platforms/SMART_TV.md): Android TV — spatial navigation, D-pad player, QR login, overscan.
 
 ### Feature Details
-- [Authentication](./docs/features/AUTHENTICATION.md): Dual-factor HTTP-only cookie sessions and Anti-Bot protection.
-- [Google OAuth](./docs/features/GOOGLE_AUTH.md): Google Sign-In integration (web redirect + native iOS/Android).
-- [Livestream Framework](./docs/features/LIVESTREAM.md): RTMP ingestion, HLS transmission, and Agora RTM Live Chat loops.
-- [Livestream Clipping](./docs/features/CLIPS.md): Record live moments, FFmpeg processing, MinIO storage, public sharing, and Library page.
-- [User Profile](./docs/features/PROFILE.md): Zod validation, S3 avatar uploads, and Security mutations.
-- [Ask AI](./docs/features/ASK_AI.md): Voice-to-voice AI assistant with Nova 2 Sonic, tool calling, and content search.
-- [Search Engine](./docs/features/SEARCH.md): Debounced URL-parameter driven queries and infinite scroll facets.
-- [Watch Content](./docs/features/WATCH.md): VOD operations, HLS bitrates, and Redis heartbeat synchronization.
-- [Watchlist](./docs/features/WATCHLIST.md): Optimistic UI, Radix primitives, and TanStack query caching.
-- [Watch Party](./docs/features/WATCH_PARTY.md): Decentralized peer-to-peer event pipelines over Agora Real-Time Messaging.
-- [Watch Party — Live TV](./docs/features/WATCH_PARTY_LIVE_TV.md): Watching a live channel together — URL resolution, why guests are not force-paused, and blocked-autoplay recovery.
-- [3D Theatre Mode](./docs/features/THEATRE_3D.md): Opt-in 3D auditorium for watch parties — R3F scene, Rapier walking, avatar sync over Agora RTM.
-- [Friends & Voice Calls](./docs/features/FRIENDS.md): Friend system, voice calls, media ducking, and online presence.
-- [Music](./docs/features/MUSIC.md): JioSaavn streaming, AudioEngine, synced lyrics, playlists, Redis queue, gapless playback, crossfade, equalizer, sleep timer, and Spotify Connect-like device transfer.
-- [Music Discover](./docs/features/MUSIC_DISCOVER.md): Swipe-based song discovery feed with audio previews, haptic feedback, and personalized recommendation engine.
-- [Manga](./docs/features/MANGA.md): MangaPlus reader with browse/search, favorites, reading progress persistence, and Smart TV spatial-navigation support.
-- [Remote Control](./docs/features/REMOTE_CONTROL.md): Mobile-to-desktop video remote control via Socket.IO.
-- [Smart TV](./docs/features/SMART_TV.md): Android TV platform — spatial navigation, D-pad player, letter grid search, overscan, QR login, music full player, manga reader.
-- [Mobile Application](./docs/features/MOBILE.md): Capacitor setup, 21 native plugins, mobile bridge API, and dev workflow.
-- [Desktop Application](./docs/DESKTOP.md): Electron wrapper, system tray, Discord Rich Presence, media keys, and auto-updates.
-- [Games](./docs/features/GAMES.md): Embedded HTML5 game catalogue, asset pipeline, and in-app player.
-  - [Games Patching](./docs/features/GAMES_PATCHING.md): Patching third-party game bundles for offline/embedded use.
-  - [Games Deployment](./docs/features/GAMES_DEPLOYMENT.md): Building and shipping game assets.
-
-### Contributing
-- [Contributing Guide](./docs/CONTRIBUTING.md): Branching model, commit conventions, and review expectations.
+- [Authentication](./docs/features/auth/README.md): cookie sessions, OTP, QR login, and anti-bot protection.
+- [Google OAuth](./docs/features/auth/GOOGLE_OAUTH.md): Google Sign-In (web redirect + native iOS/Android).
+- [User Profile](./docs/features/profile/README.md): Zod validation, avatar uploads, and security mutations.
+- [Hub](./docs/features/hub/README.md): the destination grid and landing surface.
+- [Search Engine](./docs/features/search/README.md): debounced URL-parameter driven queries and infinite scroll facets.
+- [Watch Content](./docs/features/watch/README.md): VOD operations, HLS/DASH engines, and progress synchronization.
+- [Watchlist](./docs/features/watchlist/README.md): optimistic UI and TanStack Query caching.
+- [Watch Party](./docs/features/watch-party/README.md): decentralized peer-to-peer event pipelines over Agora RTM.
+- [Watch Party — Live TV](./docs/features/watch-party/LIVE_TV.md): watching a live channel together and blocked-autoplay recovery.
+- [3D Theatre Mode](./docs/features/watch-party/THEATRE_3D.md): opt-in 3D auditorium — R3F scene, Rapier walking, avatar sync.
+- [Livestream Framework](./docs/features/livestream/README.md): IPTV channel browse, categories, and stream resolution.
+- [Livestream Clipping](./docs/features/clips/README.md): server-side clip recording, public sharing, and the Library page.
+- [Friends & Voice Calls](./docs/features/friends/README.md): friend system, voice calls, media ducking, and online presence.
+- [Music](./docs/features/music/README.md): JioSaavn streaming, AudioEngine, synced lyrics, playlists, gapless playback, crossfade, equalizer, and device transfer.
+- [Music Discover](./docs/features/music-discover/README.md): swipe-based song discovery with audio previews and haptic feedback.
+- [Manga](./docs/features/manga/README.md): MangaPlus reader with browse/search, favourites, and progress persistence.
+- [Ask AI](./docs/features/ask-ai/README.md): voice-to-voice AI assistant with tool calling and content search.
+- [Remote Control](./docs/features/remote-control/README.md): mobile-to-desktop video remote control via Socket.IO.
+- [Games](./docs/features/games/README.md): embedded HTML5 game catalogue, asset pipeline, and in-app player.
+  - [Games Patching](./docs/features/games/PATCHING.md): patching third-party game bundles for embedded use.
+  - [Games Deployment](./docs/features/games/DEPLOYMENT.md): building and shipping game assets.
 
 ## Technology Stack
 
-- **Framework:** Next.js 16 (React 19, App Router)
+- **Framework:** Next.js 16 (React 19, App Router). No Server Actions — mutations go through `apiFetch` to the Node.js backend.
 - **Desktop Wrapper:** Electron (Node.js)
-- **Mobile Wrapper:** Capacitor (iOS, Android)
+- **Mobile Wrapper:** Capacitor (iOS, Android, Android TV)
 - **Language:** TypeScript (Strict Mode)
-- **Styling:** Tailwind CSS v4 (Custom Neo-Brutalist Theme)
+- **Styling:** Tailwind CSS v4 (CSS-native `@theme`, custom neo-brutalist palette)
 - **Internationalization:** next-intl (14 languages, cookie-based)
-- **Real-Time Data:** Agora RTM, Socket.IO (friends, presence, voice calls)
+- **Real-Time Data:** Agora RTM (watch party signalling and chat), Socket.IO (friends, presence, voice-call signalling, music device sync, remote control)
 - **Real-Time Media:** Agora RTC (WebRTC — watch party, voice calls)
-- **Server State & Caching:** TanStack Query (useQuery, useMutation, stale-while-revalidate)
+- **Video:** `hls.js` and `dash.js` behind a shared engine abstraction
+- **Server State & Caching:** TanStack Query (`useQuery`, `useMutation`, stale-while-revalidate)
 - **Client State:** Zustand (auth state, music playback state)
-- **Real-Time Database:** Firestore (explore posts, reactions — real-time onSnapshot listeners)
-- **Quality Assurance:** Biome (Linting/Formatting), Vitest (Unit Testing), Playwright (E2E Testing)
+- **Firebase:** Analytics, Crashlytics (native), and Cloud Messaging push
+- **Quality Assurance:** Biome (linting/formatting), Vitest (unit — 187 files, 2,644 tests), Playwright (E2E)
 - **Package Manager:** pnpm
 
 ## Project Structure Overview
@@ -77,18 +85,21 @@ The `src` directory governs all application code, rigidly separated by domain lo
 
 ```bash
 src/
-├── app/               # Next.js App Router (Pages, Layouts, Server forms)
-├── capacitor/         # Capacitor mobile-specific modules (native plugins, providers)
-├── components/        # Global, reusable UI primitives (Buttons, Inputs, Dialogs)
-├── features/          # Domain-isolated modules (auth, profile, watch-party, livestream, explore, friends)
+├── app/               # Next.js App Router (pages, layouts, route groups)
+├── capacitor/         # Capacitor mobile modules (push, analytics, music service)
+├── components/        # Global, reusable UI primitives (buttons, inputs, dialogs)
+├── features/          # Domain-isolated modules (16 features — see docs/features/)
 ├── hooks/             # Global generic hooks
-├── i18n/              # Internationalization (14 locales, 8 namespaces per locale)
-├── lib/               # Shared utilities, formatting scripts, and global singletons
+├── i18n/              # Internationalization (14 locales, 8 namespaces each)
+├── lib/               # Shared utilities, native bridges, and global singletons
 ├── platforms/         # Platform-specific layers (desktop, mobile, smart-tv)
-├── providers/         # Global React Contexts (Socket, Session, Theme)
+├── providers/         # Global React contexts (query, auth, socket, theme, intl)
 ├── store/             # Zustand global stores (auth)
-└── types/             # Global TypeScript types (Zod inferred and explicit interfaces)
+├── types/             # Global TypeScript types
+└── proxy.ts           # Server-side route guard (Next.js 16 renamed middleware → proxy)
 ```
+
+Tests live in `tests/`, mirroring `src/` — not colocated.
 
 ## Quick Start
 
@@ -120,18 +131,15 @@ pnpm desktop:start
 
 ### Automated Cloud Builds (Releases)
 
-The application uses GitHub Actions to automatically build and publish `.dmg` (Mac), `.msi`/`.exe` (Windows), and `.AppImage`/`.deb` (Linux) binaries whenever a new "v*" version tag is created.
+Releases are automated. `release.yml` runs [release-please](https://github.com/googleapis/release-please) on every push to `main`: it reads Conventional Commit messages, maintains `CHANGELOG.md`, and opens a release PR. Merging that PR creates the `v*` tag, which triggers `build-desktop.yml`, `build-android.yml`, and `build-android-tv.yml` on cloud runners. Those workflows compile the Next.js + Electron binaries and attach `.dmg` (macOS), `.msi`/`.exe` (Windows), `.AppImage`/`.deb` (Linux), and the Android APKs to the GitHub Releases page.
 
-You can easily trigger a new desktop build using the official [GitHub CLI (`gh`)](https://cli.github.com/):
+Do not bump the version in `package.json` or create tags by hand — release-please owns both, and a manual tag will desync `.release-please-manifest.json`.
+
+To build outside the release flow, dispatch a workflow directly:
 
 ```bash
-# 1. Update the version in package.json
-# 2. Commit the change
-# 3. Create and push a new release tag using the gh cli
-gh release create v2.17.0 --title "v2.17.0 - Major Update" --notes "Release notes here..."
+gh workflow run build-desktop.yml
 ```
-
-As soon as the tag is pushed to GitHub, the `Build Electron Desktop App` action will spin up cloud runners, compile the Next.js + Electron binaries, and attach the installer links automatically to the GitHub Releases page.
 
 ## Mobile Application (iOS, Android)
 
