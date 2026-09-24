@@ -30,7 +30,6 @@ export * from './rest/chat.api';
 export * from './rest/membership.api';
 export * from './rest/permissions.api';
 export * from './rest/playback.api';
-export * from './rest/relay.api';
 export * from './rest/room.api';
 export * from './rest/soundboard.api';
 export * from './rtm-events';

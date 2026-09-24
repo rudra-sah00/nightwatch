@@ -6,7 +6,7 @@ import type {
 } from '@mediapipe/tasks-vision';
 import type { ICameraVideoTrack } from 'agora-rtc-sdk-ng';
 import { useCallback, useEffect, useRef } from 'react';
-import type { RTMMessage } from '../../room/types/rtm-messages';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 
 interface WasmFileset {
   wasmLoaderPath: string;

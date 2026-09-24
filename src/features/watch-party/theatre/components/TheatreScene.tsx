@@ -24,7 +24,7 @@ import { useSeatedCamera } from '../hooks/use-seated-camera';
 import { useSitInteraction } from '../hooks/use-sit-interaction';
 import { useSpeechBubbles } from '../hooks/use-speech-bubbles';
 import { useTheatreAssets } from '../hooks/use-theatre-assets';
-import type { TheatreNet } from '../hooks/use-theatre-network';
+import { useTheatreNetwork } from '../hooks/use-theatre-network';
 import { useVideoTexture } from '../hooks/use-video-texture';
 import { DANCE_CLIPS } from '../lib/animation';
 import { DANCE_CLEARANCE_M } from '../lib/dance-rules';
@@ -54,15 +54,7 @@ import { TheatreSeating } from './TheatreSeating';
 
 interface TheatreSceneProps {
   userId: string;
-  /**
-   * The network layer, owned by `WatchPartyVideoArea`.
-   *
-   * Passed in rather than created here: this component is unmounted whenever the view
-   * mode returns to `2d`, and the pose buffers are fed by a relay connection that
-   * outlives it. Owning them here would discard every peer's interpolation history on
-   * each 2D round trip — the same reason the seat claim is owned above too.
-   */
-  net: TheatreNet;
+  rtmSendMessage?: (msg: RTMMessage) => void;
   /** Screen-focused mode locks the camera instead of allowing free walking. */
   cinema?: boolean;
   /**
@@ -136,7 +128,7 @@ const DPR_MAX = 1.5;
 
 export function TheatreScene({
   userId,
-  net,
+  rtmSendMessage,
   cinema = false,
   memberIds = [],
   memberNames,
@@ -169,7 +161,17 @@ export function TheatreScene({
   // Only one character body is ever fetched — see avatarModelsFor.
   const character = useTheatreView((s) => s.character);
 
-  const { peerIds, publishPose, samplePeer, peerCharacter } = net;
+  const { peerIds, publishPose, samplePeer, peerCharacter } = useTheatreNetwork(
+    {
+      userId,
+      rtmSendMessage,
+      character,
+      // The roster is the authority on who exists: peers missing from it are
+      // despawned, so a departure lands in 3D whichever membership signal fired.
+      memberIds,
+      enabled: true,
+    },
+  );
 
   // Maps a peer's chosen body onto one of the already-loaded models.
   const resolveCharacterModel = useCallback(

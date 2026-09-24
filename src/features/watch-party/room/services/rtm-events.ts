@@ -61,13 +61,8 @@ export const onSketchDraw = <T = unknown>(callback: (action: T) => void) =>
 /* ───────────────────── 3D theatre mode ───────────────────── */
 
 /**
- * Remote avatar poses.
- *
- * Retained for compatibility with anything still subscribing, but the theatre no longer
- * uses it: poses arrive as binary batches on the relay and go straight into a
- * `SnapshotBuffer` via `useTheatreNetwork`, without passing through this JSON bus. The
- * relay broadcasts control messages with `socket.to(room)`, which excludes the sender, so
- * no self-filtering is needed here either.
+ * Remote avatar poses. Fires for peers only — `useAgoraRtm` does not echo the
+ * local user's own messages back, so no self-filtering is needed here.
  */
 export const onAvatarTransform = (
   callback: (pose: {

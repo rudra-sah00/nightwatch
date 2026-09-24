@@ -53,7 +53,7 @@ describe('useWatchPartyChat', () => {
 
     act(() => {
       result.current.handleIncomingRtmMessage(
-        mockMsg as unknown as import('@/features/watch-party/room/types/rtm-messages').RTMMessage,
+        mockMsg as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage,
       );
     });
 
@@ -69,7 +69,7 @@ describe('useWatchPartyChat', () => {
         type: 'TYPING_START',
         userId: 'user-2',
         userName: 'User 2',
-      } as unknown as import('@/features/watch-party/room/types/rtm-messages').RTMMessage);
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
     });
     expect(result.current.typingUsers).toContainEqual({
       userId: 'user-2',
@@ -80,7 +80,7 @@ describe('useWatchPartyChat', () => {
       result.current.handleIncomingRtmMessage({
         type: 'TYPING_STOP',
         userId: 'user-2',
-      } as unknown as import('@/features/watch-party/room/types/rtm-messages').RTMMessage);
+      } as unknown as import('@/features/watch-party/media/hooks/useAgoraRtm').RTMMessage);
     });
     expect(result.current.typingUsers).toHaveLength(0);
   });

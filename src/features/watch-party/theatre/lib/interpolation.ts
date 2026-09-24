@@ -1,80 +1,53 @@
 /**
  * Snapshot interpolation for remote avatars.
  *
- * Avatar poses arrive from the relay at a low rate (see `THEATRE_NET`), far below
- * frame rate. Rendering them raw looks like teleporting, so each remote avatar keeps
- * a short buffer of timestamped snapshots and is rendered slightly in the past,
- * interpolating between the two straddling samples. This is the standard approach for
- * networked characters and trades a little latency for motion that reads as walking.
- *
- * ---- EVERY TIMESTAMP HERE IS SERVER TIME ----
- *
- * `Snapshot.t` is the relay's tick, identical for every pose in a batch and for every
- * client that receives it. `sample()` must be called with server time too — see
- * `relay/lib/clock.ts` for how a client derives it.
- *
- * This was not always so, and the old arrangement was a real bug rather than an
- * imprecision. Senders stamped `t = Date.now()` and receivers compared against their
- * own `Date.now()`, so the interpolation window was `INTERP_DELAY_MS ± skew`. For a
- * peer whose clock ran more than `INTERP_DELAY_MS` behind, `target >= newest.t` held
- * on every call, the hold-at-newest branch ran, and there was NO interpolation at
- * all — that avatar stepped at the send rate. Consumer clocks drift by seconds, so
- * this was likely a worse artefact than anything the network was doing.
+ * Avatar poses arrive over Agora RTM at a low rate (see `THEATRE_NET`), far
+ * below frame rate. Rendering them raw looks like teleporting, so each remote
+ * avatar keeps a short buffer of timestamped snapshots and is rendered slightly
+ * in the past, interpolating between the two straddling samples. This is the
+ * standard approach for networked characters and trades a little latency for
+ * motion that reads as walking.
  */
 
 /**
  * Network budget.
  *
- * The relay batches poses and fans out one message per client per tick, so these
- * numbers no longer trade against a per-message bill — they trade against CPU on a
- * main thread already running HLS decode and WebGL, and against how far in the past
- * remote avatars are drawn.
+ * Agora RTM meters channel messages, and avatar transforms are the only
+ * repeating message in the system. These numbers keep a full room well inside a
+ * sane envelope: 8 walking users at 8 Hz is 64 msg/s, and in practice most of a
+ * watch party is seated and still, emitting nothing at all.
  */
 export const THEATRE_NET = {
-  /**
-   * Max transform broadcasts per second, per user.
-   *
-   * 20 Hz rather than the 8 Hz the Agora path used. Agora's SDK ignored publish calls
-   * beyond 20/second and metered every message per recipient, so 8 Hz was a cost
-   * ceiling as much as a technical one. Against our own relay the only cost is a 10-byte
-   * frame, and the halved sampling delay (62 ms average at 8 Hz, 25 ms at 20 Hz) comes
-   * straight off perceived lag.
-   */
-  SEND_HZ: 20,
+  /** Max transform broadcasts per second, per user. */
+  SEND_HZ: 8,
   /** Skip a send if the avatar moved less than this (metres). */
   POSITION_EPSILON: 0.02,
   /** Skip a send if the avatar turned less than this (degrees). */
   ROTATION_EPSILON: 2,
   /**
-   * Default delay to render remote avatars behind the newest snapshot (ms).
-   *
-   * A DEFAULT, not the value in force: the relay sends `interpDelayMs` in its `hello`
-   * and the caller passes that to `sample()`. Keeping it server-side means the buffer
-   * can be retuned from measured jitter without shipping a frontend release, which
-   * matters because this number has never been measured — it was guessed, and the
-   * buffer needs to cover the p99 tail rather than the average.
-   *
-   * Must exceed the send interval (50 ms at 20 Hz) or the buffer runs dry between
-   * packets and playback stutters.
+   * Render remote avatars this far behind the newest snapshot (ms).
+   * Must exceed the send interval (125 ms at 8 Hz) or the buffer runs dry and
+   * playback stutters.
    */
   INTERP_DELAY_MS: 160,
   /** Discard snapshots older than this. */
   BUFFER_MS: 1000,
   /**
-   * Force a pose through the dead band this often, while WALKING only.
+   * Force a pose through the dead band this often.
    *
-   * A moving avatar that stops mid-stride would otherwise freeze one frame short of
-   * where it really is. It is deliberately NOT a liveness mechanism any more: presence
-   * comes from the relay's roster, and a seated avatar's position is fully derivable
-   * from its seat claim — `seatedAvatarPose` derives it and `PassiveAvatars` already
-   * draws 2D members that way with no pose traffic at all.
-   *
-   * Dropping the heartbeat for seated members is the largest single reduction in pose
-   * traffic available: in a cinema most people are seated most of the time, and eight
-   * seated users on the old 2 s heartbeat cost 32 messages a second for information
-   * every client could compute.
+   * Without it a motionless avatar transmits nothing and is therefore invisible
+   * to everyone — including anyone who joins later. 2 s costs 0.5 msg/s per
+   * person, negligible beside the 8 Hz walking cap, and doubles as liveness.
    */
   HEARTBEAT_MS: 2000,
+  /**
+   * Treat a peer as gone if silent for this long.
+   *
+   * This is a connection-loss fallback only; normal departures come from
+   * MEMBER_LEFT. It must comfortably exceed HEARTBEAT_MS or idle players get
+   * culled while still present.
+   */
+  STALE_MS: 30000,
 } as const;
 
 export interface Snapshot {
@@ -87,13 +60,7 @@ export interface Snapshot {
   s: string;
   /** which dance, index into DANCE_CLIPS. Only set when `s` is 'dance'. */
   d?: number;
-  /**
-   * SERVER time, ms — the relay's tick for the batch this pose arrived in.
-   *
-   * Never a sender's own clock. Every pose in one batch shares this value and every
-   * client that receives the batch reads the same number, which is what makes the
-   * interpolation window exact rather than `± skew`.
-   */
+  /** sender timestamp, ms */
   t: number;
 }
 
@@ -122,8 +89,10 @@ function lerpAngle(a: number, b: number, k: number): number {
  */
 export class SnapshotBuffer {
   private items: Snapshot[] = [];
+  private lastSeen = 0;
 
-  push(snap: Snapshot): void {
+  push(snap: Snapshot, now: number = Date.now()): void {
+    this.lastSeen = now;
     // Out-of-order arrival is possible; insert by timestamp rather than append.
     const i = this.items.findIndex((s) => s.t > snap.t);
     if (i === -1) this.items.push(snap);
@@ -135,6 +104,11 @@ export class SnapshotBuffer {
     }
   }
 
+  /** True when the peer has gone quiet long enough to remove. */
+  isStale(now: number = Date.now()): boolean {
+    return this.lastSeen > 0 && now - this.lastSeen > THEATRE_NET.STALE_MS;
+  }
+
   get latest(): Snapshot | null {
     return this.items.length ? this.items[this.items.length - 1] : null;
   }
@@ -142,27 +116,18 @@ export class SnapshotBuffer {
   /**
    * Pose at `renderTime`, interpolated between the straddling snapshots.
    *
-   * @param renderTime - SERVER time now, from `relay/lib/clock.ts`. Passing a local
-   *   `Date.now()` reintroduces the skew bug this class was fixed for.
-   * @param delayMs - How far in the past to render. Defaults to
-   *   `THEATRE_NET.INTERP_DELAY_MS`, but callers should pass the value the relay sent
-   *   in its `hello` so it can be tuned without a client release.
-   *
    * Before the first two samples arrive this returns the single known pose, and
    * past the newest sample it holds position rather than extrapolating — a
    * seated avatar that stopped sending must not drift.
    */
-  sample(
-    renderTime: number,
-    delayMs: number = THEATRE_NET.INTERP_DELAY_MS,
-  ): Pose | null {
+  sample(renderTime: number): Pose | null {
     if (this.items.length === 0) return null;
     if (this.items.length === 1) {
       const o = this.items[0];
       return { x: o.x, y: o.y, z: o.z, r: o.r, s: o.s, d: o.d };
     }
 
-    const target = renderTime - delayMs;
+    const target = renderTime - THEATRE_NET.INTERP_DELAY_MS;
 
     if (target <= this.items[0].t) {
       const o = this.items[0];

@@ -34,7 +34,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
-import type { RTMMessage } from '../../room/types/rtm-messages';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import { type ToolType, useSketch } from '../context/SketchContext';
 import { useSketchMoveZ } from '../hooks/use-sketch-overlay';
 

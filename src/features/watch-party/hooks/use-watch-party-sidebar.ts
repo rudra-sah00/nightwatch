@@ -5,10 +5,10 @@ import { useAuth } from '@/providers/auth-provider';
 import { useGestureDetection } from '../interactions/hooks/useGestureDetection';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
 import { useAgora } from '../media/hooks/useAgora';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import { useAgoraToken } from '../media/hooks/useAgoraToken';
 import { resolveMemberPermissions } from '../room/permissions';
 import type { WatchPartyRoom } from '../room/types';
-import type { RTMMessage } from '../room/types/rtm-messages';
 
 /** Sidebar tab identifier type. */
 type SidebarTab = 'chat' | 'participants' | 'soundboard' | 'sketch';

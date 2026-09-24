@@ -16,9 +16,9 @@ import {
   WatchPartySketchDisabled,
 } from '../interactions/components/WatchPartySketch';
 import type { AgoraParticipant } from '../media/hooks/useAgora';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 // Types
 import type { ChatMessage, WatchPartyRoom } from '../room/types';
-import type { RTMMessage } from '../room/types/rtm-messages';
 // Components
 import { MediaControls } from './MediaControls';
 import { PendingRequests } from './PendingRequests';

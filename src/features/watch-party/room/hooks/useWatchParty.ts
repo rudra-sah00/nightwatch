@@ -8,7 +8,8 @@ import { useAuth } from '@/providers/auth-provider';
 import { useSocket } from '@/providers/socket-provider';
 // Modular Hooks
 import { useWatchPartyChat } from '../../chat/hooks/useWatchPartyChat';
-import { useRelay } from '../../relay/hooks/use-relay';
+import { useAgoraRtm } from '../../media/hooks/useAgoraRtm';
+import { useAgoraRtmToken } from '../../media/hooks/useAgoraRtmToken';
 import { isRtmMessageAllowed } from '../permissions';
 import {
   dispatchRtmMessage,
@@ -48,6 +49,11 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const [requestStatus, setRequestStatus] = useState<
     'idle' | 'pending' | 'rejected' | 'joined'
   >('idle');
+  const [agoraRtmToken, setAgoraRtmToken] = useState<{
+    token: string;
+    appId: string;
+    uid: string;
+  } | null>(null);
 
   const requestStatusRef = useRef(requestStatus);
   requestStatusRef.current = requestStatus;
@@ -95,36 +101,28 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
 
   const { user } = useAuth();
   const { socket } = useSocket();
+  // 0. Agora RTM Signaling
   const currentUserName =
     room?.members.find((m) => m.id === userId)?.name ||
     user?.name ||
     (userId?.startsWith('guest') ? tf('guest') : tf('member'));
 
-  /*
-    0. Signalling — our own relay.
-  
-    Replaces Agora RTM. The payload on the wire is still the `RTMMessage` union, which is
-    why `dispatchRtmMessage`, `rtm-events.ts` and all four sub-hooks below are unchanged:
-    only the transport moved.
+  const rtmToken = useAgoraRtmToken({
+    roomId: room?.id,
+    userId: userId,
+    userName: currentUserName,
+    initialTokenData: agoraRtmToken || undefined,
+  });
 
-    Two things the relay does that Agora could not:
-
-      * Presence is connection state. A socket closing IS the departure, so the three
-        reconciled signals — RTM `MEMBER_LEFT`, Socket.IO `MEMBERS_UPDATED`/`MEMBER_LEFT`,
-        and Agora presence `REMOTE_LEAVE`/`REMOTE_TIMEOUT`/`INTERVAL` — collapse to one.
-      * Senders are authorised server-side. Host-only messages travelled on a per-user
-        Agora channel gated ONLY by `isRtmMessageAllowed` on the receiver, so any member
-        could publish a `KICK` or a `SEEK_EVENT` and it was the victim's own client
-        declining to act that saved us. See `relay/control-policy.ts`.
-  */
   const {
     isConnected: isRtmConnected,
     sendMessage: rtmSendMessage,
     sendMessageToPeer: rtmSendMessageToPeer,
-  } = useRelay({
-    roomId: room?.id,
-    userId,
-    enabled: Boolean(room?.id && userId),
+  } = useAgoraRtm({
+    appId: rtmToken.appId,
+    token: rtmToken.token || '',
+    channel: rtmToken.channel,
+    userId: rtmToken.uid,
     onMessage: (msg, senderId) => {
       /*
         Receiver-side permission enforcement.
@@ -240,6 +238,10 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         }
       }
     },
+    onPresence: (event) => {
+      sync.handlePresenceEvent(event);
+      members.handlePresenceEvent(event);
+    },
   });
 
   // 1. Chat Hook
@@ -265,6 +267,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     userId,
     roomId,
     rtmSendMessage,
+    setAgoraRtmToken,
   });
 
   // 3. Members Hook
@@ -439,15 +442,12 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     const RENEWAL_MS = 3.5 * 60 * 60 * 1000; // 3.5 hours
     const timer = setTimeout(async () => {
       const response = await getPartyStreamToken(room.id);
-      if (!response.token) return;
-      /*
-        A signal, not the token. Renewing is what creates the new stream session, so the
-        host still has to make this call — but the token itself never crosses the
-        signalling channel. Every member can fetch it from the endpoint that issued it,
-        which is both one fewer credential on the wire and one fewer thing a host could
-        assert incorrectly.
-      */
-      rtmSendMessage?.({ type: 'STREAM_TOKEN_REFRESHED' });
+      if (response.token) {
+        rtmSendMessage?.({
+          type: 'STREAM_TOKEN',
+          token: response.token,
+        } as unknown as import('../types/rtm-messages').RTMMessage);
+      }
     }, RENEWAL_MS);
 
     return () => clearTimeout(timer);

@@ -26,6 +26,7 @@ describe('useWatchPartyLifecycle', () => {
       setError: vi.fn(),
       setErrorCode: vi.fn(),
       setIsLoading: vi.fn(),
+      setAgoraRtmToken: vi.fn(),
       requestStatus: 'idle',
       normalizeRoomUrls: vi.fn((r) => r),
     };

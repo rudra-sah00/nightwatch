@@ -4,12 +4,12 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/analytics';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   getPartyMessages,
   sendPartyMessage,
 } from '../../room/services/watch-party.api';
 import type { ChatMessage, WatchPartyRoom } from '../../room/types';
-import type { RTMMessage } from '../../room/types/rtm-messages';
 
 /**
  * One `Audio` for the whole tab, reused.

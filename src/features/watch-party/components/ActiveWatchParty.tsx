@@ -5,9 +5,9 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/providers/auth-provider';
 import { useActiveWatchParty } from '../hooks/use-active-watch-party';
 import { useModalFocus } from '../hooks/use-modal-focus';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import { resolveMemberPermissions } from '../room/permissions';
 import type { ChatMessage, PartyEvent, WatchPartyRoom } from '../room/types';
-import type { RTMMessage } from '../room/types/rtm-messages';
 import { useTheatrePreload } from '../theatre/hooks/use-theatre-preload';
 import { useViewModeHotkey } from '../theatre/hooks/use-view-mode-hotkey';
 import { useTheatreView } from '../theatre/lib/view-mode';
@@ -61,18 +61,8 @@ interface ActiveWatchPartyProps {
   typingUsers?: TypingUser[];
   onTypingStart?: () => void;
   onTypingStop?: () => void;
-  /*
-    Synchronous, and deliberately so.
-
-    These returned `Promise<void>` when the transport was Agora, because its `publish()`
-    was async — but nothing ever awaited them, so the promise was only ever floating. The
-    relay emits over an open socket, which is fire-and-forget: there is no delivery
-    receipt to await, and returning a promise would imply a guarantee it cannot make.
-    Reliability for the messages that need it comes from ordering on the connection and
-    from state recovery on reconnect, not from a resolved promise here.
-  */
-  rtmSendMessage?: (msg: RTMMessage) => void;
-  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
+  rtmSendMessage?: (msg: RTMMessage) => Promise<void>;
+  rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => Promise<void>;
 }
 
 /**

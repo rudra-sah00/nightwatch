@@ -1,6 +1,7 @@
 import type Konva from 'konva';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   onSketchClear,
   onSketchCursorMove,
@@ -11,7 +12,6 @@ import {
   onSketchUndo,
 } from '../../room/services/watch-party.api';
 import type { SketchAction } from '../../room/types';
-import type { RTMMessage } from '../../room/types/rtm-messages';
 import { useSketch } from '../context/SketchContext';
 
 interface PendingTextInput {

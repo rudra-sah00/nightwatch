@@ -16,8 +16,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMediaControls } from '../hooks/use-media-controls';
 import type { MediaDevice } from '../media/hooks/useAgora';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import type { WatchPartyRoom } from '../room/types';
-import type { RTMMessage } from '../room/types/rtm-messages';
 import { WatchPartySettings } from './WatchPartySettings';
 
 /** Props for the {@link MediaControls} component. */

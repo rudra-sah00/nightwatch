@@ -12,20 +12,16 @@ import { CenterPlayButton } from '@/features/watch/player/ui/controls/PlayPause'
 import { NextEpisodeOverlay } from '@/features/watch/player/ui/overlays/NextEpisodeOverlay';
 import { extractTokenFromUrl } from '@/features/watch/utils';
 import { checkIsMobile } from '@/lib/electron-bridge';
-import { env } from '@/lib/env';
 import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
-import { useRelay } from '../relay/hooks/use-relay';
-import type { RelaySeatClaim } from '../relay/lib/types';
+import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import {
   PARTY_PLAYBACK_BLOCKED_EVENT,
   type PartyPlaybackBlockedDetail,
 } from '../room/hooks/usePredictiveSync';
 import type { WatchPartyRoom } from '../room/types';
-import type { RTMMessage } from '../room/types/rtm-messages';
 import { useSeatOccupancy } from '../theatre/hooks/use-seat-occupancy';
-import { useTheatreNetwork } from '../theatre/hooks/use-theatre-network';
 import { memberNames, presentMemberIds } from '../theatre/lib/roster';
 import type { Stance } from '../theatre/lib/stance';
 import { useTheatreView } from '../theatre/lib/view-mode';
@@ -236,71 +232,6 @@ export function WatchPartyVideoArea({
   currentUserName,
 }: WatchPartyVideoAreaProps) {
   /**
-   * Which avatar body this user picked.
-   *
-   * Read from the same store `TheatreScene` reads, but here, because the relay announces
-   * it on the roster at connect time — and the relay outlives the scene.
-   */
-  const theatreCharacter = useTheatreView((state) => state.character);
-
-  /**
-   * Bridges a replayed or incoming seat claim into `useSeatOccupancy`.
-   *
-   * A ref because the relay is declared before the seat hook, and the seat hook needs the
-   * relay's `claimSeat`. One of the two directions has to be late-bound; a ref costs
-   * nothing here since both live for the party's lifetime.
-   */
-  const seatClaimRef = useRef<((claim: RelaySeatClaim) => void) | null>(null);
-
-  /**
-   * The watch-party relay.
-   *
-   * Mounted HERE rather than inside `TheatreScene` for the same reason
-   * `useSeatOccupancy` is: the scene is unmounted every time the view mode returns to
-   * `2d`, and a connection that reconnects on every 2D round trip would lose its slot,
-   * its clock calibration and its place in the roster. This component's lifetime is the
-   * party's.
-   *
-   * Stage 1 of the migration: poses and seat claims ride the relay, the remaining
-   * control messages still ride `rtmSendMessage`. The relay simply stays off when
-   * `NEXT_PUBLIC_WS_RELAY_URL` is unset, so an environment without a relay behaves
-   * exactly as before.
-   */
-  const relay = useRelay({
-    roomId: room.id,
-    userId,
-    character: theatreCharacter === 'woman' ? 'w' : 'm',
-    enabled: Boolean(userId) && env.WS_RELAY_URL.length > 0,
-    onPose: (peerId, pose, serverTick) =>
-      theatreNetRef.current?.acceptPose(peerId, pose, serverTick),
-    onSeatClaim: (claim) => seatClaimRef.current?.(claim),
-  });
-
-  /**
-   * Pose buffers and the send-rate policy.
-   *
-   * Also above the scene, because the relay above feeds it. `TheatreScene` receives the
-   * result as one `net` prop and is otherwise unchanged by the transport swap.
-   */
-  const theatreNet = useTheatreNetwork({
-    userId: userId ?? '',
-    peerIds: relay.peerIds,
-    serverNow: relay.serverNow,
-    sendPose: relay.sendPose,
-    interpDelayMs: relay.interpDelayMs,
-    characterFor: relay.characterFor,
-    enabled: Boolean(userId),
-  });
-
-  /*
-    Refs break the circular reference between the two hooks above: the relay's `onPose`
-    has to reach the buffers, and the buffers are created from the relay's roster. A ref
-    is the standard way out and costs nothing, since both live for the party's lifetime.
-  */
-  const theatreNetRef = useRef(theatreNet);
-  theatreNetRef.current = theatreNet;
-
-  /**
    * Present members, memoised on the member list.
    *
    * A fresh array every render would re-fire the theatre's roster reconciliation
@@ -384,24 +315,15 @@ export function WatchPartyVideoArea({
 
     `active` is the 3D flag and gates one thing only: the automatic seat on entry.
   */
-  const { seatMap, mySeat, claimSeat, acceptRemoteClaim } = useSeatOccupancy({
+  const { seatMap, mySeat, claimSeat } = useSeatOccupancy({
     userId: userId ?? '',
-    // The relay stamps `at` in SERVER time and broadcasts the claim. That matters
-    // because `at` is the only field the contest is decided on: with wall clocks two
-    // people could each genuinely believe they claimed first.
-    claimSeatOnRelay: relay.claimSeat,
+    rtmSendMessage,
     // Same roster the avatars reconcile against, so a departed member's chair is
     // released rather than staying reserved for the rest of the session.
     memberIds: theatreMemberIds,
     enabled: Boolean(userId),
     active: is3D,
   });
-
-  /*
-    Close the loop declared above: the relay's `onSeatClaim` reaches the seat hook
-    through this ref, covering both live claims and the set replayed in `hello`.
-  */
-  seatClaimRef.current = acceptRemoteClaim;
 
   /*
     Where this user was standing, kept alongside their seat.
@@ -520,7 +442,7 @@ export function WatchPartyVideoArea({
         <div className="absolute inset-0 z-40 bg-black">
           <TheatreScene
             userId={userId ?? ''}
-            net={theatreNet}
+            rtmSendMessage={rtmSendMessage}
             cinema={viewMode === 'cinema'}
             /*
               Everyone currently in the party, so members who never switched 3D

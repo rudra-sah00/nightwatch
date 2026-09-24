@@ -23,7 +23,6 @@ Due to the scale of the application, our detailed technical documentation is spl
 - [High-Level Architecture](./docs/ARCHITECTURE.md): The Next.js framework, real-time topologies, React state strategies, platform layers, and player compound components.
 - [API Layer & Communication](./docs/API_LAYER.md): Integration with Node.js backend, Agora RTM/RTC, and WebRTC protocols.
 - [Realtime Migration Plan](./docs/REALTIME_MIGRATION.md): Plan for replacing Agora Signaling with our own relay — cost and latency analysis, all 32 message types, staged cutover.
-- [Relay Design](./docs/RELAY_DESIGN.md): The relay itself — where it terminates, binary wire protocol, auth and token renewal, presence from connection state, server-stamped timeline, fallback ladder, deployment and rollout gates.
 - [State Management Strategy](./docs/STATE_MANAGEMENT.md): Multi-tiered state management using TanStack Query, Zustand stores, Provider Contexts, and React hooks.
 - [Testing Methodology](./docs/TESTING.md): Unit, integration, and E2E testing strategies using Vitest and Playwright.
 - [UI & Styling Guidelines](./docs/UI_GUIDELINES.md): Neo-brutalist design rules, Tailwind utility constraints, and CVA component usage.

@@ -203,22 +203,14 @@ describe('useWatchPartySync', () => {
     expect(mockSetRoom).toHaveBeenCalled();
   });
 
-  it('re-fetches the stream token on STREAM_TOKEN_REFRESHED rather than trusting the payload', async () => {
-    /*
-      The message deliberately carries no token. It used to carry one, which put a live
-      credential on the signalling channel and made the host the authority on what that
-      credential was. Receivers now fetch it from the endpoint that issued it, and the
-      relay refuses `STREAM_TOKEN` from any client — see relay/control-policy.ts.
-    */
+  it('handleIncomingRtmMessage should update room for STREAM_TOKEN', () => {
     const { result } = renderHook(() => useWatchPartySync(defaultProps));
 
-    await act(async () => {
+    act(() => {
       result.current.handleIncomingRtmMessage({
-        type: 'STREAM_TOKEN_REFRESHED',
+        type: 'STREAM_TOKEN',
+        token: 'new-token-123',
       } as RTMMessage);
-      // let the fetch promise settle
-      await Promise.resolve();
-      await Promise.resolve();
     });
 
     expect(mockNormalizeRoomUrls).toHaveBeenCalled();
