@@ -38,12 +38,44 @@ const nextConfig: NextConfig = {
       '@tanstack/react-query',
       'radix-ui',
       'firebase',
-      'react-konva',
-      'konva',
       'zod',
       '@noriginmedia/norigin-spatial-navigation',
       'react-loading-skeleton',
       '@mediapipe/tasks-vision',
+      /*
+        `konva` and `react-konva` are DELIBERATELY ABSENT, against the general rule
+        above, and must not be added back.
+
+        `optimizePackageImports` rewrites a barrel import into deep imports of the
+        individual modules. For react-konva that skips its entry file
+        (`es/ReactKonva.js`), and that file has exactly two statements:
+
+            import 'konva';                    // registers every shape class
+            export * from './ReactKonvaCore.js';
+
+        The first is a bare side-effect import and it is the ONLY thing that registers
+        `Line`, `Rect`, `Circle` and the rest on the Konva namespace. `ReactKonvaCore`
+        itself imports `konva/lib/Core.js`, which has no shapes at all — that split is
+        how react-konva offers a "minimal" build you register shapes into yourself.
+
+        Optimising the import therefore turns the full build into the minimal one
+        without saying so. react-konva then looks up `Konva['Line']`, finds nothing,
+        and silently substitutes `Group`:
+
+            "Konva has no node with the type Line. Group will be used instead."
+
+        A Group paints nothing, so the sketch canvas accepted input, built its action
+        list and broadcast strokes correctly while drawing absolutely nothing. It fails
+        as a console warning rather than an error, which is why it looked like a
+        drawing bug rather than a bundler one.
+
+        `konva` is listed here too for a second reason: it is not a barrel at all.
+        `konva/lib/index.js` is `import { Konva } from './_FullInternals.js'; export
+        default Konva;` — a single default export whose entire purpose is that import's
+        side effect. There is nothing to optimise and everything to lose.
+
+        Guarded by tests/next-config-konva.test.ts.
+      */
     ],
     // Cache client-side router navigations to prevent full page reloads.
     // Without this, Next.js 15+ refetches the RSC payload on every navigation
