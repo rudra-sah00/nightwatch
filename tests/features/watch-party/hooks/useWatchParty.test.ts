@@ -38,30 +38,42 @@ vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
 vi.mock('sonner', () => import('../__mocks__/sonner'));
 vi.mock('@/features/watch', () => import('../__mocks__/watch-utils'));
 
-// RTM Mocks
-vi.mock('@/features/watch-party/media/hooks/useAgoraRtmToken', () => ({
-  useAgoraRtmToken: vi.fn(() => ({
-    appId: 'test-app-id',
-    token: 'test-token',
-    channel: 'test-channel',
-    uid: 'test-uid',
-    isLoading: false,
-  })),
-}));
+/*
+  Signalling mock.
 
+  Was two mocks — `useAgoraRtmToken` for the credential and `useAgoraRtm` for the
+  client. The relay needs neither: it fetches its own room-scoped token through the REST
+  layer (already mocked here) and holds one connection. Sends are synchronous now, so
+  these no longer resolve a promise nothing awaited.
+*/
 const { mockRtmSendMessage, mockRtmSendMessageToPeer } = vi.hoisted(() => ({
-  mockRtmSendMessage: vi.fn().mockResolvedValue(true),
-  mockRtmSendMessageToPeer: vi.fn().mockResolvedValue(true),
+  mockRtmSendMessage: vi.fn(),
+  mockRtmSendMessageToPeer: vi.fn(),
 }));
 
-vi.mock('@/features/watch-party/media/hooks/useAgoraRtm', () => ({
-  useAgoraRtm: vi.fn(() => {
-    return {
-      isConnected: true,
-      sendMessage: mockRtmSendMessage,
-      sendMessageToPeer: mockRtmSendMessageToPeer,
-    };
-  }),
+vi.mock('@/features/watch-party/relay/hooks/use-relay', () => ({
+  useRelay: vi.fn(() => ({
+    rung: 'relay',
+    isConnected: true,
+    selfSlot: 0,
+    roster: [],
+    peerIds: [],
+    interpDelayMs: 160,
+    serverNow: () => Date.now(),
+    sendPose: vi.fn(),
+    sendCursor: vi.fn(),
+    sendMessage: mockRtmSendMessage,
+    sendMessageToPeer: mockRtmSendMessageToPeer,
+    claimSeat: vi.fn(() => Date.now()),
+    announceCharacter: vi.fn(),
+    characterFor: () => null,
+    stats: {
+      bestRttMs: null,
+      jitterMs: null,
+      clockOffsetMs: 0,
+      clockSamples: 0,
+    },
+  })),
 }));
 
 describe('useWatchParty', () => {

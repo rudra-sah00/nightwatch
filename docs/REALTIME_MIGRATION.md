@@ -137,8 +137,19 @@ Add consumer last mile: +5–15 ms fibre, +20–40 ms mobile.
 **The Talcher box cannot serve production.** It has no public IPv4 —
 `117.199.185.185` is BSNL's NAT gateway, inbound times out, and the machine's only
 addresses are a Docker bridge and Tailscale. Its three IPv6 prefixes rotate, so it
-cannot hold a DNS name or a TLS certificate. Keep it as the dev and load-test target;
+cannot hold a stable DNS name. Keep it as the dev and load-test target;
 it is 6 cores, 15 GB, idle, reachable over Tailscale.
+
+> **Correction, 2026-09-24.** This paragraph originally said the rotating prefixes
+> mean it "cannot hold a DNS name or a TLS certificate". **The certificate half was
+> wrong** — a certificate binds to a name, not an address, and DNS-01 ACME
+> validation needs no inbound connectivity, so the name can hold a valid cert
+> whatever it points at. The real blockers were measured and are different:
+> Tailscale cannot establish a direct path to the box at all (20 attempts,
+> `direct connection not established`, every packet via `DERP(blr)`), which is
+> decisive for IPv4; and an `AAAA`-only relay is unreachable from any IPv4-only
+> client — including our own dev machine, which has **no global IPv6 address**.
+> See RELAY_DESIGN.md §1d for the full probe results.
 
 ---
 

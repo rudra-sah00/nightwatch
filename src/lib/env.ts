@@ -12,6 +12,7 @@
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+const wsRelayUrl = process.env.NEXT_PUBLIC_WS_RELAY_URL;
 const agoraAppId = process.env.NEXT_PUBLIC_AGORA_APP_ID;
 const turnstileKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -27,12 +28,19 @@ if (!backendUrl || !wsUrl || !agoraAppId) {
  *
  * - `BACKEND_URL` — Base URL of the Node.js API server.
  * - `WS_URL` — WebSocket endpoint for Socket.IO connections.
- * - `AGORA_APP_ID` — Agora project App ID for RTM/RTC.
+ * - `WS_RELAY_URL` — WebSocket endpoint for the watch-party relay. Deliberately
+ *   OPTIONAL and separate from `WS_URL`: the relay is its own process on its own port
+ *   with its own tunnel hostname, so it restarts without touching the API. Falling back
+ *   to `WS_URL` would silently point relay traffic at the API's three load-balanced
+ *   replicas, where room members would land on different processes and each would run
+ *   its own tick — so when this is unset the relay simply stays off.
+ * - `AGORA_APP_ID` — Agora project App ID for RTC (voice and video).
  * - `TURNSTILE_SITE_KEY` — Cloudflare Turnstile site key (empty string if unset).
  */
 export const env = {
   BACKEND_URL: backendUrl,
   WS_URL: wsUrl,
+  WS_RELAY_URL: wsRelayUrl || '',
   AGORA_APP_ID: agoraAppId,
   TURNSTILE_SITE_KEY: turnstileKey || '',
   GOOGLE_CLIENT_ID: googleClientId || '',

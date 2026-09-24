@@ -2,7 +2,6 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/analytics';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import type {
   SoundboardResponse,
   SoundItem,
@@ -12,6 +11,7 @@ import {
   onPartyInteraction,
   searchSounds,
 } from '../../room/services/watch-party.api';
+import type { RTMMessage } from '../../room/types/rtm-messages';
 
 /** Options for {@link useSoundboard}. */
 interface UseSoundboardOptions {

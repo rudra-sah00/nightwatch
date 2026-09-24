@@ -37,16 +37,6 @@ vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
 vi.mock('sonner', () => import('../__mocks__/sonner'));
 vi.mock('@/features/watch', () => import('../__mocks__/watch-utils'));
 
-vi.mock('@/features/watch-party/media/hooks/useAgoraRtmToken', () => ({
-  useAgoraRtmToken: vi.fn(() => ({
-    appId: 'app',
-    token: 'tok',
-    channel: 'R1',
-    uid: 'G1',
-    isLoading: false,
-  })),
-}));
-
 /** A minimal Socket.IO stand-in whose events can be driven from a test. */
 const socketHandlers = new Map<string, Set<(...args: unknown[]) => void>>();
 const socketEmit = vi.fn();
@@ -76,13 +66,35 @@ let capturedOnMessage:
   | ((msg: RTMMessage, senderId?: string) => void)
   | undefined;
 
-vi.mock('@/features/watch-party/media/hooks/useAgoraRtm', () => ({
-  useAgoraRtm: vi.fn((opts) => {
+/*
+  Capture the relay's `onMessage` so a test can push a control message in, exactly as the
+  Agora mock used to. The payload shape is unchanged — only the transport moved — which
+  is why every assertion below still applies.
+*/
+vi.mock('@/features/watch-party/relay/hooks/use-relay', () => ({
+  useRelay: vi.fn((opts) => {
     capturedOnMessage = opts.onMessage;
     return {
+      rung: 'relay',
       isConnected: true,
+      selfSlot: 0,
+      roster: [],
+      peerIds: [],
+      interpDelayMs: 160,
+      serverNow: () => Date.now(),
+      sendPose: vi.fn(),
+      sendCursor: vi.fn(),
       sendMessage: vi.fn(),
       sendMessageToPeer: vi.fn(),
+      claimSeat: vi.fn(() => Date.now()),
+      announceCharacter: vi.fn(),
+      characterFor: () => null,
+      stats: {
+        bestRttMs: null,
+        jitterMs: null,
+        clockOffsetMs: 0,
+        clockSamples: 0,
+      },
     };
   }),
 }));

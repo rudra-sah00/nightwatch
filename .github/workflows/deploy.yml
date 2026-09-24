@@ -59,6 +59,7 @@ jobs:
           cat >> .env.production.local << EOF
           NEXT_PUBLIC_BACKEND_URL=${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_WS_URL=${{ secrets.NEXT_PUBLIC_WS_URL }}
+          NEXT_PUBLIC_WS_RELAY_URL=${{ secrets.NEXT_PUBLIC_WS_RELAY_URL }}
           NEXT_PUBLIC_AGORA_APP_ID=${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           NEXT_PUBLIC_CF_WORKER_URL=${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
@@ -82,6 +83,7 @@ jobs:
           NODE_ENV: ${{ secrets.NODE_ENV }}
           NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
+          NEXT_PUBLIC_WS_RELAY_URL: ${{ secrets.NEXT_PUBLIC_WS_RELAY_URL }}
           NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
@@ -104,6 +106,7 @@ jobs:
           NODE_ENV: ${{ secrets.NODE_ENV }}
           NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL }}
           NEXT_PUBLIC_WS_URL: ${{ secrets.NEXT_PUBLIC_WS_URL }}
+          NEXT_PUBLIC_WS_RELAY_URL: ${{ secrets.NEXT_PUBLIC_WS_RELAY_URL }}
           NEXT_PUBLIC_AGORA_APP_ID: ${{ secrets.NEXT_PUBLIC_AGORA_APP_ID }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
           NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}

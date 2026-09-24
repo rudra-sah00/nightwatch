@@ -6,7 +6,6 @@ import { io } from 'socket.io-client';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/analytics';
 import { env } from '@/lib/env';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   createPartyRoom,
   getPartyStreamToken,
@@ -15,6 +14,7 @@ import {
   requestJoinPartyRoom,
 } from '../services/watch-party.api';
 import type { ChatMessage, PartyCreatePayload, WatchPartyRoom } from '../types';
+import type { RTMMessage } from '../types/rtm-messages';
 
 /** Props for {@link useWatchPartyLifecycle}. */
 interface UseWatchPartyLifecycleProps {
@@ -27,9 +27,6 @@ interface UseWatchPartyLifecycleProps {
   setError: React.Dispatch<React.SetStateAction<string | null>>;
   setErrorCode: React.Dispatch<React.SetStateAction<string | null>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setAgoraRtmToken: React.Dispatch<
-    React.SetStateAction<{ token: string; appId: string; uid: string } | null>
-  >;
   requestStatus: 'idle' | 'pending' | 'rejected' | 'joined';
   normalizeRoomUrls: (
     room: WatchPartyRoom,
@@ -61,7 +58,6 @@ export function useWatchPartyLifecycle({
   userId,
   roomId,
   rtmSendMessage,
-  setAgoraRtmToken,
 }: UseWatchPartyLifecycleProps) {
   const t = useTranslations('common.toasts');
   const tp = useTranslations('party.toasts');
@@ -117,7 +113,6 @@ export function useWatchPartyLifecycle({
         status?: string;
         room?: WatchPartyRoom;
         streamToken?: string;
-        agoraRtmToken?: { token: string; appId: string; uid: string };
       }) => {
         if (payload?.userId === activeUserId) {
           if (payload.status === 'approved') {
@@ -143,9 +138,6 @@ export function useWatchPartyLifecycle({
               });
 
               setRoom(normalizedRoom);
-              if (payload.agoraRtmToken) {
-                setAgoraRtmToken(payload.agoraRtmToken);
-              }
               setIsConnected(true);
               setRequestStatus('joined');
               toast.success(t('requestApproved'));
@@ -218,7 +210,6 @@ export function useWatchPartyLifecycle({
     setIsConnected,
     setRequestStatus,
     setError,
-    setAgoraRtmToken,
     t,
     tp,
   ]);

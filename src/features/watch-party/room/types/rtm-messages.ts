@@ -233,9 +233,21 @@ export interface RtmContentUpdated {
 
 // ============ Stream Token ============
 
-export interface RtmStreamToken {
-  type: 'STREAM_TOKEN';
-  token: string;
+/**
+ * The host has renewed the party's stream token. Re-fetch it.
+ *
+ * Deliberately carries NO token. It used to (`RtmStreamToken`, `{ token: string }`),
+ * which put a live credential on the signalling channel and made the host the authority
+ * on what that credential was — a host could hand guests any string and they would treat
+ * it as the stream URL's token.
+ *
+ * Every member is already authorised for `GET /api/rooms/:id/stream-token`, so a bare
+ * signal is enough: receivers fetch the token from the server that issued it. The relay
+ * refuses `STREAM_TOKEN` from any client for this reason — see
+ * `relay/control-policy.ts`.
+ */
+export interface RtmStreamTokenRefreshed {
+  type: 'STREAM_TOKEN_REFRESHED';
 }
 
 // ============ Union Type ============
@@ -336,6 +348,6 @@ export type RTMMessage =
   | RtmPermissionsUpdated
   | RtmMemberPermissionsUpdated
   | RtmContentUpdated
-  | RtmStreamToken
+  | RtmStreamTokenRefreshed
   | RtmAvatarTransform
   | RtmSeatClaim;

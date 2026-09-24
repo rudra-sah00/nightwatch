@@ -15,53 +15,29 @@ import {
  * chair, and must not silently re-seat you if you chose to stand.
  */
 
-type ClaimListener = (c: {
-  userId: string;
-  seatId: string | null;
-  at: number;
-}) => void;
+/**
+ * No module mocking any more.
+ *
+ * This suite used to mock `watch-party.api`'s `onSeatClaim`, `onMemberJoined` and
+ * `onMemberLeft`, because the hook subscribed to an ambient RTM event bus. It no longer
+ * subscribes to anything: claims are handed in through `acceptRemoteClaim` and
+ * departures come from the roster it is already given. Driving it is now a function
+ * call, which is both simpler and a closer match to how `WatchPartyVideoArea` wires it.
+ */
 
-const claimListeners = new Set<ClaimListener>();
-const joinListeners = new Set<(m: { id: string }) => void>();
-const leftListeners = new Set<(id: string) => void>();
-
-vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
-  onSeatClaim: (cb: ClaimListener) => {
-    claimListeners.add(cb);
-    return () => claimListeners.delete(cb);
-  },
-  onMemberJoined: (cb: (m: { id: string }) => void) => {
-    joinListeners.add(cb);
-    return () => joinListeners.delete(cb);
-  },
-  onMemberLeft: (cb: (id: string) => void) => {
-    leftListeners.add(cb);
-    return () => leftListeners.delete(cb);
-  },
-}));
-
-/** A claim arriving from somebody else. */
-function incomingClaim(userId: string, seatId: string | null, at: number) {
-  act(() => {
-    for (const cb of claimListeners) cb({ userId, seatId, at });
-  });
-}
-
-function memberLeft(userId: string) {
-  act(() => {
-    for (const cb of leftListeners) cb(userId);
-  });
-}
+/** Result of the hook, for the helpers below. */
+type SeatHook = ReturnType<typeof useSeatOccupancy>;
 
 function setup(
   overrides: Partial<Parameters<typeof useSeatOccupancy>[0]> = {},
 ) {
-  const rtmSendMessage = vi.fn();
+  /** Stands in for the relay: records the claim and stamps a server time. */
+  const claimSeatOnRelay = vi.fn((_seatId: string | null) => Date.now());
   const view = renderHook(
     (props: { active: boolean }) =>
       useSeatOccupancy({
         userId: 'me',
-        rtmSendMessage,
+        claimSeatOnRelay,
         memberIds: ['me', 'alice'],
         enabled: true,
         active: props.active,
@@ -69,28 +45,31 @@ function setup(
       }),
     { initialProps: { active: true } },
   );
-  return { ...view, rtmSendMessage };
+
+  /** A claim arriving from somebody else, or replayed by the relay in `hello`. */
+  const incomingClaim = (userId: string, seatId: string | null, at: number) => {
+    act(() => {
+      (view.result.current as SeatHook).acceptRemoteClaim({
+        userId,
+        seatId,
+        at,
+      });
+    });
+  };
+
+  return { ...view, claimSeatOnRelay, incomingClaim };
 }
 
 const claimsSent = (fn: ReturnType<typeof vi.fn>) =>
-  fn.mock.calls
-    .map((c) => c[0])
-    .filter((m) => m.type === 'SEAT_CLAIM')
-    .map((m) => m.seatId);
+  fn.mock.calls.map((c) => c[0] as string | null);
 
 describe('useSeatOccupancy — entering 3D', () => {
-  beforeEach(() => {
-    claimListeners.clear();
-    joinListeners.clear();
-    leftListeners.clear();
-  });
-
   it('seats you the first time you enter, and tells the room', () => {
     // The spawn point is on the rear platform behind both rows, so an unseated
     // arrival's first frame is the backs of other people's heads.
-    const { result, rtmSendMessage } = setup();
+    const { result, claimSeatOnRelay } = setup();
     expect(result.current.mySeat).toBe(autoSeatOrder('me')[0]);
-    expect(claimsSent(rtmSendMessage)).toEqual([result.current.mySeat]);
+    expect(claimsSent(claimSeatOnRelay)).toEqual([result.current.mySeat]);
   });
 
   it('does not seat anybody who is still in 2D', () => {
@@ -119,7 +98,7 @@ describe('useSeatOccupancy — entering 3D', () => {
       chair. The loser is bounced back to standing — and must then land somewhere,
       or entering together would leave people on their feet at random.
     */
-    const { result, rtmSendMessage } = setup();
+    const { result, claimSeatOnRelay, incomingClaim } = setup();
     const first = result.current.mySeat as SeatId;
 
     // Somebody else got there a second earlier, which beats us on timestamp.
@@ -128,19 +107,16 @@ describe('useSeatOccupancy — entering 3D', () => {
     expect(result.current.seatMap[first]).toBe('alice');
     expect(result.current.mySeat).not.toBeNull();
     expect(result.current.mySeat).not.toBe(first);
-    expect(claimsSent(rtmSendMessage)).toEqual([first, result.current.mySeat]);
+    expect(claimsSent(claimSeatOnRelay)).toEqual([
+      first,
+      result.current.mySeat,
+    ]);
   });
 });
 
 describe('useSeatOccupancy — 2D <-> 3D round trip', () => {
-  beforeEach(() => {
-    claimListeners.clear();
-    joinListeners.clear();
-    leftListeners.clear();
-  });
-
   it('keeps your seat through 3D -> 2D -> 3D, without re-claiming it', () => {
-    const { result, rerender, rtmSendMessage } = setup();
+    const { result, rerender, claimSeatOnRelay } = setup();
     const seat = result.current.mySeat;
     expect(seat).not.toBeNull();
 
@@ -152,11 +128,11 @@ describe('useSeatOccupancy — 2D <-> 3D round trip', () => {
 
     // One claim in total. A second would carry a fresh timestamp and lose the
     // seat to anybody who has claimed more recently.
-    expect(claimsSent(rtmSendMessage)).toEqual([seat]);
+    expect(claimsSent(claimSeatOnRelay)).toEqual([seat]);
   });
 
   it('survives repeated switching', () => {
-    const { result, rerender, rtmSendMessage } = setup();
+    const { result, rerender, claimSeatOnRelay } = setup();
     const seat = result.current.mySeat;
 
     for (let i = 0; i < 5; i += 1) {
@@ -165,7 +141,7 @@ describe('useSeatOccupancy — 2D <-> 3D round trip', () => {
     }
 
     expect(result.current.mySeat).toBe(seat);
-    expect(claimsSent(rtmSendMessage)).toEqual([seat]);
+    expect(claimsSent(claimSeatOnRelay)).toEqual([seat]);
   });
 
   it('leaves you standing if that is how you left, rather than re-seating you', () => {
@@ -197,31 +173,50 @@ describe('useSeatOccupancy — 2D <-> 3D round trip', () => {
 });
 
 describe('useSeatOccupancy — departures', () => {
-  beforeEach(() => {
-    claimListeners.clear();
-    joinListeners.clear();
-    leftListeners.clear();
-  });
-
   it('frees a chair the moment its occupant leaves the party', () => {
     /*
-      The bug this closes. A claim that outlives its owner does not merely look
-      wrong — the deterministic rule favours the EARLIEST timestamp, so a ghost
-      claim beats every later one and that chair is reserved for somebody who has
-      gone, for the rest of the party.
+      The bug this closes. A claim that outlives its owner does not merely look wrong —
+      the deterministic rule favours the EARLIEST timestamp, so a ghost claim beats every
+      later one and that chair is reserved for somebody who has gone, for the rest of
+      the party.
+
+      Driven through the roster rather than a `MEMBER_LEFT` event, because that is what
+      replaced it: the relay's roster IS presence, so a member absent from it has gone.
+      There is no longer a separate departure signal to miss.
     */
-    const { result } = setup();
-    incomingClaim('alice', 'B5', 1);
+    const { result, rerender, incomingClaim } = renderHook(
+      (props: { memberIds: string[] }) =>
+        useSeatOccupancy({
+          userId: 'me',
+          memberIds: props.memberIds,
+          enabled: true,
+          active: true,
+        }),
+      { initialProps: { memberIds: ['me', 'alice'] } },
+    ) as unknown as {
+      result: { current: SeatHook };
+      rerender: (p: { memberIds: string[] }) => void;
+      incomingClaim: never;
+    };
+
+    act(() => {
+      result.current.acceptRemoteClaim({
+        userId: 'alice',
+        seatId: 'B5',
+        at: 1,
+      });
+    });
     expect(result.current.seatMap.B5).toBe('alice');
 
-    memberLeft('alice');
+    rerender({ memberIds: ['me'] });
     expect(result.current.seatMap.B5).toBeNull();
+    void incomingClaim;
   });
 
   it('releases a seat held by someone the roster has dropped', () => {
-    // The commonest departure is a closed tab, which only ever surfaces as an
-    // Agora presence LEAVE — no MEMBER_LEFT is emitted, so reconciling against the
-    // roster is what actually clears the chair.
+    // Reconciling against the roster is the correctness guarantee behind the relay's
+    // own optimisation: it does not matter whether an event fired or was missed,
+    // because anyone absent from the roster loses their claim on the next pass.
     const { result, rerender } = renderHook(
       (props: { memberIds: string[] }) =>
         useSeatOccupancy({
@@ -233,7 +228,13 @@ describe('useSeatOccupancy — departures', () => {
       { initialProps: { memberIds: ['me', 'alice'] } },
     );
 
-    incomingClaim('alice', 'B5', 1);
+    act(() => {
+      result.current.acceptRemoteClaim({
+        userId: 'alice',
+        seatId: 'B5',
+        at: 1,
+      });
+    });
     expect(result.current.seatMap.B5).toBe('alice');
 
     rerender({ memberIds: ['me'] });
@@ -252,7 +253,13 @@ describe('useSeatOccupancy — departures', () => {
       { initialProps: { memberIds: ['me', 'alice'] } },
     );
 
-    incomingClaim('alice', 'B5', 1);
+    act(() => {
+      result.current.acceptRemoteClaim({
+        userId: 'alice',
+        seatId: 'B5',
+        at: 1,
+      });
+    });
     rerender({ memberIds: [] });
     expect(result.current.seatMap.B5).toBe('alice');
     expect(result.current.mySeat).not.toBeNull();

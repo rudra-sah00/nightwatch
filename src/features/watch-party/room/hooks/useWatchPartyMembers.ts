@@ -5,7 +5,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/analytics';
 import { useSocket } from '@/providers/socket-provider';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   approveJoinRequest,
   fetchPendingRequests,
@@ -13,6 +12,7 @@ import {
   rejectJoinRequest,
 } from '../services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '../types';
+import type { RTMMessage } from '../types/rtm-messages';
 
 /** Props for {@link useWatchPartyMembers}. */
 interface UseWatchPartyMembersProps {

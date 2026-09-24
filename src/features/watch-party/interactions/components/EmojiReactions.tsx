@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
+import type { RTMMessage } from '../../room/types/rtm-messages';
 import { useEmojiReactions } from '../hooks/use-emoji-reactions';
 
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), {

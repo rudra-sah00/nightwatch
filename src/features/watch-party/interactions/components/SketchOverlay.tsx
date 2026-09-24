@@ -17,7 +17,7 @@ import {
   Transformer,
 } from 'react-konva';
 import { onSketchReaction } from '@/features/watch-party/room/services/watch-party.api';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
+import type { RTMMessage } from '../../room/types/rtm-messages';
 import { useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
 

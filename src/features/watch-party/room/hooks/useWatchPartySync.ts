@@ -3,13 +3,13 @@
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   getPartyStreamToken,
   syncPartyState,
   updatePartyContent,
 } from '../services/watch-party.api';
 import type { PartyEvent, PartyStateUpdate, WatchPartyRoom } from '../types';
+import type { RTMMessage } from '../types/rtm-messages';
 
 /** Props for {@link useWatchPartySync}. */
 interface UseWatchPartySyncProps {
@@ -330,12 +330,28 @@ export function useWatchPartySync({
           break;
         }
 
-        case 'STREAM_TOKEN': {
-          setRoom((prev) => {
-            if (!prev) return null;
-            // When token changes, we re-normalize URLs
-            return normalizeRoomUrls(prev, msg.token, { injectStream: true });
-          });
+        case 'STREAM_TOKEN_REFRESHED': {
+          /*
+            The host has renewed the stream session; fetch the new token from the server
+            rather than taking it off the wire. The message deliberately carries no
+            credential — see `RtmStreamTokenRefreshed`.
+
+            Fire-and-forget: a failure here leaves the old token in place, which keeps
+            working until it actually expires, and the next playback error path already
+            recovers. Throwing inside a message handler would take down the dispatcher.
+          */
+          const refreshingRoomId = room?.id;
+          if (refreshingRoomId) {
+            void getPartyStreamToken(refreshingRoomId).then((response) => {
+              const token = response.token;
+              if (!token) return;
+              setRoom((prev) =>
+                prev
+                  ? normalizeRoomUrls(prev, token, { injectStream: true })
+                  : null,
+              );
+            });
+          }
           break;
         }
         case 'SYNC_REQUEST': {

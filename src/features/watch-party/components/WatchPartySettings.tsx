@@ -5,12 +5,12 @@ import { toast } from 'sonner';
 import { cn, formatBytes } from '@/lib/utils';
 import { useModalFocus } from '../hooks/use-modal-focus';
 import { useWatchPartySettings } from '../hooks/use-watch-party-settings';
-import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import {
   updateMemberPermissions,
   updatePartyPermissions,
 } from '../room/services/watch-party.api';
 import type { RoomMember, WatchPartyRoom } from '../room/types';
+import type { RTMMessage } from '../room/types/rtm-messages';
 import { useTheatreAssets } from '../theatre/hooks/use-theatre-assets';
 import { useTheatreView } from '../theatre/lib/view-mode';
 import { theatreDownloadBytes } from '../theatre/types';

@@ -2,7 +2,7 @@
 
 import { Loader2, Play, Search, Volume2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
+import type { RTMMessage } from '../../room/types/rtm-messages';
 import { useSoundboard } from '../hooks/use-soundboard';
 
 /**

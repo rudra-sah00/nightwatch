@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { trackEvent } from '@/lib/analytics';
-import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
+import type { RTMMessage } from '../../room/types/rtm-messages';
 
 /** Options for {@link useEmojiReactions}. */
 interface UseEmojiReactionsOptions {
