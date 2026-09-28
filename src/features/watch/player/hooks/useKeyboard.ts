@@ -26,6 +26,32 @@ import {
  */
 const SPACE_RELEASE_SETTLE_MS = 70;
 
+/**
+ * Grace period after a seek-key `keyup` before the key counts as released.
+ *
+ * The seek keys used to have no auto-repeat guard at all, unlike the Space gesture
+ * above. Holding an arrow therefore issued a full 10-second seek on every repeat
+ * tick: measured at 21 seeks in ~500ms, moving the playhead 210 seconds. The
+ * visible symptom was not fast seeking but a playback error, because each
+ * `seeking` event makes hls.js abort the fragments in flight and request new ones
+ * — and on open-GOP content it also re-primes the buffer with `stopLoad()` +
+ * `startLoad(t)` (see `useHls`). Dozens of those per second exhaust
+ * `fragLoadingMaxRetry` and escalate to a fatal error, so the user gets
+ * "Playback error occurred" plus a network panel full of cancelled segment
+ * requests.
+ *
+ * `e.repeat` alone cannot fix it, for the reason documented on
+ * SPACE_RELEASE_SETTLE_MS: the platforms that send discrete keydown/keyup pairs
+ * per tick never set it. So a seek key is held until a `keyup` has gone
+ * un-followed for this long, which is longer than the fastest OS repeat
+ * (~15-30ms) and shorter than a deliberate re-press, leaving repeated tapping
+ * unaffected.
+ */
+const SEEK_RELEASE_SETTLE_MS = 70;
+
+/** Keys that perform a relative seek, and so share the auto-repeat guard. */
+const SEEK_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'KeyJ', 'KeyL']);
+
 /** Options for {@link useKeyboard}. */
 interface UseKeyboardOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -193,6 +219,15 @@ export function useKeyboard({
   /** The gesture became a hold, so its release must NOT toggle play/pause. */
   const holdConsumedRef = useRef(false);
 
+  /**
+   * Seek keys currently held down, and their pending provisional releases.
+   * See {@link SEEK_RELEASE_SETTLE_MS}.
+   */
+  const seekHeldRef = useRef<Set<string>>(new Set());
+  const seekSettleTimersRef = useRef<
+    Map<string, ReturnType<typeof setTimeout>>
+  >(new Map());
+
   const clearGestureTimers = useCallback(() => {
     if (settleTimerRef.current) {
       clearTimeout(settleTimerRef.current);
@@ -280,6 +315,34 @@ export function useKeyboard({
       }
 
       const h = handlersRef.current;
+
+      /*
+        Auto-repeat guard for the seek keys, before the switch so every seek
+        binding is covered by one rule.
+
+        Same two-platform problem as the Space gesture: `e.repeat` catches the
+        platforms that report auto-repeat, and the settle window catches the ones
+        that emit a discrete keydown/keyup pair per tick instead. A pending
+        settle timer means the previous keyup was a repeat artefact, not a
+        release, so the key is still down.
+
+        preventDefault still runs on a suppressed tick, otherwise the browser
+        scrolls the page while the key is held.
+      */
+      if (SEEK_KEYS.has(e.code) && !h.disabled) {
+        const pendingRelease = seekSettleTimersRef.current.get(e.code);
+        if (pendingRelease) {
+          clearTimeout(pendingRelease);
+          seekSettleTimersRef.current.delete(e.code);
+          e.preventDefault();
+          return;
+        }
+        if (e.repeat || seekHeldRef.current.has(e.code)) {
+          e.preventDefault();
+          return;
+        }
+        seekHeldRef.current.add(e.code);
+      }
 
       switch (e.code) {
         case 'Space': {
@@ -390,6 +453,23 @@ export function useKeyboard({
      * does not also toggle playback.
      */
     const handleKeyUp = (e: KeyboardEvent) => {
+      // Seek keys: provisional release only. If another keydown for this key lands
+      // inside the settle window it was an auto-repeat artefact and the key is
+      // still held. See SEEK_RELEASE_SETTLE_MS.
+      if (SEEK_KEYS.has(e.code)) {
+        if (!seekHeldRef.current.has(e.code)) return;
+        const existing = seekSettleTimersRef.current.get(e.code);
+        if (existing) clearTimeout(existing);
+        seekSettleTimersRef.current.set(
+          e.code,
+          setTimeout(() => {
+            seekSettleTimersRef.current.delete(e.code);
+            seekHeldRef.current.delete(e.code);
+          }, SEEK_RELEASE_SETTLE_MS),
+        );
+        return;
+      }
+
       if (e.code !== 'Space') return;
       // keydown was ignored (typing in a field, or disabled) — nothing to resolve.
       if (!gestureOpenRef.current) return;
@@ -419,10 +499,16 @@ export function useKeyboard({
 
     /**
      * Losing focus mid-hold never delivers a keyup, which would otherwise leave
-     * playback pinned at 2x with no way back short of the settings menu.
+     * playback pinned at 2x with no way back short of the settings menu — and a
+     * seek key stuck in the held set, which would swallow the next press.
      */
     const handleRelease = () => {
       handlersRef.current.cancelSpaceGesture();
+      for (const timer of seekSettleTimersRef.current.values()) {
+        clearTimeout(timer);
+      }
+      seekSettleTimersRef.current.clear();
+      seekHeldRef.current.clear();
     };
 
     window.addEventListener('keyup', handleKeyUp);
@@ -461,6 +547,11 @@ export function useKeyboard({
       window.removeEventListener('blur', handleRelease);
       document.removeEventListener('visibilitychange', handleRelease);
       handlersRef.current.cancelSpaceGesture();
+      for (const timer of seekSettleTimersRef.current.values()) {
+        clearTimeout(timer);
+      }
+      seekSettleTimersRef.current.clear();
+      seekHeldRef.current.clear();
       if (unsubscribeDesktopMedia) unsubscribeDesktopMedia();
     };
   }, []);
