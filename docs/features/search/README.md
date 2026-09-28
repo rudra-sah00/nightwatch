@@ -8,13 +8,15 @@ URL-parameter driven search with debounced typeahead suggestions, content-detail
 
 ```
 src/features/search/
-├── api.ts                          # searchContent, getShowDetails, getSeriesEpisodes, getSearchSuggestions
+├── api.ts                          # searchContent, searchCatalogContent, getShowDetails, getSeriesEpisodes
 ├── schema.ts                       # Zod validation for search query
 ├── types.ts                        # SearchResult, ShowDetails, Episode, Season, ContentType
 ├── components/
 │   ├── SearchIdle.tsx              # /search landing — hero search bar, no query yet
 │   ├── SearchClient.tsx            # Search results page
-│   ├── search-results.tsx          # Results grid
+│   ├── search-results-by-catalog.tsx # Per-catalogue sections, each filling in as it lands
+│   ├── search-results.tsx          # Flat merged grid (smart TV / single-list surfaces)
+│   ├── search-result-item.tsx      # Shared poster card
 │   ├── content-detail-modal.tsx    # Full-screen content detail overlay
 │   ├── content-info.tsx            # Content metadata display
 │   ├── season-selector.tsx         # Season dropdown
@@ -22,11 +24,13 @@ src/features/search/
 │   ├── episode-list.tsx            # Episode list container
 │   └── EpisodeSkeleton.tsx         # Loading placeholder
 ├── lib/
+│   ├── catalogs.ts                 # Catalogue render order + section labels
 │   └── catalog-badge.ts            # Per-catalogue badge colours for result posters
 ├── hooks/
 │   ├── use-search-input.ts         # Global search input + typeahead
 │   ├── use-search-results.ts       # Deduplication
-│   ├── use-home-client.ts          # Home page state (TanStack Query)
+│   ├── use-catalog-search.ts       # One query per catalogue, in parallel
+│   ├── use-home-client.ts          # Search page state (TanStack Query)
 │   ├── use-content-detail.ts       # Core content detail composition
 │   ├── use-content-detail-modal.ts # Modal lifecycle
 │   ├── use-content-progress.ts     # Watch progress restoration
@@ -80,13 +84,52 @@ Search results page with an inline-editable query:
 - The search query is rendered as a large `<input>` styled to match the heading typography
 - Input width auto-sizes to content (`width: ${query.length + 1}ch`)
 - Enter triggers router navigation (URL-driven search)
-- Shows result count, loading/error/empty states
-- `SearchResults` grid for content cards
+- Result count climbs as catalogues land, announced via `aria-live="polite"`
+- `SearchResultsByCatalog` renders one section per catalogue
 - Dynamically imported `ContentDetailModal` on selection
+
+The route itself (`app/(protected)/(main)/search/page.tsx`) does no searching. It used to
+`await searchContent(query)` in the server component, which held the entire RSC payload
+behind a three-way upstream fan-out: the user got a full-page skeleton and then every
+result at once, however slow the worst catalogue was. The query already lives in the URL,
+so the page ships its shell immediately and the client fetches.
+
+### Progressive per-catalogue search
+
+`hooks/use-catalog-search.ts`, `components/search-results-by-catalog.tsx`
+
+The merged `/api/video/search` fans out to three upstreams and resolves only when the
+slowest does. `useCatalogSearch` instead runs one query per catalogue against
+`/api/video/search?catalog=`, so each section paints as soon as its own upstream answers.
+
+| Section state | Renders |
+|---|---|
+| In flight | Heading + skeleton tiles, so the page reads as "more is coming" |
+| Resolved with matches | Heading + count + poster grid |
+| Resolved with nothing | Nothing — a title absent from one service is not information the user asked for |
+| Failed | Inline retry for that catalogue alone; the others keep their results |
+
+Sections stay in a fixed order (`lib/catalogs.ts`, matching the backend's
+`SEARCHABLE_CATALOGS`) rather than reordering by arrival. Appending by whichever upstream
+wins the race would make posters jump under the cursor as slower catalogues land, and would
+lose the grouping that makes a title's origin obvious while scanning a dense grid.
+
+Nothing allocates a merged array: each section renders straight from its own query's `data`,
+which TanStack Query keeps referentially stable, so an arriving catalogue does not re-render
+the sections already on screen.
+
+Failure granularity matters here. The full-width "search failed" panel appears only when
+*every* catalogue failed; one dead upstream is a bad section, not a bad search. `searchOne`
+on the backend surfaces a 502 for exactly this reason, where the merged search silently
+omits a dead catalogue instead.
 
 ### search-results
 
 `components/search-results.tsx`
+
+Flat single grid, used where results arrive as one merged list — the smart-TV search page.
+The main search page renders `search-results-by-catalog.tsx` instead. Both share
+`search-result-item.tsx` for the card itself.
 
 Grid of content cards with:
 - Poster images via `next/image` with optimized URLs
@@ -268,7 +311,8 @@ Minimal hook tracking image error state for a single episode card.
 
 1. User types in `SearchIdle` → `useSearchInput` manages input + suggestions
 2. Enter press → `router.push('/search?q=...')` via `useTransition`
-3. `SearchClient` reads `?q=` → `useHomeClient` fetches results via TanStack Query
+3. `SearchClient` reads `?q=` → `useHomeClient` → `useCatalogSearch` fires one query per
+   catalogue in parallel; each section renders as its own request lands
 4. User clicks result → `ContentDetailModal` opens
 5. `useContentDetail` fetches show details + episodes + watch progress (all TanStack Query cached)
 6. User clicks Play → `usePlaybackActions.handlePlay` constructs URL → `router.push('/watch/...')`

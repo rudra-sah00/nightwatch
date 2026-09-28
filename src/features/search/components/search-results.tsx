@@ -1,17 +1,12 @@
 'use client';
 
 import { Film } from 'lucide-react';
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import React from 'react';
 import { SearchSkeleton } from '@/components/ui/skeletons';
-import { cn, getOptimizedImageUrl } from '@/lib/utils';
-import {
-  useSearchResultItem,
-  useSearchResults,
-} from '../hooks/use-search-results';
-import { catalogBadgeClass } from '../lib/catalog-badge';
+import { useSearchResults } from '../hooks/use-search-results';
 import type { SearchResult } from '../types';
+import { SearchResultItem } from './search-result-item';
 
 /** Props for {@link SearchResults}. */
 interface SearchResultsProps {
@@ -21,9 +16,13 @@ interface SearchResultsProps {
 }
 
 /**
- * Displays a responsive grid of search-result cards. Deduplicates results
- * by ID, shows skeleton placeholders while loading, and renders an
- * empty-state illustration when no results match.
+ * Displays a single flat grid of search-result cards. Deduplicates results by ID, shows
+ * skeleton placeholders while loading, and renders an empty-state illustration when no
+ * results match.
+ *
+ * Used where results arrive as one merged list. The main search page renders
+ * {@link SearchResultsByCatalog} instead, which fills one section per catalogue as each
+ * upstream answers rather than waiting on the slowest.
  *
  * @param props - {@link SearchResultsProps}
  * @returns The search results grid element.
@@ -58,7 +57,7 @@ export const SearchResults = React.memo(function SearchResults({
     );
   }
 
-  if (results.length === 0) {
+  if (uniqueResults.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 bg-card border-[4px] border-border  text-center max-w-2xl mx-auto w-full">
         <Film className="w-20 h-20 text-neo-blue mb-6 stroke-[3px]" />
@@ -86,77 +85,5 @@ export const SearchResults = React.memo(function SearchResults({
         />
       ))}
     </div>
-  );
-});
-
-/** Props for the internal {@link SearchResultItem} card. */
-interface SearchResultItemProps {
-  result: SearchResult;
-  onSelect: (result: SearchResult) => void;
-  index: number;
-}
-
-const SearchResultItem = React.memo(function SearchResultItem({
-  result,
-  onSelect,
-  index,
-}: SearchResultItemProps) {
-  const { imageError, setImageError } = useSearchResultItem();
-  const t = useTranslations('search');
-
-  return (
-    <button
-      type="button"
-      className="group flex flex-col text-left cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-neo-blue rounded-lg overflow-hidden"
-      onClick={() => onSelect(result)}
-      aria-label={t('results.viewDetailsFor', { title: result.title })}
-    >
-      {/* Poster */}
-      <div className="aspect-[2/3] border-[2px] border-border overflow-hidden relative w-full bg-background rounded-lg">
-        {imageError ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-background">
-            <Film className="w-8 h-8 text-foreground/20 stroke-[3px]" />
-          </div>
-        ) : (
-          <Image
-            src={getOptimizedImageUrl(result.poster)}
-            alt={result.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={() => setImageError(true)}
-            unoptimized={result.poster?.includes('/api/stream/')}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-            loading={index < 6 ? 'eager' : 'lazy'}
-            priority={index === 0}
-          />
-        )}
-
-        {/* Year badge */}
-        {result.year ? (
-          <div className="absolute top-2 right-2 bg-neo-yellow border-[2px] border-border px-1.5 py-0.5 font-headline font-black text-[10px] text-foreground">
-            {result.year}
-          </div>
-        ) : null}
-
-        {/* Catalogue badge — which service the title came from. Bottom-left so it never
-            collides with the year badge, and colour-coded per catalogue so the origin is
-            recognisable at a glance across a dense grid. */}
-        {result.sourceLabel ? (
-          <div
-            className={cn(
-              'absolute bottom-2 left-2 right-2 border-[2px] border-border px-1.5 py-0.5 font-headline font-black text-[9px] sm:text-[10px] uppercase tracking-wider text-foreground truncate',
-              catalogBadgeClass(result.source),
-            )}
-          >
-            {result.sourceLabel}
-          </div>
-        ) : null}
-      </div>
-
-      {/* Title */}
-      <p className="font-headline text-xs sm:text-sm font-black uppercase tracking-tight leading-tight mt-2 line-clamp-2 group-hover:text-neo-blue transition-colors">
-        {result.title}
-      </p>
-    </button>
   );
 });

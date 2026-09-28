@@ -3,8 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { SearchIdle } from '@/features/search/components/SearchIdle';
-import { SearchResults } from '@/features/search/components/search-results';
-import type { SearchResult } from '@/features/search/types';
+import { SearchResultsByCatalog } from '@/features/search/components/search-results-by-catalog';
 import { useHomeClient } from '../hooks/use-home-client';
 import { useSearchInput } from '../hooks/use-search-input';
 
@@ -19,38 +18,31 @@ const ContentDetailModal = dynamic(
 import { GlobalLoading } from '@/components/ui/global-loading';
 import { useAuth } from '@/providers/auth-provider';
 
-/** Props for the {@link SearchClient} component. */
-interface SearchClientProps {
-  /** Server-rendered initial search results. */
-  initialResults: SearchResult[];
-  /** The initial search query from URL parameters. */
-  initialQuery: string;
-  /** Whether the server-side search request failed. */
-  serverError?: boolean;
-}
-
 /**
  * Client-side search results page with an inline-editable query input.
  *
- * Renders search results in a grid, handles loading/error/empty states, and
- * opens a {@link ContentDetailModal} when a result is selected. The search
- * input triggers a router transition on Enter for URL-driven search.
+ * Results render as one section per catalogue, each filling in as its own upstream answers
+ * rather than all appearing at once when the slowest of three finishes. Sections still in
+ * flight show skeleton tiles under their heading, so the page reads as "more is coming"
+ * instead of looking complete.
+ *
+ * Opens a {@link ContentDetailModal} when a result is selected. The search input triggers a
+ * router transition on Enter for URL-driven search.
  */
-export function SearchClient({
-  initialResults,
-  initialQuery,
-  serverError,
-}: SearchClientProps) {
+export function SearchClient() {
   const {
-    results,
-    isTransitioning,
+    sections,
+    totalCount,
+    isAnyPending,
+    isSettled,
+    isAllFailed,
     hasSearched,
     selectedContent,
     selectedContentId,
     fromContinueWatching,
     handleSelectContent,
     handleCloseModal,
-  } = useHomeClient({ initialResults, initialQuery });
+  } = useHomeClient();
 
   const {
     query: searchInputQuery,
@@ -71,7 +63,7 @@ export function SearchClient({
   // "Results:" label over an empty input, "0 Films Found" and then dead space — which
   // is what the hub's Movies & Web Series tile used to land on. Show the search
   // landing instead.
-  const isIdle = !(hasSearched || isTransitioning || isPending);
+  const isIdle = !(hasSearched || isPending);
 
   if (isIdle) {
     return (
@@ -81,9 +73,16 @@ export function SearchClient({
     );
   }
 
-  // isPending goes true the instant the user presses Enter (router transition
-  // fires) and stays true until the new page renders — giving immediate
-  // skeleton feedback without reacting to every character typed.
+  // isPending goes true the instant the user presses Enter (router transition fires) and
+  // stays true until the new page renders — giving immediate feedback on the header label
+  // without reacting to every character typed.
+  const isBusy = isAnyPending || isPending;
+
+  // Only a total failure earns the full-width panel. One dead catalogue is handled inside
+  // its own section, which keeps the others' results on screen.
+  const showFailurePanel = isAllFailed && !isPending;
+  const showEmptyPanel =
+    isSettled && !isPending && !isAllFailed && totalCount === 0;
 
   return (
     <div className="w-full">
@@ -93,9 +92,7 @@ export function SearchClient({
           <div className="mb-6 md:mb-10">
             <div className="flex items-baseline gap-3 mb-2">
               <span className="font-headline text-lg sm:text-xl md:text-2xl font-black uppercase tracking-widest text-foreground/50 shrink-0">
-                {isTransitioning || isPending
-                  ? t('results.searching')
-                  : t('results.resultsLabel')}
+                {isBusy ? t('results.searching') : t('results.resultsLabel')}
               </span>
               <input
                 value={searchInputQuery}
@@ -118,17 +115,18 @@ export function SearchClient({
                 aria-label={t('results.editQueryAriaLabel')}
               />
             </div>
-            <p className="font-headline font-bold text-xs uppercase tracking-widest text-foreground/40">
-              {t('results.filmsFound', { count: results.length })}
+            {/* Counts up as catalogues land, so it reads as progress rather than a final
+                tally that keeps changing. */}
+            <p
+              className="font-headline font-bold text-xs uppercase tracking-widest text-foreground/40"
+              aria-live="polite"
+            >
+              {t('results.filmsFound', { count: totalCount })}
             </p>
           </div>
 
           <div className="space-y-6">
-            {serverError &&
-            !isTransitioning &&
-            !isPending &&
-            hasSearched &&
-            results.length === 0 ? (
+            {showFailurePanel ? (
               <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border text-center">
                 <span className="text-5xl mb-4">⚠️</span>
                 <p className="font-headline font-black uppercase tracking-widest text-foreground mb-2">
@@ -138,10 +136,7 @@ export function SearchClient({
                   {t('results.searchFailedHint')}
                 </p>
               </div>
-            ) : !isTransitioning &&
-              !isPending &&
-              hasSearched &&
-              results.length === 0 ? (
+            ) : showEmptyPanel ? (
               <div className="flex flex-col items-center justify-center py-20 bg-neo-surface border-[4px] border-border text-center">
                 <span className="text-5xl mb-4">🔍</span>
                 <p className="font-headline font-black uppercase tracking-widest text-foreground mb-2">
@@ -152,9 +147,8 @@ export function SearchClient({
                 </p>
               </div>
             ) : (
-              <SearchResults
-                results={results}
-                isLoading={isTransitioning || isPending}
+              <SearchResultsByCatalog
+                sections={sections}
                 onSelect={handleSelectContent}
               />
             )}

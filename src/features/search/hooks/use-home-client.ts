@@ -1,36 +1,48 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { searchContent } from '@/features/search/api';
 import type { SearchResult } from '@/features/search/types';
 import { useAuth } from '@/providers/auth-provider';
+import type { User } from '@/types';
+import { type CatalogSection, useCatalogSearch } from './use-catalog-search';
 
-/** Options for the {@link useHomeClient} hook. */
-interface UseHomeClientOptions {
-  initialResults: SearchResult[];
-  initialQuery: string;
+/** Return value of the {@link useHomeClient} hook. */
+interface UseHomeClientReturn {
+  query: string;
+  user: User | null;
+  /** One entry per catalogue, each resolving independently. */
+  sections: CatalogSection[];
+  totalCount: number;
+  isAnyPending: boolean;
+  isSettled: boolean;
+  isAllFailed: boolean;
+  hasSearched: boolean;
+  selectedContent: SearchResult | null;
+  selectedContentId: string | null;
+  fromContinueWatching: boolean;
+  continueWatchingCount: number;
+  isContinueWatchingLoading: boolean;
+  handleSelectContent: (result: SearchResult) => void;
+  handleContinueWatchingSelect: (contentId: string) => void;
+  handleCloseModal: () => void;
+  handleContinueWatchingLoad: (count: number) => void;
 }
 
 /**
- * Client-side hook for the home/search page.
- * Uses TanStack Query for search caching — results persist when navigating away and back.
+ * Client-side hook for the search page.
+ *
+ * Search state comes from {@link useCatalogSearch}, which runs one query per catalogue so
+ * each section of the grid can render as soon as its own upstream answers. There is no
+ * server-rendered seed: the merged search took as long as the slowest of three upstreams,
+ * and awaiting it in the server component held the whole route behind that worst case.
  */
-export function useHomeClient({
-  initialResults,
-  initialQuery,
-}: UseHomeClientOptions) {
+export function useHomeClient(): UseHomeClientReturn {
   const searchParams = useSearchParams();
-  const query = searchParams.get('q') || initialQuery;
+  const query = searchParams.get('q') || '';
 
-  const { data: results = initialResults, isFetching } = useQuery({
-    queryKey: ['search', query],
-    queryFn: () => searchContent(query),
-    enabled: !!query.trim(),
-    initialData: initialResults.length > 0 ? initialResults : undefined,
-    placeholderData: (prev) => prev,
-  });
+  const { sections, totalCount, isAnyPending, isSettled, isAllFailed } =
+    useCatalogSearch(query);
 
   const hasSearched = !!query.trim();
 
@@ -52,11 +64,12 @@ export function useHomeClient({
     setContinueWatchingCount(0);
   }, []);
 
+  // Warm the detail modal's chunk once there is something to open.
   useEffect(() => {
-    if (results.length > 0 || continueWatchingCount > 0) {
+    if (totalCount > 0 || continueWatchingCount > 0) {
       void import('@/features/search/components/content-detail-modal');
     }
-  }, [results.length, continueWatchingCount]);
+  }, [totalCount, continueWatchingCount]);
 
   const handleSelectContent = useCallback((result: SearchResult) => {
     setSelectedContent(result);
@@ -84,8 +97,11 @@ export function useHomeClient({
   return {
     query,
     user,
-    results,
-    isTransitioning: isFetching,
+    sections,
+    totalCount,
+    isAnyPending,
+    isSettled,
+    isAllFailed,
     hasSearched,
     selectedContent,
     selectedContentId,

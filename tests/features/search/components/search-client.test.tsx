@@ -1,12 +1,25 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchClient } from '@/features/search/components/SearchClient';
-import type { SearchResult } from '@/features/search/types';
+import type { CatalogSection } from '@/features/search/hooks/use-catalog-search';
+
+const section = (over: Partial<CatalogSection> = {}): CatalogSection => ({
+  id: 'nf',
+  label: 'Netflix',
+  results: [],
+  isPending: false,
+  isError: false,
+  retry: vi.fn(),
+  ...over,
+});
 
 const { homeClientState } = vi.hoisted(() => ({
   homeClientState: {
-    results: [] as SearchResult[],
-    isTransitioning: false,
+    sections: [] as unknown[],
+    totalCount: 0,
+    isAnyPending: false,
+    isSettled: false,
+    isAllFailed: false,
     hasSearched: false,
     selectedContent: null,
     selectedContentId: null,
@@ -46,8 +59,8 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('@/features/search/components/search-results', () => ({
-  SearchResults: () => <div data-testid="search-results" />,
+vi.mock('@/features/search/components/search-results-by-catalog', () => ({
+  SearchResultsByCatalog: () => <div data-testid="search-results" />,
 }));
 
 vi.mock('@/components/ui/global-loading', () => ({
@@ -56,15 +69,15 @@ vi.mock('@/components/ui/global-loading', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  homeClientState.results = [];
-  homeClientState.isTransitioning = false;
+  homeClientState.sections = [];
+  homeClientState.totalCount = 0;
+  homeClientState.isAnyPending = false;
+  homeClientState.isSettled = false;
+  homeClientState.isAllFailed = false;
   homeClientState.hasSearched = false;
   searchInputState.query = '';
   searchInputState.isPending = false;
 });
-
-const render_ = (query = '') =>
-  render(<SearchClient initialResults={[]} initialQuery={query} />);
 
 describe('SearchClient', () => {
   /**
@@ -74,7 +87,7 @@ describe('SearchClient', () => {
    */
   describe('with no query', () => {
     it('shows the search landing, not an empty results report', () => {
-      render_();
+      render(<SearchClient />);
 
       expect(screen.getByText('idle.headline1')).toBeInTheDocument();
       expect(
@@ -84,7 +97,7 @@ describe('SearchClient', () => {
     });
 
     it('reports no film count', () => {
-      render_();
+      render(<SearchClient />);
 
       expect(screen.queryByText('results.filmsFound')).not.toBeInTheDocument();
     });
@@ -93,39 +106,92 @@ describe('SearchClient', () => {
   describe('with a query', () => {
     it('shows the results layout', () => {
       homeClientState.hasSearched = true;
-      homeClientState.results = [
-        { id: 'nm:70143836', title: 'Breaking Bad' } as SearchResult,
-      ];
+      homeClientState.isSettled = true;
+      homeClientState.totalCount = 1;
+      homeClientState.sections = [section({ results: [{}] as never })];
 
-      render_('breaking bad');
+      render(<SearchClient />);
 
       expect(screen.getByText('results.resultsLabel')).toBeInTheDocument();
       expect(screen.getByTestId('search-results')).toBeInTheDocument();
       expect(screen.queryByText('idle.headline1')).not.toBeInTheDocument();
     });
 
-    it('reports no results when the query found nothing', () => {
+    it('reports no results when every catalogue settled with nothing', () => {
       homeClientState.hasSearched = true;
-      homeClientState.results = [];
+      homeClientState.isSettled = true;
+      homeClientState.totalCount = 0;
+      homeClientState.sections = [section()];
 
-      render_('zzzzz');
+      render(<SearchClient />);
 
       expect(screen.getByText('results.noResults')).toBeInTheDocument();
       expect(screen.queryByText('idle.headline1')).not.toBeInTheDocument();
     });
 
-    it('reports a failed search', () => {
+    /** Only a total failure is a failed search; one dead catalogue is a bad section. */
+    it('reports a failed search when every catalogue failed', () => {
       homeClientState.hasSearched = true;
+      homeClientState.isSettled = true;
+      homeClientState.isAllFailed = true;
+      homeClientState.sections = [section({ isError: true })];
 
-      render(
-        <SearchClient
-          initialResults={[]}
-          initialQuery="breaking"
-          serverError
-        />,
-      );
+      render(<SearchClient />);
 
       expect(screen.getByText('results.searchFailed')).toBeInTheDocument();
+    });
+
+    it('keeps rendering sections when only one catalogue failed', () => {
+      homeClientState.hasSearched = true;
+      homeClientState.isSettled = true;
+      homeClientState.totalCount = 1;
+      homeClientState.sections = [
+        section({ id: 'nf', results: [{}] as never }),
+        section({ id: 'pv', label: 'Prime Video', isError: true }),
+      ];
+
+      render(<SearchClient />);
+
+      expect(screen.getByTestId('search-results')).toBeInTheDocument();
+      expect(
+        screen.queryByText('results.searchFailed'),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  /**
+   * Results arrive per catalogue, so the page is partially populated while the rest are
+   * still in flight. It must show what landed rather than an all-or-nothing state.
+   */
+  describe('while catalogues are still arriving', () => {
+    it('renders the sections that landed instead of an empty or failed panel', () => {
+      homeClientState.hasSearched = true;
+      homeClientState.isAnyPending = true;
+      homeClientState.totalCount = 4;
+      homeClientState.sections = [
+        section({ id: 'nf', results: [{}, {}, {}, {}] as never }),
+        section({ id: 'pv', label: 'Prime Video', isPending: true }),
+      ];
+
+      render(<SearchClient />);
+
+      expect(screen.getByTestId('search-results')).toBeInTheDocument();
+      expect(screen.queryByText('results.noResults')).not.toBeInTheDocument();
+      expect(screen.getByText('results.searching')).toBeInTheDocument();
+    });
+
+    /** An empty panel here would flash before the slower catalogues answered. */
+    it('does not claim "no results" until every catalogue has settled', () => {
+      homeClientState.hasSearched = true;
+      homeClientState.isAnyPending = true;
+      homeClientState.isSettled = false;
+      homeClientState.totalCount = 0;
+      homeClientState.sections = [section({ isPending: true })];
+
+      render(<SearchClient />);
+
+      expect(screen.queryByText('results.noResults')).not.toBeInTheDocument();
+      expect(screen.getByTestId('search-results')).toBeInTheDocument();
     });
   });
 
@@ -134,26 +200,18 @@ describe('SearchClient', () => {
    * landing here would flash the hero between submit and results.
    */
   describe('while a search is in flight', () => {
-    it('leaves the landing once a transition starts', () => {
-      homeClientState.isTransitioning = true;
+    it('leaves the landing once the router transition is pending', () => {
+      searchInputState.isPending = true;
 
-      render_();
+      render(<SearchClient />);
 
       expect(screen.queryByText('idle.headline1')).not.toBeInTheDocument();
       expect(screen.getByText('results.searching')).toBeInTheDocument();
     });
-
-    it('leaves the landing once the router transition is pending', () => {
-      searchInputState.isPending = true;
-
-      render_();
-
-      expect(screen.queryByText('idle.headline1')).not.toBeInTheDocument();
-    });
   });
 
   it('defers to the auth loading state', () => {
-    render_();
+    render(<SearchClient />);
 
     expect(screen.queryByTestId('global-loading')).not.toBeInTheDocument();
   });
