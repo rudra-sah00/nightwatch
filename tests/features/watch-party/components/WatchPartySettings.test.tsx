@@ -198,4 +198,62 @@ describe('WatchPartySettings', () => {
       ).toBeInTheDocument();
     });
   });
+
+  /*
+    Two defects that made the panel unusable in a real room, both invisible in
+    isolation because each needs an ancestor or a sibling to go wrong.
+
+    1. The panel is `fixed inset-0 z-[10000]`, but it renders inside
+       MediaControls, inside the sidebar `<aside>` — which is `relative z-30`
+       and therefore its own stacking context. z-index does not escape one, so
+       the 10000 only ordered the panel against its siblings inside the aside,
+       and the aside still resolved as 30 at the root. SketchOverlay is z-40 in
+       the video area, so the sketch canvas painted over the panel and, being
+       `pointer-events-auto` while drawing, ate every click aimed at it. Hence
+       the portal to document.body.
+
+    2. The scroll box used to be the flex container too: `flex flex-col` plus
+       `max-h-[80vh] overflow-y-auto`. That cannot scroll — the rows are flex
+       items, so once the content is taller than the box they shrink to fit
+       instead of overflowing, scrollHeight stays equal to clientHeight, and the
+       Done button at the bottom is unreachable. Measured in a browser against
+       the real class list: scrollHeight 720 === clientHeight 720 before,
+       880 > 720 after. It only bit once a room had three or four guests,
+       because that is when the override blocks make the content tall enough.
+
+    happy-dom does no layout, so scrollHeight cannot be asserted here. What is
+    asserted is the structural invariant that produced it.
+  */
+  describe('overlay stacking and scrolling', () => {
+    it('portals the panel out of the sidebar subtree', () => {
+      const { container } = renderSettings(
+        <WatchPartySettings room={mockRoom} isHost={true} />,
+      );
+      fireEvent.click(screen.getByRole('button'));
+
+      // Present in the document, but NOT inside this component's own container —
+      // that is what escaping the aside's z-30 stacking context means.
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(container.querySelector('[role="dialog"]')).toBeNull();
+    });
+
+    it('keeps scrolling and flex layout on separate elements', () => {
+      renderSettings(<WatchPartySettings room={mockRoom} isHost={true} />);
+      fireEvent.click(screen.getByRole('button'));
+
+      const scrollBox = screen.getByRole('dialog');
+
+      // The element that scrolls must be a plain block with a height cap.
+      expect(scrollBox.className).toContain('overflow-y-auto');
+      expect(scrollBox.className).toContain('max-h-[80vh]');
+
+      // It must NOT also be the flex column, or its children shrink to fit and
+      // there is never anything to scroll.
+      expect(scrollBox.className).not.toContain('flex-col');
+
+      // The flex column lives one level in, at natural height.
+      expect(scrollBox.querySelector('.flex-col')).not.toBeNull();
+    });
+  });
 });

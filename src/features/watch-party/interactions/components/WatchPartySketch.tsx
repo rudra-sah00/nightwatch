@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/providers/theme-provider';
@@ -412,39 +413,51 @@ export function WatchPartySketch({
         </Button>
       </div>
 
-      {/* Emoji Picker Overlay */}
-      {isEmojiPickerOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
-            <Button
-              type="button"
-              onClick={() => setIsEmojiPickerOpen(false)}
-              className="absolute -top-12 right-0 px-4 py-2 bg-background border-[3px] border-border  font-black text-xs uppercase tracking-widest hover:bg-neo-yellow/80 transition-colors"
-            >
-              {t('sketch.close')}
-            </Button>
-            <div className="border-[4px] border-border ">
-              <EmojiPicker
-                onEmojiClick={handleEmojiClick}
-                theme={
-                  (appTheme === 'dark' ||
-                  (appTheme === 'system' &&
-                    typeof window !== 'undefined' &&
-                    window.matchMedia('(prefers-color-scheme: dark)').matches)
-                    ? 'dark'
-                    : 'light') as Theme
-                }
-                emojiStyle={'native' as EmojiStyle}
-                lazyLoadEmojis={true}
-                searchPlaceHolder={t('sketch.searchStickers')}
-                width={320}
-                height={400}
-                skinTonesDisabled
-              />
+      {/*
+        Emoji Picker Overlay.
+
+        Portalled for the same reason as the settings dialog: this component
+        renders inside the sidebar `<aside>`, which is `relative z-30` and so its
+        own stacking context. Left in place, this `z-[100]` never competed with
+        SketchOverlay's `z-40` in the video area — the aside resolved as 30 at the
+        root and the sketch canvas covered the picker, swallowing its clicks.
+        Which is the worst possible case, since you reach this picker from the
+        sketch tab while drawing is exactly what is active.
+      */}
+      {isEmojiPickerOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="relative motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-200 motion-reduce:animate-none">
+              <Button
+                type="button"
+                onClick={() => setIsEmojiPickerOpen(false)}
+                className="absolute -top-12 right-0 px-4 py-2 bg-background border-[3px] border-border  font-black text-xs uppercase tracking-widest hover:bg-neo-yellow/80 transition-colors"
+              >
+                {t('sketch.close')}
+              </Button>
+              <div className="border-[4px] border-border ">
+                <EmojiPicker
+                  onEmojiClick={handleEmojiClick}
+                  theme={
+                    (appTheme === 'dark' ||
+                    (appTheme === 'system' &&
+                      typeof window !== 'undefined' &&
+                      window.matchMedia('(prefers-color-scheme: dark)').matches)
+                      ? 'dark'
+                      : 'light') as Theme
+                  }
+                  emojiStyle={'native' as EmojiStyle}
+                  lazyLoadEmojis={true}
+                  searchPlaceHolder={t('sketch.searchStickers')}
+                  width={320}
+                  height={400}
+                  skinTonesDisabled
+                />
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

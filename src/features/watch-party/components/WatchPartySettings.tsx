@@ -1,6 +1,7 @@
 import { Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { cn, formatBytes } from '@/lib/utils';
 import { useModalFocus } from '../hooks/use-modal-focus';
@@ -204,68 +205,102 @@ export function WatchPartySettings({
         <Settings aria-hidden="true" className="w-5 h-5 stroke-[3px]" />
       </button>
 
-      {isOpen ? (
-        <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/70">
-          {/* Click-to-dismiss. A button, so it is keyboard-operable by
+      {/*
+        Portalled to the body, not rendered in place.
+
+        This overlay is `fixed inset-0 z-[10000]`, but it lives inside
+        MediaControls, inside the sidebar `<aside>`, which is `relative z-30`
+        and therefore its own stacking context. z-index does not escape a
+        stacking context: the 10000 only ordered this against its siblings
+        INSIDE the aside, and the whole aside still resolved as z-30 at the
+        root. SketchOverlay is `absolute inset-0 z-40` in the video area, which
+        is not a stacking context, so its 40 was compared at the root and beat
+        the aside's 30 — the sketch canvas painted over the settings dialog and,
+        being `pointer-events-auto` in sketch mode, swallowed every click and
+        wheel event aimed at it. Settings were unreachable while drawing.
+
+        A portal moves this to the body, where the 10000 is finally compared
+        against the sketch layer directly.
+      */}
+      {isOpen
+        ? createPortal(
+            <div className="fixed inset-0 z-[10000] flex flex-col items-center justify-center backdrop-blur-sm bg-black/70">
+              {/* Click-to-dismiss. A button, so it is keyboard-operable by
               construction, and hidden from assistive tech because it duplicates
               the Done button below — Escape closes too, via useModalFocus. */}
-          <button
-            type="button"
-            aria-hidden="true"
-            tabIndex={-1}
-            onClick={() => setIsOpen(false)}
-            className="absolute inset-0 cursor-default"
-          />
-          <div
-            ref={settingsRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="wp-settings-title"
-            tabIndex={-1}
-            className="relative flex flex-col items-center gap-6 w-full max-w-sm px-4 max-h-[80vh] overflow-y-auto no-scrollbar"
-          >
-            <div className="flex flex-col items-center gap-2">
-              <Settings className="w-8 h-8 text-white stroke-[3px]" />
-              <h2
-                id="wp-settings-title"
-                className="font-black font-headline uppercase tracking-tight text-xl text-white"
+              <button
+                type="button"
+                aria-hidden="true"
+                tabIndex={-1}
+                onClick={() => setIsOpen(false)}
+                className="absolute inset-0 cursor-default"
+              />
+              {/*
+                Scrolling and flex are deliberately on two different elements.
+
+                This used to be one element: `flex flex-col` with `max-h-[80vh]
+                overflow-y-auto`. That silently cannot scroll. The rows are flex
+                items, so once the content is taller than the box they SHRINK to
+                fit it instead of overflowing it — scrollHeight stays equal to
+                clientHeight and there is nothing to scroll. It only showed up
+                once a room had three or four guests, because that is when the
+                individual-override blocks make the content tall enough to be
+                squeezed, and the Done button at the bottom became unreachable.
+
+                So: this element only scrolls, and the child below only lays out.
+                The child keeps its natural height, so the overflow is real.
+              */}
+              <div
+                ref={settingsRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="wp-settings-title"
+                tabIndex={-1}
+                className="relative w-full max-w-sm max-h-[80vh] overflow-y-auto overscroll-contain custom-scrollbar px-4 py-6"
               >
-                {t('settings.title')}
-              </h2>
-            </div>
-
-            {/* Personal Preferences */}
-            {onToggleFloatingChat !== undefined ? (
-              <div className="w-full space-y-4">
-                <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
-                  {t('settings.personal')}
-                </p>
-
-                <div className="flex items-center justify-between w-full">
-                  <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
-                    {t('settings.floatingChat')}
-                  </span>
-                  <Switch
-                    checked={floatingChatEnabled}
-                    onCheckedChange={() => onToggleFloatingChat?.()}
-                    label={t('settings.floatingChatOverlay')}
-                  />
-                </div>
-
-                {onToggleFloatingTiles !== undefined ? (
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
-                      {t('settings.floatingTiles')}
-                    </span>
-                    <Switch
-                      checked={floatingTilesEnabled}
-                      onCheckedChange={() => onToggleFloatingTiles?.()}
-                      label={t('settings.floatingTilesOverlay')}
-                    />
+                <div className="flex flex-col items-center gap-6">
+                  <div className="flex flex-col items-center gap-2">
+                    <Settings className="w-8 h-8 text-white stroke-[3px]" />
+                    <h2
+                      id="wp-settings-title"
+                      className="font-black font-headline uppercase tracking-tight text-xl text-white"
+                    >
+                      {t('settings.title')}
+                    </h2>
                   </div>
-                ) : null}
 
-                {/*
+                  {/* Personal Preferences */}
+                  {onToggleFloatingChat !== undefined ? (
+                    <div className="w-full space-y-4">
+                      <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
+                        {t('settings.personal')}
+                      </p>
+
+                      <div className="flex items-center justify-between w-full">
+                        <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                          {t('settings.floatingChat')}
+                        </span>
+                        <Switch
+                          checked={floatingChatEnabled}
+                          onCheckedChange={() => onToggleFloatingChat?.()}
+                          label={t('settings.floatingChatOverlay')}
+                        />
+                      </div>
+
+                      {onToggleFloatingTiles !== undefined ? (
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                            {t('settings.floatingTiles')}
+                          </span>
+                          <Switch
+                            checked={floatingTilesEnabled}
+                            onCheckedChange={() => onToggleFloatingTiles?.()}
+                            label={t('settings.floatingTilesOverlay')}
+                          />
+                        </div>
+                      ) : null}
+
+                      {/*
                   3D theatre opt-in. Reads the store directly rather than taking
                   props, because this component sits two levels below
                   ActiveWatchParty and prop-drilling it through the sidebar would
@@ -274,31 +309,31 @@ export function WatchPartySettings({
                   Nothing downloads until this is switched on — a normal 2D watch
                   party must not pay for 3D assets it never shows.
                 */}
-                <div className="flex items-center justify-between w-full">
-                  <span className="flex flex-col">
-                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
-                      3D Theatre
-                    </span>
-                    <span className="text-[10px] font-medium text-white/40">
-                      {theatrePhase === 'downloading'
-                        ? `Downloading… ${Math.round(theatreProgress * 100)}%`
-                        : theatrePhase === 'ready'
-                          ? 'Ready — press V to change view'
-                          : theatrePhase === 'error'
-                            ? 'Download failed — toggle to retry'
-                            : theatreDownloadLabel}
-                    </span>
-                  </span>
-                  <Switch
-                    checked={theatreEnabled}
-                    onCheckedChange={(next) =>
-                      next ? enableTheatre() : disableTheatre()
-                    }
-                    label="3D Theatre"
-                  />
-                </div>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="flex flex-col">
+                          <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                            3D Theatre
+                          </span>
+                          <span className="text-[10px] font-medium text-white/40">
+                            {theatrePhase === 'downloading'
+                              ? `Downloading… ${Math.round(theatreProgress * 100)}%`
+                              : theatrePhase === 'ready'
+                                ? 'Ready — press V to change view'
+                                : theatrePhase === 'error'
+                                  ? 'Download failed — toggle to retry'
+                                  : theatreDownloadLabel}
+                          </span>
+                        </span>
+                        <Switch
+                          checked={theatreEnabled}
+                          onCheckedChange={(next) =>
+                            next ? enableTheatre() : disableTheatre()
+                          }
+                          label="3D Theatre"
+                        />
+                      </div>
 
-                {/*
+                      {/*
                   Which body you appear as. Shown only once 3D is on, because it
                   is meaningless otherwise.
 
@@ -308,186 +343,192 @@ export function WatchPartySettings({
                   broadcast with your pose so other people see you as the body
                   you picked.
                 */}
-                {theatreEnabled ? (
-                  <div className="flex items-center justify-between w-full">
-                    <span className="flex flex-col">
-                      <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
-                        Your Character
-                      </span>
-                      <span className="text-[10px] font-medium text-white/40">
-                        How others see you in the theatre
-                      </span>
-                    </span>
-                    <fieldset className="flex items-center gap-1 rounded-md border-2 border-white/15 p-0.5">
-                      <legend className="sr-only">Your character</legend>
-                      {(['man', 'woman'] as const).map((option) => (
-                        <label
-                          key={option}
-                          className={`cursor-pointer px-2.5 py-1 text-[10px] font-black font-headline uppercase tracking-widest transition-colors ${
-                            theatreCharacter === option
-                              ? 'bg-white text-black'
-                              : 'text-white/50 hover:text-white/80'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="theatre-character"
-                            value={option}
-                            checked={theatreCharacter === option}
-                            onChange={() => setTheatreCharacter(option)}
-                            className="sr-only"
-                          />
-                          {option === 'man' ? 'Man' : 'Woman'}
-                        </label>
-                      ))}
-                    </fieldset>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
+                      {theatreEnabled ? (
+                        <div className="flex items-center justify-between w-full">
+                          <span className="flex flex-col">
+                            <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                              Your Character
+                            </span>
+                            <span className="text-[10px] font-medium text-white/40">
+                              How others see you in the theatre
+                            </span>
+                          </span>
+                          <fieldset className="flex items-center gap-1 rounded-md border-2 border-white/15 p-0.5">
+                            <legend className="sr-only">Your character</legend>
+                            {(['man', 'woman'] as const).map((option) => (
+                              <label
+                                key={option}
+                                className={`cursor-pointer px-2.5 py-1 text-[10px] font-black font-headline uppercase tracking-widest transition-colors ${
+                                  theatreCharacter === option
+                                    ? 'bg-white text-black'
+                                    : 'text-white/50 hover:text-white/80'
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="theatre-character"
+                                  value={option}
+                                  checked={theatreCharacter === option}
+                                  onChange={() => setTheatreCharacter(option)}
+                                  className="sr-only"
+                                />
+                                {option === 'man' ? 'Man' : 'Woman'}
+                              </label>
+                            ))}
+                          </fieldset>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
 
-            {isHost ? (
-              <>
-                {/* Global Permissions */}
-                <div className="w-full space-y-4">
-                  <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
-                    {t('settings.globalPermissions')}
-                  </p>
-
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
-                      {t('settings.sketchBoard')}
-                    </span>
-                    <Switch
-                      checked={room.permissions.canGuestsDraw}
-                      onCheckedChange={(v) =>
-                        handleGlobalPermissionToggle('canGuestsDraw', v)
-                      }
-                      label={t('settings.allowDrawLabel')}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
-                      {t('settings.soundboardLabel')}
-                    </span>
-                    <Switch
-                      checked={room.permissions.canGuestsPlaySounds}
-                      onCheckedChange={(v) =>
-                        handleGlobalPermissionToggle('canGuestsPlaySounds', v)
-                      }
-                      label={t('settings.allowSoundsLabel')}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
-                      {t('settings.liveChat')}
-                    </span>
-                    <Switch
-                      checked={room.permissions.canGuestsChat}
-                      onCheckedChange={(v) =>
-                        handleGlobalPermissionToggle('canGuestsChat', v)
-                      }
-                      label={t('settings.allowChatLabel')}
-                    />
-                  </div>
-                </div>
-
-                {/* Individual Overrides */}
-                {guests.length > 0 ? (
-                  <div className="w-full space-y-4">
-                    <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
-                      {t('settings.individualOverrides')}
-                    </p>
-
-                    {guests.map((guest) => (
-                      <div key={guest.id} className="w-full space-y-3">
-                        <p className="text-xs font-black font-headline uppercase tracking-widest text-white text-center">
-                          {guest.name}
+                  {isHost ? (
+                    <>
+                      {/* Global Permissions */}
+                      <div className="w-full space-y-4">
+                        <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
+                          {t('settings.globalPermissions')}
                         </p>
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
-                              {t('tabs.sketch')}
-                            </span>
-                            <Switch
-                              checked={
-                                guest.permissions?.canDraw ??
-                                room.permissions.canGuestsDraw
-                              }
-                              onCheckedChange={(v) =>
-                                handleUserPermissionToggle(
-                                  guest.id,
-                                  'canDraw',
-                                  v,
-                                )
-                              }
-                              label={t('settings.sketchFor', {
-                                name: guest.name,
-                              })}
-                            />
-                          </div>
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
-                              {t('settings.sounds')}
-                            </span>
-                            <Switch
-                              checked={
-                                guest.permissions?.canPlaySound ??
-                                room.permissions.canGuestsPlaySounds
-                              }
-                              onCheckedChange={(v) =>
-                                handleUserPermissionToggle(
-                                  guest.id,
-                                  'canPlaySound',
-                                  v,
-                                )
-                              }
-                              label={t('settings.soundsFor', {
-                                name: guest.name,
-                              })}
-                            />
-                          </div>
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
-                              {t('tabs.chat')}
-                            </span>
-                            <Switch
-                              checked={
-                                guest.permissions?.canChat ??
-                                room.permissions.canGuestsChat
-                              }
-                              onCheckedChange={(v) =>
-                                handleUserPermissionToggle(
-                                  guest.id,
-                                  'canChat',
-                                  v,
-                                )
-                              }
-                              label={t('settings.chatFor', {
-                                name: guest.name,
-                              })}
-                            />
-                          </div>
+
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                            {t('settings.sketchBoard')}
+                          </span>
+                          <Switch
+                            checked={room.permissions.canGuestsDraw}
+                            onCheckedChange={(v) =>
+                              handleGlobalPermissionToggle('canGuestsDraw', v)
+                            }
+                            label={t('settings.allowDrawLabel')}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                            {t('settings.soundboardLabel')}
+                          </span>
+                          <Switch
+                            checked={room.permissions.canGuestsPlaySounds}
+                            onCheckedChange={(v) =>
+                              handleGlobalPermissionToggle(
+                                'canGuestsPlaySounds',
+                                v,
+                              )
+                            }
+                            label={t('settings.allowSoundsLabel')}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-xs font-bold font-headline uppercase tracking-widest text-white">
+                            {t('settings.liveChat')}
+                          </span>
+                          <Switch
+                            checked={room.permissions.canGuestsChat}
+                            onCheckedChange={(v) =>
+                              handleGlobalPermissionToggle('canGuestsChat', v)
+                            }
+                            label={t('settings.allowChatLabel')}
+                          />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : null}
-              </>
-            ) : null}
 
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="text-white/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white mt-2"
-            >
-              {t('dialog.cancel')}
-            </button>
-          </div>
-        </div>
-      ) : null}
+                      {/* Individual Overrides */}
+                      {guests.length > 0 ? (
+                        <div className="w-full space-y-4">
+                          <p className="text-[10px] font-black font-headline uppercase tracking-widest text-white/40 text-center">
+                            {t('settings.individualOverrides')}
+                          </p>
+
+                          {guests.map((guest) => (
+                            <div key={guest.id} className="w-full space-y-3">
+                              <p className="text-xs font-black font-headline uppercase tracking-widest text-white text-center">
+                                {guest.name}
+                              </p>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div className="flex flex-col items-center gap-2">
+                                  <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
+                                    {t('tabs.sketch')}
+                                  </span>
+                                  <Switch
+                                    checked={
+                                      guest.permissions?.canDraw ??
+                                      room.permissions.canGuestsDraw
+                                    }
+                                    onCheckedChange={(v) =>
+                                      handleUserPermissionToggle(
+                                        guest.id,
+                                        'canDraw',
+                                        v,
+                                      )
+                                    }
+                                    label={t('settings.sketchFor', {
+                                      name: guest.name,
+                                    })}
+                                  />
+                                </div>
+                                <div className="flex flex-col items-center gap-2">
+                                  <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
+                                    {t('settings.sounds')}
+                                  </span>
+                                  <Switch
+                                    checked={
+                                      guest.permissions?.canPlaySound ??
+                                      room.permissions.canGuestsPlaySounds
+                                    }
+                                    onCheckedChange={(v) =>
+                                      handleUserPermissionToggle(
+                                        guest.id,
+                                        'canPlaySound',
+                                        v,
+                                      )
+                                    }
+                                    label={t('settings.soundsFor', {
+                                      name: guest.name,
+                                    })}
+                                  />
+                                </div>
+                                <div className="flex flex-col items-center gap-2">
+                                  <span className="text-[10px] font-bold font-headline uppercase tracking-widest text-white/50">
+                                    {t('tabs.chat')}
+                                  </span>
+                                  <Switch
+                                    checked={
+                                      guest.permissions?.canChat ??
+                                      room.permissions.canGuestsChat
+                                    }
+                                    onCheckedChange={(v) =>
+                                      handleUserPermissionToggle(
+                                        guest.id,
+                                        'canChat',
+                                        v,
+                                      )
+                                    }
+                                    label={t('settings.chatFor', {
+                                      name: guest.name,
+                                    })}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="text-white/60 text-xs font-headline font-bold uppercase tracking-wider cursor-pointer hover:text-white mt-2"
+                  >
+                    {t('dialog.cancel')}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }
