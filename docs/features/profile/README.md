@@ -190,6 +190,24 @@ Read-only public profile page:
 - Join date formatted via `useFormatter`
 - **Stats**: watch streak (consecutive days) and total watch hours
 - Activity heatmap (`ActivityGraph`)
+
+#### Genuinely public
+
+The route lives at `app/(public)/user/[id]/`, **not** under `(protected)`. `GET /api/user/public/:id`
+takes no auth, and this view already branches on whether a viewer is signed in — a signed-out
+visitor gets a "return to base" link home instead of the Back button, and every friend action is
+skipped. It was nonetheless unreachable while signed out: the route sat in `(protected)` and
+`proxy.ts` is deny-by-default, so every shared profile URL redirected to
+`/continue?from=/user/...`. `/user/` is now in `PUBLIC_PREFIXES`.
+
+It deliberately does not sit under `(protected)/(main)`. That tree mounts signed-in-only
+machinery — the call provider, music engine, push registration, the friends sidebar, and
+`HubGate`, which renders a "what do you want to explore?" modal straight over the page. The
+trade-off is that signed-in viewers see no navbar or sidebars here; the view renders its own
+header and Back button, so it stands alone in both states.
+
+The page exports `generateMetadata`, so a shared link unfurls with the person's name, handle and
+avatar rather than the generic site title.
 - Link back to home page
 - "What's New" section
 

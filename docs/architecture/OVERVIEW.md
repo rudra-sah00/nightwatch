@@ -26,7 +26,7 @@ Next.js 16 renamed the `middleware` convention to `proxy`, so the server-side gu
 
 It performs an **optimistic** check only: it reads the durable `refreshToken` cookie and never calls the backend, because the guard runs on every matched request including prefetches. Real authorization stays in the backend, which validates every `/api` call.
 
-*   **Deny by default.** Everything is protected unless listed in `PUBLIC_PATHS` (`/`, `/continue`, `/privacy`, `/terms`) or matched by `PUBLIC_PREFIXES` (`/auth/`, `/clip/share/`, `/watch-party/`). A newly added route is guarded automatically.
+*   **Deny by default.** Everything is protected unless listed in `PUBLIC_PATHS` (`/`, `/continue`, `/privacy`, `/terms`) or matched by `PUBLIC_PREFIXES` (`/auth/`, `/clip/share/`, `/user/`, `/watch-party/`). A newly added route is guarded automatically.
 *   **Destination preservation.** Unauthenticated requests redirect to `/continue?from=<path>`; `ContinueClient` re-validates that value before navigating.
 *   **Signed-in users** hitting `/continue` are redirected to `/home`.
 *   **Matcher** `['/((?!api|_next|.*\\.[\\w]+$).*)']` skips `/api`, Next internals, and any path with a file extension, which keeps `sw.js`, `firebase-messaging-sw.js`, `manifest.json`, and `public/` assets reachable while signed out — both the service worker and PWA install require this.

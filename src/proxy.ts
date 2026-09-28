@@ -52,6 +52,7 @@ const PUBLIC_PATHS: ReadonlySet<string> = new Set([
 const PUBLIC_PREFIXES: readonly string[] = [
   '/auth/', // OAuth callbacks — the session does not exist yet mid-handshake
   '/clip/share/', // publicly shareable clip links
+  '/user/', // public profiles — shareable links, readable while signed out
   '/watch-party/', // the (party) layout intentionally allows guests
 ];
 

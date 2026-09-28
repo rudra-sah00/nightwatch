@@ -9,6 +9,7 @@ import {
   UserMinus,
   UserPlus,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFormatter, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -161,14 +162,16 @@ export function PublicProfileView({
               <span>Back</span>
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => router.back()}
+            /* A signed-out viewer usually arrives cold from a shared link, so there is no
+               history entry to go back to and `router.back()` would do nothing. Send them
+               to the landing page, which is what the Home icon promises anyway. */
+            <Link
+              href="/"
               className="group flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground border-[3px] border-border transition-colors duration-200 uppercase font-headline font-bold text-sm tracking-tight hover:bg-primary/90"
             >
               <Home className="w-4 h-4" />
               <span>{t('publicProfile.returnBase')}</span>
-            </button>
+            </Link>
           )}
           <div className="hidden md:block bg-neo-yellow border-[3px] border-border px-5 py-2  font-headline font-black uppercase text-sm tracking-widest">
             {t('publicProfile.identityVerified')}

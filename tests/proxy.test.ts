@@ -39,7 +39,6 @@ describe('proxy — signed-out visitors', () => {
     '/continue-watching',
     '/ask-ai',
     '/content/9',
-    '/user/7',
   ];
 
   it.each(protectedPaths)('redirects %s to the login page', (path) => {
@@ -71,6 +70,8 @@ describe('proxy — public paths', () => {
     '/terms',
     '/auth/google/callback',
     '/clip/share/some-share-id',
+    // Public profiles are shareable links; the backend endpoint takes no auth.
+    '/user/019cb3fa-3af6-7641-a730-08212f8e514a',
     // The (party) layout explicitly allows guests.
     '/watch-party/room-1',
   ];
@@ -85,6 +86,17 @@ describe('proxy — public paths', () => {
       proxy(request('/clip/share/abc')).headers.get('location'),
     ).toBeNull();
     expect(proxy(request('/clip/abc')).status).toBe(307);
+  });
+
+  /**
+   * A shared profile link has to open for someone with no account. This used to redirect to
+   * `/continue?from=/user/...`, which made every shared profile URL a login wall even though
+   * `GET /api/user/public/:id` takes no auth at all.
+   */
+  it('keeps /user/:id public while /profile stays protected', () => {
+    expect(proxy(request('/user/abc')).headers.get('location')).toBeNull();
+    expect(proxy(request('/profile')).status).toBe(307);
+    expect(proxy(request('/profile/security')).status).toBe(307);
   });
 });
 
