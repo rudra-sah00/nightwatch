@@ -196,12 +196,32 @@ export const onSketchProvideSync = <
     callback({ requesterId: msg.requesterId as string } as unknown as T),
   );
 
+/**
+ * Full-canvas replacement, sent to a joining guest in answer to `SKETCH_REQUEST_SYNC`.
+ *
+ * `elements` is validated here because this is the only sketch message that replaces the whole
+ * action list rather than appending to or filtering it, so it is the only one that can leave the
+ * state as something that is not an array. The WP-C1 sender gate in `room/permissions.ts` answers
+ * "may you say this?" and deliberately says nothing about whether the payload is well-formed;
+ * this is that second question, asked at the boundary so every consumer inherits the answer.
+ *
+ * Observed behaviour before this guard, driven through the real dispatch path: `undefined` and
+ * `null` threw a TypeError from inside the React state updater, and — worse — a string, a number
+ * and a plain object were stored verbatim as the sketch state. Those three got past the cap check
+ * silently (a string has a numeric `length`; the others have `undefined`, and neither comparison
+ * is true), leaving the canvas poisoned until the next legitimate stroke called `prev.findIndex`
+ * and threw far from the message that caused it.
+ *
+ * A malformed payload is dropped rather than coerced to `[]`: an empty array is a legitimate
+ * canvas state and would silently wipe what the receiver already had.
+ */
 export const onSketchSyncState = <T = unknown[]>(
   callback: (data: { elements: T }) => void,
 ) =>
-  subscribe('SKETCH_SYNC_STATE', (msg) =>
-    callback({ elements: msg.elements as T }),
-  );
+  subscribe('SKETCH_SYNC_STATE', (msg) => {
+    if (!Array.isArray(msg.elements)) return;
+    callback({ elements: msg.elements as T });
+  });
 
 export const onSketchMoveZ = <
   T extends { actionId: string; direction: 'front' | 'back' } = {

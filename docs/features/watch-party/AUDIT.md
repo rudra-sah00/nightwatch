@@ -27,12 +27,14 @@ unauthenticated except for three message kinds: any approved member could seize 
 host, end the party, repoint everyone's player at arbitrary content, or grant themselves the
 permissions the one existing gate was built to enforce.
 
-**WP-H2 is what is left worth fixing.** The same receive path validates *who sent* a message and
-never *whether it is well-formed*, and one malformed `SKETCH_SYNC_STATE` throws inside a React state
-updater on every recipient at once. It needs no hostile intent — a client on a different build does
-it by accident, during join.
+**WP-H2 is also fixed.** The same receive path validated *who sent* a message and never *whether it
+was well-formed*. A malformed `SKETCH_SYNC_STATE` silently replaced every recipient's sketch state
+with a non-array — no throw, nothing logged — and the canvas then broke on the next legitimate
+stroke, far from the cause.
 
-Everything else here is ordinary bug work.
+**What is left is ordinary bug work**: an uncapped emoji list (WP-H1) and four MEDIUM/LOW items.
+The larger outstanding risk is not a finding but a gap — see
+[§ Coverage honesty](#coverage-honesty).
 
 ---
 
@@ -175,7 +177,40 @@ connected to. No special tooling beyond a console call to the send path.
 
 ## HIGH
 
-### WP-H2 — A malformed `SKETCH_SYNC_STATE` throws inside a React state updater on every recipient
+### WP-H2 — A malformed `SKETCH_SYNC_STATE` corrupts or crashes the shared sketch state on every recipient
+
+**✅ FIXED — `rtm-events.ts` `onSketchSyncState` + `SketchContext` setter.** Two layers: the
+boundary drops a payload whose `elements` is not an array, and the setter refuses to store a
+non-array whoever calls it. Neither coerces to `[]`, because an empty canvas is a legitimate state
+and coercing would silently wipe the receiver's work. Regression test
+`tests/features/watch-party/wp-h2-sketch-sync-payload.test.tsx` — 8 of its 10 cases fail against
+the unfixed tree.
+
+**🔶 THE ORIGINAL REASONING WAS PARTLY WRONG, and the correction is the useful part.** The finding
+below claimed a non-array throws at the cap check. Driving all five shapes through the real
+dispatch path in a real mount showed otherwise:
+
+| `elements` | Observed before the fix |
+|---|---|
+| `undefined` | `TypeError` from inside the state updater — as predicted |
+| `null` | `TypeError` — as predicted |
+| a string | **stored verbatim, no throw** — a string has a numeric `length`, so `> 200` is simply false |
+| a number | **stored verbatim, no throw** — `(42).length` is `undefined`, and `undefined > 200` is false |
+| a plain object | **stored verbatim, no throw** — same as above |
+
+So three of the five shapes did not crash: they silently replaced the sketch state with something
+that is not an array, tree still mounted, nothing logged. **That is the worse case**, and the audit
+missed it by reasoning about the throw instead of running it. The canvas stayed poisoned until the
+next legitimate stroke called `prev.findIndex` and threw — far from the message that caused it, and
+after the sync that did it had already scrolled out of view. Confirmed by a test that poisons the
+state and then dispatches a valid `SKETCH_DRAW`.
+
+This also answers the open question the finding recorded. There was no error boundary to identify,
+because in the common case there was no error — which is why nobody had reported it.
+
+---
+
+The finding as originally written, retained for the reasoning:
 
 Found in the Phase 4 pass over `interactions/`.
 
@@ -224,11 +259,13 @@ guest, so the blast lands during join.
 `canGuestsDraw` defaults to `false`, so a guest needs the host to have enabled drawing; the host
 always holds it.
 
-**How I could be wrong.** If an error boundary above the overlay catches this and re-renders
-cleanly, the severity drops from "party view dies" to "canvas resets". I have **not** verified
-which boundary catches it or what the user actually sees — that needs the throw driven through a
-real mount, which is the first thing the fix phase should do. The throw itself is certain;
-`next.length` on `undefined` has one outcome.
+**How I could be wrong — answered.** The question recorded here was which error boundary catches
+the throw and what the user sees. Both were the wrong question: in three of five shapes there is no
+throw at all. See the correction above.
+
+**Still unverified:** that a real peer on a different build actually emits one of these shapes.
+The mechanism is proven; the claim that it happens in the wild without hostile intent remains
+reasoning, and would need two clients on different versions to demonstrate.
 
 ---
 
@@ -457,13 +494,17 @@ test-verified — the backend statements under WP-C1 come from reading the sourc
 - **Phase 4 — discovery on the unread feature. ✅ DONE for `interactions/` and the join
   lifecycle**, producing WP-H2 and WP-M2 through WP-M4. The surfaces listed as still shallow above
   remain unread.
-- **Phase 5 — WP-H2**, the highest-value remaining fix: validate inbound RTM payload shape, not
-  just sender. Worth doing as one guard at the `rtm-events.ts` boundary rather than per consumer,
-  since every accessor there is an unchecked `as` cast and `SKETCH_SYNC_STATE` is only the instance
-  that happens to crash. First step is to drive the throw through a real mount and find out what
-  the user actually sees.
+- **Phase 5 — WP-H2. ✅ DONE.** Fixed at the `rtm-events.ts` boundary plus the `SketchContext`
+  invariant. **Deliberately scoped to `elements`:** every other accessor in `rtm-events.ts` is
+  still an unchecked `as` cast. `SKETCH_SYNC_STATE` was the one that could poison state, because it
+  is the only sketch message that replaces the action list rather than appending to or filtering it
+  — the others leave `actions` a valid array even when the individual action is junk. A malformed
+  *action* can still reach Konva and is not covered here; that is a separate finding nobody has
+  written yet.
 - **Phase 6 — WP-H1**, emoji cap and send throttle. Independent of everything else.
 - **Phase 7 — WP-M2 / WP-M3 / WP-M4**, small and independent of each other.
 - **Phase 8 — WP-M1 / WP-L1**, if judged worth the change.
 - **Phase 9 — finish discovery**: the two sketch components, membership races, `useAgora` beyond
-  listener balance, and the theatre seat-claim rule.
+  listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
+  until it was executed, the remaining findings should be treated as unproven until each is driven
+  through a mount the same way.

@@ -134,6 +134,22 @@ export function SketchProvider({ children }: { children: ReactNode }) {
     (update: SketchAction[] | ((prev: SketchAction[]) => SketchAction[])) => {
       _setActions((prev) => {
         const next = typeof update === 'function' ? update(prev) : update;
+        /*
+          `actions` is an array or this provider is broken, so the invariant is enforced here
+          rather than trusted from every caller.
+
+          This is not defensive padding. The cap below reads `next.length`, which threw on
+          `undefined` and `null` — but silently accepted a string (numeric `length`), a number and
+          a plain object (`undefined > 200` is false), storing each as the sketch state. Every
+          later consumer calls `prev.findIndex` / `prev.filter`, so a poisoned state broke the
+          canvas at whatever touched it next, far from the message that caused it. The payload that
+          could do it arrives over RTM and is now also checked at the boundary in
+          `rtm-events.ts`; this keeps the invariant true regardless of who calls in.
+
+          Keeping `prev` rather than resetting to `[]` matters: an empty canvas is a legitimate
+          state, so coercing would quietly erase the user's work instead of ignoring a bad update.
+        */
+        if (!Array.isArray(next)) return prev;
         return next.length > MAX_SKETCH_ACTIONS
           ? next.slice(next.length - MAX_SKETCH_ACTIONS)
           : next;
