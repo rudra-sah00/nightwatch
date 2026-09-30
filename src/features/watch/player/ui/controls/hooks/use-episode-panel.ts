@@ -43,6 +43,11 @@ export function useEpisodePanel({
   const [isLoading, setIsLoading] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const fetchedSeasonsRef = useRef<Set<number>>(new Set());
+  /**
+   * Season of the most recently started fetch, so an earlier one that resolves later cannot
+   * overwrite it. See fetchShowData.
+   */
+  const latestSeasonRequestRef = useRef<number | null>(null);
 
   // Sync selected season with current playing season
   useEffect(() => {
@@ -79,6 +84,18 @@ export function useEpisodePanel({
   const fetchShowData = useCallback(
     async (seasonToFetch: number) => {
       if (!seriesId || !isSeriesContent) return;
+      /*
+        Claim this fetch as the current one. Switching S1 → S2 → S3 quickly launches three
+        overlapping requests and the last to *resolve* used to win, so the dropdown could say
+        S3 while the list showed S1's episodes — and clicking an episode played the wrong
+        one. Each write below is gated on still being the latest request.
+
+        A guard rather than an AbortController because the two awaits are separate calls with
+        a cache hit in between; cancelling correctly would mean threading a signal through
+        both API helpers, whereas discarding a stale result is enough to fix the symptom.
+      */
+      latestSeasonRequestRef.current = seasonToFetch;
+      const isStale = () => latestSeasonRequestRef.current !== seasonToFetch;
       if (fetchedSeasonsRef.current.has(seasonToFetch) && seasons.length > 0) {
         return; // Already fetched
       }
@@ -98,6 +115,7 @@ export function useEpisodePanel({
 
           // Check if we have episodes for this season in cache
           if (cached.loadedSeasons[seasonToFetch]) {
+            if (isStale()) return;
             setEpisodes(cached.loadedSeasons[seasonToFetch]);
             fetchedSeasonsRef.current.add(seasonToFetch);
             setIsLoading(false);
@@ -108,6 +126,7 @@ export function useEpisodePanel({
         // Fetch show details if we don't have seasons yet
         if (!showDetails || seasons.length === 0) {
           showDetails = await getShowDetails(seriesId);
+          if (isStale()) return;
           if (showDetails.seasons?.length) {
             setSeasons(showDetails.seasons);
           }
@@ -123,6 +142,7 @@ export function useEpisodePanel({
             seriesId,
             seasonData.seasonId,
           );
+          if (isStale()) return;
           setEpisodes(fetchedEpisodes);
           fetchedSeasonsRef.current.add(seasonToFetch);
 
@@ -137,7 +157,9 @@ export function useEpisodePanel({
       } catch {
         // Silently fail — panel stays open with empty state
       } finally {
-        setIsLoading(false);
+        // A superseded fetch must not clear the spinner the current one is still showing.
+        if (latestSeasonRequestRef.current === seasonToFetch)
+          setIsLoading(false);
       }
     },
     [seriesId, isSeriesContent, seasons.length],

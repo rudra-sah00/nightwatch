@@ -89,6 +89,78 @@ describe('useEpisodePanel', () => {
     });
   });
 
+  /**
+   * Regression tests for PLAYER_AUDIT H10 — rapid season switching showed the wrong episodes.
+   *
+   * `fetchShowData` had no stale-response guard, so switching S1 → S2 quickly launched
+   * overlapping requests and the last to *resolve* won. The dropdown said S2 while the list
+   * showed S1's episodes, and clicking an episode played the wrong one.
+   */
+  describe('out-of-order season fetches (PLAYER_AUDIT H10)', () => {
+    /** Episodes tagged by season so the winner is identifiable. */
+    const episodesFor = (season: number) => [
+      { ...mockEpisodes[0], episodeId: `s${season}e1`, season },
+    ];
+
+    it('ignores a slow earlier fetch that resolves after a newer one', async () => {
+      vi.mocked(getShowDetails).mockResolvedValue(mockShowDetails as never);
+
+      // Season 1 resolves only after season 2 has already landed.
+      let releaseSeason1: (() => void) | null = null;
+      vi.mocked(getSeriesEpisodes).mockImplementation(
+        async (_seriesId: string, seasonId?: string) => {
+          if (seasonId === 'season-1') {
+            await new Promise<void>((resolve) => {
+              releaseSeason1 = resolve;
+            });
+            return { episodes: episodesFor(1) } as never;
+          }
+          return { episodes: episodesFor(2) } as never;
+        },
+      );
+
+      const { result } = renderHook(() => useEpisodePanel(defaultOptions));
+
+      await act(async () => {
+        result.current.toggle();
+      });
+      await act(async () => {
+        result.current.onSeasonChange(2);
+      });
+      await waitFor(() => {
+        expect(result.current.episodes[0]?.episodeId).toBe('s2e1');
+      });
+
+      // The stale season-1 response arrives last and must be discarded.
+      await act(async () => {
+        releaseSeason1?.();
+        await Promise.resolve();
+      });
+
+      expect(result.current.episodes[0]?.episodeId).toBe('s2e1');
+      expect(result.current.selectedSeason).toBe(2);
+    });
+
+    it('does not leave the spinner up after a superseded fetch settles', async () => {
+      vi.mocked(getShowDetails).mockResolvedValue(mockShowDetails as never);
+      vi.mocked(getSeriesEpisodes).mockResolvedValue({
+        episodes: episodesFor(2),
+      } as never);
+
+      const { result } = renderHook(() => useEpisodePanel(defaultOptions));
+      await act(async () => {
+        result.current.toggle();
+      });
+      await act(async () => {
+        result.current.onSeasonChange(2);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+    });
+  });
+
   describe('toggle', () => {
     it('should open the panel on toggle', async () => {
       const { result } = renderHook(() => useEpisodePanel(defaultOptions));
