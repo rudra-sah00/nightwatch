@@ -432,7 +432,12 @@ tap, which jumps the volume abruptly. Fine-grained adjustment is impossible.
 
 ### H10 — Rapid season switching shows the wrong episode list
 
-**✅ CONFIRMED** 🔶 — `fetchShowData` spans `:79-148` (doc said 80-141). `setEpisodes` at `:126`,
+**✅ FIXED — `53638e08`.** Every state write, including the `finally` that clears the spinner, is
+gated on the fetch still being the latest. A guard rather than an `AbortController`: the function
+makes two API calls with a cache hit in between, so cancelling properly would mean threading a
+signal through both helpers.
+
+Verified during Phase 0 🔶 — `fetchShowData` spans `:79-148` (doc said 80-141). `setEpisodes` at `:126`,
 unconditional `setIsLoading(false)` in the `finally` at `:139`. Verified there is no
 `AbortController` and no stale guard; the `fetchedSeasonsRef.current.has(...)` early return at
 `:82` only suppresses *redundant* refetches of an already-loaded season and does nothing about
@@ -451,7 +456,11 @@ the wrong one.
 
 ### H11 — Two Escape handlers close the episode panel, firing the close path twice
 
-**✅ CONFIRMED** 🔶 — `EpisodePanel.tsx:75-86` (doc said 78-83) and `use-episode-panel.ts:62-66`
+**✅ FIXED — `97228794`**, by keeping the hook's handler as the audit recommended — it also owns the
+outside-click listener, so both dismissals live together. `EpisodePanel` is only ever rendered by
+`PlayerEpisodePanel`, which uses the hook, so no caller loses the behaviour.
+
+Verified during Phase 0 🔶 — `EpisodePanel.tsx:75-86` (doc said 78-83) and `use-episode-panel.ts:62-66`
 (doc said 63-67). Both are gated on `isOpen`, neither stops propagation, and the component's
 `onClose` **is** the hook's `close`, so `setIsOpen(false)` and `onInteraction?.(false)` both run
 twice.
@@ -468,7 +477,11 @@ component's.
 
 ### H12 — Rapid quality switching on MP4 orphans `loadedmetadata` listeners
 
-**✅ CONFIRMED** 🔶 — `setQuality` spans `:141-169` (doc said 145-163); `onMetadata` is declared at
+**✅ FIXED — `3553a595`.** The pending listener is tracked at hook scope and dropped before a new
+one is added, so the last switch wins. The main effect's cleanup detaches it too, so an unmount
+mid-switch cannot restore a position into a torn-down player.
+
+Verified during Phase 0 🔶 — `setQuality` spans `:141-169` (doc said 145-163); `onMetadata` is declared at
 `:154` and registered at `:163`. Confirmed it uses plain `addEventListener` with **no**
 `{ once: true }`, and that assigning `video.src` does not detach existing listeners. The effect
 cleanup at `:97` holds no reference to these closures.
@@ -506,7 +519,14 @@ No fix required. Retained here so the claim is not re-raised.
 
 ### H14 — TextTrack activation indexes by array position, which HLS-injected tracks break
 
-**✅ CONFIRMED** — `:172-176` exact. The mismatch is not hypothetical: `use-video-element.ts`
+**✅ FIXED — `db5b7de8`.** Matching is by id across the whole list, then by label for tracks the
+browser or hls.js created with an empty id. Two passes, because an exact id match anywhere beats a
+label that merely coincides earlier — a case the new tests turned up. The matcher is extracted to
+`ui/resolve-text-track.ts` so it can be tested at all: happy-dom returns a fresh `TextTrackList`
+and fresh `TextTrack` objects on every property access, so a `mode` written in one read is
+invisible in the next.
+
+Verified during Phase 0: `:172-176` exact. The mismatch is not hypothetical: `use-video-element.ts`
 builds its `tracks` array by appending a `fallback-captions` entry when `captionUrl` is set and not
 already present, and `VideoElement.tsx:102` renders a further hardcoded
 `<track kind="captions">`. Neither is in the `subtitleTracks` prop the index is derived from, so
@@ -532,7 +552,13 @@ guarantee.
 
 ### H15 — Subtitles freeze after a level switch replaces the TextTrack
 
-**✅ CONFIRMED (code)** 🔶 **/ ❓ UNPROVABLE (that hls.js replaces the track)** — the listener loop
+**✅ FIXED — `45b35894`.** Binding is a function now, re-run on the `TextTrackList`'s own
+`addtrack`/`removetrack`/`change` events, releasing the previous listeners first so an orphan
+cannot fire into a stale closure. Tested against a hand-rolled element for the same happy-dom
+reason as H14. **That hls.js replaces the track for our manifests is still unproven** — it needs
+multi-variant content with in-manifest WebVTT.
+
+Verified during Phase 0 🔶 — the listener loop
 is at `:136-149` with `addEventListener('cuechange', …)` on `:139`, and the deps are at `:160`, not
 `:134-140`. The snapshot-vs-deps mismatch is confirmed, as is that the safety poll only covers the
 first 2 s after mount. Whether hls.js actually swaps the underlying `TextTrack` on a level switch
@@ -557,7 +583,7 @@ is given in brackets.
 
 | # | Finding | Location | Status |
 |---|---|---|---|
-| M1 | The controls-safety effect has **no dependency array**, so its 5 s timer is destroyed and recreated ~4×/s during playback and can never fire. If `isInteracting` sticks true, controls stay visible forever. | `usePlayerHandlers.ts:135-147` *(was :136)* | ✅ CONFIRMED — no array at `:147`; compounds with H5 |
+| M1 | The controls-safety effect has **no dependency array**, so its 5 s timer is destroyed and recreated ~4×/s during playback and can never fire. If `isInteracting` sticks true, controls stay visible forever. | `usePlayerHandlers.ts:135-147` *(was :136)* | ✅ **FIXED `1626d26a`** — the timer never once fired; `dispatch` listed, which is stable |
 | M2 | `applyResponse` wraps everything in `try { … } catch (_e) {}`. A `{success:false}` or empty `masterPlaylistUrl` is swallowed — no error, no log — leaving the player loading forever. | `useStreamUrls.ts:125-134` *(was :112-120)* | ✅ CONFIRMED 🔶 — `processResponse` throws `Invalid play response` on exactly that input |
 | M3 | The soft-navigation sync effect never resets `subtitleTracks` or `apiDurationSeconds`, and guards the others with `if (…)`, so the previous video's captions/sprites/duration persist into the next. | `useStreamUrls.ts:100-122` *(was :96-111)* | ✅ CONFIRMED 🔶 |
 | ~~M4~~ | ~~`stopVideo()` sends CSRF as a `_csrf` query param via `sendBeacon`, while `apiFetch` uses the `x-csrf-token` header.~~ | `api.ts:167-179` | ❌ **WRONG** — see disproof below |
@@ -568,12 +594,12 @@ is given in brackets.
 | M9 | `stopVideo()` fires before the outgoing episode's unmount progress flush, so the backend sees stop → play(new) → progress(old). Can resurrect a just-closed continue-watching entry. | `NextEpisodeService.ts:145` *(was :140)* | ✅ CONFIRMED 🔶 |
 | ~~M10~~ | ~~`countdown` and `cancelled` are `useState` initialisers on a hook that never unmounts, so they never reset.~~ | `use-next-episode-overlay.ts:29-30` | ❌ **WRONG** — see disproof below |
 | M11 | `spriteVttCache` is a module-level unbounded `Map`; entries accumulate for the tab's lifetime across every video watched. | `SpriteService.ts:15` | ✅ CONFIRMED — ~144 KB per hour of video, never evicted |
-| M12 | `use-player-root` builds a `subtitleSettings` state that nothing consumes, and its initialiser calls `applySubtitleSettings` → `loadSubtitleFonts()`, pulling ~200 KB of Google Fonts on every player mount even if the style panel is never opened. The real settings live in `use-player-audio-subtitle-selectors`. | `use-player-root.ts:117-124` *(was :116-124)* | ✅ CONFIRMED — `PlayerRoot.tsx` never destructures it; note `loadSubtitleFonts` is idempotent per page, so the cost is once per page, not once per mount |
-| M13 | `applySubtitleSettings` runs twice per change — once directly in the handler, once via the effect watching the state it just set. | `use-player-audio-subtitle-selectors.ts:25-33` *(was :29-33)* | ✅ CONFIRMED 🔶 — idempotent, so wasteful rather than harmful |
+| M12 | `use-player-root` builds a `subtitleSettings` state that nothing consumes, and its initialiser calls `applySubtitleSettings` → `loadSubtitleFonts()`, pulling ~200 KB of Google Fonts on every player mount even if the style panel is never opened. The real settings live in `use-player-audio-subtitle-selectors`. | `use-player-root.ts:117-124` *(was :116-124)* | ✅ **FIXED `e0434fa5`** — dead state and its mount-time font fetch removed; the selectors hook applies settings when it mounts |
+| M13 | `applySubtitleSettings` runs twice per change — once directly in the handler, once via the effect watching the state it just set. | `use-player-audio-subtitle-selectors.ts:25-33` *(was :29-33)* | ✅ **FIXED `a1877f6d`** — effect is mount-only; the handler already applies on change |
 | M14 | `onInteraction` is in the effect's deps, so an identity change while the menu is open fires `false` on the old closure then `true` on the new one, flickering the auto-hide timer. | `use-settings-menu.ts:22-47` | ✅ CONFIRMED |
 | M15 | The countdown effect depends on `onComplete`, which the only caller passes as an inline arrow. Any parent re-render restarts the intervals, stuttering the countdown and re-delaying playback by 500 ms. | `use-playback-countdown.ts:42` *(was :40)*, `content-detail-modal.tsx:146` | ✅ CONFIRMED 🔶 — **and it is the trigger that turns H4 into a happy-path leak**; fix together |
 | M16 | `orientationTimeoutsRef` is only drained on unmount, so every fullscreen exit pushes 1–2 more stale IDs. | `useFullscreen.ts:283,311` *(was :284)* | ✅ CONFIRMED 🔶 — hygiene only: the IDs are numbers and the stale `clearTimeout`s are no-ops |
-| M17 | `addEventListener('canplaythrough', () => {})` is added with an anonymous handler and never removed; accumulates each time the effect re-runs. | `use-video-element.ts:131` *(was :133)* | ✅ CONFIRMED 🔶 — handler body is empty, so it accumulates without doing anything |
+| M17 | `addEventListener('canplaythrough', () => {})` is added with an anonymous handler and never removed; accumulates each time the effect re-runs. | `use-video-element.ts:131` *(was :133)* | ✅ **FIXED `bd670b9a`** — removed; the handler body was empty |
 | M18 | Two independent `usePlaybackSpeedBoost` instances (one in `use-player-root`, one in `useKeyboard`) each own a private `restoreRateRef`, despite a comment claiming they share rules. | `use-player-root.ts:384`, `useKeyboard.ts:204` | ✅ CONFIRMED (two instances) but the **"double-dispatches `SET_SPEED_BOOST`" claim is WRONG**: `engageSpeedBoost` returns early at `if (video.playbackRate >= SPEED_BOOST_RATE) return true;` before any dispatch, so the second instance cannot dispatch. **Severity MEDIUM → LOW** — structurally untidy, functionally guarded |
 | M19 | Sprite preload creates `new Image()` and drops the reference immediately, so memory-pressured mobile/TV WebViews can purge it before use, defeating the preload. | `SpriteService.ts:137-138` | ✅ CONFIRMED (code) but **severity MEDIUM → LOW**: the preload's real purpose is warming the HTTP cache, and those bytes survive GC of the `Image` object. Only the decoded bitmap is lost |
 
@@ -677,8 +703,19 @@ SEEKING.md P0 #2 scrub rework as intended — there is now one shared drag *gest
 This also closes cross-cutting pattern 1 below: there *is* a shared drag primitive now.
 `LiveSeekBar` still has its own mouse+touch implementation and could adopt it.
 
-**Wave 3 — correctness of the long tail.** H10–H12, H14, H15, then the MEDIUM table. M1, M12 and
-M13 are one-line fixes with immediate benefit. H13 is struck — nothing to do.
+**Wave 3 — correctness of the long tail.** ✅ **HIGH complete:** H10 (`53638e08`), H11
+(`97228794`), H12 (`3553a595`), H14 (`db5b7de8`), H15 (`45b35894`). H13 is struck — nothing to do.
+✅ **Started on MEDIUM:** M1 (`1626d26a`), M12 (`e0434fa5`), M13 (`a1877f6d`), M17 (`bd670b9a`).
+
+⏸ **Still open in MEDIUM:** M2, M3, M5, M6, M7, M8, M9, M11, M14, M15, M16, M18, M19 — and the
+whole LOW table except L1. None is user-visible breakage; they are leaks, staleness and hygiene.
+
+**A note on testability.** H14 and H15 could not be tested through the DOM: happy-dom returns a
+fresh `TextTrackList` and fresh `TextTrack` objects on every property access, so a `mode` written
+in one read is invisible in the next and listeners attach to throwaway objects. Real browsers keep
+those identities stable. H14's matcher was therefore extracted to a pure module and H15 tested
+against a hand-rolled element — both faithful, but worth knowing before writing further
+TextTrack tests here.
 
 **Wave 4 — performance.** H5 (context split) is the biggest single win but touches every consumer,
 so it wants its own change and a careful re-render measurement before and after.
