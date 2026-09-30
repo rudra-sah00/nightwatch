@@ -16,6 +16,8 @@ interface UsePlayerEngineOptions {
   isLive?: boolean;
   /** Diagnostic only: tags `video_error` so the watch-party drift loop can be tested. */
   isWatchPartyGuest?: boolean;
+  /** Stable content id used to remember whether this title needs a seek re-prime. */
+  seekReprimeKey?: string;
   /** Stream format hint from the backend (avoids URL-sniffing) */
   streamFormat?: 'hls' | 'mp4' | 'dash';
 }
@@ -39,6 +41,7 @@ export function usePlayerEngine({
   qualities,
   isLive = false,
   isWatchPartyGuest = false,
+  seekReprimeKey,
   streamFormat,
 }: UsePlayerEngineOptions): UsePlayerEngineReturn {
   const nullHlsRef = useRef<HlsType | null>(null);
@@ -76,6 +79,7 @@ export function usePlayerEngine({
     qualities,
     isLive,
     isWatchPartyGuest,
+    seekReprimeKey,
   });
 
   // Initialize DASH engine

@@ -137,6 +137,9 @@ export function usePlayerRoot({
     // drift-correction loop, which runs for non-hosts only — can be tested against real
     // sessions.
     isWatchPartyGuest: !isHost,
+    // Series share one re-prime answer across episodes: the encode is a property of the
+    // title, not of the episode, so a show discovered on episode 1 does not re-probe on 2.
+    seekReprimeKey: metadata.seriesId || metadata.movieId,
     streamFormat,
   });
 

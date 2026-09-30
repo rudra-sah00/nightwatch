@@ -4,6 +4,10 @@ import type HlsType from 'hls.js';
 import { type RefObject, useCallback, useEffect, useRef } from 'react';
 import { reportError, trackEvent } from '@/lib/analytics';
 import type { AudioTrack, PlayerAction, Quality } from '../context/types';
+import {
+  needsSeekReprime,
+  rememberSeekReprime,
+} from '../services/SeekReprimeMemory';
 
 /**
  * Fatal MEDIA_ERROR recoveries allowed before giving up on a source.
@@ -90,6 +94,14 @@ interface UseHlsOptions {
    * D4. Invisible in the single-viewer case, which is why it has not been isolated before.
    */
   isWatchPartyGuest?: boolean;
+  /**
+   * Stable content id used to remember whether this title needs a seek re-prime.
+   *
+   * Keyed on content rather than `streamUrl`, which carries a per-session token and so would
+   * never match a previous playback. Omitting it just means the title is re-probed, which is
+   * the old behaviour.
+   */
+  seekReprimeKey?: string;
 }
 
 interface NativeAudioTrack {
@@ -114,6 +126,7 @@ export function useHls({
   qualities: _manualQualities,
   isLive = false,
   isWatchPartyGuest = false,
+  seekReprimeKey,
 }: UseHlsOptions) {
   const hlsRef = useRef<HlsType | null>(null);
   const unauthorizedRetryCountRef = useRef(0);
@@ -160,11 +173,13 @@ export function useHls({
    * Survives the engine remount that recovery triggers because it lives at hook scope, not
    * inside the effect.
    *
-   * Deliberately not persisted across page loads. A stored flag would keep charging the
-   * seek penalty for a title long after an upstream re-encode fixed it, and the cost of
-   * re-learning is a single ~1s recovery per playback.
+   * Seeded from {@link needsSeekReprime}, so the discovery costs one fatal decode error per
+   * title rather than one per playback — the ref alone reset on every mount, which made the
+   * first seek of every session on affected content the one designed to fail. The cache is
+   * TTL-bounded rather than permanent, so an upstream re-encode is picked up rather than
+   * charged the seek penalty forever.
    */
-  const needsSeekReprimeRef = useRef(false);
+  const needsSeekReprimeRef = useRef(needsSeekReprime(seekReprimeKey));
   /*
     Diagnostic state for `video_error`, at hook scope so it survives the engine remount
     that recovery triggers — the same reason needsSeekReprimeRef lives here. Scope is
@@ -189,6 +204,9 @@ export function useHls({
    */
   const isWatchPartyGuestRef = useRef(isWatchPartyGuest);
   isWatchPartyGuestRef.current = isWatchPartyGuest;
+  /** Latest-ref for the same reason: the effect's deps stay minimal. */
+  const seekReprimeKeyRef = useRef(seekReprimeKey);
+  seekReprimeKeyRef.current = seekReprimeKey;
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
@@ -892,8 +910,11 @@ export function useHls({
 
                 if (isUnrecoverableDecode) {
                   // The decoder could not configure itself from what it was handed. Every
-                  // later seek on this stream re-primes so it does not recur.
+                  // later seek on this stream re-primes so it does not recur — and the
+                  // answer is remembered per title, so the next playback does not have to
+                  // rediscover it the same expensive way.
                   needsSeekReprimeRef.current = true;
+                  rememberSeekReprime(seekReprimeKeyRef.current);
                 }
 
                 if (isUnrecoverableDecode && onStreamExpiredRef.current) {
