@@ -18,6 +18,16 @@ re-traced against the current tree. Each carries a status:
 | 🔶 STALE | Code moved; the corrected location is given |
 | ❓ UNPROVABLE | Code confirmed, but the runtime consequence needs a repro not available locally |
 
+**Progress: P0 and P1 are complete.** Eleven of the twelve defects are fixed — D1, D2, D3,
+D4, D5, D6, D7, D8, D9, D10, D12. Only **D11** (`maxBufferHole` at 5× the default) remains,
+and it is deliberately last: it is a symptom marker, and P2 #12 is to revisit it now that
+init-segment handling is correct rather than to change it blind.
+
+Two things are fixed in code but **not verified against affected content**, and no claim is
+made that they are: D5's cached flag preventing a real decode error, and D4's loop actually
+being broken. Both need content or a two-guest party that is not reproducible locally. The
+`video_error` fields added in §7 are how they get confirmed in the field.
+
 **Result: 12 of 12 defects survived.** D4's file path was stale and its trigger condition was
 understated; one row of D6's table was wrong. Nothing was deleted. Details in
 [§10 Verification log](#10-verification-log).
@@ -167,9 +177,15 @@ The same reasoning was never applied to the arrows.
 
 ### D2 — Resume-on-load is an unguarded seek at the worst possible moment ⚠️ critical
 
-**✅ CONFIRMED** — line numbers exact. `handleProgressLoaded` is wired as `onProgressLoaded` into
-`useWatchProgress` (`use-player-root.ts:308`) and called from the `watch:get_progress` socket
-callback, so it fires after the engine has already begun loading at 0.
+**✅ FIXED — `28832601`.** The resume position is handed to hls.js as `startPosition`, so the
+engine loads the right fragment outright and there is no seek to fail. The seek is kept as a
+fallback for a position arriving after construction — the value comes from a socket
+round-trip, and losing a viewer's resume point would be worse than the seek it avoids — but it
+now runs only when `startPosition` lost the race, and goes through `useSeekController`.
+
+Verified during Phase 0: line numbers exact. `handleProgressLoaded` is wired as
+`onProgressLoaded` into `useWatchProgress` and called from the `watch:get_progress` socket
+callback, so it fired after the engine had already begun loading at 0.
 
 ```ts
 // use-player-root.ts:298-300
@@ -225,7 +241,17 @@ Same file, same area:
 
 ### D4 — Watch-party drift correction feeds a re-prime loop ⚠️ high
 
-**✅ CONFIRMED (code)** 🔶 **/ ❓ UNPROVABLE (that the loop is entered)** — the file is
+**✅ FIXED — `4fed8aa2`. ❓ That the loop is actually entered remains unproven locally** — it
+needs a two-guest party on affected content.
+
+Two guards: the tick is skipped entirely while a seek is in flight or `readyState` is below
+`HAVE_FUTURE_DATA` — precisely the state a re-prime creates, where measured drift is the stall
+rather than desync — and the hard-seek threshold doubles on each correction that fails to
+bring drift back inside it, up to 32s. The backoff clears only once drift is inside the *base*
+threshold, not merely the widened one; clearing it on any sub-threshold tick let a backed-off
+guest reset while still badly desynced, which still produced 17 hard seeks in 20 ticks.
+
+Verified during Phase 0: the file is
 `src/features/watch-party/room/hooks/usePredictiveSync.ts`, not `src/features/watch-party/`.
 Lines 372-420 are exact. Verified absent from the whole file: any `isSeeking`, `readyState`,
 `paused`, buffering, cooldown or consecutive-failure check gating the drift branch. The only
@@ -261,7 +287,17 @@ has not been isolated before.
 
 ### D5 — The re-prime learns by failing, so every session eats one guaranteed error ⚠️ high
 
-**✅ CONFIRMED** — `needsSeekReprimeRef` has exactly three references in `useHls.ts`: declared
+**✅ FIXED — `24d62b99`.** The answer is cached per content id with a 7-day TTL
+(`services/SeekReprimeMemory.ts`), keyed on `seriesId` in preference to `movieId` since the
+encode is a property of the title. So discovery costs one fatal error per title rather than one
+per playback, and the TTL keeps the original objection satisfied: a stored flag would charge
+the seek penalty long after an upstream re-encode fixed the title.
+
+Up-front detection from the init segment's `avcC` box — a track with in-band parameter sets
+(`avc3`) can be known before the first seek — is still the better fix. It needs fMP4 box
+parsing and affected content to validate against, so it is recorded rather than attempted.
+
+Verified during Phase 0: `needsSeekReprimeRef` had exactly three references in `useHls.ts`: declared
 `useRef(false)` at `:157`, read as an early-return at `:422-423`, and written `true` at `:805`
 inside the `isUnrecoverableDecode` branch of the fatal `MEDIA_ERROR` handler. There is no other
 writer and no persistence, so the first seek on affected content must fail before the mechanism
@@ -413,10 +449,16 @@ has failed.
 
 ### D10 — `stopLoad()` + `startLoad(t)` inside the `seeking` handler ⚠️ medium
 
-**✅ CONFIRMED** — `stopLoad()` + `startLoad(target, true)` are at `useHls.ts:440-443`, inside the
-`onSeeking` handler registered at `:452`. Grep confirms `BUFFER_FLUSHING` has **zero** occurrences
-in `src/`, and the event *is* available in the installed hls.js, so P1 #6 is implementable as
-written with no dependency change.
+**✅ FIXED — `05efe1be`.** Both halves. The re-prime is deferred to a macrotask, so it no longer
+mutates hls.js loader state while `StreamController` is still reacting to the same `seeking`
+event — the documented cause of #5349. Deferring also coalesces a burst into one re-prime at
+the final position, and a pending one is cancelled on unmount. And `BUFFER_FLUSHING` now runs
+before the reload, over the whole range and both track types, so ranges appended with a
+promoted non-IDR keyframe can no longer survive `stopLoad()` and reach the decoder.
+
+Verified during Phase 0: `stopLoad()` + `startLoad(target, true)` were at `useHls.ts:440-443`
+inside the `onSeeking` handler registered at `:452`, and `BUFFER_FLUSHING` had **zero**
+occurrences in `src/` despite being available in the installed hls.js 1.7.3.
 
 - It runs **synchronously inside `seeking`**, which is also when hls.js's `StreamController`
   reacts. We mutate loader state underneath it. hls.js
@@ -506,18 +548,17 @@ that's not buffered", including YouTube.
 
 ### P1 — make seeking correct rather than survivable
 
-5. **Fix resume-on-load (D2).** Prefer starting the load at the resume position — hls.js accepts
-   a start position — over loading at 0 and then seeking. That removes the first-seek failure for
-   the most common entry point.
-6. **Flush the buffer on a discontinuous seek** via `BUFFER_FLUSHING` before re-priming, so stale
-   promoted-keyframe ranges cannot reach the decoder.
-7. **Move the re-prime off the `seeking` event**, so we are not mutating loader state while
-   `StreamController` reacts to the same event.
-8. **Stop learning by failing (D5).** Detect non-IDR alignment up front from the init segment, or
-   cache the per-content flag with a TTL.
-9. **Break the watch-party loop (D4).** Suppress drift hard-seeks while a re-prime is in flight,
-   and widen the threshold or back off exponentially when consecutive corrections fail to
-   converge.
+5. ~~**Fix resume-on-load (D2).**~~ — **DONE, `28832601`.** `startPosition` on the VOD config,
+   with the seek kept as a fallback for a late-arriving position.
+6. ~~**Flush the buffer on a discontinuous seek**~~ — **DONE, `05efe1be`.** `BUFFER_FLUSHING`
+   over the whole range, both audio and video, before the reload.
+7. ~~**Move the re-prime off the `seeking` event**~~ — **DONE, `05efe1be`.** Deferred to a
+   macrotask, which also coalesces a burst into one re-prime at the final position.
+8. ~~**Stop learning by failing (D5).**~~ — **DONE, `24d62b99`**, by the TTL cache. Up-front
+   detection from the init segment's `avcC` box is still the better fix and is recorded in D5.
+9. ~~**Break the watch-party loop (D4).**~~ — **DONE, `4fed8aa2`.** Both: the tick is skipped
+   while seeking or under-buffered, and the threshold doubles on each non-converging
+   correction.
 10. **Verify the Chromium bug (§3).** Could retire much of the above.
 
 ### P2 — structural
