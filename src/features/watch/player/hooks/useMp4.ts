@@ -41,6 +41,13 @@ export function useMp4({
   // Stable ref for onStreamExpired to avoid effect re-runs on parent renders
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
+  /**
+   * The `loadedmetadata` listener a quality switch is waiting on, if any.
+   *
+   * Tracked at hook scope because the main effect's cleanup cannot see closures created inside
+   * `setQuality`, and two of them running restores two different positions. See setQuality.
+   */
+  const pendingQualityRestoreRef = useRef<(() => void) | null>(null);
 
   // 1. Initial Source Setup & Event Listeners
   useEffect(() => {
@@ -120,6 +127,13 @@ export function useMp4({
 
     return () => {
       if (metadataTimeout) clearTimeout(metadataTimeout);
+      if (pendingQualityRestoreRef.current) {
+        video.removeEventListener(
+          'loadedmetadata',
+          pendingQualityRestoreRef.current,
+        );
+        pendingQualityRestoreRef.current = null;
+      }
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('error', handleError);
       video.pause();
@@ -176,9 +190,30 @@ export function useMp4({
 
         video.src = newUrl;
 
+        /*
+          Only one restore listener may be pending at a time.
+
+          Each switch used to add a fresh `loadedmetadata` listener that removed itself from
+          inside, so switching twice before the first fired left both attached — and both ran.
+          The earlier one restored the position captured *before* the first switch, so the
+          playhead visibly jumped to the wrong place, and on open-GOP content that extra seek
+          is another chance at a decode error. The effect cleanup cannot help; it has no
+          reference to these closures.
+
+          Dropping the previous listener before adding the new one keeps the last switch the
+          one that wins, which is what the user asked for.
+        */
+        if (pendingQualityRestoreRef.current) {
+          video.removeEventListener(
+            'loadedmetadata',
+            pendingQualityRestoreRef.current,
+          );
+        }
+
         // Wait for metadata before seeking — setting currentTime before metadata is unreliable
         const onMetadata = () => {
           video.removeEventListener('loadedmetadata', onMetadata);
+          pendingQualityRestoreRef.current = null;
           if (currentTime !== null) {
             video.currentTime = currentTime;
           }
@@ -186,6 +221,7 @@ export function useMp4({
             video.play().catch(() => {});
           }
         };
+        pendingQualityRestoreRef.current = onMetadata;
         video.addEventListener('loadedmetadata', onMetadata);
 
         dispatch({

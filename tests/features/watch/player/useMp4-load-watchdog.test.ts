@@ -135,3 +135,96 @@ describe('useMp4 native load watchdog (PLAYER_AUDIT H1)', () => {
     expect(onStreamExpired).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * Regression tests for PLAYER_AUDIT H12 — rapid quality switching orphaned `loadedmetadata`
+ * listeners.
+ *
+ * Each `setQuality` added a fresh listener that removed itself from inside, so switching twice
+ * before the first fired left both attached and both ran. The earlier one restored the position
+ * captured before the first switch, so the playhead jumped to the wrong place — and on open-GOP
+ * content that extra seek is another chance at a decode error. The main effect's cleanup could
+ * not help; it has no reference to those closures.
+ */
+describe('useMp4 quality switching (PLAYER_AUDIT H12)', () => {
+  const QUALITIES = [
+    { quality: '1080p', url: 'https://cdn.example.com/1080.mp4' },
+    { quality: '720p', url: 'https://cdn.example.com/720.mp4' },
+    { quality: '480p', url: 'https://cdn.example.com/480.mp4' },
+  ];
+
+  function mountWithQualities() {
+    const video = document.createElement('video');
+    video.play = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(video, 'paused', {
+      configurable: true,
+      value: false,
+    });
+    const writes: number[] = [];
+    let current = 300;
+    Object.defineProperty(video, 'currentTime', {
+      configurable: true,
+      get: () => current,
+      set: (t: number) => {
+        current = t;
+        writes.push(t);
+      },
+    });
+    const ref = { current: video };
+    const hook = renderHook(() =>
+      useMp4({
+        videoRef: ref,
+        streamUrl: STREAM,
+        dispatch: vi.fn() as unknown as Dispatch<PlayerAction>,
+        manualQualities: QUALITIES,
+      }),
+    );
+    return { video, writes, hook };
+  }
+
+  it('restores the position once when two switches race', () => {
+    const { video, writes, hook } = mountWithQualities();
+
+    act(() => {
+      hook.result.current.setQuality(1);
+      hook.result.current.setQuality(2);
+    });
+    act(() => {
+      video.dispatchEvent(new Event('loadedmetadata'));
+    });
+
+    // Two orphaned listeners both restored, one from a stale captured position.
+    expect(writes).toHaveLength(1);
+  });
+
+  it('leaves no restore listener attached after it has fired', () => {
+    const { video, writes, hook } = mountWithQualities();
+
+    act(() => {
+      hook.result.current.setQuality(1);
+    });
+    act(() => {
+      video.dispatchEvent(new Event('loadedmetadata'));
+    });
+    const afterFirst = writes.length;
+    act(() => {
+      video.dispatchEvent(new Event('loadedmetadata'));
+    });
+
+    expect(writes).toHaveLength(afterFirst);
+  });
+
+  it('does not restore after unmount', () => {
+    const { video, writes, hook } = mountWithQualities();
+
+    act(() => {
+      hook.result.current.setQuality(1);
+    });
+    hook.unmount();
+    act(() => {
+      video.dispatchEvent(new Event('loadedmetadata'));
+    });
+
+    expect(writes).toEqual([]);
+  });
+});
