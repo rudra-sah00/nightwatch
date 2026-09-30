@@ -21,10 +21,16 @@ export function usePlayerAudioSubtitleSelectors() {
     () => loadSubtitleSettings(),
   );
 
-  // Apply saved settings on mount
+  /*
+    Mount only. Depending on `subtitleSettings` meant every change applied twice — once
+    synchronously in the handler below, once here on the next render. Harmless, since writing the
+    same CSS variables is idempotent, but it also loaded the subtitle fonts again and made the
+    effect's purpose ("apply saved settings") untrue of what it did.
+  */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only by design, see above
   useEffect(() => {
     applySubtitleSettings(subtitleSettings);
-  }, [subtitleSettings]);
+  }, []);
 
   const handleSubtitleSettingsChange = (newSettings: SubtitleSettings) => {
     setSubtitleSettings(newSettings);
