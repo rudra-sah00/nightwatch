@@ -24,7 +24,24 @@ export function usePlaybackCountdown(onComplete: () => void) {
         document.body.style.overflow = originalStyle;
         onComplete();
       }, 500);
-      return () => clearTimeout(finalTimeout);
+      /*
+        The restore has to happen here as well as inside the timeout. Unmounting during
+        this 500 ms window — back navigation, a route change, the parent hiding the
+        countdown — cancels the timeout, and without this line `overflow: hidden` stayed
+        on `<body>`, leaving every subsequent page in the SPA session unscrollable until
+        a full reload.
+
+        It also keeps `originalStyle` honest across re-runs. Each run captures
+        `getComputedStyle(document.body).overflow`, and React runs the previous
+        cleanup before the next effect body — so as long as every branch restores,
+        the next capture sees the real original. When this branch skipped the restore,
+        a re-run inside the window (see the `onComplete` dependency) captured 'hidden'
+        as the original and the timeout then "restored" the lock permanently.
+      */
+      return () => {
+        clearTimeout(finalTimeout);
+        document.body.style.overflow = originalStyle;
+      };
     }
 
     const timer = setInterval(() => {
