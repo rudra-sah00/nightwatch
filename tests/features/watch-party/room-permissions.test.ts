@@ -211,10 +211,17 @@ describe('isRtmMessageAllowed', () => {
     expect(isRtmMessageAllowed(room(), undefined, draw)).toBe(true);
   });
 
-  it('never gates playback, membership or theatre traffic', () => {
+  /*
+    Still ungated, and each for its own reason: membership departure and seat claims are not
+    capabilities a host can revoke, and asking for the canvas is reading rather than drawing.
+
+    `PLAY_EVENT` and `PAUSE_EVENT` used to be asserted here as ungated. That was this bug written
+    down as intended behaviour — playback events assert host authority, and nothing downstream
+    filtered them by sender. They are now covered in `rtm-host-authority.test.ts` with the
+    opposite expectation.
+  */
+  it('never gates membership departure or theatre traffic', () => {
     const ungated: RTMMessage[] = [
-      { type: 'PLAY_EVENT', videoTime: 1, playbackRate: 1, serverTime: 0 },
-      { type: 'PAUSE_EVENT', videoTime: 1, serverTime: 0 },
       { type: 'MEMBER_LEFT', userId: 'G1' },
       { type: 'SEAT_CLAIM', userId: 'G1', seatId: 's1', at: 0 },
       { type: 'SKETCH_REQUEST_SYNC', requesterId: 'G1' },

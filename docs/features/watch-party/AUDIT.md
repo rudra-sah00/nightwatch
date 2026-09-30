@@ -33,6 +33,22 @@ one existing gate is built to enforce. Everything else in this document is ordin
 
 ### WP-C1 — The inbound RTM gate covers three message kinds out of thirty-one; the rest are applied without checking who sent them
 
+**✅ FIXED — see `HOST_ONLY` in `room/permissions.ts`.** A `HOST_ONLY` set is now checked before
+anything else in `isRtmMessageAllowed`, and it fails *closed* rather than open: every message in
+it is meaningless to a client with no room, so refusing when no verdict is possible costs nothing
+and removes the join-window gap entirely. The fail-open rule still applies to the sketch traffic it
+was written for. Regression test `tests/features/watch-party/rtm-host-authority.test.ts` — 19 of
+its 30 cases fail against the unfixed module, and the existing
+`room-permissions.test.ts` assertion that playback was "never gated" was this defect written down
+as intended behaviour and has been corrected in place.
+
+**⚠️ ONE ROW REMAINS OPEN — `JOIN_APPROVED` / `JOIN_REJECTED`.** These are deliberately excluded.
+They legitimately arrive while the recipient's `room` is still `null` — that is the join handshake
+— so there is no `room.hostId` to compare against, and gating them the same way would break
+joining outright. Closing them needs the expected host id threaded from the lobby into the join
+window, which is a data-flow change rather than a gate change. **Still exploitable against a user
+who is mid-join.**
+
 One root cause, so it is one finding. The blast radius is enumerated below because each message
 type is a separately exploitable action and each will need its own regression test.
 
@@ -107,6 +123,12 @@ act on. Severity is per action; the finding as a whole is CRITICAL.
 | `STREAM_TOKEN` | `useWatchPartySync.ts:333` | Rewrites every member's stream URLs through `normalizeRoomUrls` | HIGH |
 | `HOST_DISCONNECTED` / `HOST_RECONNECTED` | `useWatchPartySync.ts:318,327` | Fabricates the host-connectivity banner | MEDIUM |
 | `JOIN_APPROVED` / `JOIN_REJECTED` | `useWatchParty.ts:167,212` | Answers a pending join on the host's behalf with an arbitrary room payload | HIGH |
+
+All rows above are now gated **except the last**, which remains open — see the FIXED note at the
+top of this finding. A detail found while fixing: `HOST_DISCONNECTED` and `HOST_RECONNECTED` are
+handled by `useWatchPartySync` but published nowhere in the client — host connectivity is inferred
+from RTM presence instead. They were gated anyway, since nothing legitimate is lost by requiring
+the host of a message the host never sends.
 
 Note the ordering dependency: `PERMISSIONS_UPDATED` is the one to fix first, because while it is
 open the existing draw/chat/sound gate is bypassable and therefore not actually providing the
@@ -255,13 +277,10 @@ test-verified — the backend statements under WP-C1 come from reading the sourc
 
 ## Proposed phase order
 
-Not started; for review.
-
-- **Phase 1 — WP-C1, and nothing else.** Security, kept in its own phase per the brief. Within it,
-  `PERMISSIONS_UPDATED` first, since the existing gate is bypassable until it lands. Likely shape:
-  thread `senderId` into the three sub-handlers and extend `isRtmMessageAllowed` to classify
-  host-authority message types, rather than adding scattered checks.
+- **Phase 1 — WP-C1. ✅ DONE**, except the `JOIN_APPROVED` / `JOIN_REJECTED` row, which needs a
+  data-flow change and an explicit decision.
 - **Phase 2 — WP-H1**, emoji cap and send throttle. Independent of everything else.
 - **Phase 3 — WP-M1 / WP-L1**, if judged worth the change.
-- **Phase 4 — a real audit of the sketch overlay and room lifecycle**, the two large surfaces this
-  pass did not cover.
+- **Phase 4 — real discovery on the ~90% of the feature this pass did not read**, above all the
+  1,446-line sketch overlay, `useAgora.ts` (794), and the room-lifecycle race questions in area 1.
+  This is the largest remaining piece of work and should not be mistaken for polish.
