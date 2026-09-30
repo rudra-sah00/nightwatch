@@ -151,8 +151,10 @@ const TOUCH_FULLSCREEN_STYLE: React.CSSProperties = {
  *   viewport overlay (no native Fullscreen API on iOS Safari).
  * - Implements **tap-to-toggle controls** on mobile — tapping the container
  *   shows/hides the control bar (ignores taps on interactive children).
- * - Registers **keyboard shortcuts** on the container (`Space`/`K` play/pause,
- *   `J`/`L`/arrows seek, arrows volume, `M` mute, `F` fullscreen).
+ * - Registers **keyboard shortcuts** on the container (arrows volume, `M` mute,
+ *   `F` fullscreen). Play/pause and seeking are deliberately *not* handled here —
+ *   the window-level listener in `useKeyboard` owns them, so that one gesture
+ *   produces one action.
  *
  * @param props - See {@link PlayerRootProps}.
  */
@@ -295,7 +297,7 @@ export function PlayerRoot({
           )
             return;
 
-          const { seek, setVolume, toggleMute, toggleFullscreen } =
+          const { setVolume, toggleMute, toggleFullscreen } =
             contextValue.playerHandlers;
           const vol = state.volume;
 
@@ -311,14 +313,28 @@ export function PlayerRoot({
             case 'ArrowLeft':
             case 'j':
             case 'J':
-              e.preventDefault();
-              seek(state.currentTime - 10);
-              break;
             case 'ArrowRight':
             case 'l':
             case 'L':
-              e.preventDefault();
-              seek(state.currentTime + 10);
+              // Also handled by the window-level listener in `useKeyboard`, for the
+              // same reason as Space. Seeking here as well wrote `currentTime` twice
+              // per press, and the two writes compounded rather than cancelling: this
+              // handler computed an absolute target from `state.currentTime` — up to
+              // ~250 ms stale, since `SET_TIME` comes from `timeupdate` — and
+              // `useKeyboard` then applied its relative offset to the position this
+              // one had just written, so a single 10 s press travelled 20 s.
+              //
+              // It also bypassed the auto-repeat guard. That guard lives in
+              // `useKeyboard` (see SEEK_KEYS), so a held arrow suppressed there still
+              // issued one seek per repeat tick through this handler — measured at 14
+              // writes for a 13-tick hold. Each write emits `seeking`, which makes
+              // hls.js abort the fragments in flight, and on open-GOP content also
+              // re-primes the buffer; dozens per second escalate to a fatal decode
+              // error.
+              //
+              // `useKeyboard`'s implementation is the correct one: relative, read from
+              // live `video.currentTime`, and clamped against live
+              // `duration`/`seekable`.
               break;
             case 'ArrowUp':
               e.preventDefault();
