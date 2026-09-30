@@ -32,11 +32,7 @@ was well-formed*. A malformed `SKETCH_SYNC_STATE` silently replaced every recipi
 with a non-array — no throw, nothing logged — and the canvas then broke on the next legitimate
 stroke, far from the cause.
 
-**WP-C2 is the most serious thing still open**, and it is on the backend, which had never been testable
-until this session. An unapproved guest can sit on a party's Socket.IO channel and receive the stream
-token that the HTTP route deliberately gates behind membership.
-
-**WP-H3 is the other one that matters**, and it was found last, in the area the earlier passes kept
+**WP-H3 is the most serious thing still open**, and it was found last, in the area the earlier passes kept
 deferring. Any member can take any seat in the 3D theatre from whoever is sitting in it and lock it
 permanently — and a device with a merely slow clock does it by accident.
 
@@ -188,6 +184,22 @@ connected to. No special tooling beyond a console call to the send path.
 ---
 
 ### WP-C2 — An unapproved guest joins the room's Socket.IO channel and receives the stream token
+
+**✅ FIXED — `nightwatch-backend` `watch-party.handler.ts`.** The guest branch now runs the same
+membership check as the authenticated branch and returns `NOT_A_MEMBER`; the dead `isPending` write is
+gone. Regression test `tests/websocket/handlers/watch-party.guest-membership.test.ts` — 4 of its 6 cases
+fail against the old handler. Backend suite: **119 files, 1,849 tests, passing.**
+
+**Refusing strands nobody, which was the thing to verify before changing it.** `JOIN_RESULT` is emitted
+to `user:${memberId}` by `MembershipService.approveMember`, not to the room, and every guest socket joins
+its own `user:` channel in `session.handler.ts`, so a pending guest still learns it was approved. The
+frontend never puts guests in the room channel at all — `useWatchParty.ts:341` returns early for guest
+ids — and the comment there already asserted this endpoint "rejects it with `NOT_A_MEMBER`". It did not.
+The fix makes the server behave the way the client already documents.
+
+It is a membership check rather than a blanket guest ban: once approved, a guest is a member like any
+other and must get in. Asserted, along with room scoping still short-circuiting before the lookup.
+
 
 **Backend.** Found in the first pass where backend tests could actually be executed (Postgres was down
 for every prior session). `nightwatch-backend/src/websocket/handlers/watch-party.handler.ts:66-73`:
@@ -787,9 +799,7 @@ its role in the WP-C1 trace, and rate limiting on the REST routes.
   `WatchPartyVideoArea.tsx`, `MediaControls.tsx` (scanned for listener/timer balance only, all clean).
 - **Phase 10 — backend discovery. ✅ DONE** for the watch-party socket handler and the host-authority
   claims, producing WP-C2. The clips/chat/playlist modules and REST rate limiting remain unread.
-- **Phase 11 — WP-C2**, the socket access-control bypass. Security, so it belongs in its own phase, and
-  it should come before WP-H3: refusing a non-member guest mirrors the authenticated branch immediately
-  above it, but the existing test that blesses the current behaviour has to be corrected deliberately.
+- **Phase 11 — WP-C2. ✅ DONE**, in its own commit in the backend repo.
 - **Phase 12 — WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
   whether an occupied seat should be takeable at all needs a decision.
 - **Phase 13 — WP-M5**, the reaction cap, mirroring the WP-H1 fix.
