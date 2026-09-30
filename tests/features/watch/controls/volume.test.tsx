@@ -98,39 +98,142 @@ describe('Volume', () => {
   });
 
   describe('slider drag interactions', () => {
-    it('should call onVolumeChange on mouse down', () => {
+    /**
+     * Pointer Events, not mouse: the slider used `mousedown` plus global
+     * `mousemove`/`mouseup`, and touch never synthesises those during a drag, so on any
+     * touch device the volume could only be tapped — it jumped, and fine adjustment was
+     * impossible (PLAYER_AUDIT H9).
+     */
+    function stubWidth(slider: HTMLElement) {
+      Object.defineProperty(slider, 'getBoundingClientRect', {
+        value: () => ({ left: 0, width: 100 }),
+      });
+      slider.setPointerCapture = vi.fn();
+      slider.releasePointerCapture = vi.fn();
+    }
+
+    it('sets the volume on pointer down', () => {
       const onVolumeChange = vi.fn();
       render(<Volume {...defaultProps} onVolumeChange={onVolumeChange} />);
 
       const slider = screen.getByRole('slider');
+      stubWidth(slider);
 
-      // Simulate mouse down with position
-      Object.defineProperty(slider, 'getBoundingClientRect', {
-        value: () => ({ left: 0, width: 100 }),
+      fireEvent.pointerDown(slider, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        clientX: 50,
       });
 
-      fireEvent.mouseDown(slider, { clientX: 50 });
-      expect(onVolumeChange).toHaveBeenCalled();
+      expect(onVolumeChange).toHaveBeenCalledWith(0.5);
     });
 
-    it('should handle mouse move during drag', () => {
+    it('tracks the volume while dragging', () => {
       const onVolumeChange = vi.fn();
       render(<Volume {...defaultProps} onVolumeChange={onVolumeChange} />);
 
       const slider = screen.getByRole('slider');
+      stubWidth(slider);
 
-      Object.defineProperty(slider, 'getBoundingClientRect', {
-        value: () => ({ left: 0, width: 100 }),
+      fireEvent.pointerDown(slider, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        clientX: 50,
+      });
+      fireEvent.pointerMove(slider, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 75,
+      });
+      fireEvent.pointerUp(slider, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 75,
       });
 
-      // Start dragging
-      fireEvent.mouseDown(slider, { clientX: 50 });
+      expect(onVolumeChange).toHaveBeenLastCalledWith(0.75);
+    });
 
-      // Move mouse
-      fireEvent.mouseMove(document, { clientX: 75 });
+    /** The defect: dragging by touch did nothing at all. */
+    it('can be dragged by touch', () => {
+      const onVolumeChange = vi.fn();
+      render(<Volume {...defaultProps} onVolumeChange={onVolumeChange} />);
 
-      // Stop dragging
-      fireEvent.mouseUp(document);
+      const slider = screen.getByRole('slider');
+      stubWidth(slider);
+
+      fireEvent.pointerDown(slider, {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 20,
+      });
+      fireEvent.pointerMove(slider, {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 60,
+      });
+
+      expect(onVolumeChange).toHaveBeenLastCalledWith(0.6);
+    });
+
+    /** Capture means a drag that strays off the slider still tracks. */
+    it('keeps tracking after the pointer leaves the slider', () => {
+      const onVolumeChange = vi.fn();
+      render(<Volume {...defaultProps} onVolumeChange={onVolumeChange} />);
+
+      const slider = screen.getByRole('slider');
+      stubWidth(slider);
+
+      fireEvent.pointerDown(slider, {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 20,
+      });
+      fireEvent.pointerLeave(slider, { pointerId: 1, pointerType: 'touch' });
+      fireEvent.pointerMove(slider, {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 90,
+      });
+
+      expect(onVolumeChange).toHaveBeenLastCalledWith(0.9);
+    });
+
+    it('stops tracking once the pointer is released', () => {
+      const onVolumeChange = vi.fn();
+      render(<Volume {...defaultProps} onVolumeChange={onVolumeChange} />);
+
+      const slider = screen.getByRole('slider');
+      stubWidth(slider);
+
+      fireEvent.pointerDown(slider, {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 20,
+      });
+      fireEvent.pointerUp(slider, {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 20,
+      });
+      onVolumeChange.mockClear();
+      fireEvent.pointerMove(slider, {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 90,
+      });
+
+      expect(onVolumeChange).not.toHaveBeenCalled();
+    });
+
+    it('sets touch-action none so the page does not scroll instead', () => {
+      render(<Volume {...defaultProps} />);
+
+      expect(
+        (screen.getByRole('slider') as HTMLElement).style.touchAction,
+      ).toBe('none');
     });
   });
 

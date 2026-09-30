@@ -23,7 +23,7 @@ export function Volume({
   onVolumeChange,
   onMuteToggle,
 }: VolumeProps) {
-  const { isHovered, setIsHovered, isDragging, sliderRef, handleMouseDown } =
+  const { isHovered, setIsHovered, isDragging, sliderRef, pointerHandlers } =
     useVolume({ onVolumeChange });
   const t = useTranslations('watch.player');
 
@@ -71,7 +71,10 @@ export function Volume({
           className={cn(
             'relative h-1.5 w-24 bg-white/20 rounded-full cursor-pointer',
           )}
-          onMouseDown={handleMouseDown}
+          // Required for pointer events to report a horizontal drag rather than the
+          // browser claiming it to scroll the page.
+          style={{ touchAction: 'none' }}
+          {...pointerHandlers}
           role="slider"
           tabIndex={0}
           aria-valuemin={0}
