@@ -214,13 +214,23 @@ export const onSketchProvideSync = <
  *
  * A malformed payload is dropped rather than coerced to `[]`: an empty array is a legitimate
  * canvas state and would silently wipe what the receiver already had.
+ *
+ * `targetId` is forwarded because this message is addressed to one joining guest, and the consumer
+ * is the layer that knows its own id. It was previously set by the sender and read nowhere, which
+ * left a field that looks like an access check doing no work at all.
  */
 export const onSketchSyncState = <T = unknown[]>(
-  callback: (data: { elements: T }) => void,
+  callback: (data: { elements: T; targetId?: string }) => void,
 ) =>
   subscribe('SKETCH_SYNC_STATE', (msg) => {
     if (!Array.isArray(msg.elements)) return;
-    callback({ elements: msg.elements as T });
+    callback({
+      elements: msg.elements as T,
+      targetId:
+        typeof msg.targetId === 'string' && msg.targetId.length > 0
+          ? msg.targetId
+          : undefined,
+    });
   });
 
 export const onSketchMoveZ = <

@@ -257,7 +257,18 @@ export function useSketchOverlay({
     });
 
     const cleanupSyncState = onSketchSyncState<SketchAction[]>(
-      ({ elements }) => {
+      ({ elements, targetId }) => {
+        /*
+          This message is the host's answer to one guest's `SKETCH_REQUEST_SYNC`, and it replaces
+          the whole canvas. `targetId` was previously set by the sender and read nowhere, so a
+          message addressed to a different joiner was applied here anyway — the mechanism worked
+          only because delivery happens to be peer-to-peer, leaving a field that looks like an
+          access check doing nothing.
+
+          Accept when it is absent (older clients omit it) or when we have no id yet: receiving the
+          join sync matters more than the check, and neither case is attributable anyway.
+        */
+        if (targetId && userId && targetId !== userId) return;
         setActions(elements);
       },
     );

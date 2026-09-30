@@ -372,7 +372,10 @@ describe('Watch Party API Service (REST & RTM Bridge)', () => {
         elements: [],
         targetId: 't1',
       } as RTMMessage);
-      expect(cbSync).toHaveBeenCalledWith({ elements: [] });
+      // `targetId` is forwarded as of WP-M2 — it names the one guest this sync answers, and the
+      // consumer needs it to ignore a sync addressed to somebody else. This assertion previously
+      // pinned the field being dropped, which was the defect.
+      expect(cbSync).toHaveBeenCalledWith({ elements: [], targetId: 't1' });
     });
   });
 });
