@@ -216,6 +216,12 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
         isVisible={!!state.error && !state.isLoading && !state.isBuffering}
         message={state.error || t('errorDefault')}
         onRetry={() => {
+          // Deliberately a full reload. Recovering from a fatal error needs the
+          // engine re-created, and every engine hook keys its effect on `streamUrl`,
+          // so clearing `error` and setting `isLoading` would leave a spinner over a
+          // dead MediaSource. A reload costs a new stream token and CDN negotiation
+          // (~3-5s); the cheaper fix is an engine nonce threaded through
+          // `usePlayerEngine`. See PLAYER_AUDIT.md H7.
           window.location.reload();
         }}
         onBack={playerHandlers.goBack}

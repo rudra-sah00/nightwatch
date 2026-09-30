@@ -205,6 +205,8 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
         isVisible={!!error && !isLoading && !state.isBuffering}
         message={error || t('liveUnavailable')}
         onRetry={() => {
+          // Deliberately a full reload — see the note in WatchVODPlayer and
+          // PLAYER_AUDIT.md H7.
           window.location.reload();
         }}
         onBack={playerHandlers.goBack}

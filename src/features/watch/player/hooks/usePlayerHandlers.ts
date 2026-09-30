@@ -58,7 +58,12 @@ interface UsePlayerHandlersProps {
  * - **`handleAudioChange(trackId)`** — Switches audio track and optionally notifies the parent
  *   via `onExternalAudioChange` for language dub URL swaps.
  * - **`handleSubtitleChange(trackId)`** — Dispatches `SET_CURRENT_SUBTITLE_TRACK`.
- * - **`handleRetry`** — Clears the error state and re-triggers loading.
+ *
+ * Deliberately absent: a retry handler. Recovering from a fatal error needs the engine
+ * re-created, not just `error` cleared and `isLoading` set — every engine hook keys its
+ * effect on `streamUrl`, so clearing state alone would leave a spinner over a dead
+ * MediaSource. `ErrorOverlay`'s `onRetry` therefore reloads the page, which is blunt but
+ * correct. See PLAYER_AUDIT.md H7 for the engine-nonce alternative.
  *
  * @param props - See {@link UsePlayerHandlersProps}.
  * @returns Object containing all handler functions listed above.
@@ -278,12 +283,6 @@ export function usePlayerHandlers({
     [dispatch, showControls],
   );
 
-  // Handle retry on error
-  const handleRetry = useCallback(() => {
-    dispatch({ type: 'SET_ERROR', error: null });
-    dispatch({ type: 'SET_LOADING', isLoading: true });
-  }, [dispatch]);
-
   return {
     showControls,
     handleInteraction,
@@ -297,6 +296,5 @@ export function usePlayerHandlers({
     handlePlaybackRateChange,
     handleAudioChange,
     handleSubtitleChange,
-    handleRetry,
   };
 }
