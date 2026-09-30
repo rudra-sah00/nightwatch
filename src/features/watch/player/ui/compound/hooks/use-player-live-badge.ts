@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { usePlayerContext } from '../../../context/PlayerContext';
+import { usePlayerControls } from '../../../context/PlayerContext';
 
 const LIVE_EDGE_THRESHOLD_S = 15;
 
@@ -10,7 +10,7 @@ const LIVE_EDGE_THRESHOLD_S = 15;
  * @returns Metadata, `isAtLiveEdge` flag, and `handleGoLive` callback.
  */
 export function usePlayerLiveBadge() {
-  const { metadata, videoRef, playerHandlers } = usePlayerContext();
+  const { metadata, videoRef, playerHandlers } = usePlayerControls();
   const [isAtLiveEdge, setIsAtLiveEdge] = useState(true);
 
   useEffect(() => {

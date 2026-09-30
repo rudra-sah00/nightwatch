@@ -1,5 +1,12 @@
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import {
   checkIsDesktop,
   checkIsMobile,
@@ -522,54 +529,108 @@ export function usePlayerRoot({
   // Assign the handler to the ref so useKeyboard can trigger it
   showControlsRef.current = showControls;
 
-  const contextValue = {
-    state,
-    dispatch,
-    metadata,
-    streamUrl,
-    videoRef,
-    videoCallbackRef: handleVideoCallbackRef,
-    containerRef,
-    hlsRef,
-    spriteSheet,
-    spriteVtt,
-    readOnly,
-    isHost,
-    isAuthenticated,
-    onNavigate,
-    onStreamExpired,
-    qualities,
-    captionUrl,
-    subtitleTracks,
-    playerHandlers: {
-      togglePlay: handleTogglePlay,
-      toggleMute: handleMuteToggle,
-      seek: handleSeek,
-      skip: handleSkip,
-      setVolume: handleVolumeChange,
+  /*
+    Two values, not one.
+
+    `SET_TIME` is dispatched from `timeupdate` at ~4Hz, and this used to be a bare object literal
+    holding `state` alongside everything else — so each of those dispatches produced a new context
+    identity and woke all 32 `usePlayerContext()` consumers, including the 18 that read only
+    handlers, refs and metadata. Splitting the playhead out means those 18 subscribe to
+    `usePlayerControls()` and are not re-rendered by a time update at all.
+
+    The stable half still has to be memoised, or it would get a new identity on every render and
+    the split would buy nothing.
+  */
+  const stableValue = useMemo(
+    () => ({
+      dispatch,
+      metadata,
+      streamUrl,
+      videoRef,
+      videoCallbackRef: handleVideoCallbackRef,
+      containerRef,
+      hlsRef,
+      spriteSheet,
+      spriteVtt,
+      readOnly,
+      isHost,
+      isAuthenticated,
+      onNavigate,
+      onStreamExpired,
+      qualities,
+      captionUrl,
+      subtitleTracks,
+      playerHandlers: {
+        togglePlay: handleTogglePlay,
+        toggleMute: handleMuteToggle,
+        seek: handleSeek,
+        skip: handleSkip,
+        setVolume: handleVolumeChange,
+        toggleFullscreen,
+        goBack: handleBack,
+        setQuality: handleQualityChange,
+        setPlaybackRate: handlePlaybackRateChange,
+        setAudioTrack: handleAudioChange,
+        setSubtitleTrack: handleSubtitleChange,
+        handleInteraction,
+        engageSpeedBoost,
+        releaseSpeedBoost,
+      },
+      nextEpisode: {
+        show: showNextEpisode,
+        info: nextEpisodeInfo,
+        isLoading: isLoadingNext,
+        play: playNextEpisode,
+        cancel: cancelNextEpisode,
+      },
+    }),
+    // Only the values that genuinely vary are listed. Every handler is a stable `useCallback`
+    // and the refs keep their identity for the life of the player, so naming them all would be
+    // noise that hides which dependencies actually move.
+    [
+      metadata,
+      streamUrl,
+      spriteSheet,
+      spriteVtt,
+      readOnly,
+      isHost,
+      isAuthenticated,
+      onNavigate,
+      onStreamExpired,
+      qualities,
+      captionUrl,
+      subtitleTracks,
+      showNextEpisode,
+      nextEpisodeInfo,
+      isLoadingNext,
+      hlsRef,
+      playNextEpisode,
+      releaseSpeedBoost,
+      handleVolumeChange,
       toggleFullscreen,
-      goBack: handleBack,
-      setQuality: handleQualityChange,
-      setPlaybackRate: handlePlaybackRateChange,
-      setAudioTrack: handleAudioChange,
-      setSubtitleTrack: handleSubtitleChange,
+      handleVideoCallbackRef,
+      handleTogglePlay,
+      handleSubtitleChange,
+      handleSkip,
+      handleSeek,
+      handleMuteToggle,
+      handleQualityChange,
       handleInteraction,
       engageSpeedBoost,
-      releaseSpeedBoost,
-    },
-    nextEpisode: {
-      show: showNextEpisode,
-      info: nextEpisodeInfo,
-      isLoading: isLoadingNext,
-      play: playNextEpisode,
-      cancel: cancelNextEpisode,
-    },
-  };
+      handlePlaybackRateChange,
+      handleBack,
+      handleAudioChange,
+      cancelNextEpisode,
+    ],
+  );
+
+  const stateValue = useMemo(() => ({ state }), [state]);
 
   return {
     state,
     containerRef,
-    contextValue,
+    stableValue,
+    stateValue,
     showControls,
     handleVideoClick,
   };

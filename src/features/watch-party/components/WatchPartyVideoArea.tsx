@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { RecordButton } from '@/features/clips/components/RecordButton';
 import { useClipRecorder } from '@/features/clips/hooks/use-clip-recorder';
 import { Player } from '@/features/watch/player';
-import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
+import { usePlayerControls } from '@/features/watch/player/context/PlayerContext';
 import { CenterPlayButton } from '@/features/watch/player/ui/controls/PlayPause';
 import { NextEpisodeOverlay } from '@/features/watch/player/ui/overlays/NextEpisodeOverlay';
 import { extractTokenFromUrl } from '@/features/watch/utils';
@@ -76,7 +76,7 @@ function PlayerOverlays({
     isHost,
     onNextEpisode,
   );
-  const { metadata, playerHandlers, videoRef } = usePlayerContext();
+  const { metadata, playerHandlers, videoRef } = usePlayerControls();
   const tp = useTranslations('party.toasts');
   const tPlayer = useTranslations('watch.player');
 

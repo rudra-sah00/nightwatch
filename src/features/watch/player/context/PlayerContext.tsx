@@ -2,8 +2,15 @@ import type HlsType from 'hls.js';
 import { createContext, use } from 'react';
 import type { PlayerAction, PlayerState, VideoMetadata } from './types';
 
-interface PlayerContextValue {
-  state: PlayerState;
+/**
+ * Everything about the player that does not change four times a second.
+ *
+ * Split from the playhead because `SET_TIME` is dispatched from `timeupdate` at ~4Hz, and a
+ * single context meant each of those woke every consumer — including the majority that read only
+ * handlers, refs and metadata. Keeping them apart means a component that never asks for the
+ * playhead is never re-rendered by it.
+ */
+interface PlayerStableValue {
   dispatch: React.Dispatch<PlayerAction>;
   metadata: VideoMetadata;
   streamUrl: string | null;
@@ -69,12 +76,48 @@ interface PlayerContextValue {
   };
 }
 
-export const PlayerContext = createContext<PlayerContextValue | null>(null);
+/** The volatile half: the reducer state, which changes at ~4Hz during playback. */
+interface PlayerStateValue {
+  state: PlayerState;
+}
 
-export function usePlayerContext() {
-  const context = use(PlayerContext);
-  if (!context) {
+/** The full shape, for consumers that genuinely need both halves. */
+export type PlayerContextValue = PlayerStableValue & PlayerStateValue;
+
+export const PlayerStableContext = createContext<PlayerStableValue | null>(
+  null,
+);
+export const PlayerContext = createContext<PlayerStateValue | null>(null);
+
+/**
+ * Handlers, refs, metadata and config — everything except the playhead.
+ *
+ * Prefer this over {@link usePlayerContext} wherever `state` is not read. A component
+ * subscribing only here is not re-rendered by a time update, which is the whole point of the
+ * split: 18 of the player's consumers read no state at all and were being woken 4 times a second.
+ */
+export function usePlayerControls(): PlayerStableValue {
+  const stable = use(PlayerStableContext);
+  if (!stable) {
     throw new Error('Player components must be used within a Player.Root');
   }
-  return context;
+  return stable;
+}
+
+/**
+ * The player state plus everything {@link usePlayerControls} provides.
+ *
+ * Subscribes to both contexts, so a consumer of this re-renders on every `SET_TIME`. That is
+ * correct for anything displaying the playhead, and wrong for anything that is not — use
+ * `usePlayerControls` there instead.
+ */
+export function usePlayerContext(): PlayerContextValue {
+  const stable = usePlayerControls();
+  const volatile = use(PlayerContext);
+  if (!volatile) {
+    throw new Error('Player components must be used within a Player.Root');
+  }
+  // A new object per render is free here: subscribing to the state context already guarantees
+  // this component re-renders whenever the state changes.
+  return { ...stable, ...volatile };
 }

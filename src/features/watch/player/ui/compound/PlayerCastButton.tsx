@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { usePlayerContext } from '../../context/PlayerContext';
+import { usePlayerControls } from '../../context/PlayerContext';
 import { useChromecast } from '../../hooks/useChromecast';
 
 /**
@@ -13,7 +13,7 @@ import { useChromecast } from '../../hooks/useChromecast';
  * When connected, the icon fills to indicate an active session.
  */
 export function PlayerCastButton() {
-  const { metadata, streamUrl } = usePlayerContext();
+  const { metadata, streamUrl } = usePlayerControls();
   const t = useTranslations('watch.player');
 
   const { castState, startCast, stopCast } = useChromecast({

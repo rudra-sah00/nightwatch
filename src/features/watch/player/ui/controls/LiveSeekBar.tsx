@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { usePlayerContext } from '../../context/PlayerContext';
+import { usePlayerControls } from '../../context/PlayerContext';
 
 // Pure formatter — hoisted to module level (rule 6.3, no hook deps)
 function formatBehind(s: number): string {
@@ -33,7 +33,7 @@ function formatBehind(s: number): string {
  * - Click **or drag** to seek within the DVR window (touch supported).
  */
 export function LiveSeekBar({ compact = false }: { compact?: boolean }) {
-  const { videoRef, playerHandlers, readOnly } = usePlayerContext();
+  const { videoRef, playerHandlers, readOnly } = usePlayerControls();
   const t = useTranslations('watch.player');
   const barRef = useRef<HTMLDivElement>(null);
 

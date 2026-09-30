@@ -14,7 +14,7 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 import { ACESFilmicToneMapping, MathUtils, SRGBColorSpace } from 'three';
-import { usePlayerContext } from '@/features/watch/player/context/PlayerContext';
+import { usePlayerControls } from '@/features/watch/player/context/PlayerContext';
 import type { RTMMessage } from '../../room/types/rtm-messages';
 import { CAPSULE_CENTRE_TO_FEET } from '../hooks/use-avatar-controls';
 import { useDanceMenu } from '../hooks/use-dance-menu';
@@ -156,7 +156,7 @@ export function TheatreScene({
   // `ref.current`: a ref mutation does not re-render, so reading it here would
   // freeze whatever value existed at first paint (usually null) and the screen
   // would never receive a picture.
-  const { videoRef, playerHandlers, readOnly } = usePlayerContext();
+  const { videoRef, playerHandlers, readOnly } = usePlayerControls();
 
   // Only one character body is ever fetched — see avatarModelsFor.
   const character = useTheatreView((s) => s.character);

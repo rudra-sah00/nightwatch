@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { usePlayerContext } from '../../context/PlayerContext';
+import { usePlayerControls } from '../../context/PlayerContext';
 
 /** Props for the {@link PlayerHeader} component. */
 interface PlayerHeaderProps {
@@ -23,7 +23,7 @@ export function PlayerHeader({
   hideBackButton,
   rightContent,
 }: PlayerHeaderProps) {
-  const { metadata, playerHandlers } = usePlayerContext();
+  const { metadata, playerHandlers } = usePlayerControls();
   const t = useTranslations('watch.player');
   const tAria = useTranslations('watch.aria');
 

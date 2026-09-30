@@ -63,8 +63,9 @@ vi.mock('@/features/watch/player/ui/compound/hooks/use-player-root', () => ({
       state,
       containerRef,
       showControls: vi.fn(),
-      contextValue: {
-        state,
+      // The context is split now: the volatile state half and the memoised stable half.
+      stateValue: { state },
+      stableValue: {
         dispatch: vi.fn(),
         metadata,
         streamUrl: null,

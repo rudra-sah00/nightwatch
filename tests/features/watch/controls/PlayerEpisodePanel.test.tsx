@@ -54,6 +54,9 @@ const mockPlayerContext = {
 
 vi.mock('@/features/watch/player/context/PlayerContext', () => ({
   usePlayerContext: () => mockPlayerContext,
+  // The panel reads only handlers and metadata, so it subscribes to the stable half now —
+  // both hooks resolve to the same fixture here.
+  usePlayerControls: () => mockPlayerContext,
   PlayerContext: {
     Provider: ({
       children,

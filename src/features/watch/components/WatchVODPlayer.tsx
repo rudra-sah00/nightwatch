@@ -6,7 +6,7 @@ import { useRemoteControlListener } from '@/features/remote-control/hooks/use-re
 import { checkIsDesktop, desktopBridge } from '@/lib/electron-bridge';
 import { useSocket } from '@/providers/socket-provider';
 import { useVODPlayerState } from '../hooks/use-vod-player-state';
-import { Player, usePlayerContext } from '../player';
+import { Player, usePlayerControls } from '../player';
 import type { VideoMetadata } from '../player/context/types';
 import { CenterPlayButton } from '../player/ui/controls/PlayPause';
 import { BufferingOverlay } from '../player/ui/overlays/BufferingOverlay';
@@ -301,7 +301,7 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
 
 /** Mobile-only skip-back button that seeks the video 10 seconds backwards. */
 function MobileSkipBack() {
-  const { playerHandlers } = usePlayerContext();
+  const { playerHandlers } = usePlayerControls();
   return (
     <button
       type="button"
@@ -315,7 +315,7 @@ function MobileSkipBack() {
 
 /** Mobile-only skip-forward button that seeks the video 10 seconds forwards. */
 function MobileSkipForward() {
-  const { playerHandlers } = usePlayerContext();
+  const { playerHandlers } = usePlayerControls();
   return (
     <button
       type="button"
@@ -329,7 +329,7 @@ function MobileSkipForward() {
 
 /** Mobile-only back button in the top-left of the player overlay. */
 function MobileBackButton() {
-  const { playerHandlers } = usePlayerContext();
+  const { playerHandlers } = usePlayerControls();
   return (
     <button
       type="button"

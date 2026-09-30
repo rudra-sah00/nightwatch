@@ -3,7 +3,10 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { PlayerContext } from '../../context/PlayerContext';
+import {
+  PlayerContext,
+  PlayerStableContext,
+} from '../../context/PlayerContext';
 import type { VideoMetadata } from '../../context/types';
 import { useMobileDetection } from '../../hooks/useMobileDetection';
 import { SpeedBoostIndicator } from '../overlays/SpeedBoostIndicator';
@@ -210,32 +213,33 @@ export function PlayerRoot({
   const resolvedIsLive =
     streamMode === 'live' ? true : streamMode === 'vod' ? false : isLive;
 
-  const { state, containerRef, contextValue, showControls } = usePlayerRoot({
-    streamUrl,
-    metadata,
-    skipProgressHistory,
-    captionUrl,
-    subtitleTracks,
-    qualities,
-    spriteVtt,
-    spriteSheet,
-    readOnly: resolvedReadOnly,
-    isHost,
-    isAuthenticated,
-    onNavigate,
-    fullscreenToggleOverride,
-    isFullscreenOverride,
-    onStreamExpired,
-    onVideoRef,
-    initialAudioTracks,
-    onAudioTrackChange,
-    initialAudioTrackId,
-    onBack: onBackProp,
-    isLive: resolvedIsLive,
-    playbackRate,
-    streamFormat,
-    holdToSpeedUp,
-  });
+  const { state, containerRef, stableValue, stateValue, showControls } =
+    usePlayerRoot({
+      streamUrl,
+      metadata,
+      skipProgressHistory,
+      captionUrl,
+      subtitleTracks,
+      qualities,
+      spriteVtt,
+      spriteSheet,
+      readOnly: resolvedReadOnly,
+      isHost,
+      isAuthenticated,
+      onNavigate,
+      fullscreenToggleOverride,
+      isFullscreenOverride,
+      onStreamExpired,
+      onVideoRef,
+      initialAudioTracks,
+      onAudioTrackChange,
+      initialAudioTrackId,
+      onBack: onBackProp,
+      isLive: resolvedIsLive,
+      playbackRate,
+      streamFormat,
+      holdToSpeedUp,
+    });
 
   const isMobile = useMobileDetection();
 
@@ -260,107 +264,109 @@ export function PlayerRoot({
       )
         return;
       if (state.showControls) {
-        contextValue.dispatch({ type: 'HIDE_CONTROLS' });
+        stableValue.dispatch({ type: 'HIDE_CONTROLS' });
         if (controlsTimeoutRef.current)
           clearTimeout(controlsTimeoutRef.current);
       } else {
         showControls();
       }
     },
-    [isMobile, state.showControls, contextValue, showControls],
+    [isMobile, state.showControls, stableValue, showControls],
   );
 
   return (
-    <PlayerContext value={contextValue}>
-      <div
-        ref={containerRef}
-        role="application"
-        className={cn(
-          'group video-container w-full bg-black overflow-hidden flex flex-col',
-          !touchFullscreen && !containerStyle && LAYOUT_CLASSES[layout],
-          (touchFullscreen || containerStyle) && 'relative',
-          'cursor-none',
-          state.showControls && !resolvedHideControls && 'cursor-auto',
-          className,
-        )}
-        style={effectiveContainerStyle}
-        onMouseMove={showControls}
-        onMouseEnter={showControls}
-        onClick={handleContainerClick}
-        aria-label={tAria('videoPlayer')}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          // Don't capture keys when typing in an input
-          if (
-            e.target instanceof HTMLInputElement ||
-            e.target instanceof HTMLTextAreaElement
-          )
-            return;
+    <PlayerStableContext value={stableValue}>
+      <PlayerContext value={stateValue}>
+        <div
+          ref={containerRef}
+          role="application"
+          className={cn(
+            'group video-container w-full bg-black overflow-hidden flex flex-col',
+            !touchFullscreen && !containerStyle && LAYOUT_CLASSES[layout],
+            (touchFullscreen || containerStyle) && 'relative',
+            'cursor-none',
+            state.showControls && !resolvedHideControls && 'cursor-auto',
+            className,
+          )}
+          style={effectiveContainerStyle}
+          onMouseMove={showControls}
+          onMouseEnter={showControls}
+          onClick={handleContainerClick}
+          aria-label={tAria('videoPlayer')}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            // Don't capture keys when typing in an input
+            if (
+              e.target instanceof HTMLInputElement ||
+              e.target instanceof HTMLTextAreaElement
+            )
+              return;
 
-          const { setVolume, toggleMute, toggleFullscreen } =
-            contextValue.playerHandlers;
-          const vol = state.volume;
+            const { setVolume, toggleMute, toggleFullscreen } =
+              stableValue.playerHandlers;
+            const vol = state.volume;
 
-          switch (e.key) {
-            case ' ':
-            case 'k':
-            case 'K':
-              // Handled by the window-level listener in `useKeyboard`, which needs
-              // keyup too so holding Space can speed up to 2x. Toggling here as well
-              // would fire twice (cancelling out) and would pause on key-down,
-              // defeating the hold.
-              break;
-            case 'ArrowLeft':
-            case 'j':
-            case 'J':
-            case 'ArrowRight':
-            case 'l':
-            case 'L':
-              // Also handled by the window-level listener in `useKeyboard`, for the
-              // same reason as Space. Seeking here as well wrote `currentTime` twice
-              // per press, and the two writes compounded rather than cancelling: this
-              // handler computed an absolute target from `state.currentTime` — up to
-              // ~250 ms stale, since `SET_TIME` comes from `timeupdate` — and
-              // `useKeyboard` then applied its relative offset to the position this
-              // one had just written, so a single 10 s press travelled 20 s.
-              //
-              // It also bypassed the auto-repeat guard. That guard lives in
-              // `useKeyboard` (see SEEK_KEYS), so a held arrow suppressed there still
-              // issued one seek per repeat tick through this handler — measured at 14
-              // writes for a 13-tick hold. Each write emits `seeking`, which makes
-              // hls.js abort the fragments in flight, and on open-GOP content also
-              // re-primes the buffer; dozens per second escalate to a fatal decode
-              // error.
-              //
-              // `useKeyboard`'s implementation is the correct one: relative, read from
-              // live `video.currentTime`, and clamped against live
-              // `duration`/`seekable`.
-              break;
-            case 'ArrowUp':
-              e.preventDefault();
-              setVolume(Math.min(1, vol + 0.1));
-              break;
-            case 'ArrowDown':
-              e.preventDefault();
-              setVolume(Math.max(0, vol - 0.1));
-              break;
-            case 'm':
-            case 'M':
-              e.preventDefault();
-              toggleMute();
-              break;
-            case 'f':
-            case 'F':
-              e.preventDefault();
-              toggleFullscreen();
-              break;
-          }
-          showControls();
-        }}
-      >
-        {children}
-        <SpeedBoostIndicator />
-      </div>
-    </PlayerContext>
+            switch (e.key) {
+              case ' ':
+              case 'k':
+              case 'K':
+                // Handled by the window-level listener in `useKeyboard`, which needs
+                // keyup too so holding Space can speed up to 2x. Toggling here as well
+                // would fire twice (cancelling out) and would pause on key-down,
+                // defeating the hold.
+                break;
+              case 'ArrowLeft':
+              case 'j':
+              case 'J':
+              case 'ArrowRight':
+              case 'l':
+              case 'L':
+                // Also handled by the window-level listener in `useKeyboard`, for the
+                // same reason as Space. Seeking here as well wrote `currentTime` twice
+                // per press, and the two writes compounded rather than cancelling: this
+                // handler computed an absolute target from `state.currentTime` — up to
+                // ~250 ms stale, since `SET_TIME` comes from `timeupdate` — and
+                // `useKeyboard` then applied its relative offset to the position this
+                // one had just written, so a single 10 s press travelled 20 s.
+                //
+                // It also bypassed the auto-repeat guard. That guard lives in
+                // `useKeyboard` (see SEEK_KEYS), so a held arrow suppressed there still
+                // issued one seek per repeat tick through this handler — measured at 14
+                // writes for a 13-tick hold. Each write emits `seeking`, which makes
+                // hls.js abort the fragments in flight, and on open-GOP content also
+                // re-primes the buffer; dozens per second escalate to a fatal decode
+                // error.
+                //
+                // `useKeyboard`'s implementation is the correct one: relative, read from
+                // live `video.currentTime`, and clamped against live
+                // `duration`/`seekable`.
+                break;
+              case 'ArrowUp':
+                e.preventDefault();
+                setVolume(Math.min(1, vol + 0.1));
+                break;
+              case 'ArrowDown':
+                e.preventDefault();
+                setVolume(Math.max(0, vol - 0.1));
+                break;
+              case 'm':
+              case 'M':
+                e.preventDefault();
+                toggleMute();
+                break;
+              case 'f':
+              case 'F':
+                e.preventDefault();
+                toggleFullscreen();
+                break;
+            }
+            showControls();
+          }}
+        >
+          {children}
+          <SpeedBoostIndicator />
+        </div>
+      </PlayerContext>
+    </PlayerStableContext>
   );
 }

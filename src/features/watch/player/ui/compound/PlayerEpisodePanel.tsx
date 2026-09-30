@@ -6,7 +6,7 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { Episode } from '@/features/search/types';
 import { cn } from '@/lib/utils';
-import { usePlayerContext } from '../../context/PlayerContext';
+import { usePlayerControls } from '../../context/PlayerContext';
 import { EpisodePanel } from '../controls/EpisodePanel';
 import { useEpisodePanel } from '../controls/hooks/use-episode-panel';
 
@@ -45,7 +45,7 @@ export function PlayerEpisodePanel({
 }: {
   children?: React.ReactNode;
 }) {
-  const { metadata, onNavigate, playerHandlers } = usePlayerContext();
+  const { metadata, onNavigate, playerHandlers } = usePlayerControls();
 
   const isSeries = metadata.type === 'series';
   const seriesId = metadata.seriesId || metadata.movieId;
@@ -137,7 +137,7 @@ export function PlayerEpisodePanelOverlay() {
  */
 export function PlayerEpisodePanelTrigger() {
   const ctx = use(EpisodePanelContext);
-  const { playerHandlers } = usePlayerContext();
+  const { playerHandlers } = usePlayerControls();
   const t = useTranslations('watch.player');
   const tAria = useTranslations('watch.aria');
   if (!ctx) return null;
