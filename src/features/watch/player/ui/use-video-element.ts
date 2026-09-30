@@ -138,7 +138,6 @@ export function useVideoElement({
     video.addEventListener('waiting', handleWaiting);
     video.addEventListener('playing', handlePlaying);
     video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('canplaythrough', () => {});
     video.addEventListener('error', handleError);
     video.addEventListener('ended', handleEnded);
     video.addEventListener('loadstart', handleLoadStart);
