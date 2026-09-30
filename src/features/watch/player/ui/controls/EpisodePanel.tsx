@@ -73,18 +73,14 @@ export function EpisodePanel({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  /*
+    Escape is deliberately not handled here. `use-episode-panel` binds it at document level
+    alongside the outside-click listener, and its `close` is the same function this component
+    receives as `onClose` — so a second handler ran the whole close path twice for one
+    keypress, firing `onInteraction(false)` twice in a tick and cancelling then restarting the
+    controls auto-hide timer. The hook keeps it because it also owns the outside-click
+    listener, so both dismissals stay in one place.
+  */
 
   const isCurrentSeason = selectedSeason === currentSeason;
 

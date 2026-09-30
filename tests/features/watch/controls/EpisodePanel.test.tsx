@@ -273,7 +273,16 @@ describe('EpisodePanel', () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onClose on Escape key in left area', async () => {
+    /**
+     * Escape is owned by `use-episode-panel`, not by this component.
+     *
+     * Both used to handle it, and the component's `onClose` *is* the hook's `close`, so one
+     * keypress ran the whole close path twice — firing `onInteraction(false)` twice in a tick,
+     * which cancelled and restarted the controls auto-hide timer. The hook keeps it because it
+     * also owns the outside-click listener, so both dismissals live in one place.
+     * `use-episode-panel.test.ts` covers the behaviour itself.
+     */
+    it('does not handle Escape — the panel hook owns that key', async () => {
       const onClose = vi.fn();
       render(<EpisodePanel {...defaultProps} onClose={onClose} />);
 
@@ -282,7 +291,7 @@ describe('EpisodePanel', () => {
       });
 
       fireEvent.keyDown(window, { key: 'Escape' });
-      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
     });
 
     it('should call onEpisodeSelect when an episode is clicked', async () => {
