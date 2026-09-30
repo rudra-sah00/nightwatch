@@ -278,6 +278,46 @@ the backend suite now runs (1,843 tests pass), but no exploit was executed.
 
 ### WP-H3 — A seat claim with an early timestamp evicts whoever is sitting there, and locks the seat permanently
 
+**🔶 PARTIALLY FIXED — the core defect is STILL OPEN and needs a decision.**
+
+**What is fixed.** `sanitizeClaimAt` drops an `at` that is not a finite number, applied where remote
+claims enter in `use-seat-occupancy.ts`. That closes two concrete vectors, both confirmed against the old
+path:
+
+| Old behaviour | Result |
+|---|---|
+| `at: '0'` (string) | `stuck=true`, **evicted the seated occupant** — `'0' < 1699…` is a coercion, not a comparison |
+| `at: NaN` | sat down, and then **no honest claim could ever beat it** (`NaN < x` is false) — a permanent lock |
+
+17 cases in `tests/features/watch-party/theatre/wp-h3-seat-claim-forgery.test.ts`.
+
+**What is NOT fixed.** A well-formed early *number* — `at: 1` — still evicts a seated occupant and still
+holds the seat afterwards. Three tests pin that residual explicitly so it cannot be mistaken for closed;
+if a future change fixes WP-H3 those three SHOULD fail and be rewritten.
+
+**An approach that was tried and abandoned, recorded so it is not retried.** The first attempt clamped
+`at` into a ±5-minute window around the receiver's clock. It does not work, and the test proved it: the
+window has to be generous enough to tolerate ordinary clock skew, real claims are *seconds* old, so a
+forged claim floored at `now − window` is still earlier than every honest one. Narrowing the window until
+it helps means using the receiver's own arrival time, which destroys the order-independence the
+no-referee design depends on — two clients would assign different times to the same claim and could
+disagree about who is sitting where. **Bounding the type of `at` is possible; bounding its value is not,
+without a trusted timebase.**
+
+**The decision needed.** Two options, both behaviour changes:
+
+1. **Refuse to evict an occupied seat.** `applyClaim` would only contest *free* seats, so `at` would
+   matter solely for genuinely simultaneous grabs. Removes the whole class. Changes seating behaviour: a
+   seat held by a ghost claim stays held until reconciliation frees it, which is the case the module's
+   existing comment about untakeable seats was already worried about.
+2. **Stamp claims from a trusted timebase** — the party's synchronised clock via `useClockSync`, or host
+   arbitration. Correct, and also fixes the honest-slow-clock case, which option 1 does not. It changes
+   what `at` means on the wire, so mixed-version clients would compare different timebases.
+
+Option 1 is smaller and stops the malicious case; option 2 is the only one that also stops the accidental
+one. Neither is mine to choose.
+
+
 Found in the Phase 9 pass over `theatre/`. **Proven against the real rule, not reasoned.**
 
 Seat claims are broadcast with no arbiter, resolved by a rule the module argues is safe because it is
@@ -800,7 +840,9 @@ its role in the WP-C1 trace, and rate limiting on the REST routes.
 - **Phase 10 — backend discovery. ✅ DONE** for the watch-party socket handler and the host-authority
   claims, producing WP-C2. The clips/chat/playlist modules and REST rate limiting remain unread.
 - **Phase 11 — WP-C2. ✅ DONE**, in its own commit in the backend repo.
-- **Phase 12 — WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
+- **Phase 12 — WP-H3. 🔶 PARTIAL.** Unorderable timestamps dropped; the early-number vector needs a
+  decision between refusing eviction and a trusted timebase. See the finding.
+- **(was Phase 12) WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
   whether an occupied seat should be takeable at all needs a decision.
 - **Phase 13 — WP-M5**, the reaction cap, mirroring the WP-H1 fix.
 - **(superseded) finish discovery**: the two sketch components, membership races, `useAgora` beyond

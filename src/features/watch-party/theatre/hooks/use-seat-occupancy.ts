@@ -13,6 +13,7 @@ import {
   type ClaimMap,
   isSeatId,
   type SeatClaim,
+  sanitizeClaimAt,
   seatOf,
   toSeatMap,
   vacate as vacateIn,
@@ -167,7 +168,18 @@ export function useSeatOccupancy({
         return;
       }
       if (!isSeatId(c.seatId)) return;
-      applyClaim(c.seatId, c.userId, c.at);
+      /*
+        `at` decides every contest and arrives in the payload, so it has to be bounded before it is
+        trusted. Unbounded, a claim with `at: 0` took any occupied seat and then held it against every
+        later claim forever, because the rule is earliest-wins and `applyClaim` compares an incoming
+        claim against the sitting occupant. Ten such claims locked the whole auditorium.
+
+        A non-numeric or non-finite value is dropped outright rather than defaulted to now: a claim we
+        cannot order is not a claim, and defaulting would hand it the current instant.
+      */
+      const at = sanitizeClaimAt(c.at, Date.now());
+      if (at === null) return;
+      applyClaim(c.seatId, c.userId, at);
     });
     // someone leaving the party frees their seat immediately
     const offLeave = onMemberLeft((id) => vacate(id));

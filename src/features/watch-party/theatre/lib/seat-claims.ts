@@ -26,6 +26,41 @@ export interface SeatClaim {
 export type ClaimMap = Map<SeatId, SeatClaim>;
 
 /**
+ * Validate an inbound claim timestamp, or reject it as unorderable.
+ *
+ * `at` decides every contest and arrives in the payload. `rtm-events` read it as
+ * `(msg.at as number) ?? Date.now()`, and `??` catches only `null` and `undefined`, so a string, `NaN`,
+ * `0` and `-1` all passed through. A string makes `incoming.at < existing.at` a coercion rather than a
+ * comparison, and `NaN` loses every contest silently; neither is a claim anyone can order, so both are
+ * dropped here.
+ *
+ * **This does not fix AUDIT.md WP-H3, and must not be read as doing so.** The rule is earliest-wins and
+ * `applyClaim` compares an incoming claim against the *sitting occupant*, so any well-formed early number
+ * still evicts whoever is seated and then holds the seat forever.
+ *
+ * Clamping `at` into a window around the receiver's clock was tried first and abandoned, because it
+ * cannot work: the window has to be generous enough to tolerate ordinary clock skew, real claims are
+ * seconds old, and a forged claim floored at `now − window` is therefore still earlier than every honest
+ * one. A window tight enough to help would have to be near zero, which means using the receiver's own
+ * arrival time — and that breaks the order-independence the no-referee design depends on, since two
+ * clients would then assign different times to the same claim and could disagree about who is sitting
+ * where. There is a test pinning the residual so this stays visible.
+ *
+ * Closing WP-H3 properly needs one of two changes, both of which alter behaviour rather than validation:
+ * refuse to evict an occupied seat at all, or stamp claims from a timebase the receiver trusts (the
+ * party's synchronised clock, or host arbitration).
+ *
+ * @param at - The raw `at` from the message. Any type; this is wire data.
+ * @param now - Unused, retained so callers read as validating against arrival. See above for why no
+ *   clock-relative bound is applied.
+ * @returns The timestamp when it is a finite number, else `null`.
+ */
+export function sanitizeClaimAt(at: unknown, _now: number): number | null {
+  if (typeof at !== 'number' || !Number.isFinite(at)) return null;
+  return at;
+}
+
+/**
  * Does `incoming` beat `existing` for the same seat?
  *
  * Earliest timestamp wins. An exact tie breaks on the lower userId, which is
