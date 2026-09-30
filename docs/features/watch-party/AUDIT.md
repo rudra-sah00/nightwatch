@@ -518,6 +518,50 @@ constant.
 
 ## MEDIUM
 
+### WP-M6 — A failed device switch keeps the new device selected, and the next mic enable retries it
+
+Found in the Phase 14 pass over the areas nothing had read.
+
+`media/hooks/useAgora.ts:735-748`:
+
+```ts
+const switchAudioDevice = useCallback(
+  async (deviceId: string) => {
+    setSelectedAudioDevice(deviceId);
+    if (localAudioTrackRef.current) {
+      try {
+        await localAudioTrackRef.current.setDevice(deviceId);
+        toast.success(tp('micSwitched'));
+      } catch {
+        toast.error(tp('micSwitchFailed'));
+      }
+    }
+  },
+```
+
+The selection is committed on line 737, before the switch is attempted, and nothing rolls it back when
+`setDevice` throws. `switchVideoDevice` at `:750-762` is identical.
+
+The state feeds a ref (`:123-124`), and that ref is what a later track creation reads —
+`microphoneId: selectedAudioDeviceRef.current || undefined` at `:644`. So the failure does not end with
+the toast.
+
+**Consequence.** Pick a microphone that another application holds exclusively: the switch fails, an error
+toast appears, and the device dropdown still shows the device that failed. The track keeps running on the
+old microphone, so the UI now names a device that is not the one being used. Worse, muting and unmuting
+then builds a *new* track from the stale ref and attempts the same failing device, so a transient failure
+becomes a stuck one until the user picks something else.
+
+`refreshDevices` does not rescue it. Its correction at `:177-184` only replaces the selection when the
+device has **vanished** from the enumerated list — a device that is present but unusable stays selected.
+
+**How I could be wrong.** If `setDevice` never rejects in practice and instead resolves having silently
+kept the old device, there is no error path to speak of and this reduces to the dropdown being wrong.
+Distinguishing the two needs two real audio devices and an application holding one of them, so it is
+**not verifiable locally**.
+
+---
+
 ### WP-M5 — The sketch reaction list has no cap, the same defect WP-H1 fixed next door
 
 **✅ FIXED — `MAX_ACTIVE_REACTIONS = 12` plus a coordinate guard in `SketchOverlay.tsx`.** The ceiling is
@@ -797,18 +841,33 @@ were mine:
   WP-H3 is not a failure of that property — it is that the property is enforced over a number the
   sender chooses.
 
+**Disproved in the Phase 14 pass**, over the last areas nothing had read:
+
+- **Rapier teardown is not a leak.** `TheatreColliders.tsx` and `TheatreScene.tsx` use
+  `@react-three/rapier` declaratively — `<Physics>`, `<RigidBody>`, `<CuboidCollider>` — with no
+  imperatively created bodies or colliders, so teardown is the library's on unmount. Nothing to dispose.
+- **Agora token renewal is correctly guarded.** The `tokenPrivilegeWillExpire` handler re-checks
+  `!cleaned && clientRef.current === client` before calling `renewToken`, so a renewal in flight across an
+  unmount or a channel change cannot land on a replaced client.
+- **`WatchPartySettings.tsx` does not need rollback.** Its permission toggles look optimistic — the
+  comment says so — but both write local state inside `.then()`, after the server has confirmed, so a
+  rejected update leaves nothing to undo. The comment is wrong; the code is right.
+- **`MediaControls.tsx` has no asynchrony at all**, so none of the post-unmount or race classes apply.
+- **Backend chat enforcement is real.** `ChatService.addMessage` resolves `resolvePermissions` and refuses
+  a non-member or muted sender before the Redis write, with `getChatDenialReason` distinguishing
+  `NOT_A_MEMBER` from `CHAT_MUTED`. This is the enforcement WP-C1's analysis assumed and it holds.
+
 **Still shallow — absence of findings here is not evidence of absence:**
 
 - **Rapier physics cleanup and the theatre network tick rate.** Still untouched. Seat claims were
   examined (WP-H3); collider and rigidbody teardown was not.
-- **Konva node lifecycle and the transformer** inside `SketchOverlay.tsx`. Timers and frames were
-  checked and are clean; the Konva object graph itself was not examined.
-- **`useAgora.ts` device switching and token renewal.** Listener balance and the track toggles were
-  checked. `switchAudioDevice` / `switchVideoDevice` (`:735,750`) and the `renewToken` path (`:545`)
-  were not read.
-- **`WatchPartySettings.tsx` (534), `WatchPartyVideoArea.tsx` (484), `MediaControls.tsx` (402).**
-  Scanned for listener/timer balance only, which is clean in all three (Settings and MediaControls arm
-  none at all). Their logic is unread.
+- **Konva node lifecycle and the transformer** inside `SketchOverlay.tsx`. Timers, frames, the reaction
+  list and the Konva element tree were checked; the imperative transformer attach/detach was not.
+- **`WatchPartyVideoArea.tsx` (484).** Read for the async patterns only. Its clip-recording stop awaits
+  and then toasts (`:287-288`) without an unmount guard — the same class as WP-M4, not reported because
+  it follows a deliberate user action and the toast is arguably correct even if the view has gone. The
+  lazy-import and playback-blocked paths are unexamined.
+- **Backend clips, playlist and the guest-room-scope middleware**, and rate limiting on the REST routes.
 - **One possible issue I chose not to raise as a finding.** `toggleAudio` / `toggleVideo` capture
   `clientRef.current` before awaiting track creation, and do not re-check it afterwards, so an unmount
   mid-await could in principle publish to a client that has left. In practice the publish should reject
@@ -859,6 +918,10 @@ its role in the WP-C1 trace, and rate limiting on the REST routes.
 - **(was Phase 12) WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
   whether an occupied seat should be takeable at all needs a decision.
 - **Phase 13 — WP-M5. ✅ DONE.**
+- **Phase 14 — discovery over the last unread areas. ✅ DONE**, producing WP-M6. Rapier teardown, Agora
+  token renewal, the settings permission path, MediaControls and backend chat enforcement were all
+  checked and hold up.
+- **Phase 15 — WP-M6**, the device-switch rollback. Small and independent.
 - **(superseded) finish discovery**: the two sketch components, membership races, `useAgora` beyond
   listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
   until it was executed, the remaining findings should be treated as unproven until each is driven
