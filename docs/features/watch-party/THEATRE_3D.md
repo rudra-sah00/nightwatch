@@ -562,12 +562,44 @@ threaded down from `useWatchParty`, which is why `WatchPartyVideoArea` takes a
 between clients is now network latency rather than unbounded clock drift.
 
 **A client that lies about `at` still wins, and that is open.** Because `applyClaim`
-compares an incoming claim against the *sitting* occupant, a forged `at: 1` takes any
-seat and holds it against every later claim. Only an arbiter can stop that, since it
-is the only arrangement where the deciding value does not come from the claimant —
-and that reverses the no-referee decision this section argues for, on grounds that
-still hold. Left as a deliberate trade: the party's own model is that admission is
-the permission boundary, and this is griefing by someone the host has already let in.
+compares an incoming claim against the *sitting* occupant, a forged `at: 1` takes a
+seat and holds it against every later claim.
+
+The blast radius is narrower than that sentence suggests, and it is worth writing down
+so the next reader neither over- nor under-reacts:
+
+- **One identity holds one seat.** `applyClaim` vacates the claimant's other seats
+  first, so a forged claim cannot be repeated across the row. Holding all ten needs ten
+  distinct members, and `MAX_ROOM_MEMBERS` is ten including the host — so locking the
+  auditorium requires the entire party to be colluding, at which point there is no
+  victim.
+- **It frees when they leave.** The ghost reconciliation above vacates any claim whose
+  holder is no longer in the room, so the seat returns on departure or a kick.
+- **The attacker is someone the host admitted.** Party admission is the permission
+  boundary this whole design rests on.
+
+So the real exploit is: a member you invited squats one chair and will not give it up,
+in an opt-in mode, and you can kick them. Viewing, audio and chat are unaffected. That
+is left deliberately rather than paid for with a round trip on every claim.
+
+**Revisit it if any of these becomes true**, because each one breaks an assumption above:
+
+1. Seats gain functional weight — tied to permissions, spatial audio, or capability.
+2. Parties stop being invite-gated. The entire argument is "admitted implies trusted";
+   public or link-open parties void it, and this should be closed before such a launch.
+3. Anyone actually reports it. Observed griefing is worth architecture; speculative
+   griefing is not.
+
+**If it is closed, stamp `at` on the server rather than adding an arbiter.** Full host
+arbitration — the host adjudicating each claim — adds a single point of failure and
+adjudication logic for no extra benefit; all that is needed is a timestamp the claimant
+cannot choose. The no-referee argument above was written with avatar movement in mind,
+which is 60 Hz; sitting happens a handful of times per session, so a round trip on a
+claim is close to free and the reasoning does not transfer as strongly as it reads.
+
+Note that three tests in `wp-h3-seat-claim-forgery.test.ts` deliberately **assert** this
+defect so it stays visible. They will fail when it is fixed, and should be rewritten to
+assert the new behaviour rather than deleted.
 
 Two things were tried and rejected, recorded so they are not retried:
 

@@ -24,6 +24,7 @@ import {
   type ClaimMap,
   sanitizeClaimAt,
   toSeatMap,
+  vacate,
 } from '@/features/watch-party/theatre/lib/seat-claims';
 
 const NOW = 1_700_000_000_000;
@@ -148,5 +149,40 @@ describe('WP-H3 residual — STILL OPEN, pinned so it stays visible', () => {
 
     expect(inboundClaim(claims, seat, 'slow-by-5s', NOW - 5000)).toBe(true);
     expect(toSeatMap(claims)[seat]).toBe('slow-by-5s');
+  });
+});
+
+/*
+  The two properties that bound the residual above, and that THEATRE_3D.md's decision to leave it
+  open explicitly relies on. They are asserted here because the risk assessment is only valid while
+  they hold: if a later change let one identity hold several seats, or stopped releasing a seat on
+  departure, the documented reasoning would silently stop being true.
+*/
+describe('WP-H3 residual — the bounds the accepted-trade decision rests on', () => {
+  it('one identity can hold only one seat, however many it claims', () => {
+    const claims: ClaimMap = new Map();
+    for (const s of SEAT_IDS) inboundClaim(claims, s, 'attacker', 1);
+
+    const held = SEAT_IDS.filter((s) => toSeatMap(claims)[s] === 'attacker');
+    expect(held).toHaveLength(1);
+  });
+
+  it('releases a forged claim when its holder leaves the room', () => {
+    const claims: ClaimMap = new Map();
+    inboundClaim(claims, seat, 'attacker', 1);
+    expect(toSeatMap(claims)[seat]).toBe('attacker');
+
+    expect(vacate(claims, 'attacker')).toBe(true);
+
+    expect(toSeatMap(claims)[seat]).toBeNull();
+  });
+
+  it('frees the seat for an honest member once the holder is gone', () => {
+    const claims: ClaimMap = new Map();
+    inboundClaim(claims, seat, 'attacker', 1);
+    vacate(claims, 'attacker');
+
+    expect(inboundClaim(claims, seat, 'honest', NOW)).toBe(true);
+    expect(toSeatMap(claims)[seat]).toBe('honest');
   });
 });
