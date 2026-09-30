@@ -421,5 +421,11 @@ export function useWatchPartyClient({
     handleLeave,
     confirmLeave,
     handleCopyLink,
+    /*
+      Exposed so seat claims can be stamped from the party's shared timebase rather than the device
+      clock. Contests compare `at` across clients, so they need a common reference; a device seconds
+      off would otherwise evict seated members by accident.
+    */
+    clockOffset,
   };
 }

@@ -107,6 +107,7 @@ export function WatchPartyClient({
     handleLeave,
     confirmLeave,
     handleCopyLink,
+    clockOffset,
   } = useWatchPartyClient({
     roomId,
     isNewParty,
@@ -195,6 +196,7 @@ export function WatchPartyClient({
             room={room}
             currentUserId={currentUserId}
             currentUserName={currentUserName}
+            clockOffset={clockOffset}
             isHost={isHost}
             copied={copied}
             onKick={kickUser}

@@ -191,6 +191,14 @@ function PlayerOverlays({
 
 /** Props for the {@link WatchPartyVideoArea} component. */
 interface WatchPartyVideoAreaProps {
+  /**
+   * Offset to the party's shared timebase, forwarded to seat claims.
+   *
+   * Seat contests compare `at` across clients, so they need a common reference; a device whose own
+   * clock is seconds off would otherwise evict seated members by accident. Threaded rather than read
+   * locally because the clock lives in `useWatchParty` and the claim is made here.
+   */
+  clockOffset?: number;
   room: WatchPartyRoom;
   isHost: boolean;
   isFullscreen: boolean;
@@ -229,6 +237,7 @@ export function WatchPartyVideoArea({
   rtmSendMessage,
   rtmSendMessageToPeer,
   userId,
+  clockOffset,
   currentUserName,
 }: WatchPartyVideoAreaProps) {
   /**
@@ -317,6 +326,7 @@ export function WatchPartyVideoArea({
   */
   const { seatMap, mySeat, claimSeat } = useSeatOccupancy({
     userId: userId ?? '',
+    clockOffset,
     rtmSendMessage,
     // Same roster the avatars reconcile against, so a departed member's chair is
     // released rather than staying reserved for the rest of the session.

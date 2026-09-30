@@ -35,6 +35,14 @@ const EMPTY_TYPING_USERS: TypingUser[] = [];
 
 /** Props for the {@link ActiveWatchParty} component. */
 interface ActiveWatchPartyProps {
+  /**
+   * Offset to the party's shared timebase, forwarded to seat claims.
+   *
+   * Seat contests compare `at` across clients, so they need a common reference; a device whose own
+   * clock is seconds off would otherwise evict seated members by accident. Threaded rather than read
+   * locally because the clock lives in `useWatchParty` and the claim is made further down.
+   */
+  clockOffset?: number;
   room: WatchPartyRoom;
   currentUserId: string | undefined;
   currentUserName?: string;
@@ -77,6 +85,7 @@ export function ActiveWatchParty({
   room,
   currentUserId,
   currentUserName: propUserName,
+  clockOffset,
   isHost,
   copied,
   onKick,
@@ -283,6 +292,7 @@ export function ActiveWatchParty({
           rtmSendMessageToPeer={rtmSendMessageToPeer}
           userId={currentUserId}
           currentUserName={currentUserName}
+          clockOffset={clockOffset}
         />
 
         {/* Floating participant tiles when sidebar is closed.

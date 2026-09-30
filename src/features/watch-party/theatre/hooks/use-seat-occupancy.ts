@@ -34,6 +34,18 @@ interface UseSeatOccupancyOptions {
    */
   memberIds?: readonly string[];
   /**
+   * Offset from this device's clock to the party's shared timebase, from `useClockSync`.
+   *
+   * Claims are decided by comparing `at` across clients, which silently assumed their clocks agreed.
+   * They do not: a device a few seconds slow won every contest it entered and evicted people who were
+   * already seated, through no fault of anyone's. Stamping from the shared timebase instead reduces the
+   * spread between clients from device-clock drift, which is unbounded, to network latency.
+   *
+   * It does not make the value trustworthy — a client that lies about `at` still wins, and only an
+   * arbiter could stop that. This closes the accidental case, not the deliberate one.
+   */
+  clockOffset?: number;
+  /**
    * Track claims at all. True for the whole party session, in 2D as well as 3D —
    * see the note on this hook's placement below.
    */
@@ -90,6 +102,7 @@ interface UseSeatOccupancyOptions {
  */
 export function useSeatOccupancy({
   userId,
+  clockOffset = 0,
   rtmSendMessage,
   memberIds,
   enabled,
@@ -141,7 +154,12 @@ export function useSeatOccupancy({
   const claimSeat = useCallback(
     (seat: SeatId | null) => {
       if (!enabled) return;
-      const at = Date.now();
+      /*
+        Stamped from the party's shared timebase, not this device's clock. Every client compares these
+        numbers against each other, so what matters is that they share a reference; a device whose own
+        clock is seconds off would otherwise win every contest and evict seated members by accident.
+      */
+      const at = Date.now() + clockOffset;
       if (seat === null) {
         // Deliberate, so the automatic seat must not put them back.
         autoSeatResolved.current = true;
@@ -156,7 +174,7 @@ export function useSeatOccupancy({
         at,
       });
     },
-    [enabled, userId, rtmSendMessage, applyClaim, vacate],
+    [enabled, userId, clockOffset, rtmSendMessage, applyClaim, vacate],
   );
 
   useEffect(() => {
