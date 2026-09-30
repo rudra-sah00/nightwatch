@@ -184,9 +184,21 @@ export function useWatchPartyLifecycle({
       if (!targetRoomId || !activeUserId) return;
       try {
         const roomData = await getRoomDetails(targetRoomId);
+        /*
+          Re-check after every await, not only on entry.
+
+          The cleanup below sets `socketCleaned` and clears this interval, but an iteration already
+          suspended at one of these awaits resumes and runs to completion regardless. Under React 19
+          the setState calls are silent no-ops on an unmounted tree, so the symptom was the toast:
+          `sonner` is mounted globally rather than inside the party subtree, so a user who gave up on
+          the lobby and navigated away got "request approved" up to ten seconds later, on whatever
+          page they had moved to.
+        */
+        if (socketCleaned) return;
         if (roomData?.members.some((m) => m.id === activeUserId)) {
           // We were approved but missed the Socket.IO event
           const streamRes = await getPartyStreamToken(targetRoomId);
+          if (socketCleaned) return;
           const token = streamRes.token || '';
           const normalizedRoom = normalizeRoomUrls(roomData, token, {
             injectStream: true,
