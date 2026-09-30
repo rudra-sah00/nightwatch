@@ -102,6 +102,19 @@ interface UseHlsOptions {
    * the old behaviour.
    */
   seekReprimeKey?: string;
+  /**
+   * Position to begin loading at, in seconds, when resuming a partly-watched title.
+   *
+   * Handed to hls.js as `startPosition` so the first fragment loaded is the one the viewer
+   * wants, rather than loading at 0 and then seeking. On content whose segments are not
+   * IDR-aligned that seek was the *first* of the session and so the one most likely to fail,
+   * and resuming is the single most common way into the player.
+   *
+   * Read at construction only, because that is when hls.js needs it. A position arriving
+   * later still works: `use-player-root` falls back to a normal seek when the element has
+   * already moved past the start.
+   */
+  resumeAtSeconds?: number;
 }
 
 interface NativeAudioTrack {
@@ -127,6 +140,7 @@ export function useHls({
   isLive = false,
   isWatchPartyGuest = false,
   seekReprimeKey,
+  resumeAtSeconds,
 }: UseHlsOptions) {
   const hlsRef = useRef<HlsType | null>(null);
   const unauthorizedRetryCountRef = useRef(0);
@@ -207,6 +221,12 @@ export function useHls({
   /** Latest-ref for the same reason: the effect's deps stay minimal. */
   const seekReprimeKeyRef = useRef(seekReprimeKey);
   seekReprimeKeyRef.current = seekReprimeKey;
+  /**
+   * Latest-ref again. Adding this to the engine effect's deps would tear down and rebuild
+   * playback the moment the resume position arrived, which is the opposite of the point.
+   */
+  const resumeAtSecondsRef = useRef(resumeAtSeconds);
+  resumeAtSecondsRef.current = resumeAtSeconds;
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
@@ -377,6 +397,25 @@ export function useHls({
               // VOD-optimised: prefer stability over latency
               enableWorker: true,
               lowLatencyMode: false,
+              /*
+                Begin loading at the resume position rather than loading at 0 and seeking
+                there afterwards.
+
+                That seek was the *first* of the session, which on segments that are not
+                IDR-aligned is the one most likely to hand the decoder a promoted non-IDR
+                frame with no parameter sets — and resuming a partly-watched episode is the
+                single most common way into the player, so the most common entry point was
+                also the riskiest. Starting the load here asks for the right fragment
+                outright, so there is no seek to fail.
+
+                -1 is hls.js's "start at the beginning, or the manifest's own start time".
+                Read from a ref because hls.js needs it at construction; a position that
+                arrives later falls back to a normal seek in `use-player-root`.
+              */
+              startPosition:
+                resumeAtSecondsRef.current && resumeAtSecondsRef.current > 0
+                  ? resumeAtSecondsRef.current
+                  : -1,
               backBufferLength: 90,
               /**
                * Forward buffer. Reduced from 120s/200MB.

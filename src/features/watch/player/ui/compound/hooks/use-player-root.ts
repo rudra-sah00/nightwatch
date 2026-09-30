@@ -125,6 +125,16 @@ export function usePlayerRoot({
     },
   );
 
+  /**
+   * Resume position, once the backend has told us there is one.
+   *
+   * Held in state as well as applied, because `useHls` hands it to hls.js as
+   * `startPosition` so the engine loads the right fragment outright instead of loading at 0
+   * and seeking afterwards — that seek was the first of the session, and on segments that
+   * are not IDR-aligned the first seek is the one most likely to fail.
+   */
+  const [resumeAtSeconds, setResumeAtSeconds] = useState<number | undefined>();
+
   const { setQuality, setAudioTrack, hlsRef } = usePlayerEngine({
     videoRef,
     streamUrl,
@@ -140,6 +150,7 @@ export function usePlayerRoot({
     // Series share one re-prime answer across episodes: the encode is a property of the
     // title, not of the episode, so a show discovered on episode 1 does not re-probe on 2.
     seekReprimeKey: metadata.seriesId || metadata.movieId,
+    resumeAtSeconds,
     streamFormat,
   });
 
@@ -304,11 +315,40 @@ export function usePlayerRoot({
     onNavigate: handleNavigate,
   });
 
-  const handleProgressLoaded = useCallback((seconds: number) => {
-    if (Number.isFinite(seconds) && seconds > 0 && videoRef.current) {
-      videoRef.current.currentTime = seconds;
-    }
-  }, []);
+  /*
+    The single owner of the playhead. Created above every consumer — resume-on-load,
+    `useKeyboard` and `usePlayerHandlers` — so the whole tree shares one instance, and
+    therefore one clamp, one relative base, and one seek-in-flight gate. See
+    useSeekController.
+  */
+  const { seekTo, seekBy } = useSeekController({
+    videoRef,
+    isLive,
+    disabled: readOnly,
+  });
+
+  const handleProgressLoaded = useCallback(
+    (seconds: number) => {
+      if (!(Number.isFinite(seconds) && seconds > 0)) return;
+      setResumeAtSeconds(seconds);
+
+      const video = videoRef.current;
+      if (!video) return;
+
+      /*
+        Already there, so `startPosition` won the race and applied it at construction —
+        seeking again would be the very write this change exists to avoid.
+
+        Otherwise the position arrived after the engine was built, when hls.js can no longer
+        use it, so fall back to the seek this always did. Deliberately not gated on
+        `readyState` or anything else: losing a viewer's resume position is a worse bug than
+        the seek, so the fallback stays unconditional.
+      */
+      if (Math.abs(video.currentTime - seconds) < 1) return;
+      seekTo(seconds);
+    },
+    [seekTo],
+  );
 
   useWatchProgress({
     videoRef,
@@ -370,17 +410,6 @@ export function usePlayerRoot({
   }, [state.currentSubtitleTrack, state.subtitleTracks]);
 
   const toggleFullscreen = fullscreenToggleOverride || nativeToggleFullscreen;
-
-  /*
-    The single owner of the playhead. Created here, above both `useKeyboard` and
-    `usePlayerHandlers`, so every control in the tree shares one instance — and therefore
-    one clamp, one relative base, and one seek-in-flight gate. See useSeekController.
-  */
-  const { seekTo, seekBy } = useSeekController({
-    videoRef,
-    isLive,
-    disabled: readOnly,
-  });
 
   const { togglePlay, toggleMute } = useKeyboard({
     videoRef,

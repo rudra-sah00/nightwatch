@@ -407,6 +407,50 @@ describe('useHls', () => {
    * it is not platform-specific. Reloading the fragment re-appends the init segment, which
    * is the only thing that restores the parameter sets.
    */
+  /**
+   * Resuming a partly-watched episode is the most common way into the player, and it used to
+   * load at 0 and then seek — making the first seek of the session the one most likely to
+   * hand the decoder a promoted non-IDR frame. hls.js takes a start position instead, so
+   * there is no seek to fail (SEEKING.md D2, P1 #5).
+   */
+  describe('resume starts the load at the right position', () => {
+    const mountWith = async (resumeAtSeconds?: number) => {
+      const videoRef = createVideoRef();
+      renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+          resumeAtSeconds,
+        }),
+      );
+      await vi.waitFor(() => {
+        expect(MockHlsClass).toHaveBeenCalled();
+      });
+      // The mock constructor is declared with no parameters, so reach the config via unknown.
+      const calls = MockHlsClass.mock.calls as unknown as unknown[][];
+      return calls.at(-1)?.[0] as { startPosition?: number } | undefined;
+    };
+
+    it('hands the resume position to hls.js as startPosition', async () => {
+      const config = await mountWith(1999.5);
+
+      expect(config?.startPosition).toBe(1999.5);
+    });
+
+    it('uses -1 when there is nothing to resume', async () => {
+      const config = await mountWith(undefined);
+
+      expect(config?.startPosition).toBe(-1);
+    });
+
+    it('uses -1 for a zero position rather than treating it as a resume', async () => {
+      const config = await mountWith(0);
+
+      expect(config?.startPosition).toBe(-1);
+    });
+  });
+
   describe('seek re-primes the decoder', () => {
     /**
      * Seeks and then lets the deferred re-prime run.

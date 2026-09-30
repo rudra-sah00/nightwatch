@@ -18,6 +18,8 @@ interface UsePlayerEngineOptions {
   isWatchPartyGuest?: boolean;
   /** Stable content id used to remember whether this title needs a seek re-prime. */
   seekReprimeKey?: string;
+  /** Resume position handed to hls.js as `startPosition`, avoiding a load-then-seek. */
+  resumeAtSeconds?: number;
   /** Stream format hint from the backend (avoids URL-sniffing) */
   streamFormat?: 'hls' | 'mp4' | 'dash';
 }
@@ -42,6 +44,7 @@ export function usePlayerEngine({
   isLive = false,
   isWatchPartyGuest = false,
   seekReprimeKey,
+  resumeAtSeconds,
   streamFormat,
 }: UsePlayerEngineOptions): UsePlayerEngineReturn {
   const nullHlsRef = useRef<HlsType | null>(null);
@@ -80,6 +83,7 @@ export function usePlayerEngine({
     isLive,
     isWatchPartyGuest,
     seekReprimeKey,
+    resumeAtSeconds,
   });
 
   // Initialize DASH engine
