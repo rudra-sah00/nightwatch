@@ -520,6 +520,20 @@ export function useSketchOverlay({
       const point = stage?.getPointerPosition();
       if (!point || !isSketchMode) return;
 
+      /*
+        Nothing below here means anything without drawing permission.
+
+        The cursor broadcast used to sit above this check, so a member with drawing switched off
+        emitted `SKETCH_CURSOR_MOVE` every 100 ms while hovering — and every recipient dropped all
+        of them, because that message is draw-gated in `room/permissions.ts` and the sender does not
+        hold the capability. Guaranteed-wasted messages on a transport that bills and rate-limits
+        per message, in the default configuration rather than an unusual one.
+
+        `isDrawing` is deliberately NOT part of this guard: someone who can draw should broadcast
+        their cursor while merely hovering, which is the whole point of showing remote cursors.
+      */
+      if (!canDraw) return;
+
       // Broadcast the live cursor position, throttled to ~10fps.
       const now = Date.now();
       if (now - lastCursorBroadcast.current > 100) {
@@ -534,7 +548,7 @@ export function useSketchOverlay({
         lastCursorBroadcast.current = now;
       }
 
-      if (!isDrawing.current || !canDraw) return;
+      if (!isDrawing.current) return;
       if (currentTool === 'select') return;
 
       const lastAction = currentActionRef.current;
