@@ -152,7 +152,16 @@ export function usePlayerHandlers({
       }
     }, 5000);
     return () => clearTimeout(safety);
-  });
+    /*
+      With no dependency array this ran on every render, and its own cleanup cleared the timer
+      each time — so during playback, where SET_TIME re-renders at ~4Hz, the 5s countdown was
+      restarted every ~250ms and could never complete. The safety net it is supposed to provide
+      never once fired.
+
+      `dispatch` is the only non-ref value read, and `useReducer` guarantees it is stable, so in
+      practice this is mount-only.
+    */
+  }, [dispatch]);
 
   // Show controls when paused, and sync timer when playing
   useEffect(() => {
