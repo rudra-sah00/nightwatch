@@ -546,17 +546,28 @@ resolve identically on every machine with nobody adjudicating. The rule:
 
 #### The unresolved weakness in this design
 
-`at` decides every contest and is the claimant's own `Date.now()`, sent in the
-payload. A value that cannot be ordered — a string, `NaN` — is now dropped before
-the rule sees it, which closed two concrete holes: a string `'0'` compared by
-coercion and evicted whoever was seated, and a `NaN` claim was unbeatable because
-`NaN < x` is false, so one malformed message locked a chair permanently.
+`at` decides every contest and arrives in the payload. Two of the three problems
+with that are now closed.
 
-**A well-formed early number is still accepted, and still wins.** Because
-`applyClaim` compares an incoming claim against the *sitting* occupant, `at: 1`
-takes any seat and then holds it against every later claim. This needs no malice:
-a device whose clock is a few seconds slow evicts punctual users by accident, and
-every client agrees because they are all applying a correct rule to a wrong number.
+**Unorderable values are dropped** before the rule sees them. A string `'0'` was
+compared by coercion and evicted whoever was seated; a `NaN` claim was unbeatable,
+because `NaN < x` is false, so one malformed message locked a chair permanently.
+
+**Claims are stamped from the party's shared timebase**, `Date.now() + clockOffset`,
+rather than the device clock. Comparing `at` across clients assumed their clocks
+agreed; they do not, and a device a few seconds slow won every contest it entered
+and evicted seated members by accident. The offset comes from `useClockSync` and is
+threaded down from `useWatchParty`, which is why `WatchPartyVideoArea` takes a
+`clockOffset` prop for something with no visible connection to seating. The spread
+between clients is now network latency rather than unbounded clock drift.
+
+**A client that lies about `at` still wins, and that is open.** Because `applyClaim`
+compares an incoming claim against the *sitting* occupant, a forged `at: 1` takes any
+seat and holds it against every later claim. Only an arbiter can stop that, since it
+is the only arrangement where the deciding value does not come from the claimant —
+and that reverses the no-referee decision this section argues for, on grounds that
+still hold. Left as a deliberate trade: the party's own model is that admission is
+the permission boundary, and this is griefing by someone the host has already let in.
 
 Two things were tried and rejected, recorded so they are not retried:
 
@@ -570,10 +581,8 @@ Two things were tried and rejected, recorded so they are not retried:
   there.
 
 Order-independence requires a total order computed from claim data alone, so the
-timestamp has to be trustworthy. Stamping claims from the party's synchronised
-clock would fix the accidental case; only host arbitration fixes a deliberate liar,
-and that reverses the no-referee decision this section argues for, so it is a real
-trade rather than an oversight.
+timestamp has to be trustworthy — which is why the fix was to improve the timebase
+rather than to change when the comparison applies.
 - A person holds at most one seat, so a new claim vacates their previous one
   first. Otherwise standing up and sitting elsewhere leaves a phantom occupant
   that blocks the chair for everyone.

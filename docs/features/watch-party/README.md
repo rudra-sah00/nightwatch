@@ -377,19 +377,23 @@ itself the `canDraw` this gate exists to enforce.
 **Gated on `expectedHostId`**: `JOIN_APPROVED`, `JOIN_REJECTED`. These arrive while
 the recipient's `room` is still `null` — that *is* the handshake — so there is no
 `room.hostId` to compare against and the lobby preview's host id is used instead.
-This works for authenticated joiners only: the backend withholds `hostId` from
-unauthenticated room previews, so a guest has no expected host and the handshake
-stays open for them. Refusing it without one would make joining impossible for
-exactly the users the flow exists for.
+An authenticated viewer gets this from the lobby preview. A guest's preview carries
+no `hostId` — the backend withholds it from unauthenticated callers — so
+`useWatchPartyLifecycle` fetches it again once `requestJoin` has stored a guest
+token, at which point `apiFetch` sends that token and the same endpoint does return
+it. The lookup is not awaited: an approval arriving before it resolves is still
+ungated, so this narrows the window to one REST call rather than closing it, and
+awaiting would delay every legitimate join to defend against a race an attacker
+cannot reliably win.
 
 Not gated: `SKETCH_REQUEST_SYNC` (asking for the canvas is reading, not drawing —
 a member with drawing off still sees what others drew), emoji reactions (no
 permission exists for them), `MEMBER_JOINED` / `MEMBER_LEFT`, and theatre traffic
 (`AVATAR_TRANSFORM`, `SEAT_CLAIM`) — 3D presence is not a capability a host can
 revoke. Note that `SEAT_CLAIM` being ungated is correct but not sufficient on its
-own: its `at` field decides seat contests and is sender-supplied, so a well-formed
-early timestamp still takes an occupied seat. See
-[3D theatre seating](./THEATRE_3D.md#seating).
+own: its `at` field decides seat contests and is sender-supplied, so although it is
+now stamped from the shared clock and validated for shape, a *forged* early timestamp
+still takes an occupied seat. See [3D theatre seating](./THEATRE_3D.md#seating).
 
 Unknown senders and un-loaded rooms **pass, except for the host-authority sets
 above, which fail closed.** Failing open for capability-gated traffic is
