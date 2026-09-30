@@ -743,7 +743,23 @@ about rather than observed.
 
 ### WP-M1 — Clock offset carries no round-trip compensation, so every guest sits systematically behind the host
 
-**🔶 QUANTIFIED, NOT FIXED — needs a decision.** Driven through `useClockSync` with host and guest
+**✅ FIXED — outlier-filtered min-delay estimator in `useClockSync`.** The median is still computed, but
+only as the reference for rejecting samples more than 1000 ms from it; the offset is then the **largest**
+surviving sample. Since every sample is `trueOffset − oneWayLatency`, the largest is the one that
+travelled fastest and so carries the least error — NTP's min-delay filter, reached from the other
+direction. Measured on the same latencies as below, the estimate moves from **−70 ms to −40 ms**.
+
+Neither of the two options originally offered was taken as written. A raw maximum was rejected because it
+latches onto a single spurious spike — a host clock step would be adopted and held, which is the
+robustness the median was there for. Filtering first keeps that and drops most of the bias, at no
+protocol cost, so the ping/pong exchange was not needed after all. Regression test
+`tests/features/watch-party/hooks/wp-m1-clock-bias.test.ts` — 4 of its 7 cases fail against the median
+estimator, and one pins the remaining bias so it is not mistaken for solved.
+
+**Residual:** the smallest observed one-way latency is still an error. Removing it entirely needs a real
+round-trip measurement, which remains a protocol change.
+
+Original measurement: Driven through `useClockSync` with host and guest
 clocks set exactly equal and one-way latencies of 40/90/60/150/70 ms, the computed `clockOffset` came
 out at **−70 ms, exactly the median latency**. The mechanism is confirmed precisely:
 
@@ -934,8 +950,8 @@ its role in the WP-C1 trace, and rate limiting on the REST routes.
 - **Phase 6 — WP-H1. ✅ DONE.** Cap plus payload shape check. No send-side throttle — that is a UX
   decision, flagged in the finding rather than assumed.
 - **Phase 7 — WP-M2 / WP-M3 / WP-M4. ✅ DONE**, one commit each.
-- **Phase 8 — WP-L1 ✅ DONE. WP-M1 quantified and left open** pending a decision between a
-  robustness trade and a protocol change — see the finding.
+- **Phase 8 — WP-L1 ✅ DONE. WP-M1 ✅ DONE** — resolved without the protocol change, by filtering
+  outliers and then taking the least-delayed sample.
 - **Phase 9 — discovery. ✅ DONE for theatre seat claims, membership presence, `useAgora` toggles and
   the sketch components**, producing WP-H3 and WP-M5. Remaining unread: `WatchPartySettings.tsx`,
   `WatchPartyVideoArea.tsx`, `MediaControls.tsx` (scanned for listener/timer balance only, all clean).
