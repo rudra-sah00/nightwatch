@@ -382,8 +382,13 @@ and all client state lost — where re-creating the engine would do.
 
 ### H8 — The mobile seek bar seeks on every `touchmove`
 
-**✅ CONFIRMED** — lines exact. `seekFromTouch` (`:36-41`) calls `playerHandlers.seek()` directly
-with no throttle and no preview state.
+**✅ FIXED — `0f95a6d6`.** Rewritten onto the shared `useDragSeek` primitive, so it previews
+while moving and commits one seek on release, same as the desktop bar. Regression test:
+`tests/features/watch/controls/mobile-seek-bar-drag.test.tsx` (3 of 8 fail against the old
+component). Portrait stays display-only.
+
+Verified during Phase 0: lines exact; `seekFromTouch` (`:36-41`) called
+`playerHandlers.seek()` directly with no throttle and no preview state.
 
 `player/ui/compound/PlayerMobileSeekBar.tsx:49-55`
 
@@ -405,8 +410,17 @@ fraction visually, and commits once on release. That is the pattern to copy.
 
 ### H9 — The volume slider cannot be dragged on any touch device
 
-**✅ CONFIRMED** — re-grepped both files: the only `pointer` match is the `cursor-pointer` CSS
-class. Drag is `onMouseDown` → `document.mousemove`/`mouseup`.
+**✅ FIXED — `ded3be2c`.** Converted to Pointer Events, so mouse, touch and pen share one
+path, with `setPointerCapture` replacing the document-level `mousemove`/`mouseup` listeners
+— which also removes a global listener that could outlive the element. Volume keeps
+applying continuously during the drag, unlike the seek bar's commit-on-release: there is no
+expensive commit to defer, and hearing the level change is the point of the control.
+Regression test: the two existing mouse-only drag cases in
+`tests/features/watch/controls/volume.test.tsx` are migrated and now assert the resulting
+value, plus four new touch/capture cases. Five of 26 fail against the old implementation.
+
+Verified during Phase 0: the only `pointer` match in either file was the `cursor-pointer`
+CSS class.
 
 `player/ui/controls/hooks/use-volume.ts`, `player/ui/controls/Volume.tsx` — zero occurrences of
 `touch` in either file (verified by grep).
@@ -655,8 +669,13 @@ SEEKING.md P0 #1 (`a4a8fba6`). ⏸ **H3 remains** — blocked on adding
 without conflict. Fixing H4's cleanup also resolved the **M15** compound leak; M15's own
 countdown stutter is still open.
 
-**Wave 2 — mobile and input.** H8 and H9 together (both are "touch was never wired up"); fold H8
-into the SEEKING.md P0 #2 scrub rework so there is one pointer-driven seek bar rather than two.
+**Wave 2 — mobile and input.** ✅ **Landed:** H8 and H9 (`0f95a6d6`, `ded3be2c`). Both were
+"touch was never wired up", and both are now Pointer Events with capture. H8 folded into the
+SEEKING.md P0 #2 scrub rework as intended — there is now one shared drag *gesture*
+(`useDragSeek`), though the two bars keep their own presentation; see D12.
+
+This also closes cross-cutting pattern 1 below: there *is* a shared drag primitive now.
+`LiveSeekBar` still has its own mouse+touch implementation and could adopt it.
 
 **Wave 3 — correctness of the long tail.** H10–H12, H14, H15, then the MEDIUM table. M1, M12 and
 M13 are one-line fixes with immediate benefit. H13 is struck — nothing to do.

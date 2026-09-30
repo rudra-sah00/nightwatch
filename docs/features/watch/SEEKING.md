@@ -189,8 +189,17 @@ most common path is also the one wired to fail once, every time.
 
 ### D3 — Scrubbing fires a seek per mousemove ⚠️ critical
 
-**✅ CONFIRMED** 🔶 — `handleDrag` is at `use-seek-bar.ts:131-135` (doc said 132) and the
-`SeekBar` bindings at `:150-153` (doc said 150, 151). Code identical.
+**✅ FIXED — `0f95a6d6`.** Movement now updates a fraction used only for rendering, and
+exactly one seek is issued on `pointerup`. The gesture lives in a new shared
+`useDragSeek` primitive (`ui/controls/hooks/use-drag-seek.ts`) that both scrub bars
+consume, so there is one implementation rather than two. Pointer Events replace the
+mouse/touch pairs, `setPointerCapture` keeps the drag alive once the pointer leaves the
+bar, and the trailing `onClick` seek is gone — a tap is `pointerdown` + `pointerup` at one
+place, which the release commit already covers. Regression test:
+`tests/features/watch/controls/seek-bar-drag.test.tsx` (6 of 11 fail against the old code).
+
+Verified during Phase 0: `handleDrag` was at `use-seek-bar.ts:131-135` (doc said 132) and
+the `SeekBar` bindings at `:150-153`.
 
 ```ts
 // use-seek-bar.ts:132
@@ -396,10 +405,22 @@ handling the holes should not need this much tolerance.
 
 ### D12 — Scrub bar is desktop-mouse-only, and duplicated for mobile
 
-**✅ CONFIRMED** — `SeekBar.tsx` and `use-seek-bar.ts` contain zero `touch`/`pointer` handlers
-(`use-seek-bar.ts` types every parameter as `React.MouseEvent<HTMLDivElement>`).
-`PlayerMobileSeekBar.tsx` is an independent implementation with its own `onTouchStart/Move/End`,
-its own fraction maths, and its own copies of D3 and D6.
+**✅ FIXED (the duplication) — `0f95a6d6`. Presentation deliberately left alone.**
+
+The duplicated *gesture* is gone: both bars now share `useDragSeek`, which handles mouse,
+touch and pen through Pointer Events with capture. `SeekBar` is no longer mouse-only.
+
+Their *visuals* are intentionally not merged, and the original finding was slightly wrong
+to imply they should be. The two never render together — `WatchVODPlayer` gates them
+`hidden pointer-ui:contents` and `hidden touch-ui:block` — and they are different
+affordances on purpose: `SeekBar` is the neo-brutalist control-bar scrubber with sprite
+previews, `PlayerMobileSeekBar` the thin YouTube-style bar pinned to the bottom of the
+player, non-interactive in portrait. Collapsing them into one component would be a UI
+redesign, not a defect fix.
+
+Verified during Phase 0: `SeekBar.tsx` and `use-seek-bar.ts` contained zero
+`touch`/`pointer` handlers, and `use-seek-bar.ts` typed every parameter as
+`React.MouseEvent<HTMLDivElement>`.
 
 ---
 
@@ -438,8 +459,9 @@ that's not buffered", including YouTube.
 
 1. ~~**Delete the arrow/`j`/`l` cases from `PlayerRoot.tsx`'s `onKeyDown`**~~ — **DONE,
    `a4a8fba6`.** `useKeyboard` now owns them, exactly as Space already did.
-2. **Make scrubbing commit on release.** Update a local preview during drag; seek on `pointerup`.
-   Move `SeekBar` to Pointer Events with `setPointerCapture`; drop the trailing `onClick` seek.
+2. ~~**Make scrubbing commit on release.**~~ — **DONE, `0f95a6d6`.** Preview during drag,
+   seek on `pointerup`, Pointer Events with `setPointerCapture`, trailing `onClick` dropped.
+   Shared by both scrub bars via the new `useDragSeek` primitive.
 3. **Introduce one `useSeekController`** owning relative and absolute seek, clamping against live
    `duration`/`seekable`, one seek in flight with chase-the-latest-target coalescing, and a single
    `seeking`/`seeked` lifecycle. Every control calls it. `useKeyboard`'s implementation is the
@@ -465,7 +487,10 @@ that's not buffered", including YouTube.
 
 ### P2 — structural
 
-11. Unify `SeekBar` and `PlayerMobileSeekBar` onto one pointer-driven component.
+11. ~~Unify `SeekBar` and `PlayerMobileSeekBar` onto one pointer-driven component.~~ —
+    **Gesture unified in `0f95a6d6`** via the shared `useDragSeek` primitive. Their
+    presentation is deliberately left separate; see D12 for why merging it would be a
+    redesign rather than a fix.
 12. Revisit `maxBufferHole` once init-segment handling is correct.
 13. Ask whether the backend can re-segment on IDR boundaries for affected titles — the only real
     fix for Layer 1.
