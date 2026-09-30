@@ -2,6 +2,7 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { trackEvent } from '@/lib/analytics';
 import type { PlayerAction } from '../context/types';
+import { resolveTextTrackIndex } from './resolve-text-track';
 
 interface SubtitleTrackDef {
   id: string;
@@ -176,25 +177,15 @@ export function useVideoElement({
     }
 
     if (trackId && trackId !== 'off') {
-      // Find which index in our subtitleTracks array matches the selected ID
-      const targetIndex = subtitleTracks.findIndex((t) => t.id === trackId);
-
-      if (targetIndex !== -1 && targetIndex < textTracks.length) {
-        // Direct index match — track elements render in the same order as subtitleTracks
+      // Matched by identity, never by array position — see resolveTextTrackIndex for why
+      // the two lists cannot be assumed to correspond.
+      const targetIndex = resolveTextTrackIndex(
+        Array.from(textTracks, (t) => ({ id: t.id, label: t.label })),
+        trackId,
+        subtitleTracks,
+      );
+      if (targetIndex !== -1) {
         textTracks[targetIndex].mode = 'showing';
-      } else {
-        // Fallback: match by id, label, or language on the TextTrack object
-        const targetTrack = subtitleTracks.find((t) => t.id === trackId);
-        for (let i = 0; i < textTracks.length; i++) {
-          const track = textTracks[i];
-          if (
-            track.id === trackId ||
-            (targetTrack && track.label === targetTrack.label)
-          ) {
-            track.mode = 'showing';
-            break;
-          }
-        }
       }
     }
   }, [currentTrackId, subtitleTracks]);
