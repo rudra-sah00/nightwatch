@@ -81,6 +81,15 @@ interface UseHlsOptions {
   qualities?: { quality: string; url: string }[];
   /** When true, uses live-optimised HLS config (small buffer, seek to live edge on start) */
   isLive?: boolean;
+  /**
+   * Whether this client is a watch-party guest rather than the host.
+   *
+   * Diagnostic only — it changes no playback behaviour. Guests are the only sessions
+   * running `usePredictiveSync`'s drift correction, which hard-seeks every 2s once drift
+   * exceeds the threshold, so `video_error` needs to distinguish them to test SEEKING.md
+   * D4. Invisible in the single-viewer case, which is why it has not been isolated before.
+   */
+  isWatchPartyGuest?: boolean;
 }
 
 interface NativeAudioTrack {
@@ -104,6 +113,7 @@ export function useHls({
   onStreamExpired,
   qualities: _manualQualities,
   isLive = false,
+  isWatchPartyGuest = false,
 }: UseHlsOptions) {
   const hlsRef = useRef<HlsType | null>(null);
   const unauthorizedRetryCountRef = useRef(0);
@@ -155,6 +165,30 @@ export function useHls({
    * re-learning is a single ~1s recovery per playback.
    */
   const needsSeekReprimeRef = useRef(false);
+  /*
+    Diagnostic state for `video_error`, at hook scope so it survives the engine remount
+    that recovery triggers — the same reason needsSeekReprimeRef lives here. Scope is
+    therefore one player mount, which is what "this playback" means.
+
+    These exist to test SEEKING.md's hypothesis that the decode errors are produced by
+    our own seek storms rather than by the content alone. A failure carrying
+    seeksInLastSecond: 1 says something very different from one carrying 40.
+  */
+  /** `seeking` event timestamps, pruned to the last second. See seeksInLastSecond. */
+  const seekTimestampsRef = useRef<number[]>([]);
+  /** When the element last began playing, for secondsSincePlaybackStart. */
+  const playbackStartedAtRef = useRef<number | null>(null);
+  /** How many times we have taken the reload-decoder recovery this playback. */
+  const reloadDecoderRecoveryCountRef = useRef(0);
+  /**
+   * Latest-ref so the diagnostic flag can be read without joining the effect's deps.
+   *
+   * Those are kept deliberately minimal to avoid re-initialising HLS, and a guest being
+   * promoted to host mid-party would otherwise tear down and rebuild playback for a field
+   * that changes nothing about it.
+   */
+  const isWatchPartyGuestRef = useRef(isWatchPartyGuest);
+  isWatchPartyGuestRef.current = isWatchPartyGuest;
   // Ref for callback to avoid HLS reinit when callback identity changes
   const onStreamExpiredRef = useRef(onStreamExpired);
   onStreamExpiredRef.current = onStreamExpired;
@@ -230,6 +264,25 @@ export function useHls({
     // Seek re-prime handlers, removed on cleanup. See where they are assigned.
     let onSeeking: (() => void) | null = null;
     let onSeeked: (() => void) | null = null;
+    /*
+      Diagnostic listeners, kept separate from the re-prime pair above because those are
+      VOD-only (`if (!isLive)`) and conditional on needsSeekReprimeRef, whereas the seek
+      rate has to be measured on every path — live included — for the numbers to mean
+      anything.
+    */
+    const onSeekingTelemetry = () => {
+      seekTimestampsRef.current.push(Date.now());
+      // Bounded: only the last second is ever read, and a scrub drag can emit 60-120
+      // events per second, so an unpruned array would grow for the whole session.
+      if (seekTimestampsRef.current.length > 256) {
+        seekTimestampsRef.current = seekTimestampsRef.current.slice(-256);
+      }
+    };
+    const onPlayingTelemetry = () => {
+      playbackStartedAtRef.current ??= Date.now();
+    };
+    video.addEventListener('seeking', onSeekingTelemetry);
+    video.addEventListener('playing', onPlayingTelemetry);
     /**
      * Target of the re-prime in flight, or null.
      *
@@ -617,6 +670,29 @@ export function useHls({
           data: { type: string; details: unknown; fatal?: boolean },
           action: string,
         ) => {
+          /*
+            Seek-storm context. SEEKING.md §7's argument is that these failures are
+            largely produced by our own seek storms rather than by the content alone, and
+            these four fields are what decide it:
+
+            - seeksInLastSecond should be 1 for a deliberate gesture. The keyboard path was
+              measured at 2 per press before a4a8fba6, and the scrub bar still commits a
+              seek per pointermove, so a drag should show tens.
+            - msSinceLastSeek separates seek-induced failures from the backgrounded-tab
+              decoder rebuild, which arrives with no recent seek at all.
+            - secondsSincePlaybackStart catches D2's resume-on-load seek, which lands
+              within the first second or two of every continue-watching session.
+            - isWatchPartyGuest tests D4, the drift-correction loop, which is invisible in
+              the single-viewer case.
+          */
+          const now = Date.now();
+          const recentSeeks = seekTimestampsRef.current.filter(
+            (t) => now - t <= 1000,
+          );
+          seekTimestampsRef.current = recentSeeks;
+          const lastSeekAt = seekTimestampsRef.current.at(-1) ?? null;
+          const playbackStartedAt = playbackStartedAtRef.current;
+
           const diagnostics = {
             type: data.type,
             details: data.details,
@@ -638,6 +714,21 @@ export function useHls({
                 ? undefined
                 : document.visibilityState,
             isLive,
+            /** Seeks issued in the second before this failure. 1 = one gesture, one seek. */
+            seeksInLastSecond: recentSeeks.length,
+            /** Null when no seek has been observed at all this playback. */
+            msSinceLastSeek: lastSeekAt === null ? null : now - lastSeekAt,
+            /** Cheap read of the above for grouping in analytics. */
+            followedSeek: lastSeekAt !== null && now - lastSeekAt <= 3000,
+            /** Null when the element never reached `playing` — i.e. it failed on startup. */
+            secondsSincePlaybackStart:
+              playbackStartedAt === null
+                ? null
+                : Math.round((now - playbackStartedAt) / 1000),
+            /** Tests D4: the drift-correction loop only exists for non-hosts. */
+            isWatchPartyGuest: isWatchPartyGuestRef.current,
+            /** Should approach 0 once D5 stops learning by failing. */
+            reloadDecoderRecoveries: reloadDecoderRecoveryCountRef.current,
           };
 
           console.warn(`[NW-HLS] Fatal ${data.type} (${action}):`, diagnostics);
@@ -806,7 +897,10 @@ export function useHls({
                 }
 
                 if (isUnrecoverableDecode && onStreamExpiredRef.current) {
+                  // Reported before the increment, so the payload carries how many
+                  // recoveries preceded this one rather than counting itself.
                   reportPlaybackError(data, 'reload-decoder');
+                  reloadDecoderRecoveryCountRef.current += 1;
                   resumePositionRef.current = video.currentTime;
                   hls.destroy();
                   dispatch({ type: 'SET_LOADING', isLoading: true });
@@ -1046,6 +1140,8 @@ export function useHls({
 
     return () => {
       cancelled = true;
+      video.removeEventListener('seeking', onSeekingTelemetry);
+      video.removeEventListener('playing', onPlayingTelemetry);
       if (onSeeking) {
         video.removeEventListener('seeking', onSeeking);
         onSeeking = null;

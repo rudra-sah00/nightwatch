@@ -131,6 +131,11 @@ export function usePlayerRoot({
     onStreamExpired,
     qualities,
     isLive,
+    // Diagnostic only. `isHost` defaults to true and only the watch-party paths pass
+    // false, so this is the guest condition. Tags `video_error` so SEEKING.md D4 — the
+    // drift-correction loop, which runs for non-hosts only — can be tested against real
+    // sessions.
+    isWatchPartyGuest: !isHost,
     streamFormat,
   });
 

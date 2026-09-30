@@ -14,6 +14,8 @@ interface UsePlayerEngineOptions {
   onStreamExpired?: () => void;
   qualities?: { quality: string; url: string }[];
   isLive?: boolean;
+  /** Diagnostic only: tags `video_error` so the watch-party drift loop can be tested. */
+  isWatchPartyGuest?: boolean;
   /** Stream format hint from the backend (avoids URL-sniffing) */
   streamFormat?: 'hls' | 'mp4' | 'dash';
 }
@@ -36,6 +38,7 @@ export function usePlayerEngine({
   onStreamExpired,
   qualities,
   isLive = false,
+  isWatchPartyGuest = false,
   streamFormat,
 }: UsePlayerEngineOptions): UsePlayerEngineReturn {
   const nullHlsRef = useRef<HlsType | null>(null);
@@ -72,6 +75,7 @@ export function usePlayerEngine({
     onStreamExpired,
     qualities,
     isLive,
+    isWatchPartyGuest,
   });
 
   // Initialize DASH engine
