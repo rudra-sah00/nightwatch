@@ -67,8 +67,21 @@ export function getGoogleOAuthUrl(mode: 'login' | 'connect'): string {
 }
 
 /**
+ * Recognises the Android Credential Manager failure that means Google aborted
+ * the flow because the device account needs full re-authentication.
+ *
+ * `16` is `CommonStatusCodes.CANCELED`, so this is Google giving up rather than
+ * rejecting our credentials — a package, SHA-1 or client-ID mismatch reports
+ * `10`/`28444` instead and is not retryable.
+ */
+function isAccountReauthFailure(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err ?? '');
+  return message.includes('Account reauth failed') || message.includes('[16]');
+}
+
+/**
  * Native Google Sign-In for iOS/Android via Capacitor plugin.
- * Returns the accessToken for backend verification.
+ * Returns the idToken for backend verification.
  */
 export async function nativeGoogleSignIn(): Promise<string> {
   const { SocialLogin } = await import('@capgo/capacitor-social-login');
@@ -78,12 +91,44 @@ export async function nativeGoogleSignIn(): Promise<string> {
       iOSClientId: GOOGLE_IOS_CLIENT_ID,
     },
   });
-  // Always sign out first so the account picker shows every time
-  await SocialLogin.logout({ provider: 'google' }).catch(() => {});
-  const res = await SocialLogin.login({
-    provider: 'google',
-    options: { scopes: ['email', 'profile'] },
-  });
+
+  const isIos = window.Capacitor?.getPlatform?.() === 'ios';
+
+  // iOS keeps the previous sign-out-first behaviour so the account picker still
+  // shows every time.
+  //
+  // Android deliberately does NOT sign out up front. `logout` maps to
+  // `clearCredentialStateAsync`, and clearing that state is the plugin's only
+  // recovery from "[16] Account reauth failed": it clears, then retries once.
+  // Clearing it pre-emptively left that retry with nothing to clear, so
+  // affected accounts failed twice identically and were permanently blocked.
+  // Nothing is lost by dropping it — Android takes the
+  // `GetSignInWithGoogleOption` path, which always presents the account
+  // chooser regardless of prior sign-in state.
+  if (isIos) {
+    await SocialLogin.logout({ provider: 'google' }).catch(() => {});
+  }
+
+  const login = () =>
+    SocialLogin.login({
+      provider: 'google',
+      options: { scopes: ['email', 'profile'] },
+    });
+
+  let res: Awaited<ReturnType<typeof login>>;
+  try {
+    res = await login();
+  } catch (err: unknown) {
+    if (isIos || !isAccountReauthFailure(err)) {
+      throw err;
+    }
+    // The plugin has already cleared credential state and retried by this
+    // point. `logout` additionally drops the restore credential, which its
+    // internal retry leaves alone, so this last attempt is not a repeat.
+    await SocialLogin.logout({ provider: 'google' }).catch(() => {});
+    res = await login();
+  }
+
   const result = res.result as {
     accessToken?: { token?: string };
     idToken?: string;

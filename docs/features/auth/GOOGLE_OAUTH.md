@@ -147,7 +147,17 @@ await SocialLogin.initialize({
 });
 ```
 
-The `nativeGoogleSignIn()` function always signs out first (`SocialLogin.logout`) so the account picker shows every time, then calls `SocialLogin.login` and extracts the `idToken` from the result.
+On iOS, `nativeGoogleSignIn()` signs out first (`SocialLogin.logout`) so the account picker shows every time, then calls `SocialLogin.login` and extracts the `idToken` from the result.
+
+**Android deliberately does not sign out first.** `logout` maps to `clearCredentialStateAsync`, and clearing that state is the plugin's only recovery from `[16] Account reauth failed` — it clears, then retries once. Clearing it up front left that retry with nothing to clear, so any account Google decided needed re-authentication failed twice identically and was permanently blocked from signing in. Nothing is lost by dropping it: with no `style` option the plugin takes the `GetSignInWithGoogleOption` path, which always presents the account chooser regardless of prior sign-in state.
+
+If a reauth failure still surfaces on Android, `nativeGoogleSignIn()` calls `logout` — which additionally drops the restore credential, unlike the plugin's internal retry — and attempts sign-in one last time.
+
+### Debugging Android sign-in failures
+
+`[16]` is `CommonStatusCodes.CANCELED`: Google aborted the flow because the device account needs full re-authentication. It is **not** a configuration rejection — a package, SHA-1 or client-ID mismatch reports `10`/`28444` and takes a different branch in the plugin, with a different message. So a `16` does not indicate anything wrong in Google Cloud Console; the usual user-side workaround is removing and re-adding the Google account in Android Settings.
+
+After a failure, filter Logcat for tag `GoogleProvider`: the plugin prints the package name, `signingSha1` and a masked `webClientId` for comparison against the OAuth clients.
 
 ### Android Setup
 
