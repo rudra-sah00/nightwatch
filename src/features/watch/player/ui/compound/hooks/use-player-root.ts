@@ -20,11 +20,6 @@ import { usePlayerEngine } from '../../../hooks/usePlayerEngine';
 import { usePlayerHandlers } from '../../../hooks/usePlayerHandlers';
 import { useSeekController } from '../../../hooks/useSeekController';
 import { useWatchProgress } from '../../../hooks/useWatchProgress';
-import {
-  applySubtitleSettings,
-  loadSubtitleSettings,
-  type SubtitleSettings,
-} from '../../controls/utils/subtitle-settings';
 
 interface PlayerRootHookProps {
   streamUrl: string | null;
@@ -115,15 +110,17 @@ export function usePlayerRoot({
 
   const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
 
-  const [subtitleSettings, setSubtitleSettings] = useState<SubtitleSettings>(
-    () => {
-      const saved = loadSubtitleSettings();
-      if (typeof window !== 'undefined') {
-        applySubtitleSettings(saved);
-      }
-      return saved;
-    },
-  );
+  /*
+    Subtitle settings deliberately do not live here.
+
+    This hook used to hold its own `subtitleSettings` state that nothing consumed — `PlayerRoot`
+    destructures only state, containerRef, contextValue and showControls, and the settings the UI
+    actually edits live in `use-player-audio-subtitle-selectors`. Worse, the initialiser called
+    `applySubtitleSettings`, which calls `loadSubtitleFonts()`, so every first player mount
+    fetched the ~200KB Google Fonts stylesheet for the subtitle style panel whether or not the
+    panel was ever opened. The selectors hook applies them when it mounts, which is when they are
+    needed.
+  */
 
   /**
    * Resume position, once the backend has told us there is one.
@@ -575,7 +572,5 @@ export function usePlayerRoot({
     contextValue,
     showControls,
     handleVideoClick,
-    subtitleSettings,
-    setSubtitleSettings,
   };
 }
