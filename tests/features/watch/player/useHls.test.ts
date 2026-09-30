@@ -15,6 +15,7 @@ const { mockHls, eventHandlers, MockHlsClass } = vi.hoisted(() => {
     stopLoad: vi.fn(),
     recoverMediaError: vi.fn(),
     swapAudioCodec: vi.fn(),
+    trigger: vi.fn(),
     destroy: vi.fn(),
     on: vi.fn((event: string, handler: EventHandler) => {
       const handlers = eventHandlers.get(event) || [];
@@ -45,6 +46,7 @@ const { mockHls, eventHandlers, MockHlsClass } = vi.hoisted(() => {
       AUDIO_TRACK_SWITCHED: 'hlsAudioTrackSwitched',
       AUDIO_TRACKS_UPDATED: 'hlsAudioTracksUpdated',
       LEVEL_SWITCHED: 'hlsLevelSwitched',
+      BUFFER_FLUSHING: 'hlsBufferFlushing',
       ERROR: 'hlsError',
     },
     configurable: true,
@@ -406,14 +408,22 @@ describe('useHls', () => {
    * is the only thing that restores the parameter sets.
    */
   describe('seek re-primes the decoder', () => {
-    const seekTo = (video: HTMLVideoElement, t: number) => {
+    /**
+     * Seeks and then lets the deferred re-prime run.
+     *
+     * The re-prime is no longer synchronous inside `seeking`: it is deferred to a macrotask
+     * so it cannot mutate hls.js loader state while StreamController is still reacting to
+     * the same event (hls.js #5349). So the test has to yield before asserting.
+     */
+    const seekTo = async (video: HTMLVideoElement, t: number) => {
       Object.defineProperty(video, 'currentTime', {
         configurable: true,
         writable: true,
         value: t,
       });
-      act(() => {
+      await act(async () => {
         video.dispatchEvent(new Event('seeking'));
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
     };
 
@@ -467,7 +477,7 @@ describe('useHls', () => {
     it('seeks natively until a stream proves it needs re-priming', async () => {
       const video = await mountVod({ arm: false });
 
-      seekTo(video, 300);
+      await seekTo(video, 300);
 
       expect(mockHls.startLoad).not.toHaveBeenCalled();
       expect(mockHls.stopLoad).not.toHaveBeenCalled();
@@ -476,7 +486,7 @@ describe('useHls', () => {
     it('starts re-priming once the decode signature appears', async () => {
       const video = await mountVod({ arm: false });
 
-      seekTo(video, 300);
+      await seekTo(video, 300);
       expect(mockHls.startLoad).not.toHaveBeenCalled();
 
       Object.defineProperty(video, 'error', {
@@ -492,7 +502,7 @@ describe('useHls', () => {
       });
       mockHls.startLoad.mockClear();
 
-      seekTo(video, 400);
+      await seekTo(video, 400);
 
       expect(mockHls.startLoad).toHaveBeenCalledWith(400, true);
     });
@@ -500,7 +510,7 @@ describe('useHls', () => {
     it('reloads the fragment at the seek target', async () => {
       const video = await mountVod();
 
-      seekTo(video, 2370.72);
+      await seekTo(video, 2370.72);
 
       expect(mockHls.stopLoad).toHaveBeenCalled();
       // skipSeekToStartPosition=true: currentTime is already set, and letting hls.js
@@ -508,12 +518,108 @@ describe('useHls', () => {
       expect(mockHls.startLoad).toHaveBeenCalledWith(2370.72, true);
     });
 
+    /**
+     * `stopLoad()` aborts in-flight requests but does not remove buffered ranges, so ranges
+     * appended with a promoted non-IDR frame as their keyframe survived it and could still
+     * reach the decoder — the re-prime fetched correct data and then played the bad data
+     * anyway. Shaka and dash.js both clear the buffer on a seek outside the buffered range;
+     * hls.js exposes BUFFER_FLUSHING for it and we never used it.
+     */
+    it('flushes the buffer before reloading', async () => {
+      const video = await mountVod();
+
+      await seekTo(video, 500);
+
+      expect(mockHls.trigger).toHaveBeenCalledWith('hlsBufferFlushing', {
+        startOffset: 0,
+        endOffset: Number.POSITIVE_INFINITY,
+        type: null,
+      });
+    });
+
+    it('flushes before it reloads, not after', async () => {
+      const video = await mountVod();
+
+      await seekTo(video, 500);
+
+      const flushOrder = mockHls.trigger.mock.invocationCallOrder[0];
+      const loadOrder = mockHls.startLoad.mock.invocationCallOrder[0];
+      expect(flushOrder).toBeLessThan(loadOrder);
+    });
+
+    /**
+     * Seeks arriving inside one task — the shape a scrub burst or a held key produces —
+     * collapse to a single re-prime, and it primes for where the playhead actually ended up
+     * rather than the first target of the burst.
+     */
+    it('coalesces a burst of seeks into one re-prime at the final position', async () => {
+      const video = await mountVod();
+
+      await act(async () => {
+        for (const t of [100, 200, 300, 400]) {
+          Object.defineProperty(video, 'currentTime', {
+            configurable: true,
+            writable: true,
+            value: t,
+          });
+          video.dispatchEvent(new Event('seeking'));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(mockHls.startLoad).toHaveBeenCalledTimes(1);
+      expect(mockHls.startLoad).toHaveBeenCalledWith(400, true);
+    });
+
+    /**
+     * The re-prime runs in a later task, so an unmount in between must cancel it rather than
+     * calling into a destroyed instance.
+     */
+    it('does not re-prime after unmount', async () => {
+      const videoRef = createVideoRef();
+      const { unmount } = renderHook(() =>
+        useHls({
+          videoRef,
+          streamUrl: 'https://example.com/stream.m3u8',
+          dispatch: mockDispatch,
+        }),
+      );
+      await vi.waitFor(() => {
+        expect(mockHls.attachMedia).toHaveBeenCalled();
+      });
+      Object.defineProperty(videoRef.current, 'error', {
+        configurable: true,
+        value: { code: 3 },
+      });
+      act(() => {
+        triggerEvent('hlsError', {
+          fatal: true,
+          type: 'mediaError',
+          details: 'mediaSourceRequiresReset',
+        });
+      });
+      mockHls.startLoad.mockClear();
+
+      Object.defineProperty(videoRef.current, 'currentTime', {
+        configurable: true,
+        writable: true,
+        value: 300,
+      });
+      act(() => {
+        videoRef.current.dispatchEvent(new Event('seeking'));
+      });
+      unmount();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockHls.startLoad).not.toHaveBeenCalled();
+    });
+
     it('re-primes on every subsequent seek', async () => {
       const video = await mountVod();
 
-      seekTo(video, 100);
-      seekTo(video, 200);
-      seekTo(video, 300);
+      await seekTo(video, 100);
+      await seekTo(video, 200);
+      await seekTo(video, 300);
 
       expect(mockHls.startLoad).toHaveBeenCalledTimes(3);
     });
@@ -525,7 +631,7 @@ describe('useHls', () => {
         video.dispatchEvent(new Event('seeking'));
       });
 
-      seekTo(video, 500);
+      await seekTo(video, 500);
 
       expect(mockHls.startLoad).toHaveBeenCalledTimes(1);
     });
@@ -538,9 +644,9 @@ describe('useHls', () => {
     it('re-primes each of several rapid skips', async () => {
       const video = await mountVod();
 
-      seekTo(video, 100);
-      seekTo(video, 105);
-      seekTo(video, 110);
+      await seekTo(video, 100);
+      await seekTo(video, 105);
+      await seekTo(video, 110);
 
       expect(mockHls.startLoad).toHaveBeenCalledTimes(3);
       expect(mockHls.startLoad).toHaveBeenLastCalledWith(110, true);
@@ -550,11 +656,11 @@ describe('useHls', () => {
     it('re-primes when seeking back to an earlier target', async () => {
       const video = await mountVod();
 
-      seekTo(video, 400);
+      await seekTo(video, 400);
       act(() => {
         video.dispatchEvent(new Event('seeked'));
       });
-      seekTo(video, 400);
+      await seekTo(video, 400);
 
       expect(mockHls.startLoad).toHaveBeenCalledTimes(2);
     });
@@ -562,7 +668,7 @@ describe('useHls', () => {
     it('ignores a non-finite currentTime', async () => {
       const video = await mountVod();
 
-      seekTo(video, Number.NaN);
+      await seekTo(video, Number.NaN);
 
       expect(mockHls.startLoad).not.toHaveBeenCalled();
     });
@@ -574,7 +680,7 @@ describe('useHls', () => {
     it('leaves live playback alone', async () => {
       const video = await mountVod({ isLive: true });
 
-      seekTo(video, 42);
+      await seekTo(video, 42);
 
       expect(mockHls.startLoad).not.toHaveBeenCalled();
     });

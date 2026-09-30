@@ -310,6 +310,8 @@ export function useHls({
      * landed. Comparing positions suppresses only an echo of the same seek.
      */
     let primingFor: number | null = null;
+    /** Pending deferred re-prime, so a burst of seeks collapses to one. */
+    let reprimeTimer: ReturnType<typeof setTimeout> | null = null;
 
     // Clear any previous errors when loading new stream
     dispatch({ type: 'SET_ERROR', error: null });
@@ -508,10 +510,51 @@ export function useHls({
             }
             primingFor = target;
 
-            hls.stopLoad();
-            // skipSeekToStartPosition: currentTime is already where the user asked for;
-            // letting hls.js set it again would re-enter this handler.
-            hls.startLoad(target, true);
+            /*
+              Deferred out of the `seeking` handler rather than run inside it.
+
+              hls.js's StreamController reacts to the same `seeking` event, so calling
+              stopLoad()/startLoad() synchronously here mutated loader state underneath it
+              mid-reaction — the documented cause of hls.js #5349, "scrubbing current
+              position causes fragments to stuck between loading and buffered state". A
+              macrotask puts the re-prime after every synchronous listener has run,
+              whatever order they were registered in.
+
+              It also coalesces naturally: a burst of seeks collapses to one re-prime, and
+              the position is read again when it fires so we prime for where the playhead
+              actually ended up rather than the first target of the burst.
+            */
+            if (reprimeTimer !== null) clearTimeout(reprimeTimer);
+            reprimeTimer = setTimeout(() => {
+              reprimeTimer = null;
+              if (cancelled || hlsRef.current !== hls) return;
+
+              const at = video.currentTime;
+              if (!Number.isFinite(at)) return;
+
+              /*
+                Flush before re-loading. `stopLoad()` aborts in-flight requests but does not
+                remove buffered ranges, so ranges appended with a promoted non-IDR frame as
+                their keyframe stayed in the SourceBuffer and could still reach the decoder —
+                the re-prime fetched correct data and then played the bad data anyway. Shaka
+                and dash.js both clear the buffer on a seek outside the buffered range; this
+                is hls.js's equivalent, and it was never used.
+
+                `type: null` means both audio and video; the range is everything, because a
+                partial flush would leave the join between old and new appends as another
+                discontinuity to get wrong.
+              */
+              hls.trigger(Hls.Events.BUFFER_FLUSHING, {
+                startOffset: 0,
+                endOffset: Number.POSITIVE_INFINITY,
+                type: null,
+              });
+
+              hls.stopLoad();
+              // skipSeekToStartPosition: currentTime is already where the user asked for;
+              // letting hls.js set it again would re-enter this handler.
+              hls.startLoad(at, true);
+            }, 0);
           };
           // Cleared once the seek settles, so returning to the same position later still
           // re-primes rather than being mistaken for an echo.
@@ -1161,6 +1204,10 @@ export function useHls({
 
     return () => {
       cancelled = true;
+      if (reprimeTimer !== null) {
+        clearTimeout(reprimeTimer);
+        reprimeTimer = null;
+      }
       video.removeEventListener('seeking', onSeekingTelemetry);
       video.removeEventListener('playing', onPlayingTelemetry);
       if (onSeeking) {
