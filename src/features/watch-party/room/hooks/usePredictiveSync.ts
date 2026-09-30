@@ -156,6 +156,21 @@ function notifyPlaybackBlocked(muted: boolean): void {
  * @param isHost - Host is the source of truth and is never corrected.
  * @returns `applyState` to process incoming state updates and `getExpectedTime`.
  */
+/** Drift beyond this many seconds is corrected by a hard seek rather than a rate nudge. */
+const HARD_SEEK_THRESHOLD_S = 2.0;
+
+/**
+ * How many times the hard-seek threshold may double when corrections are not converging.
+ *
+ * Four steps takes it from 2s to 32s, at which point a guest is left desynced rather than
+ * stuck in a seek → re-prime → stall → drift loop. Being behind is recoverable; an unplayable
+ * stream is not.
+ */
+const MAX_HARD_SEEK_BACKOFF_STEPS = 4;
+
+/** `HTMLMediaElement.HAVE_FUTURE_DATA` — enough buffered to play the current frame onward. */
+const HAVE_FUTURE_DATA = 3;
+
 export function usePredictiveSync(
   videoRef: RefObject<HTMLVideoElement | null>,
   clockOffset: number,
@@ -370,6 +385,13 @@ export function usePredictiveSync(
     };
   }, [applyState, videoRef, isHost]);
 
+  /**
+   * Consecutive hard seeks that have not brought drift back inside the threshold.
+   *
+   * Drives the backoff below. Lives in a ref so it survives the interval's re-creation.
+   */
+  const hardSeekStreakRef = useRef(0);
+
   // Periodic state enforcement & drift check (every 2s)
   useEffect(() => {
     if (isHost) return; // Host is the source of truth, no drift correction needed
@@ -392,16 +414,55 @@ export function usePredictiveSync(
       // Skip actual time-drift correction for livestreams or uncalibrated VOD or if paused
       if (!state.isPlaying || !isCalibrated || isLive) return;
 
+      /*
+        A seek already in flight, or a buffer too thin to play from, means the playhead is
+        not where it is about to be. Drift measured now is the stall, not desync.
+
+        This is what closed the loop. On content that needs a seek re-prime, a hard seek
+        makes `useHls` discard the buffer and refetch — a stall of its own. The stall
+        increased drift, so two seconds later drift was still over threshold and it
+        hard-seeked again: another fragment abort storm, with no convergence condition. A
+        guest who once drifted past the threshold could stay in seek → re-prime → stall →
+        drift → seek indefinitely. Invisible in the single-viewer case, which is why it was
+        never isolated.
+      */
+      if (video.seeking || video.readyState < HAVE_FUTURE_DATA) return;
+
       const expected = getExpectedTime();
       const actual = video.currentTime;
       const drift = expected - actual;
 
-      if (Math.abs(drift) > 2.0) {
+      /*
+        Widen the threshold each time a hard seek fails to bring us back inside it, so
+        corrections that are not converging back off instead of repeating every 2s. Resets
+        as soon as drift lands in the soft-correction range, so a single bad patch does not
+        leave the guest permanently tolerant of desync.
+      */
+      const hardSeekThreshold =
+        HARD_SEEK_THRESHOLD_S *
+        2 ** Math.min(hardSeekStreakRef.current, MAX_HARD_SEEK_BACKOFF_STEPS);
+
+      if (Math.abs(drift) > hardSeekThreshold) {
+        hardSeekStreakRef.current += 1;
         // Hard seek if way off
         const safe = clampToSeekable(video, expected);
         if (safe !== null) video.currentTime = safe;
         video.playbackRate = state.playbackRate;
-      } else if (Math.abs(drift) > 0.5) {
+        return;
+      }
+
+      /*
+        Under the widened threshold. The backoff clears only once drift is inside the *base*
+        threshold — genuinely converged — rather than merely inside the widened one. Clearing
+        it on any sub-threshold tick would let a backed-off guest reset while still badly
+        desynced and immediately start hammering again, which is how the first attempt at
+        this still produced 17 hard seeks in 20 ticks.
+      */
+      if (Math.abs(drift) <= HARD_SEEK_THRESHOLD_S) {
+        hardSeekStreakRef.current = 0;
+      }
+
+      if (Math.abs(drift) > 0.5) {
         // Large soft drift: ±15% — converges in ~10s
         const correctionRate =
           drift > 0 ? state.playbackRate * 1.15 : state.playbackRate * 0.85;
