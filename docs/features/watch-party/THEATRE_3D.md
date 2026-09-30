@@ -543,6 +543,37 @@ resolve identically on every machine with nobody adjudicating. The rule:
 - The rule is **order-independent** — apply the same set of claims in any
   sequence and every client lands on the same occupant. That property is what
   makes a referee unnecessary, and it is what `seat-claims.test.ts` covers.
+
+#### The unresolved weakness in this design
+
+`at` decides every contest and is the claimant's own `Date.now()`, sent in the
+payload. A value that cannot be ordered — a string, `NaN` — is now dropped before
+the rule sees it, which closed two concrete holes: a string `'0'` compared by
+coercion and evicted whoever was seated, and a `NaN` claim was unbeatable because
+`NaN < x` is false, so one malformed message locked a chair permanently.
+
+**A well-formed early number is still accepted, and still wins.** Because
+`applyClaim` compares an incoming claim against the *sitting* occupant, `at: 1`
+takes any seat and then holds it against every later claim. This needs no malice:
+a device whose clock is a few seconds slow evicts punctual users by accident, and
+every client agrees because they are all applying a correct rule to a wrong number.
+
+Two things were tried and rejected, recorded so they are not retried:
+
+- **Clamping `at` to a window around the receiver's clock** does not work. The
+  window must tolerate ordinary clock skew, real claims are *seconds* old, so a
+  forged claim floored at `now - window` is still earlier than every honest one.
+- **Refusing to evict an occupied seat** is worse. It makes the outcome depend on
+  arrival order, which differs per client, destroying the order-independence above:
+  given A(`at:100`) and B(`at:50`) for one seat, a client receiving A then B shows
+  A while one receiving B then A shows B, and the two disagree about who is sitting
+  there.
+
+Order-independence requires a total order computed from claim data alone, so the
+timestamp has to be trustworthy. Stamping claims from the party's synchronised
+clock would fix the accidental case; only host arbitration fixes a deliberate liar,
+and that reverses the no-referee decision this section argues for, so it is a real
+trade rather than an oversight.
 - A person holds at most one seat, so a new claim vacates their previous one
   first. Otherwise standing up and sitting elsewhere leaves a phantom occupant
   that blocks the chair for everyone.

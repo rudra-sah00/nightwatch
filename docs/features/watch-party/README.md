@@ -298,7 +298,7 @@ Handles top-level RTM messages: `JOIN_APPROVED`, `JOIN_REJECTED`, `KICK`, `PARTY
 It also owns two things that used to be missing or host-only:
 
 - **The inbound RTM permission gate.** Every message passes
-  `isRtmMessageAllowed(room, senderId, msg)` before any sub-hook or the event bus
+  `isRtmMessageAllowed(room, senderId, msg, expectedHostId)` before any sub-hook or the event bus
   sees it. See [Interaction permissions](#interaction-permissions).
 - **Socket.IO room membership, for every authenticated member.** It emits
   `watch-party:join_room` on mount and on reconnect, `watch-party:leave_room` on
@@ -354,7 +354,7 @@ control that could only ever fail and be shown an error for it.
 | `canDraw` | No — RTM only | Receiver |
 | `canPlaySound` | No — RTM only | Receiver |
 
-`isRtmMessageAllowed(room, senderId, message)` is the receiver-side gate, applied
+`isRtmMessageAllowed(room, senderId, message, expectedHostId)` is the receiver-side gate, applied
 once in `useWatchParty`'s `onMessage` so it covers both the sub-hook handlers and
 the `rtm-events` bus. `senderId` is the Agora publisher id — the authenticated
 channel identity, not a payload field a sender could edit.
@@ -363,14 +363,42 @@ Gated on `canDraw`: `SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_MOVE_Z
 `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION`, `SKETCH_SYNC_STATE`. Gated on
 `canPlaySound`: `INTERACTION` with `kind: 'sound'`. Gated on `canChat`: `CHAT`.
 
+**Gated on being the host** (`HOST_ONLY`): `PERMISSIONS_UPDATED`,
+`MEMBER_PERMISSIONS_UPDATED`, `PARTY_CLOSED`, `KICK`, `CONTENT_UPDATED`,
+`STREAM_TOKEN`, `PLAY_EVENT`, `PAUSE_EVENT`, `SEEK_EVENT`, `RATE_EVENT`, `SYNC`,
+`HOST_DISCONNECTED`, `HOST_RECONNECTED`. These are not permissions the host can
+toggle, which is why they were originally missed: the gate's first version was
+scoped to the three capabilities the settings UI exposes, so it asked "what may
+this member do?" and never "is this member allowed to say that?". Until they were
+covered, any admitted member could seize playback, evict the host, close the party,
+repoint every player at an arbitrary room, or — via `PERMISSIONS_UPDATED` — grant
+itself the `canDraw` this gate exists to enforce.
+
+**Gated on `expectedHostId`**: `JOIN_APPROVED`, `JOIN_REJECTED`. These arrive while
+the recipient's `room` is still `null` — that *is* the handshake — so there is no
+`room.hostId` to compare against and the lobby preview's host id is used instead.
+This works for authenticated joiners only: the backend withholds `hostId` from
+unauthenticated room previews, so a guest has no expected host and the handshake
+stays open for them. Refusing it without one would make joining impossible for
+exactly the users the flow exists for.
+
 Not gated: `SKETCH_REQUEST_SYNC` (asking for the canvas is reading, not drawing —
 a member with drawing off still sees what others drew), emoji reactions (no
-permission exists for them), playback events, membership, and theatre traffic.
+permission exists for them), `MEMBER_JOINED` / `MEMBER_LEFT`, and theatre traffic
+(`AVATAR_TRANSFORM`, `SEAT_CLAIM`) — 3D presence is not a capability a host can
+revoke. Note that `SEAT_CLAIM` being ungated is correct but not sufficient on its
+own: its `at` field decides seat contests and is sender-supplied, so a well-formed
+early timestamp still takes an occupied seat. See
+[3D theatre seating](./THEATRE_3D.md#seating).
 
-Unknown senders and un-loaded rooms **pass**. Failing open is deliberate: the
-window before the room lands is exactly when a joining guest is catching up on the
-canvas, and a gate that dropped traffic then would blank the party for the case it
-exists to protect.
+Unknown senders and un-loaded rooms **pass, except for the host-authority sets
+above, which fail closed.** Failing open for capability-gated traffic is
+deliberate: the window before the room lands is exactly when a joining guest is
+catching up on the canvas, and a gate that dropped traffic then would blank the
+party for the case it exists to protect. None of that reasoning transfers to a
+host-authority message, which is meaningless to a client that has no room — there
+is no playhead to seek and no party to close — so refusing costs nothing and closes
+the window instead of leaving it open.
 
 #### Why the receiver, and why chat is different
 
@@ -585,7 +613,13 @@ Attaches `play`, `pause`, `seeked`, and `ratechange` event listeners to the host
 
 `room/hooks/useClockSync.ts`
 
-Multi-sample clock offset calibration: collects multiple RTM message timestamps and computes a stable offset using median filtering to reduce jitter. Formula: `offset = median(serverTime - localReceiveTime)` across recent samples.
+Multi-sample clock offset calibration over a sliding window of five RTM message timestamps.
+
+Each sample is `serverTime - localReceiveTime`, where `serverTime` is the sender's clock at send. That makes every sample `trueOffset - oneWayLatency`: the error always has the same sign, so a median cannot cancel it — it only picks the middle one. Measured with both clocks set equal and one-way latencies of 40/90/60/150/70 ms, a median estimator returned exactly -70 ms, so every guest sat the median latency behind the host.
+
+The offset is therefore the **largest** sample that is not an outlier: because the error is `-latency`, the largest offset is the one that travelled fastest and carries the least error. This is NTP's min-delay filter, reached from the other direction — NTP measures delay and takes the smallest, while here delay is not measurable and the largest offset is its proxy. The median is still computed, but only as the reference for discarding samples more than 1000 ms from it: a raw maximum would latch onto a single spurious spike, such as the host's clock stepping, which is the robustness a median provides.
+
+Residual: the smallest observed one-way latency remains as bias. Removing it needs a real round-trip measurement, which is a new message pair.
 
 ### useWatchPartyFullscreen
 
