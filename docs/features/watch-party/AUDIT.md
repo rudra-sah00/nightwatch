@@ -32,9 +32,12 @@ was well-formed*. A malformed `SKETCH_SYNC_STATE` silently replaced every recipi
 with a non-array — no throw, nothing logged — and the canvas then broke on the next legitimate
 stroke, far from the cause.
 
-**What is left is four MEDIUM items and one LOW** (WP-M1 through WP-M4, WP-L1), none of which has
-been driven through a mount yet. The larger outstanding risk is not a finding but a gap — see
-[§ Coverage honesty](#coverage-honesty).
+**WP-H3 is the one still open that matters**, and it was found last, in the area the earlier passes kept
+deferring. Any member can take any seat in the 3D theatre from whoever is sitting in it and lock it
+permanently — and a device with a merely slow clock does it by accident.
+
+Also open: WP-M5 (reaction cap, the twin of the fixed WP-H1) and WP-M1 (clock bias, quantified, awaiting
+a decision).
 
 **A pattern worth noting across three fixed findings.** Every one was wrong in some part until it
 was executed: WP-C1's claim that playback was filtered downstream, WP-H2's claim that a bad payload
@@ -182,6 +185,74 @@ connected to. No special tooling beyond a console call to the send path.
 
 ## HIGH
 
+### WP-H3 — A seat claim with an early timestamp evicts whoever is sitting there, and locks the seat permanently
+
+Found in the Phase 9 pass over `theatre/`. **Proven against the real rule, not reasoned.**
+
+Seat claims are broadcast with no arbiter, resolved by a rule the module argues is safe because it is
+deterministic and order-independent on every client. Both of those properties do hold. The problem is
+what the rule is decided on. `theatre/lib/seat-claims.ts:35-42`:
+
+```ts
+export function incomingWins(
+  incoming: SeatClaim,
+  existing: SeatClaim,
+): boolean {
+  if (incoming.userId === existing.userId) return true;
+  if (incoming.at !== existing.at) return incoming.at < existing.at;
+  return incoming.userId < existing.userId;
+}
+```
+
+`at` is the claimant's own `Date.now()` (`use-seat-occupancy.ts:143`), sent in the payload and taken on
+trust. The boundary does not validate it — `rtm-events.ts:119`:
+
+```ts
+at: (msg.at as number) ?? Date.now(),
+```
+
+`??` catches only `null` and `undefined`, so `0`, `-1`, a negative float and a numeric string all pass
+through untouched.
+
+And an earlier claim does not merely lose a race, it **takes an occupied seat**: `applyClaim` compares
+the incoming claim against the sitting occupant and overwrites when `incomingWins`.
+
+**Measured, by driving the real functions:**
+
+| Scenario | Result |
+|---|---|
+| honest user seated, then a claim with `at: 0` | **the claim sticks; occupant replaced** |
+| then the victim re-claims their own seat with `Date.now()` | **rejected — `at: 0` holds it forever** |
+| ten ids claiming all ten seats with `at: -1` | **0 of 10 seats remain claimable by an honest user** |
+| a device whose clock is merely **5 s slow** | **wins the seat from a punctual user** |
+
+**Consequence.** Any member of the party can take any seat in the 3D theatre from whoever is in it, and
+make it permanently unoccupiable by anyone else — every client agrees, because the rule is deterministic
+and they are all applying it faithfully to a forged number. Ten claims lock the whole auditorium. The
+last row is the one that matters most: **this needs no malice at all.** Unsynchronised device clocks are
+routine, and a guest a few seconds behind wins every seat contest they enter and evicts people who were
+already sitting.
+
+The module's own documentation describes this mechanism while treating it as someone else's problem: "A
+ghost claim carries an early timestamp, so every later claim on that chair loses to it and the seat is
+UNTAKEABLE." That is the defect, observed and reasoned about in the reconciliation context but not
+recognised as reachable from the wire.
+
+**Why HIGH and not CRITICAL.** No data is lost, nothing leaves the theatre, and 2D watching is
+unaffected — 3D is opt-in. But it is trivially reproducible and directly user-visible.
+
+**Fix shape (not implemented).** Two independent parts, and the first is worth doing regardless: clamp
+`at` at the boundary to a sane window around the receiver's own clock, rather than accepting any number.
+Whether an already-occupied seat should be takeable at all is a separate design question — first-claim-
+wins with no eviction would remove the whole class, but it changes seating behaviour, so it wants a
+decision.
+
+**How I could be wrong.** If something above `use-seat-occupancy` rejects claims from members whose
+`at` is implausible, this is unreachable — I found no such check, and `onSeatClaim` is the only
+inbound path. The arithmetic is proven; what I have **not** verified is the visible experience of being
+evicted from a seat mid-session, which needs a second participant in a live theatre.
+
+
 ### WP-H2 — A malformed `SKETCH_SYNC_STATE` corrupts or crashes the shared sketch state on every recipient
 
 **✅ FIXED — `rtm-events.ts` `onSketchSyncState` + `SketchContext` setter.** Two layers: the
@@ -315,6 +386,34 @@ constant.
 ---
 
 ## MEDIUM
+
+### WP-M5 — The sketch reaction list has no cap, the same defect WP-H1 fixed next door
+
+`interactions/components/SketchOverlay.tsx:323`:
+
+```ts
+setActiveReactions((prev) => [
+  { id, x: data.x, y: data.y, color: data.color, particles },
+]);
+```
+
+Entries leave only on their own 1500 ms timer (`:329`, correctly tracked in `reactionTimeoutsRef`), and
+there is no maximum. Each one is a particle set driven by the `requestAnimationFrame` loop at `:363`, so
+per entry it is heavier than a floating emoji.
+
+Narrower than WP-H1 in two ways: `SKETCH_REACTION` is draw-gated, so a guest needs the host to have
+enabled drawing, and the 1500 ms lifetime is a third of the emoji's. Reported anyway because it is
+literally the same defect in the same feature, and WP-H1 is now fixed — leaving this one is the
+inconsistency that made WP-H1 easy to miss in the first place.
+
+**A related observation, not separately ranked.** Remote cursors are bounded only by the 5 s staleness
+prune in `use-sketch-overlay.ts:196-210`, and the `userId` on an inbound `SKETCH_CURSOR_MOVE` is taken
+from the payload rather than compared against the RTM sender. A member holding `canDraw` can therefore
+inject cursors under arbitrary identities, bounded by what fits in 5 s.
+
+**How I could be wrong.** If the reaction tool is rate-limited at the UI. It fires on pointer-down, and
+I did not measure the achievable rate; the absent cap is certain, the practical ceiling is not.
+
 
 ### WP-M2 — `SKETCH_SYNC_STATE` carries a `targetId` that no receiver ever reads
 
@@ -535,20 +634,42 @@ were mine:
   `use-video-texture.ts:83`, and the geometry modules construct no raw `new THREE.*` outside
   R3F's own lifecycle.
 
+**Disproved in the Phase 9 pass.** Four areas I had flagged as likely and which hold up:
+
+- **Membership presence is not racy.** `useWatchPartyMembers.ts:256-295` was the thing I specifically
+  said I had not chased. The 2-minute auto-kick timers are cleared on unmount (`:59-66`), read fresh
+  state through `roomRef` rather than a closure, and re-check `currentRoom.hostId !== userId` before
+  acting because two minutes is long enough for host to have changed. It is careful code.
+- **`useAgora`'s track toggles are guarded.** Both `toggleAudio` and `toggleVideo` hold a re-entrancy
+  ref (`:613,690`) so a rapid double-click cannot create two tracks, and both close and null a track
+  that was created when `publish` then failed. Unmount unpublishes and closes both tracks and nulls
+  the client (`:578-595`).
+- **`SketchOverlay.tsx`'s timers and frames are all tracked.** The reaction timeouts go into
+  `reactionTimeoutsRef`, the blur timer is cleared on unmount, and the particle `requestAnimationFrame`
+  is cancelled. The one untracked `requestAnimationFrame` (`:127`) is a one-shot focus call guarded by
+  `inputRef.current?.`, so it is a no-op after unmount.
+- **The seat-claim rule really is deterministic and order-independent**, as its documentation claims.
+  WP-H3 is not a failure of that property — it is that the property is enforced over a number the
+  sender chooses.
+
 **Still shallow — absence of findings here is not evidence of absence:**
 
-- **`SketchOverlay.tsx` (764 lines) and `WatchPartySketch.tsx` (463).** The *hook* was read in
-  full; the two components were not. Konva node lifecycle and the transformer are unexamined.
-- **Room membership races (area 1).** `useWatchPartyMembers.ts` (553) was read along the WP-C1 and
-  WP-M4 traces only. The per-member disconnect timers at `:256-295` look like the right shape for
-  a join/leave race and were **not** chased down.
-- **`useAgora.ts` (794).** Checked for listener balance only. Track publication, device switching
-  and token renewal are unexamined.
-- **Theatre seat-claim races, Rapier cleanup, network tick rate.** Untouched. The claim-resolution
-  rule is documented as "earliest wins, ties break on lower userId, no referee", which is exactly
-  the kind of rule that is either provably sound or subtly not, and I have not tested it.
+- **Rapier physics cleanup and the theatre network tick rate.** Still untouched. Seat claims were
+  examined (WP-H3); collider and rigidbody teardown was not.
+- **Konva node lifecycle and the transformer** inside `SketchOverlay.tsx`. Timers and frames were
+  checked and are clean; the Konva object graph itself was not examined.
+- **`useAgora.ts` device switching and token renewal.** Listener balance and the track toggles were
+  checked. `switchAudioDevice` / `switchVideoDevice` (`:735,750`) and the `renewToken` path (`:545`)
+  were not read.
 - **`WatchPartySettings.tsx` (534), `WatchPartyVideoArea.tsx` (484), `MediaControls.tsx` (402).**
-  Not read.
+  Scanned for listener/timer balance only, which is clean in all three (Settings and MediaControls arm
+  none at all). Their logic is unread.
+- **One possible issue I chose not to raise as a finding.** `toggleAudio` / `toggleVideo` capture
+  `clientRef.current` before awaiting track creation, and do not re-check it afterwards, so an unmount
+  mid-await could in principle publish to a client that has left. In practice the publish should reject
+  and the existing catch closes the orphaned track, so I could not show a consequence — and after being
+  wrong three times this pass by reasoning without executing, an unproven mechanism does not belong in
+  the list. Recorded here instead.
 
 **Blocked outright:** Postgres was not listening on 5432 this session (`nc -z localhost 5432`
 closed), so no backend test has been executed here and no backend claim in this document is
@@ -575,7 +696,13 @@ test-verified — the backend statements under WP-C1 come from reading the sourc
 - **Phase 7 — WP-M2 / WP-M3 / WP-M4. ✅ DONE**, one commit each.
 - **Phase 8 — WP-L1 ✅ DONE. WP-M1 quantified and left open** pending a decision between a
   robustness trade and a protocol change — see the finding.
-- **Phase 9 — finish discovery**: the two sketch components, membership races, `useAgora` beyond
+- **Phase 9 — discovery. ✅ DONE for theatre seat claims, membership presence, `useAgora` toggles and
+  the sketch components**, producing WP-H3 and WP-M5. Remaining unread: `WatchPartySettings.tsx`,
+  `WatchPartyVideoArea.tsx`, `MediaControls.tsx` (scanned for listener/timer balance only, all clean).
+- **Phase 10 — WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
+  whether an occupied seat should be takeable at all needs a decision.
+- **Phase 11 — WP-M5**, the reaction cap, mirroring the WP-H1 fix.
+- **(superseded) finish discovery**: the two sketch components, membership races, `useAgora` beyond
   listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
   until it was executed, the remaining findings should be treated as unproven until each is driven
   through a mount the same way.
