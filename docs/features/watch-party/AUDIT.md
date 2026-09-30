@@ -32,7 +32,11 @@ was well-formed*. A malformed `SKETCH_SYNC_STATE` silently replaced every recipi
 with a non-array — no throw, nothing logged — and the canvas then broke on the next legitimate
 stroke, far from the cause.
 
-**WP-H3 is the one still open that matters**, and it was found last, in the area the earlier passes kept
+**WP-C2 is the most serious thing still open**, and it is on the backend, which had never been testable
+until this session. An unapproved guest can sit on a party's Socket.IO channel and receive the stream
+token that the HTTP route deliberately gates behind membership.
+
+**WP-H3 is the other one that matters**, and it was found last, in the area the earlier passes kept
 deferring. Any member can take any seat in the 3D theatre from whoever is sitting in it and lock it
 permanently — and a device with a merely slow clock does it by accident.
 
@@ -180,6 +184,81 @@ connected to. No special tooling beyond a console call to the send path.
 - Exploiting it for real needs a second participant and live Agora credentials, so the end-to-end
   demonstration is **not verifiable locally**. The gate's coverage, however, is a pure function
   and fully testable — see Phase 0.5.
+
+---
+
+### WP-C2 — An unapproved guest joins the room's Socket.IO channel and receives the stream token
+
+**Backend.** Found in the first pass where backend tests could actually be executed (Postgres was down
+for every prior session). `nightwatch-backend/src/websocket/handlers/watch-party.handler.ts:66-73`:
+
+```ts
+// Verify guest is an approved member (not just pending)
+const room = await WatchPartyService.getRoom(normalizedRoomId);
+if (!room?.members.some((m) => m.id === socket.data.userId)) {
+  socket.data.isPending = true;
+}
+```
+
+The comment says "verify". Nothing is verified: a guest who is **not** a member has a flag set on the
+socket and then proceeds to `socket.join(roomStr)` five lines later, exactly as an approved member does.
+And `socket.data.isPending` is **read nowhere in the codebase** — grep returns this write and two
+unrelated locals in the Agora module. It is dead, in the same way WP-M2's `targetId` was dead.
+
+**The asymmetry is the tell.** Directly below, the authenticated path does the same check and *refuses*:
+
+```ts
+if (!room?.members.some((m) => m.id === socket.data.userId)) {
+  log.warn(..., 'Authenticated user attempted to join room they are not a member of');
+  callback?.({ success: false, error: 'NOT_A_MEMBER' });
+  return;
+}
+```
+
+An authenticated non-member is turned away. A guest non-member is admitted.
+
+**What the socket room delivers.** Every broadcast to `room:${roomId}`, and one of them carries the
+credential the HTTP layer protects. `services/room.service.ts:206`:
+
+```ts
+io?.to(`room:${roomId}`).emit('CONTENT_UPDATED', { room });
+```
+
+`room` is the unredacted `WatchPartyRoom`, and the type carries both `streamUrl` and `streamToken`
+(`watch-party.types.ts` — "Shared stream token for CDN cache sharing"). Meanwhile
+`controllers/playback.controller.ts:170-178` guards the HTTP route for exactly that value:
+
+```ts
+// SECURITY: Ensure the requester is actually an approved member or the host
+```
+
+So the approval gate is enforced on one transport and bypassed on another — the same shape as WP-C1 on
+the frontend, and for the same underlying reason: the check was placed where the feature was built
+rather than on every path to the asset.
+
+Also delivered to the same unapproved listener: `MEMBERS_UPDATED` (the full member list),
+`PENDING_MEMBERS_UPDATED`, `STATE_UPDATED`, `PERMISSIONS_UPDATED`.
+
+**Consequence.** Anyone holding a room code can request to join, be left pending or rejected, and still
+sit on the room's socket channel. The roster leaks immediately and unconditionally. The stream token and
+master playlist URL leak the moment the host changes content — at which point the party's content can be
+watched without ever having been admitted, which is the entire purpose of the approval step.
+
+**This defect is asserted as intended behaviour by the existing test suite.**
+`tests/websocket/handlers/watch-party.handler.test.ts:67-74`, "allows guest to join their designated
+room", does not stub `getRoom` for that case, so it resolves `undefined`, `isPending` is set, and the
+test asserts `socket.join` was called with `room:ROOM1` and the callback got `success: true`. That is the
+third instance in this audit of a test pinning a defect as a contract, after the playback rows in
+`room-permissions.test.ts` and `targetId` in `watch-party.api.test.ts`.
+
+**Severity.** CRITICAL by this document's own definition — an access-control bypass on a credential.
+
+**How I could be wrong.** The token leak needs the host to change content while the attacker is
+connected; the roster leak does not. If `CONTENT_UPDATED` were redacted before emission this would drop
+to a roster disclosure, and it is not — `room.service.ts:206` passes the object straight through. What I
+have **not** done is drive the end-to-end exploit against a running server with a real socket client: the
+code path, the payload shape and the test that blesses it are all verified by reading and by grep, and
+the backend suite now runs (1,843 tests pass), but no exploit was executed.
 
 ---
 
@@ -671,9 +750,16 @@ were mine:
   wrong three times this pass by reasoning without executing, an unproven mechanism does not belong in
   the list. Recorded here instead.
 
-**Blocked outright:** Postgres was not listening on 5432 this session (`nc -z localhost 5432`
-closed), so no backend test has been executed here and no backend claim in this document is
-test-verified — the backend statements under WP-C1 come from reading the source only.
+**Backend, now unblocked.** Postgres was down for every earlier session in this pass, so no backend
+claim was ever executed. Docker Desktop turned out to be installed but not running; starting it brought
+the dev compose stack back up (`restart: unless-stopped`), and the three tables `tests/setup.ts`
+truncates were confirmed empty first, so running the suite destroyed nothing. **The full backend suite
+passes: 118 files, 1,843 tests**, including 211 watch-party and Agora tests. That also confirms the
+WP-C1 statement that the HTTP surface enforces host authority in the service layer — previously read,
+now executed. The backend pass produced WP-C2.
+
+**Backend still unread:** the clips, chat and playlist modules, `guest-room-scope.middleware.ts` beyond
+its role in the WP-C1 trace, and rate limiting on the REST routes.
 
 ---
 
@@ -699,9 +785,14 @@ test-verified — the backend statements under WP-C1 come from reading the sourc
 - **Phase 9 — discovery. ✅ DONE for theatre seat claims, membership presence, `useAgora` toggles and
   the sketch components**, producing WP-H3 and WP-M5. Remaining unread: `WatchPartySettings.tsx`,
   `WatchPartyVideoArea.tsx`, `MediaControls.tsx` (scanned for listener/timer balance only, all clean).
-- **Phase 10 — WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
+- **Phase 10 — backend discovery. ✅ DONE** for the watch-party socket handler and the host-authority
+  claims, producing WP-C2. The clips/chat/playlist modules and REST rate limiting remain unread.
+- **Phase 11 — WP-C2**, the socket access-control bypass. Security, so it belongs in its own phase, and
+  it should come before WP-H3: refusing a non-member guest mirrors the authenticated branch immediately
+  above it, but the existing test that blesses the current behaviour has to be corrected deliberately.
+- **Phase 12 — WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
   whether an occupied seat should be takeable at all needs a decision.
-- **Phase 11 — WP-M5**, the reaction cap, mirroring the WP-H1 fix.
+- **Phase 13 — WP-M5**, the reaction cap, mirroring the WP-H1 fix.
 - **(superseded) finish discovery**: the two sketch components, membership races, `useAgora` beyond
   listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
   until it was executed, the remaining findings should be treated as unproven until each is driven
