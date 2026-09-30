@@ -29,6 +29,14 @@ interface UseWatchPartyOptions {
   userId?: string;
   roomId?: string;
   videoRef?: React.RefObject<HTMLVideoElement | null>;
+  /**
+   * The room's host id as already known from the lobby preview, when it is known.
+   *
+   * Only used to gate the join handshake, which arrives before `room` exists and so cannot be checked
+   * against `room.hostId`. Absent for an unauthenticated guest, because the backend withholds `hostId`
+   * from unauthenticated room previews — see `isRtmMessageAllowed`.
+   */
+  expectedHostId?: string;
 }
 
 export function useWatchParty(options: UseWatchPartyOptions = {}) {
@@ -36,7 +44,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const tp = useTranslations('party.toasts');
   const tf = useTranslations('party.fallback');
   const router = useRouter();
-  const { userId, roomId } = options;
+  const { userId, roomId, expectedHostId } = options;
 
   const optionsRef = useRef(options);
   optionsRef.current = options;
@@ -148,7 +156,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         this keeps the same line out of the live panel, which RTM would otherwise
         deliver without the server ever seeing it.
       */
-      if (!isRtmMessageAllowed(room, senderId, msg)) return;
+      if (!isRtmMessageAllowed(room, senderId, msg, expectedHostId)) return;
 
       // Route messages to sub-hooks
       chat.handleIncomingRtmMessage(msg);

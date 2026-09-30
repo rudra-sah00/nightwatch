@@ -115,6 +115,20 @@ export function resolveMemberPermissions(
 }
 
 /**
+ * The join handshake, which cannot be gated on `room.hostId` because the room does not exist yet.
+ *
+ * `JOIN_APPROVED` carries a whole room object that the recipient adopts wholesale, so a forged one
+ * redirects a joining user at an attacker-supplied `streamUrl`. `JOIN_REJECTED` merely denies the join.
+ * Both are only meaningful while `requestStatus` is `'pending'`, which is exactly the window where
+ * `room` is still `null` — so these are gated on `expectedHostId`, the host id the lobby already
+ * fetched, instead.
+ */
+const JOIN_HANDSHAKE = new Set<RTMMessage['type']>([
+  'JOIN_APPROVED',
+  'JOIN_REJECTED',
+]);
+
+/**
  * RTM message types that assert an authority only the room host holds.
  *
  * These are not permissions the host can toggle, which is exactly why they were missed: the gate
@@ -224,6 +238,10 @@ const DRAW_GATED = new Set<RTMMessage['type']>([
  *   the authenticated channel identity, not a field in the payload, so it cannot
  *   be forged by editing the message.
  * @param message - The parsed inbound message.
+ * @param expectedHostId - The room's host id as the lobby already knows it, when it does. Used only for
+ *   the join handshake, which arrives before `room` exists. Absent for a guest who has not authenticated,
+ *   because the backend deliberately withholds `hostId` from unauthenticated room previews — see
+ *   {@link JOIN_HANDSHAKE}.
  * @returns `false` when the message asserts host authority and did not come from the host, or
  *   when it is a capability-gated kind and its sender does not hold that capability.
  */
@@ -231,10 +249,26 @@ export function isRtmMessageAllowed(
   room: WatchPartyRoom | null | undefined,
   senderId: string | undefined,
   message: RTMMessage,
+  expectedHostId?: string,
 ): boolean {
   const type = message.type;
   const isSoundInteraction =
     message.type === 'INTERACTION' && message.kind === 'sound';
+
+  /*
+    The join handshake, checked before the rest because it is the one host-authority pair that arrives
+    while `room` is still null and so cannot be compared against `room.hostId`.
+
+    Fails OPEN when the expected host is unknown, unlike HOST_ONLY below. That is not a preference, it is
+    the only available behaviour: an unauthenticated guest never receives `hostId` in its room preview,
+    and refusing the handshake without it would make joining impossible for exactly the users the join
+    flow exists for. So this closes the hole for authenticated joiners and leaves it for guests, and the
+    asymmetry is in the data rather than in the rule.
+  */
+  if (JOIN_HANDSHAKE.has(type)) {
+    if (!expectedHostId || !senderId) return true;
+    return senderId === expectedHostId;
+  }
 
   /*
     Host authority is checked before anything else, and fails CLOSED rather than open.

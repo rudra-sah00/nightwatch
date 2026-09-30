@@ -163,6 +163,12 @@ export function useWatchPartyClient({
     userId: currentUserId,
     roomId,
     videoRef,
+    /*
+      Lets the RTM gate check the join handshake, which arrives before `room` exists and so has no
+      `room.hostId` to compare against. Undefined for an unauthenticated guest — the backend withholds
+      `hostId` from unauthenticated room previews — so the handshake stays ungated for them.
+    */
+    expectedHostId: roomPreview?.hostId,
   });
 
   /**

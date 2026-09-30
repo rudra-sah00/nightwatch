@@ -59,7 +59,23 @@ its 30 cases fail against the unfixed module, and the existing
 `room-permissions.test.ts` assertion that playback was "never gated" was this defect written down
 as intended behaviour and has been corrected in place.
 
-**⚠️ ONE ROW REMAINS OPEN — `JOIN_APPROVED` / `JOIN_REJECTED`.** These are deliberately excluded.
+**🔶 THE LAST ROW IS NOW GATED FOR AUTHENTICATED JOINERS, AND STILL OPEN FOR GUESTS.**
+`JOIN_APPROVED` / `JOIN_REJECTED` are checked against `expectedHostId` — the host id the lobby preview
+already carries — threaded from `use-watch-party-client` through `useWatchParty` into the gate. Regression
+test `tests/features/watch-party/rtm-join-handshake.test.ts`; the two forgery cases fail against the
+ungated version.
+
+**It cannot be closed for guests from the client.** The backend deliberately withholds `hostId` from
+unauthenticated room previews (`checkRoom` includes it only when `req.user?.id` is set), so a guest has no
+expected host to compare against, and the gate fails open for them. Refusing the handshake without it
+would make joining impossible for exactly the users the flow exists for. The asymmetry is in the available
+data, not in the rule, and a test pins the open case so it is not mistaken for coverage. Closing it fully
+means one of two decisions: expose `hostId` on unauthenticated previews (a backend privacy call), or stop
+trusting the RTM handshake and rely solely on the server-emitted Socket.IO `JOIN_RESULT`, which is
+inherently trustworthy — attractive, except that the 10-second REST poll in `useWatchPartyLifecycle` exists
+precisely because `JOIN_RESULT` is not always delivered, so dropping the RTM path risks regressing joins.
+
+Original note:
 They legitimately arrive while the recipient's `room` is still `null` — that is the join handshake
 — so there is no `room.hostId` to compare against, and gating them the same way would break
 joining outright. Closing them needs the expected host id threaded from the lobby into the join
