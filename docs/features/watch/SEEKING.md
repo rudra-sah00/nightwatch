@@ -286,8 +286,11 @@ segment instead of from a failure.
 
 ### D6 — Relative skips computed from stale React state ⚠️ high
 
-**✅ CONFIRMED for three of the four sites. ❌ The `LiveSeekBar` row was WRONG** and has been
-corrected below.
+**✅ FIXED — `17bdf386`. ✅ CONFIRMED for three of the four sites; ❌ the `LiveSeekBar` row was
+WRONG** and has been corrected below.
+
+Relative seeks now come off the live element inside `useSeekController`, and rapid presses
+chain off the pending target so three quick taps of +10 travel 30 s rather than 10.
 
 `SET_TIME` is dispatched from `timeupdate` (`use-video-element.ts:66,124`), which fires roughly
 every 250 ms. These callers all derive a new absolute target from that lagging value:
@@ -318,11 +321,30 @@ seek per gesture.
 
 ### D7 — Eight places assign `video.currentTime`, with two incompatible semantics ⚠️ high
 
-**✅ CONFIRMED** — all eight sites verified at the exact cited lines (ten assignment statements
+**✅ FIXED (the UI seeks) — `17bdf386`.** `useSeekController`
+(`player/hooks/useSeekController.ts`) now owns moving the playhead, created once in
+`use-player-root` above both `useKeyboard` and `usePlayerHandlers` so the whole tree shares
+one instance, one clamp and one in-flight gate.
+
+**Retired into it:** `usePlayerHandlers.handleSeek`, `handleSkip`, `useKeyboard.seek` (whose
+implementation was the only correct one and so became the basis for the controller), and
+`use-player-live-badge`'s jump to the live edge.
+
+**Deliberately left, because they are not UI seeks:** `useHls.ts:461,1126` and
+`useMp4.ts:157` restore position at specific engine lifecycle points — `MANIFEST_PARSED`,
+`loadedmetadata` — where the controller's serialisation would fight the engine, and useHls's
+own `seeking` handler already excludes them via `resumePositionRef`. Routing them through a
+UI-level controller would be wrong, not just unnecessary.
+
+**Still outstanding, but changing approach rather than call site:** `use-player-root.ts:300`
+resume-on-load (D2 → P1 #5, which replaces load-then-seek with an hls.js start position) and
+`usePredictiveSync.ts:195,402` (D4 → P1 #9).
+
+Verified during Phase 0: all eight sites existed at the cited lines (ten assignment statements
 across seven files). An exhaustive grep of `src/` for `currentTime =` found **three further sites
 outside this document's scope**, all replicating the same pattern on the TV platform:
 `TvPlayer.tsx:229,233,307,310`, `TvWatchTogether.tsx:85,95`, `use-tv-remote-receiver.ts:87`. They
-are not part of P0 but a `useSeekController` should eventually own them too.
+are not part of P0 but should eventually adopt the controller too.
 
 | Site | Semantics | Purpose |
 |---|---|---|
@@ -344,10 +366,16 @@ D1, D2, D3 and D6 are all symptoms of this.
 
 ### D8 — No seek-in-flight serialisation ⚠️ medium-high
 
-**✅ CONFIRMED** — an absence finding, verified by grep. `seeked` appears only in `useHls.ts`
-(`:232,447,451,1053,1054`), all of it serving the re-prime recovery rather than gating user seeks.
-`seekController`, `seekLock`, `seekQueue`, `seekPending`, `waitForSeek` and `awaitSeek` have zero
-matches anywhere in `src/`.
+**✅ FIXED — `17bdf386`.** `useSeekController` holds one seek in flight and coalesces
+everything arriving during it into a single pending target — chase-the-latest, not a queue:
+the user wants the newest position, not a tour of the ones they passed through. A 3 s
+timeout reopens the gate if `seeked` never arrives, which happens when the source is replaced
+mid-seek by a quality switch or reload recovery.
+
+Verified during Phase 0 by grep: `seeked` appeared only in `useHls.ts`
+(`:232,447,451,1053,1054`), all of it serving the re-prime recovery rather than gating user
+seeks, and `seekController`, `seekLock`, `seekQueue`, `seekPending`, `waitForSeek` and
+`awaitSeek` had zero matches anywhere in `src/`.
 
 Nothing waits for `seeked` before issuing the next seek. This contradicts both HTML5 semantics
 and every platform's guidance. Apple's QA1820 is explicit:
@@ -361,12 +389,18 @@ seek but the last is wasted — while still aborting fragments and re-priming.
 
 ### D9 — Two independent error owners race ⚠️ medium-high
 
-**✅ CONFIRMED** 🔶 — the handler is `use-video-element.ts:106-115`; the decode-code check is at
-`:108` and the 1200 ms timer at `:114` (doc said 108-114). `clearPendingError()` genuinely runs on
-both `playing` and `canplay`, so a *fast* recovery does cancel the toast. But `hls.recoverMediaError()`
-rebuilds the MediaSource and needs at least one fragment fetch, and the `onStreamExpired()` path
-makes a full backend round-trip — both routinely exceed 1200 ms. The race is real in the direction
-the doc claims.
+**✅ FIXED — `38da93e6`.** The 1200 ms timer and its `SET_ERROR` dispatch are gone.
+`use-video-element` now reports the element-level decode error to telemetry and decides
+nothing; every engine already owns the decision — `useHls` for MSE and native HLS, `useMp4`
+and `useDash` on their own paths. Clearing the error on recovery stays with the element,
+which is its own state to report.
+
+Verified during Phase 0 🔶 — the handler was `use-video-element.ts:106-115`; the decode-code
+check at `:108` and the 1200 ms timer at `:114` (doc said 108-114). `clearPendingError()`
+genuinely ran on both `playing` and `canplay`, so a *fast* recovery did cancel the toast. But
+`hls.recoverMediaError()` rebuilds the MediaSource and needs at least one fragment fetch, and
+the `onStreamExpired()` path makes a full backend round-trip — both routinely exceed 1200 ms.
+The race was real in the direction the doc claimed.
 
 `use-video-element.ts:108-114` starts a 1200 ms timer on any `MEDIA_ERR_DECODE` and dispatches
 `SET_ERROR: 'Video playback error'`. `useHls.ts` independently handles the same failure with a
@@ -428,14 +462,14 @@ Verified during Phase 0: `SeekBar.tsx` and `use-seek-bar.ts` contained zero
 
 | Concern | Shaka Player | hls.js (intended use) | dash.js | Us today |
 |---|---|---|---|---|
-| Seek during scrub | UI commits on release; preview visual only | — (UI's job) | commits on release | **seek per mousemove** (D3) |
-| Seeks in flight | one, queued | one | one | **unbounded** (D8) |
-| Relative skip base | live `currentTime` | live | live | **React state, 250 ms stale** (D6) |
+| Seek during scrub | UI commits on release; preview visual only | — (UI's job) | commits on release | ✅ commits on release (`0f95a6d6`) |
+| Seeks in flight | one, queued | one | one | ✅ one, chase-the-latest (`17bdf386`) |
+| Relative skip base | live `currentTime` | live | live | ✅ live `currentTime` (`17bdf386`) |
 | Buffer on out-of-range seek | explicitly cleared, `appendWindow` trimmed | flushed internally | `replace` + clear | **not flushed** (D10) |
 | Init segment on discontinuous append | **always re-appended** (`InitSegmentReference`) | re-appended on level/discontinuity change | re-appended | only via `stopLoad`/`startLoad` (D10) |
 | Gap handling | `smallGapLimit` + gap-jump controller | `maxBufferHole` + nudge | gap controller | `maxBufferHole` 5× default (D11) |
-| Seek ownership | one `StreamingEngine` | one `StreamController` | one `PlaybackController` | **8 sites, 2 semantics** (D7) |
-| Error ownership | one `Player` error path | one `ERROR` event | one | **2 racing owners** (D9) |
+| Seek ownership | one `StreamingEngine` | one `StreamController` | one `PlaybackController` | ✅ one `useSeekController` (`17bdf386`) |
+| Error ownership | one `Player` error path | one `ERROR` event | one | ✅ one, the engine (`38da93e6`) |
 
 Two structural lessons:
 
@@ -462,12 +496,13 @@ that's not buffered", including YouTube.
 2. ~~**Make scrubbing commit on release.**~~ — **DONE, `0f95a6d6`.** Preview during drag,
    seek on `pointerup`, Pointer Events with `setPointerCapture`, trailing `onClick` dropped.
    Shared by both scrub bars via the new `useDragSeek` primitive.
-3. **Introduce one `useSeekController`** owning relative and absolute seek, clamping against live
-   `duration`/`seekable`, one seek in flight with chase-the-latest-target coalescing, and a single
-   `seeking`/`seeked` lifecycle. Every control calls it. `useKeyboard`'s implementation is the
-   right starting point. Retire the other seven sites.
-4. **Resolve the error-owner race (D9).** `useHls` owns playback failure; `use-video-element`
-   reports the element-level decode error to it instead of dispatching `SET_ERROR` on a timer.
+3. ~~**Introduce one `useSeekController`**~~ — **DONE, `17bdf386`.** Relative and absolute,
+   clamped against live `duration`/`seekable`, one seek in flight with chase-the-latest
+   coalescing. Four UI sites retired into it; the two engine position-restores stay put
+   deliberately (see D7), and resume-on-load and the party drift correction change approach
+   in P1 rather than call site.
+4. ~~**Resolve the error-owner race (D9).**~~ — **DONE, `38da93e6`.** The engines own playback
+   failure; `use-video-element` reports the element decode error and decides nothing.
 
 ### P1 — make seeking correct rather than survivable
 
