@@ -67,6 +67,8 @@ function setup(
       videoRef: { current: video as unknown as HTMLVideoElement },
       containerRef: { current: null },
       dispatch,
+      // Seeking lives in `useSeekController` now; these tests only exercise Space.
+      seekBy: vi.fn(),
       isFullscreen: false,
       onBack: vi.fn(),
       currentSubtitleTrack: null,

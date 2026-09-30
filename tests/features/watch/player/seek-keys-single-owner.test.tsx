@@ -29,6 +29,7 @@ import { useRef } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { initialPlayerState } from '@/features/watch/player/context/types';
 import { useKeyboard } from '@/features/watch/player/hooks/useKeyboard';
+import { useSeekController } from '@/features/watch/player/hooks/useSeekController';
 import { PlayerRoot } from '@/features/watch/player/ui/compound/PlayerRoot';
 
 vi.mock('@/features/watch/player/hooks/useMobileDetection', () => ({
@@ -88,6 +89,7 @@ vi.mock('@/features/watch/player/ui/compound/hooks/use-player-root', () => ({
 /** A video stand-in that records every `currentTime` assignment. */
 function makeVideo(startAt: number) {
   const recorded: number[] = [];
+  const listeners = new Map<string, Set<EventListener>>();
   let current = startAt;
   const el = {
     get currentTime() {
@@ -96,10 +98,22 @@ function makeVideo(startAt: number) {
     set currentTime(t: number) {
       current = t;
       recorded.push(t);
+      // The element fires `seeked` when a seek completes; `useSeekController` gates its
+      // one-in-flight window on it, so the stub has to emit it or the gate never reopens.
+      for (const fn of listeners.get('seeked') ?? []) {
+        fn(new Event('seeked'));
+      }
     },
     duration: 600,
     seekable: { length: 0, start: () => 0, end: () => 0 },
     buffered: { length: 0, start: () => 0, end: () => 0 },
+    addEventListener: (type: string, fn: EventListener) => {
+      if (!listeners.has(type)) listeners.set(type, new Set());
+      listeners.get(type)?.add(fn);
+    },
+    removeEventListener: (type: string, fn: EventListener) => {
+      listeners.get(type)?.delete(fn);
+    },
   } as unknown as HTMLVideoElement;
   return { el, recorded };
 }
@@ -113,10 +127,15 @@ function Harness() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = { current: video } as RefObject<HTMLVideoElement | null>;
 
+  // The real controller, so this exercises the whole chain the user's keypress travels:
+  // window listener → useKeyboard → useSeekController → element.
+  const { seekBy } = useSeekController({ videoRef });
+
   useKeyboard({
     videoRef,
     containerRef,
     dispatch: vi.fn(),
+    seekBy,
     isFullscreen: false,
     onBack: vi.fn(),
     currentSubtitleTrack: null,

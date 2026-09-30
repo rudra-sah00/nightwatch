@@ -18,6 +18,7 @@ import { useNextEpisode } from '../../../hooks/useNextEpisode';
 import { usePlaybackSpeedBoost } from '../../../hooks/usePlaybackSpeedBoost';
 import { usePlayerEngine } from '../../../hooks/usePlayerEngine';
 import { usePlayerHandlers } from '../../../hooks/usePlayerHandlers';
+import { useSeekController } from '../../../hooks/useSeekController';
 import { useWatchProgress } from '../../../hooks/useWatchProgress';
 import {
   applySubtitleSettings,
@@ -367,10 +368,22 @@ export function usePlayerRoot({
 
   const toggleFullscreen = fullscreenToggleOverride || nativeToggleFullscreen;
 
-  const { togglePlay, toggleMute, seek } = useKeyboard({
+  /*
+    The single owner of the playhead. Created here, above both `useKeyboard` and
+    `usePlayerHandlers`, so every control in the tree shares one instance — and therefore
+    one clamp, one relative base, and one seek-in-flight gate. See useSeekController.
+  */
+  const { seekTo, seekBy } = useSeekController({
+    videoRef,
+    isLive,
+    disabled: readOnly,
+  });
+
+  const { togglePlay, toggleMute } = useKeyboard({
     videoRef,
     containerRef,
     dispatch,
+    seekBy,
     isFullscreen: state.isFullscreen,
     onBack: handleBack,
     currentSubtitleTrack: state.currentSubtitleTrack,
@@ -469,7 +482,8 @@ export function usePlayerRoot({
     isLoading: state.isLoading,
     togglePlay,
     toggleMute,
-    seek,
+    seekTo,
+    seekBy,
     setQuality,
     setAudioTrack,
     qualities: state.qualities,

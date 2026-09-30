@@ -57,6 +57,13 @@ interface UseKeyboardOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
   containerRef: RefObject<HTMLDivElement | null>;
   dispatch: React.Dispatch<PlayerAction>;
+  /**
+   * Relative seek from {@link useSeekController}, the single owner of the playhead.
+   *
+   * Injected rather than implemented here so the keyboard, the scrub bars, the skip
+   * buttons and the live badge all clamp and serialise identically.
+   */
+  seekBy: (seconds: number) => void;
   isFullscreen: boolean;
   onBack: () => void;
   // Caption toggle
@@ -100,6 +107,7 @@ export function useKeyboard({
   videoRef,
   containerRef,
   dispatch,
+  seekBy,
   isFullscreen,
   onToggleCaptions,
   hasNextEpisode,
@@ -111,42 +119,14 @@ export function useKeyboard({
   allowSpeedBoost = true,
 }: UseKeyboardOptions) {
   const t = useTranslations('watch.player');
-  const seek = useCallback(
-    (seconds: number) => {
-      if (disabled) return;
-      const video = videoRef.current;
-      if (!video) return;
-      if (!Number.isFinite(seconds) || !Number.isFinite(video.currentTime))
-        return;
-
-      if (isLive) {
-        // DVR seek: clamp within the seekable/buffered range
-        const src = video.seekable.length > 0 ? video.seekable : video.buffered;
-        if (!src.length) return;
-        const start = src.start(0);
-        const end = src.end(src.length - 1);
-        if (!Number.isFinite(start) || !Number.isFinite(end)) return;
-        const currentTime = Number.isFinite(video.currentTime)
-          ? video.currentTime
-          : start;
-        video.currentTime = Math.max(
-          start,
-          Math.min(end, currentTime + seconds),
-        );
-      } else {
-        if (!Number.isFinite(video.duration)) return;
-        const currentTime = Number.isFinite(video.currentTime)
-          ? video.currentTime
-          : 0;
-        const duration = Number.isFinite(video.duration) ? video.duration : 0;
-        video.currentTime = Math.max(
-          0,
-          Math.min(duration, currentTime + seconds),
-        );
-      }
-    },
-    [videoRef, disabled, isLive],
-  );
+  /*
+    Seeking is no longer implemented here. This hook's copy was the only correct one in the
+    codebase — relative, read off the live element, clamped against live
+    `duration`/`seekable` — which is exactly why it became the basis for
+    `useSeekController`. It now arrives as `seekBy` so the keyboard shares one seek owner
+    with every other control, and gains the serialisation it never had.
+  */
+  const seek = seekBy;
 
   const adjustVolume = useCallback(
     (delta: number) => {

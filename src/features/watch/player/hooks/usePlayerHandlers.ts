@@ -23,8 +23,10 @@ interface UsePlayerHandlersProps {
   togglePlay: () => void;
   /** Low-level mute toggle from the engine. */
   toggleMute: () => void;
-  /** Low-level seek to an absolute time (seconds). */
-  seek: (seconds: number) => void;
+  /** Absolute seek from {@link useSeekController} — clamped and serialised. */
+  seekTo: (time: number) => void;
+  /** Relative seek from {@link useSeekController} — clamped and serialised. */
+  seekBy: (seconds: number) => void;
   /** Low-level HLS quality level setter (-1 = auto). */
   setQuality: (level: number) => void;
   /** Low-level audio track setter (HLS multi-audio). */
@@ -77,7 +79,8 @@ export function usePlayerHandlers({
   isLoading = false,
   togglePlay,
   toggleMute,
-  seek,
+  seekTo,
+  seekBy,
   setQuality,
   setAudioTrack,
   qualities,
@@ -174,24 +177,27 @@ export function usePlayerHandlers({
   const handleSeek = useCallback(
     (time: number) => {
       if (readOnly) return;
-      if (Number.isFinite(time) && videoRef.current) {
-        videoRef.current.currentTime = time;
-      }
+      // Absolute seek via the single controller, which clamps against live
+      // duration/seekable and serialises against any seek already in flight. This used to
+      // assign `videoRef.current.currentTime` directly, with only a `Number.isFinite`
+      // check — so a target past the end, or one arriving mid-seek, went straight to the
+      // element.
+      seekTo(time);
       trackEvent('video_seek');
       showControls();
     },
-    [videoRef, showControls, readOnly],
+    [seekTo, showControls, readOnly],
   );
 
   // Handle skipping forward/backward
   const handleSkip = useCallback(
     (seconds: number) => {
       if (readOnly) return;
-      seek(seconds);
+      seekBy(seconds);
       trackEvent('video_skip', { seconds });
       showControls();
     },
-    [seek, showControls, readOnly],
+    [seekBy, showControls, readOnly],
   );
 
   // Handle volume changes

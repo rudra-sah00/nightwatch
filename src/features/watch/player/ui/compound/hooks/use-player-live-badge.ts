@@ -10,7 +10,7 @@ const LIVE_EDGE_THRESHOLD_S = 15;
  * @returns Metadata, `isAtLiveEdge` flag, and `handleGoLive` callback.
  */
 export function usePlayerLiveBadge() {
-  const { metadata, videoRef } = usePlayerContext();
+  const { metadata, videoRef, playerHandlers } = usePlayerContext();
   const [isAtLiveEdge, setIsAtLiveEdge] = useState(true);
 
   useEffect(() => {
@@ -36,12 +36,15 @@ export function usePlayerLiveBadge() {
   const handleGoLive = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
-    // Jump to the live edge using seekable range
+    // Read the DVR window fresh, then hand the target to the seek controller via
+    // playerHandlers.seek rather than assigning currentTime here. The controller re-clamps
+    // against seekable — which slides forward as segments land — and serialises against any
+    // seek already in flight.
     const src = video.seekable.length > 0 ? video.seekable : video.buffered;
     if (!src.length) return;
-    video.currentTime = src.end(src.length - 1);
+    playerHandlers.seek(src.end(src.length - 1));
     video.play().catch(() => {});
-  }, [videoRef]);
+  }, [videoRef, playerHandlers]);
 
   return { metadata, isAtLiveEdge, handleGoLive };
 }

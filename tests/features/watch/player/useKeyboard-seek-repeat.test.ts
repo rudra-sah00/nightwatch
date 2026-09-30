@@ -69,6 +69,15 @@ function setup(video: FakeVideo) {
       videoRef: { current: video as unknown as HTMLVideoElement },
       containerRef: { current: null },
       dispatch,
+      // Seeking now lives in `useSeekController`; this mirrors its VOD clamp so these
+      // tests keep measuring the auto-repeat guard rather than the seek implementation,
+      // which has its own tests.
+      seekBy: (seconds: number) => {
+        video.currentTime = Math.max(
+          0,
+          Math.min(video.duration, video.currentTime + seconds),
+        );
+      },
       isFullscreen: false,
       onBack: vi.fn(),
       currentSubtitleTrack: null,
