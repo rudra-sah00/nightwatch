@@ -734,12 +734,28 @@ export function useAgora({
 
   const switchAudioDevice = useCallback(
     async (deviceId: string) => {
+      /*
+        Remember what was selected before committing the new choice.
+
+        The selection used to be set and left set even when `setDevice` threw, which did not end with
+        the error toast: this state feeds `selectedAudioDeviceRef`, and that ref is what `toggleAudio`
+        reads for `microphoneId` when it builds a fresh track. So a failed switch left the dropdown
+        naming a device that was not in use, and the next mute/unmute tried the failing device again —
+        turning a transient failure into a stuck one. `refreshDevices` does not rescue it either: it
+        only replaces the selection when a device has vanished from the list, not when it is present
+        but unusable.
+
+        Set first and revert on failure, rather than waiting for the switch to succeed, so the
+        dropdown still responds immediately to the click.
+      */
+      const previous = selectedAudioDeviceRef.current;
       setSelectedAudioDevice(deviceId);
       if (localAudioTrackRef.current) {
         try {
           await localAudioTrackRef.current.setDevice(deviceId);
           toast.success(tp('micSwitched'));
         } catch {
+          setSelectedAudioDevice(previous);
           toast.error(tp('micSwitchFailed'));
         }
       }
@@ -749,12 +765,15 @@ export function useAgora({
 
   const switchVideoDevice = useCallback(
     async (deviceId: string) => {
+      // Same rollback as the microphone above, for the same reason.
+      const previous = selectedVideoDeviceRef.current;
       setSelectedVideoDevice(deviceId);
       if (localVideoTrackRef.current) {
         try {
           await localVideoTrackRef.current.setDevice(deviceId);
           toast.success(tp('camSwitched'));
         } catch {
+          setSelectedVideoDevice(previous);
           toast.error(tp('camSwitchFailed'));
         }
       }

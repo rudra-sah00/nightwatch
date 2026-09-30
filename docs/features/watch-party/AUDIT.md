@@ -520,6 +520,19 @@ constant.
 
 ### WP-M6 — A failed device switch keeps the new device selected, and the next mic enable retries it
 
+**✅ FIXED.** Both `switchAudioDevice` and `switchVideoDevice` capture the previous selection and revert
+to it when `setDevice` throws. Set-first-then-revert rather than commit-on-success, so the dropdown still
+responds immediately to the click. Regression test
+`tests/features/watch-party/hooks/wp-m6-device-switch-rollback.test.ts` — 2 of its 4 cases fail against
+the unfixed hook, and the more useful of the two proves the *consequence* rather than the state: before
+the fix, muting and unmuting after a failed switch built the next track with
+`microphoneId: 'mic-b'`, the device that had just failed.
+
+The pre-existing failure test in `useAgora.test.ts` asserted only that `setDevice` was called with the bad
+id, so the selection was never covered either way — unlike the four tests in this audit that actively
+pinned a defect, this one simply stopped short.
+
+
 Found in the Phase 14 pass over the areas nothing had read.
 
 `media/hooks/useAgora.ts:735-748`:
@@ -921,7 +934,7 @@ its role in the WP-C1 trace, and rate limiting on the REST routes.
 - **Phase 14 — discovery over the last unread areas. ✅ DONE**, producing WP-M6. Rapier teardown, Agora
   token renewal, the settings permission path, MediaControls and backend chat enforcement were all
   checked and hold up.
-- **Phase 15 — WP-M6**, the device-switch rollback. Small and independent.
+- **Phase 15 — WP-M6. ✅ DONE.**
 - **(superseded) finish discovery**: the two sketch components, membership races, `useAgora` beyond
   listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
   until it was executed, the remaining findings should be treated as unproven until each is driven
