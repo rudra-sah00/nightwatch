@@ -295,8 +295,34 @@ so repeated effect runs cannot record `'hidden'` as the original.
 
 ### H5 — The context value is rebuilt every render, re-rendering the whole player at 4 Hz
 
-**✅ CONFIRMED** — `:477` is exact, and `useMemo` has zero occurrences in the file. The consumer
-count was an **undercount**: `usePlayerContext()` has 33 call sites across 26 files, not 22.
+**✅ FIXED — `860452d9`**, by the split rather than a bare `useMemo` — memoising alone would have
+kept invalidating at 4Hz, since `state` is inside the value.
+
+`PlayerContext` now carries only `{ state }`; everything stable lives in `PlayerStableContext`,
+memoised so it keeps its identity across a time update. The 18 consumers that read no state use
+`usePlayerControls()` and are no longer woken by the playhead; the 14 that need both keep
+`usePlayerContext()`, which subscribes to each half.
+
+**Measured** (`tests/features/watch/player/context-rerenders.test.tsx`):
+
+| Consumer | Wakes per `SET_TIME` before | After |
+|---|---|---|
+| reads only handlers (18 of them) | 1 | **0** |
+| reads the playhead (14 of them) | 1 | 1 |
+
+At the `timeupdate` cadence that is roughly 72 wasted component renders per second removed. One
+test deliberately skips the memo to prove it is load-bearing: without it the stable value is a new
+object each render and the split spares nobody.
+
+Two things worth knowing. The test creates its children once, outside the provider's render,
+because that is how production behaves — `PlayerRoot` owns the state and re-renders at 4Hz, but its
+`children` come from `WatchVODPlayer`, which does not, so React's element-identity bailout already
+spares the subtree and context subscription is what actually propagates the update. Measuring
+without that gives a misleading result. And typing carries the migration: `usePlayerControls()`
+returns only the stable half, so a consumer that actually needs `state` fails to compile.
+
+Verified during Phase 0: `:477` was exact, `useMemo` had zero occurrences in the file, and the
+consumer count was an **undercount** — 33 call sites across 26 files, not 22.
 
 `player/ui/compound/hooks/use-player-root.ts:477`
 
@@ -717,8 +743,8 @@ those identities stable. H14's matcher was therefore extracted to a pure module 
 against a hand-rolled element — both faithful, but worth knowing before writing further
 TextTrack tests here.
 
-**Wave 4 — performance.** H5 (context split) is the biggest single win but touches every consumer,
-so it wants its own change and a careful re-render measurement before and after.
+**Wave 4 — performance.** ✅ **Done, `860452d9`.** H5's context split, with the before/after
+measurement recorded above.
 
 LOW items are fine to batch whenever the surrounding file is being touched anyway. L1 is struck.
 
