@@ -520,6 +520,20 @@ constant.
 
 ### WP-M5 — The sketch reaction list has no cap, the same defect WP-H1 fixed next door
 
+**✅ FIXED — `MAX_ACTIVE_REACTIONS = 12` plus a coordinate guard in `SketchOverlay.tsx`.** The ceiling is
+lower than the emoji one (40) because each reaction carries 12 particles and the animation loop rebuilds
+every particle object per frame, so one reaction costs roughly twelve times one floating emoji — and at
+1500 ms it lives a third as long, so fewer are in flight normally. Oldest are dropped first, as with
+emoji. Regression test `tests/features/watch-party/wp-m5-reaction-bounds.test.tsx` — 8 of its 11 cases
+fail against the unfixed component. Counted through rendered Konva nodes rather than internal state, so
+the assertion is about what the browser is asked to draw.
+
+Also fixed, and not in the original finding: `x`/`y` arrived off the wire unchecked, so a non-finite
+coordinate produced particles at `NaN` that render nothing and still cost a full animation pass for
+1500 ms. Now refused, with tests confirming `0` and negative coordinates are still accepted — both are
+legitimate and easy to reject by accident.
+
+
 `interactions/components/SketchOverlay.tsx:323`:
 
 ```ts
@@ -844,7 +858,7 @@ its role in the WP-C1 trace, and rate limiting on the REST routes.
   decision between refusing eviction and a trusted timebase. See the finding.
 - **(was Phase 12) WP-H3**, the seat-claim forgery. Clamping `at` at the boundary is safe and independent;
   whether an occupied seat should be takeable at all needs a decision.
-- **Phase 13 — WP-M5**, the reaction cap, mirroring the WP-H1 fix.
+- **Phase 13 — WP-M5. ✅ DONE.**
 - **(superseded) finish discovery**: the two sketch components, membership races, `useAgora` beyond
   listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
   until it was executed, the remaining findings should be treated as unproven until each is driven

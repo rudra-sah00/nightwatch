@@ -22,6 +22,16 @@ import { useSketch } from '../context/SketchContext';
 import { useSketchOverlay } from '../hooks/use-sketch-overlay';
 
 /** Props for the {@link SketchOverlay} component. */
+/**
+ * Ceiling on burst reactions animating at once.
+ *
+ * Lower than the emoji ceiling in `use-floating-emojis` (40) on purpose: each reaction carries 12
+ * particles and the animation loop rebuilds every particle object on every frame, so one reaction costs
+ * roughly twelve times what one floating emoji does. Reactions are also short-lived (1500 ms against
+ * 4500 ms), so fewer are in flight in normal use and a lower ceiling is not felt.
+ */
+const MAX_ACTIVE_REACTIONS = 12;
+
 interface SketchOverlayProps {
   rtmSendMessage?: (msg: RTMMessage) => void;
   rtmSendMessageToPeer?: (peerId: string, msg: RTMMessage) => void;
@@ -308,6 +318,13 @@ export function SketchOverlay({
   // Reaction Listener
   useEffect(() => {
     return onSketchReaction((data) => {
+      /*
+        Coordinates come off the wire and are never checked. A non-finite x or y produces particles
+        at NaN, which render nothing but still cost a full pass of the animation loop below for
+        1500 ms. Cheaper to refuse than to animate.
+      */
+      if (!(Number.isFinite(data.x) && Number.isFinite(data.y))) return;
+
       const numParticles = 12;
       const particles = Array.from({ length: numParticles }).map(() => ({
         id: Math.random().toString(36).substr(2, 9),
@@ -320,10 +337,24 @@ export function SketchOverlay({
       }));
 
       const id = Math.random().toString(36).substr(2, 9);
-      setActiveReactions((prev) => [
-        ...prev,
-        { id, x: data.x, y: data.y, color: data.color, particles },
-      ]);
+      setActiveReactions((prev) => {
+        const next = [
+          ...prev,
+          { id, x: data.x, y: data.y, color: data.color, particles },
+        ];
+        /*
+          Same unbounded growth WP-H1 fixed for floating emoji, and costlier per entry: every
+          reaction carries 12 particles, and the loop below rebuilds each particle object on every
+          frame, so the per-frame work is 12x the number of live reactions. Entries left only on
+          their own 1500 ms timer, which bounds nothing when arrivals outpace expiry.
+
+          Oldest go first: they are furthest through their animation and so the least disruptive to
+          drop. Their expiry timers stay armed and become no-ops, exactly as in `use-floating-emojis`.
+        */
+        return next.length > MAX_ACTIVE_REACTIONS
+          ? next.slice(next.length - MAX_ACTIVE_REACTIONS)
+          : next;
+      });
 
       // Simple cleanup
       const tid = setTimeout(() => {
