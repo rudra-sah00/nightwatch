@@ -46,14 +46,12 @@ export function SeekBar({
     progress,
     bufferedProgress,
     hoverTime,
-    hoverPosition,
+    previewFraction,
+    isDragging,
     previewScale,
     barRef,
     getSpriteStyle,
-    handleMouseMove,
-    handleMouseLeave,
-    handleClick,
-    handleDrag,
+    pointerHandlers,
   } = useSeekBar({
     currentTime,
     duration,
@@ -64,6 +62,13 @@ export function SeekBar({
     disabled,
     allowPreview,
   });
+
+  // The hook works in fractions so it stays independent of layout; the tooltip needs
+  // pixels along the bar.
+  const hoverPosition =
+    previewFraction === null
+      ? 0
+      : previewFraction * (barRef.current?.offsetWidth ?? 0);
 
   return (
     <div
@@ -145,14 +150,15 @@ export function SeekBar({
               ? 'group-hover:h-3 lg:group-hover:h-3.5'
               : 'group-hover:h-4 lg:group-hover:h-5 2xl:group-hover:h-6'
             : '',
+          // Pointer capture keeps the drag alive once the pointer leaves the bar, so the
+          // hover styling has to persist too — otherwise the bar shrinks mid-gesture.
+          isDragging && (compact ? 'h-3 lg:h-3.5' : 'h-4 lg:h-5 2xl:h-6'),
           disabled ? 'cursor-not-allowed bg-background/50' : '',
         )}
-        onClick={disabled ? undefined : handleClick}
-        onMouseMove={(e) => {
-          handleMouseMove(e);
-          if (!disabled) handleDrag(e);
-        }}
-        onMouseLeave={handleMouseLeave}
+        // `touch-action: none` is required, not cosmetic: without it the browser claims
+        // horizontal drags for scrolling and never reports them as pointer moves.
+        style={{ touchAction: 'none' }}
+        {...pointerHandlers}
         role="slider"
         tabIndex={disabled ? -1 : 0}
         aria-valuemin={0}

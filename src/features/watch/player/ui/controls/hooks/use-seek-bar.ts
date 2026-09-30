@@ -1,6 +1,6 @@
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchSpriteVtt, type SpriteCue } from '../../../../api';
+import { useDragSeek } from './use-drag-seek';
 
 interface SpriteSheet {
   imageUrl: string;
@@ -59,11 +59,36 @@ export function useSeekBar({
   allowPreview = false,
 }: UseSeekBarOptions) {
   const canPreview = (!disabled || allowPreview) && allowPreview;
-  const progress = duration ? (currentTime / duration) * 100 : 0;
   const bufferedProgress = duration ? (buffered / duration) * 100 : 0;
 
-  const [hoverTime, setHoverTime] = useState<number | null>(null);
-  const [hoverPosition, setHoverPosition] = useState(0);
+  const getTimeFromFraction = useCallback(
+    (fraction: number) => Math.max(0, Math.min(duration, fraction * duration)),
+    [duration],
+  );
+
+  const { barRef, isDragging, dragFraction, hoverFraction, pointerHandlers } =
+    useDragSeek({ getTimeFromFraction, onSeek, disabled });
+
+  /**
+   * While dragging, the bar follows the pointer rather than the element.
+   *
+   * The seek is not committed until release, so `currentTime` has not moved yet — without
+   * this the handle would sit still under the finger for the whole gesture.
+   */
+  const progress =
+    dragFraction !== null
+      ? dragFraction * 100
+      : duration
+        ? (currentTime / duration) * 100
+        : 0;
+
+  /** Preview follows the drag when there is one, otherwise the mouse hover. */
+  const previewFraction = dragFraction ?? hoverFraction;
+  const hoverTime =
+    previewFraction === null || !duration || !canPreview
+      ? null
+      : getTimeFromFraction(previewFraction);
+
   const [previewScale, setPreviewScale] = useState(() => {
     if (typeof window === 'undefined') return PREVIEW_SCALES.base;
     const width = window.innerWidth;
@@ -73,7 +98,6 @@ export function useSeekBar({
     if (width >= 1280) return PREVIEW_SCALES.lg;
     return PREVIEW_SCALES.base;
   });
-  const barRef = useRef<HTMLDivElement>(null);
   const [vttSprites, setVttSprites] = useState<SpriteCue[]>([]);
 
   useEffect(() => {
@@ -101,41 +125,6 @@ export function useSeekBar({
       cancelled = true;
     };
   }, [spriteVtt]);
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!canPreview || !barRef.current || !duration) return;
-      const rect = barRef.current.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      const time = Math.max(0, Math.min(duration, percent * duration));
-      setHoverTime(time);
-      setHoverPosition(e.clientX - rect.left);
-    },
-    [duration, canPreview],
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    setHoverTime(null);
-  }, []);
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (disabled || !barRef.current || !duration) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      const time = Math.max(0, Math.min(duration, percent * duration));
-      onSeek(time);
-    },
-    [duration, onSeek, disabled],
-  );
-
-  const handleDrag = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (disabled || e.buttons !== 1) return;
-      handleClick(e);
-    },
-    [handleClick, disabled],
-  );
 
   // Compute which sprite frame to show — only recalculates sprite data when
   // the frame index actually changes, not on every pixel of mouse movement.
@@ -181,14 +170,13 @@ export function useSeekBar({
     progress,
     bufferedProgress,
     hoverTime,
-    hoverPosition,
+    /** 0–1 along the bar; the component converts it to pixels for the tooltip. */
+    previewFraction,
+    isDragging,
     previewScale,
     barRef,
     vttSprites,
     getSpriteStyle,
-    handleMouseMove,
-    handleMouseLeave,
-    handleClick,
-    handleDrag,
+    pointerHandlers,
   };
 }

@@ -1,6 +1,9 @@
-import { useCallback, useRef } from 'react';
+'use client';
+
+import { useCallback } from 'react';
 import { usePlayerContext } from '../../context/PlayerContext';
 import { useMobileOrientation } from '../../hooks/useMobileOrientation';
+import { useDragSeek } from '../controls/hooks/use-drag-seek';
 
 /**
  * YouTube-style thin seekbar for mobile with dual behavior based on device orientation.
@@ -10,9 +13,15 @@ import { useMobileOrientation } from '../../hooks/useMobileOrientation';
  * seek — this matches YouTube's mobile portrait UX where the seekbar is purely visual.
  *
  * **Landscape mode (interactive):** Renders a taller touch target (40px) with the same
- * 3px visible bar at the bottom. Supports touch-drag seeking, tap-to-seek, and
- * keyboard arrow-key seeking (±10s). The bar shows both buffered (white/40%) and
- * played (red) progress.
+ * 3px visible bar at the bottom. Supports drag-to-seek, tap-to-seek, and keyboard
+ * arrow-key seeking (±10s). The bar shows both buffered (white/40%) and played (red)
+ * progress.
+ *
+ * The drag gesture is {@link useDragSeek}, shared with the desktop `SeekBar`: it previews
+ * while moving and commits one seek on release. It previously seeked on every `touchmove`
+ * — roughly 60 `currentTime` writes per second of drag, each emitting `seeking` and so
+ * making hls.js abort the fragments in flight, which is what produced stutter, garbage
+ * frames and decode errors while scrubbing.
  *
  * Read-only players (e.g. watch-party guests) disable all seek interactions regardless
  * of orientation.
@@ -20,61 +29,51 @@ import { useMobileOrientation } from '../../hooks/useMobileOrientation';
 export function PlayerMobileSeekBar() {
   const { state, playerHandlers, readOnly } = usePlayerContext();
   const isPortrait = useMobileOrientation();
-  const barRef = useRef<HTMLDivElement>(null);
-  const dragging = useRef(false);
-  const progress = state.duration
-    ? (state.currentTime / state.duration) * 100
-    : 0;
+
+  // Portrait is display-only, so a drag must not seek even before the early return below.
+  const seekDisabled = readOnly || isPortrait || !state.duration;
+
+  const getTimeFromFraction = useCallback(
+    (fraction: number) =>
+      Math.max(0, Math.min(state.duration, fraction * state.duration)),
+    [state.duration],
+  );
+
+  const { barRef, dragFraction, pointerHandlers } = useDragSeek({
+    getTimeFromFraction,
+    onSeek: playerHandlers.seek,
+    disabled: seekDisabled,
+  });
+
   const buffered = state.duration ? (state.buffered / state.duration) * 100 : 0;
+  /**
+   * Follows the finger during a drag: the seek is not committed until release, so
+   * `currentTime` has not moved yet and the bar would otherwise sit still under it.
+   */
+  const progress =
+    dragFraction !== null
+      ? dragFraction * 100
+      : state.duration
+        ? (state.currentTime / state.duration) * 100
+        : 0;
 
-  const seekFromTouch = useCallback(
-    (clientX: number) => {
-      if (readOnly || isPortrait || !barRef.current || !state.duration) return;
-      const rect = barRef.current.getBoundingClientRect();
-      const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-      playerHandlers.seek(pct * state.duration);
-    },
-    [readOnly, isPortrait, state.duration, playerHandlers],
+  /** The 3px bar itself, identical in both orientations. */
+  const bar = (
+    <div className="w-full h-[3px] bg-white/20 relative">
+      <div
+        className="absolute inset-y-0 left-0 bg-white/40"
+        style={{ width: `${buffered}%` }}
+      />
+      <div
+        className="absolute inset-y-0 left-0 bg-red-600"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
   );
-
-  const onTouchStart = useCallback(
-    (e: React.TouchEvent) => {
-      if (isPortrait) return;
-      dragging.current = true;
-      seekFromTouch(e.touches[0].clientX);
-    },
-    [isPortrait, seekFromTouch],
-  );
-
-  const onTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!dragging.current) return;
-      e.preventDefault();
-      seekFromTouch(e.touches[0].clientX);
-    },
-    [seekFromTouch],
-  );
-
-  const onTouchEnd = useCallback(() => {
-    dragging.current = false;
-  }, []);
 
   // Portrait: thin non-interactive progress bar at the very bottom
   if (isPortrait) {
-    return (
-      <div className="w-full pointer-events-none">
-        <div className="w-full h-[3px] bg-white/20 relative">
-          <div
-            className="absolute inset-y-0 left-0 bg-white/40"
-            style={{ width: `${buffered}%` }}
-          />
-          <div
-            className="absolute inset-y-0 left-0 bg-red-600"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-    );
+    return <div className="w-full pointer-events-none">{bar}</div>;
   }
 
   return (
@@ -86,11 +85,10 @@ export function PlayerMobileSeekBar() {
       aria-valuemax={state.duration}
       aria-valuenow={state.currentTime}
       className="w-full pointer-events-auto relative flex items-end"
+      // touchAction: none is required for pointer events to report a horizontal drag
+      // rather than the browser claiming it for scrolling.
       style={{ height: 40, touchAction: 'none' }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onClick={(e) => seekFromTouch(e.clientX)}
+      {...pointerHandlers}
       onKeyDown={(e) => {
         if (readOnly) return;
         if (e.key === 'ArrowRight')
@@ -100,16 +98,7 @@ export function PlayerMobileSeekBar() {
       }}
     >
       {/* Thin visible bar at the bottom of the touch target */}
-      <div className="w-full h-[3px] bg-white/20 relative">
-        <div
-          className="absolute inset-y-0 left-0 bg-white/40"
-          style={{ width: `${buffered}%` }}
-        />
-        <div
-          className="absolute inset-y-0 left-0 bg-red-600"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      {bar}
     </div>
   );
 }
