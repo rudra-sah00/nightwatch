@@ -304,18 +304,34 @@ no-referee design depends on — two clients would assign different times to the
 disagree about who is sitting where. **Bounding the type of `at` is possible; bounding its value is not,
 without a trusted timebase.**
 
-**The decision needed.** Two options, both behaviour changes:
+**The way forward, with one option eliminated by testing.**
 
-1. **Refuse to evict an occupied seat.** `applyClaim` would only contest *free* seats, so `at` would
-   matter solely for genuinely simultaneous grabs. Removes the whole class. Changes seating behaviour: a
-   seat held by a ghost claim stays held until reconciliation frees it, which is the case the module's
-   existing comment about untakeable seats was already worried about.
-2. **Stamp claims from a trusted timebase** — the party's synchronised clock via `useClockSync`, or host
-   arbitration. Correct, and also fixes the honest-slow-clock case, which option 1 does not. It changes
-   what `at` means on the wire, so mixed-version clients would compare different timebases.
+~~1. **Refuse to evict an occupied seat.**~~ **❌ UNSOUND — do not do this.** I proposed it as the smaller
+fix and it does not work: refusing to overwrite an occupied seat makes the outcome depend on *arrival
+order*, which differs per client, so it destroys the order-independence the whole no-referee design rests
+on. Demonstrated directly — given claims A(`at:100`, alice) and B(`at:50`, bob) on one seat, a client that
+receives A then B ends up showing alice, and a client that receives B then A shows bob. The two clients
+disagree about who is sitting there, which is a worse failure than the one being fixed. Order-independence
+requires a total order computed from claim data alone, which means the timestamp has to be trustworthy;
+there is no way around that by changing when the comparison applies.
 
-Option 1 is smaller and stops the malicious case; option 2 is the only one that also stops the accidental
-one. Neither is mine to choose.
+2. **Stamp claims from the party's synchronised clock** (`useClockSync.getServerTime()`). Fixes the
+   *accidental* case — a guest whose device clock is seconds slow stops evicting people — because every
+   client is then on the host's timebase, where the spread is network latency rather than clock drift. It
+   does **not** stop a deliberate liar, who can still send `at: 1`. Changes what `at` means on the wire,
+   so mixed-version clients would compare timebases differing by roughly one network hop — which is still
+   far tighter than the seconds of device-clock drift they differ by today, so the migration risk is low.
+   Note this inherits WP-M1's bias: a higher-latency guest gets a slightly earlier stamp and so a small
+   edge.
+
+3. **Host arbitration.** The only thing that stops a deliberate liar, because it is the only option where
+   the deciding value comes from somewhere the claimant does not control. It is an architectural change:
+   the module's own reasoning for having no referee — that admission is already the permission boundary,
+   and a round trip per claim is a real cost — remains sound, so this is a genuine trade rather than an
+   oversight to correct.
+
+Option 2 is the defensible increment and is worth doing on its own merits; option 3 is the real fix for
+the malicious case and should be a deliberate decision, not something slipped into a bug-fix pass.
 
 
 Found in the Phase 9 pass over `theatre/`. **Proven against the real rule, not reasoned.**
