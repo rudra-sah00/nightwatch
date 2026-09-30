@@ -426,6 +426,38 @@ about rather than observed.
 
 ### WP-M1 — Clock offset carries no round-trip compensation, so every guest sits systematically behind the host
 
+**🔶 QUANTIFIED, NOT FIXED — needs a decision.** Driven through `useClockSync` with host and guest
+clocks set exactly equal and one-way latencies of 40/90/60/150/70 ms, the computed `clockOffset` came
+out at **−70 ms, exactly the median latency**. The mechanism is confirmed precisely:
+
+```
+offset = trueOffset − medianOneWayLatency
+```
+
+A guest therefore runs behind the host by its own median one-way latency. The median filter removes
+jitter, as its docstring says, but every sample carries the same sign of error, so it cannot remove
+the bias — it only picks the middle one.
+
+**Why it is mild.** `usePredictiveSync`'s soft-correction threshold is 500 ms, so a 70 ms bias is
+absorbed silently rather than causing churn, and even a 300 ms one-way link stays inside it. Every
+guest is behind by *its own* latency, so what a user might actually notice is guests differing from
+each other by their latency *differences*, not the absolute lag.
+
+**Two ways to fix it, neither free:**
+
+1. **Take the maximum sample instead of the median.** Since `offset_i = trueOffset − latency_i`, the
+   largest offset is the sample that travelled fastest — NTP's min-delay filter. No protocol change,
+   costs nothing, but trades the median's robustness: one spuriously large offset (a host clock step,
+   a `Date.now()` jump) would be latched and held. Reduces the bias from median latency to minimum
+   latency — in the measured case, 70 ms to 40 ms.
+2. **Measure round-trip properly** with a ping/pong exchange over RTM and halve it. Correct, and what
+   real clock sync does. It is a new message pair and a protocol change.
+
+**Deliberately not done.** Option 1 buys ~30 ms in the measured case for a real loss of outlier
+robustness in a sync-critical path, and that trade cannot be justified without knowing actual RTM
+latency — which needs live Agora and a second participant. Option 2 is a protocol change. Both want
+a decision rather than an assumption.
+
 `src/features/watch-party/room/hooks/useClockSync.ts:23`:
 
 ```ts
@@ -455,6 +487,11 @@ participant — **not verifiable locally**.
 ## LOW
 
 ### WP-L1 — The emoji dedup timers are untracked and outlive unmount
+
+**✅ FIXED.** Registered in `timeoutsRef` alongside `spawnEmoji`'s removal timer, so the unmount
+effect clears it too. Five arrivals left five timers alive past unmount before the fix, zero after.
+Asserted on the pending-timer count, which is the only observable difference, with a second test
+confirming dedup keys still expire while mounted.
 
 `use-floating-emojis.ts:84`:
 
@@ -536,7 +573,8 @@ test-verified — the backend statements under WP-C1 come from reading the sourc
 - **Phase 6 — WP-H1. ✅ DONE.** Cap plus payload shape check. No send-side throttle — that is a UX
   decision, flagged in the finding rather than assumed.
 - **Phase 7 — WP-M2 / WP-M3 / WP-M4. ✅ DONE**, one commit each.
-- **Phase 8 — WP-M1 / WP-L1**, if judged worth the change.
+- **Phase 8 — WP-L1 ✅ DONE. WP-M1 quantified and left open** pending a decision between a
+  robustness trade and a protocol change — see the finding.
 - **Phase 9 — finish discovery**: the two sketch components, membership races, `useAgora` beyond
   listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
   until it was executed, the remaining findings should be treated as unproven until each is driven
