@@ -133,7 +133,17 @@ export function useFloatingEmojis() {
             `${msg.emoji}-${msg.userName}-${Math.floor(Date.now() / 500)}`;
           if (recentEmojiIds.current.has(dedupKey)) return;
           recentEmojiIds.current.add(dedupKey);
-          setTimeout(() => recentEmojiIds.current.delete(dedupKey), 2000);
+          /*
+            Registered in `timeoutsRef` like `spawnEmoji`'s removal timer, so the unmount effect
+            clears it too. It was previously the one timer in this hook left untracked — harmless in
+            effect, since the callback only mutates a ref that is about to be collected, but it is
+            the same class of leak the sibling timer was deliberately tracked to avoid.
+          */
+          const dedupTimer = setTimeout(() => {
+            timeoutsRef.current.delete(dedupTimer);
+            recentEmojiIds.current.delete(dedupKey);
+          }, 2000);
+          timeoutsRef.current.add(dedupTimer);
           spawnEmoji(msg.emoji, msg.userName || t('someone'));
         }
       },
