@@ -32,9 +32,14 @@ was well-formed*. A malformed `SKETCH_SYNC_STATE` silently replaced every recipi
 with a non-array — no throw, nothing logged — and the canvas then broke on the next legitimate
 stroke, far from the cause.
 
-**What is left is ordinary bug work**: an uncapped emoji list (WP-H1) and four MEDIUM/LOW items.
-The larger outstanding risk is not a finding but a gap — see
+**What is left is four MEDIUM items and one LOW** (WP-M1 through WP-M4, WP-L1), none of which has
+been driven through a mount yet. The larger outstanding risk is not a finding but a gap — see
 [§ Coverage honesty](#coverage-honesty).
+
+**A pattern worth noting across three fixed findings.** Every one was wrong in some part until it
+was executed: WP-C1's claim that playback was filtered downstream, WP-H2's claim that a bad payload
+throws, WP-H1's claim that repeated taps flood. In two of the three the reality was *worse* than
+written. Nothing in the remaining list should be trusted until it is run.
 
 ---
 
@@ -269,36 +274,43 @@ reasoning, and would need two clients on different versions to demonstrate.
 
 ---
 
-### WP-H1 — The floating-emoji list has no cap and emission has no rate limit
+### WP-H1 — The floating-emoji list has no cap
 
-`src/features/watch-party/interactions/hooks/use-floating-emojis.ts:51`:
+**✅ FIXED — `MAX_ACTIVE_EMOJIS` + payload shape check in `use-floating-emojis.ts`.** Regression
+test `tests/features/watch-party/wp-h1-emoji-bounds.test.ts` — 8 of its 12 cases fail against the
+unfixed hook.
 
-```ts
-setActiveEmojis((current) => [
-  ...current,
-  { id, emoji, userName, left, duration, rotation, wiggleOffsets },
-]);
-```
+**🔶 PARTLY WRONG AS WRITTEN.** The claim that "a held-down or scripted send produces unbounded
+simultaneous animations" is false for the honest case. The receive path de-duplicates on
+`messageId || `${emoji}-${userName}-${bucket500ms}`` and the sender never sets `messageId`, so the
+fallback is always active and repeated taps of one emoji by one user collapse to roughly two per
+second. Measured:
 
-Entries leave only on their own 4.5 s timer. There is no `slice`, no maximum, and no throttle:
-grep for `slice|MAX|length >|throttle|rateLimit|lastSent` across both
-`use-floating-emojis.ts` and `use-emoji-reactions.ts` returns nothing.
+| Dispatched | Entries before the fix |
+|---|---|
+| 50× same emoji, same sender, same 500 ms bucket | **1** — dedup works |
+| 500× distinct emoji strings | **500** |
+| 200× same emoji, distinct senders | **200** |
+| a 100,000-character string as `emoji` | **accepted and stored verbatim** |
+| any of the above, after 4.5 s | **0** |
 
-The deduplication at `:80-84` is not a rate limit — it collapses *identical* messages within
-500 ms buckets, so distinct emoji, or any sender varying `messageId`, passes straight through.
+So the defect is narrower and sharper than written: the dedup constrains neither axis of its own
+key, and the many-senders case is the one a real party reaches without anyone trying. The last row
+matters too — entries do expire, so this was a burst ceiling problem rather than the permanent leak
+the original wording implied.
 
-**Consequence.** Every concurrent emoji is a live animated DOM node. A held-down or scripted
-send produces unbounded simultaneous animations for all members, not just the sender; emoji is
-one of the ungated types in WP-C1, so there is no permission to revoke to stop it either.
+**Also found while measuring, and not in the original finding:** `emoji` was rendered straight off
+the wire with no `typeof` and no length check. That is now validated.
 
-Worth contrasting with the sketch canvas, which **is** capped at 200 actions
-(`SketchContext.tsx:130-142`). The same class of growth was considered in one interaction surface
-and not the other.
+**Deliberately not done: no send-side throttle.** `use-emoji-reactions.ts:29` has no rate limit, but
+adding one changes what a rapid tapper experiences, which is a UX decision rather than a defect fix.
+The receive-side cap bounds the damage without changing how the picker feels. Flagged rather than
+assumed.
 
-**How I could be wrong.** If the emitting UI debounces at the button. I have not yet read
-`use-emoji-reactions.ts` in full or the button component, so the practical ceiling for an
-*honest* client is unmeasured — but a hostile or scripted one has no ceiling at all. The visible
-frame-rate consequence needs a real browser and is **not verifiable in happy-dom**.
+**How I could be wrong.** The cap of 40 is judgement, not measurement — I have not profiled the
+frame cost of 40 concurrent animations versus 200, which needs a real browser and is **not
+verifiable in happy-dom**. If 40 turns out to be visibly restrictive in a large party, it is one
+constant.
 
 ---
 
@@ -501,7 +513,8 @@ test-verified — the backend statements under WP-C1 come from reading the sourc
   — the others leave `actions` a valid array even when the individual action is junk. A malformed
   *action* can still reach Konva and is not covered here; that is a separate finding nobody has
   written yet.
-- **Phase 6 — WP-H1**, emoji cap and send throttle. Independent of everything else.
+- **Phase 6 — WP-H1. ✅ DONE.** Cap plus payload shape check. No send-side throttle — that is a UX
+  decision, flagged in the finding rather than assumed.
 - **Phase 7 — WP-M2 / WP-M3 / WP-M4**, small and independent of each other.
 - **Phase 8 — WP-M1 / WP-L1**, if judged worth the change.
 - **Phase 9 — finish discovery**: the two sketch components, membership races, `useAgora` beyond

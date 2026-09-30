@@ -14,6 +14,31 @@ export interface FloatingEmoji {
 }
 
 /**
+ * Ceiling on emoji animating at once.
+ *
+ * The list was previously bounded only by each entry's own 4.5 s timer, which bounds nothing when
+ * arrivals outpace expiry. Measured before this cap: 500 distinct emoji strings produced 500
+ * simultaneous entries, and 200 senders of the *same* emoji produced 200, because the dedup below
+ * keys on emoji and sender together and so does not constrain either axis. Every entry is a live
+ * animated DOM node, and emoji is one of the message kinds with no permission to revoke, so there
+ * was no way to stop a flood once it started.
+ *
+ * 40 is well above anything a real party produces — ten members reacting every couple of seconds
+ * sits around 20 — and far below a number that costs frames.
+ */
+const MAX_ACTIVE_EMOJIS = 40;
+
+/**
+ * Longest string accepted as an emoji.
+ *
+ * `emoji` arrives off the wire and is rendered as text with no length check: a 100,000-character
+ * string was accepted and stored verbatim. A ZWJ sequence with skin-tone modifiers — a family
+ * emoji is the worst realistic case — stays under about 25 UTF-16 units, so this rejects abuse
+ * without rejecting anything a picker can legitimately send.
+ */
+const MAX_EMOJI_LENGTH = 32;
+
+/**
  * Manages the list of active floating emoji animations.
  *
  * Listens for incoming `INTERACTION` events via {@link onPartyInteraction}
@@ -48,10 +73,24 @@ export function useFloatingEmojis() {
         -60 + Math.random() * 120,
       ];
 
-      setActiveEmojis((current) => [
-        ...current,
-        { id, emoji, userName, left, duration, rotation, wiggleOffsets },
-      ]);
+      setActiveEmojis((current) => {
+        const next = [
+          ...current,
+          { id, emoji, userName, left, duration, rotation, wiggleOffsets },
+        ];
+        /*
+          Drop from the front when over the ceiling. The oldest entries are the ones furthest
+          through their animation, so they are the least disruptive to lose — and losing the tail
+          of an animation is a far better failure than an unbounded number of them.
+
+          Their expiry timers are left alone deliberately: each filters by id and becomes a no-op
+          once its entry is already gone, and cancelling them here would mean tracking which ids
+          were dropped for no benefit.
+        */
+        return next.length > MAX_ACTIVE_EMOJIS
+          ? next.slice(next.length - MAX_ACTIVE_EMOJIS)
+          : next;
+      });
 
       // Remove emoji after animation (4s max)
       const timerId = setTimeout(() => {
@@ -75,6 +114,19 @@ export function useFloatingEmojis() {
         messageId?: string;
       }) => {
         if (msg.type === 'INTERACTION' && msg.kind === 'emoji' && msg.emoji) {
+          /*
+            `emoji` is rendered as text straight off the wire. It was accepted at any length — a
+            100,000-character string was stored and rendered verbatim — and `typeof` was never
+            checked, so a non-string would reach the dedup key and the DOM. The WP-C1 sender gate
+            does not cover INTERACTION (there is no emoji permission to consult), so shape is the
+            only check available here.
+          */
+          if (
+            typeof msg.emoji !== 'string' ||
+            msg.emoji.length > MAX_EMOJI_LENGTH
+          ) {
+            return;
+          }
           // Deduplicate RTM retries using messageId if present
           const dedupKey =
             msg.messageId ||
