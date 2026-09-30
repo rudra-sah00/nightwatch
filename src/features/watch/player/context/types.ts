@@ -151,7 +151,29 @@ export function playerReducer(
     case 'SET_BUFFERING':
       return { ...state, isBuffering: action.isBuffering };
     case 'SET_ERROR':
-      return { ...state, error: action.error, isLoading: false };
+      /*
+        A real error also ends buffering. `WatchVODPlayer` gates the ErrorOverlay on
+        `!isBuffering` and the BufferingOverlay on `isBuffering`, so leaving the flag
+        set made the two guards mutually exclusive: every `useHls` path that dispatched
+        `SET_BUFFERING: true` and later gave up — level-parsing retries exhausted, media
+        recovery past its budget, the decode timer in `use-video-element` — landed in a
+        state with an error nobody could see and a spinner that never stopped. Only
+        `handlePlaying` cleared `isBuffering`, and reaching `playing` is exactly what a
+        terminal failure prevents.
+
+        Clearing is conditional on a non-null error because `SET_ERROR: null` is the
+        normal "no error" reset, dispatched on load, `canplay` and `playing`. Clearing
+        `isBuffering` there too would hide the spinner during ordinary buffering.
+
+        `isPlaying`/`isPaused` are deliberately left alone: the element's own `pause`
+        event owns those, and forcing them here would desynchronise the two.
+      */
+      return {
+        ...state,
+        error: action.error,
+        isLoading: false,
+        isBuffering: action.error ? false : state.isBuffering,
+      };
     case 'SET_FULLSCREEN':
       return { ...state, isFullscreen: action.isFullscreen };
     case 'SHOW_CONTROLS':
