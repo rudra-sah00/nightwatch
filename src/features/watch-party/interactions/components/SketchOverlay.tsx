@@ -148,17 +148,32 @@ export function SketchOverlay({
     something no longer on the stage.
   */
   useEffect(() => {
-    if (isSketchMode && currentTool === 'select' && selectedId) {
-      const stage = transformerRef.current?.getStage();
-      const selectedNode = stage?.findOne(`#${selectedId}`);
-      if (selectedNode) {
-        transformerRef.current?.nodes([selectedNode]);
-        transformerRef.current?.getLayer()?.batchDraw();
-      }
-      return;
-    }
-    transformerRef.current?.nodes([]);
-    transformerRef.current?.getLayer()?.batchDraw();
+    const transformer = transformerRef.current;
+    if (!transformer) return;
+
+    const wantsSelection =
+      isSketchMode && currentTool === 'select' && selectedId;
+    /*
+      Look the node up only when a selection is wanted, and fall through to clearing when it is not
+      found.
+
+      The previous shape of this returned early inside the found-branch, so a `selectedId` whose node
+      had gone left the transformer still holding the *previous* node — the exact stale reference the
+      comment above describes fixing. The common removals reset `selectedId` and so re-ran this with
+      nothing selected, which hid it; the trim at `MAX_SKETCH_ACTIONS` does not, because dropping the
+      oldest actions never touches the selection.
+
+      `actions` is deliberately not a dependency. It changes on every pointer-move of every stroke in
+      the party, and re-running this at that rate is the same mistake the laser-fade effect was fixed
+      for. So a node trimmed while still selected is cleared on the next selection or tool change
+      rather than instantly, which is a stale pair of handles at worst.
+    */
+    const node = wantsSelection
+      ? transformer.getStage()?.findOne(`#${selectedId}`)
+      : undefined;
+
+    transformer.nodes(node ? [node] : []);
+    transformer.getLayer()?.batchDraw();
   }, [isSketchMode, currentTool, selectedId]);
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
