@@ -318,6 +318,14 @@ constant.
 
 ### WP-M2 — `SKETCH_SYNC_STATE` carries a `targetId` that no receiver ever reads
 
+**✅ FIXED.** `rtm-events.ts` forwards the field (normalising a non-string or empty value to
+`undefined`); the overlay hook compares it against its own id. Accepted when absent or when this
+client has no id yet. 3 of 5 new cases fail against the old behaviour. An earlier draft asserted
+the guard by re-implementing its predicate inline, which passes whatever the source does, and was
+replaced with a real mount of `SketchOverlay`. The existing `watch-party.api.test.ts` assertion
+pinned `{ elements: [] }` exactly — the field being dropped, i.e. the defect as contract — and was
+corrected in place.
+
 `use-sketch-overlay.ts:250-256` addresses the sync response to one requester:
 
 ```ts
@@ -344,6 +352,12 @@ rather than a defect. Either way it should not remain a field that looks like an
 is not one.
 
 ### WP-M3 — Members who cannot draw still broadcast cursor positions ten times a second, and every receiver discards them
+
+**✅ FIXED.** The `canDraw` guard moved above the broadcast, since nothing further down
+`handleMouseMove` means anything without it. Measured five wasted broadcasts across five pointer
+moves before the fix, zero after. `isDrawing` is deliberately not part of the guard — hovering must
+still broadcast for someone who can draw — and there is a test pinning that so the two conditions
+cannot later be folded together.
 
 `use-sketch-overlay.ts:523-535` broadcasts the cursor, and the `canDraw` check does not arrive
 until `:537`:
@@ -374,6 +388,12 @@ approaches it, the only cost is billing. Measuring either needs live Agora — *
 locally**.
 
 ### WP-M4 — The join-approval poll writes state and fires a toast after unmount
+
+**✅ FIXED.** `socketCleaned` is re-checked after each await. Confirmed by parking the first request
+on a suspended promise, unmounting, then resolving it approved — the only interleaving that
+reproduces it. A positive control asserts a poll completing while mounted still announces approval.
+The audit's reasoning held here: React 19 makes the setState calls no-ops and the toast was indeed
+the visible symptom.
 
 `useWatchPartyLifecycle.ts:181-201`. The 10-second REST fallback checks the cleanup flag on entry
 and then awaits twice without rechecking it:
@@ -515,7 +535,7 @@ test-verified — the backend statements under WP-C1 come from reading the sourc
   written yet.
 - **Phase 6 — WP-H1. ✅ DONE.** Cap plus payload shape check. No send-side throttle — that is a UX
   decision, flagged in the finding rather than assumed.
-- **Phase 7 — WP-M2 / WP-M3 / WP-M4**, small and independent of each other.
+- **Phase 7 — WP-M2 / WP-M3 / WP-M4. ✅ DONE**, one commit each.
 - **Phase 8 — WP-M1 / WP-L1**, if judged worth the change.
 - **Phase 9 — finish discovery**: the two sketch components, membership races, `useAgora` beyond
   listener balance, and the theatre seat-claim rule. Given that Phase 5's central claim was wrong
