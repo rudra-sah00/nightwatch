@@ -13,6 +13,16 @@ interface UseMp4Options {
 }
 
 /**
+ * How long to wait for `loadedmetadata` on native platforms before treating the stream
+ * as unplayable.
+ *
+ * Only armed on Capacitor: the CF Worker can return a response AVPlayer refuses to
+ * decode, and unlike the browser it fails silently rather than emitting an `error`
+ * event. Cancelled as soon as metadata arrives.
+ */
+const WATCHDOG_MS = 20000;
+
+/**
  * Manages direct MP4 source playback (non-HLS).
  *
  * Sets the video `src`, handles `loadedmetadata` and error events,
@@ -43,7 +53,22 @@ export function useMp4({
     dispatch({ type: 'SET_LOADING', isLoading: true });
     video.src = streamUrl;
 
+    /*
+      Handle for the native load watchdog set up below. Declared here so
+      `handleLoadedMetadata` can cancel it: the effect cleanup was previously the only
+      thing that cleared it, and the deps are `[streamUrl, videoRef, dispatch]`, none of
+      which change while playback continues. So on Capacitor every *successful* MP4
+      playback still fired the watchdog 20 s in, triggering a full stream refetch and
+      engine remount while the user was watching.
+    */
+    let metadataTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const handleLoadedMetadata = () => {
+      // The stream loaded, so the watchdog has nothing left to catch.
+      if (metadataTimeout) {
+        clearTimeout(metadataTimeout);
+        metadataTimeout = null;
+      }
       dispatch({ type: 'SET_ERROR', error: null });
       dispatch({ type: 'SET_LOADING', isLoading: false });
       video.play().catch((_err) => {});
@@ -79,17 +104,18 @@ export function useMp4({
 
     // Timeout: if loadedmetadata doesn't fire within 20s on native platforms,
     // the stream is likely unplayable — trigger expired to retry or show error.
-    let metadataTimeout: ReturnType<typeof setTimeout> | null = null;
+    // Cancelled by handleLoadedMetadata on success.
     const isNative =
       typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.();
     if (isNative) {
       metadataTimeout = setTimeout(() => {
+        metadataTimeout = null;
         if (onStreamExpiredRef.current) {
           onStreamExpiredRef.current();
         } else {
           dispatch({ type: 'SET_ERROR', error: 'Video failed to load' });
         }
-      }, 20000);
+      }, WATCHDOG_MS);
     }
 
     return () => {
