@@ -133,6 +133,11 @@ describe('AuthProvider & Zustand Store', () => {
     });
 
     expect(useAuthStore.getState().user).toBe(null);
-    expect(window.location.href).toBe('/continue');
+    // The redirect now waits for the backend to clear the HttpOnly session
+    // cookie, and carries `signedOut` so the proxy guard renders the login page
+    // even if that clear failed.
+    await vi.waitFor(() =>
+      expect(window.location.href).toBe('/continue?signedOut=1'),
+    );
   });
 });

@@ -15,7 +15,12 @@ Our authentication strategy is a heavily secured, token-based system managed cen
 Route protection is handled at the layout level using React Server Components. The `(protected)` route group layouts verify session cookies before rendering:
 - Checks for `refreshToken` cookie presence (NOT `accessToken` alone, since it expires every 15 min).
 - **Protected routes** → redirect to `/continue?from={path}` if no session cookie exists.
-- **Auth route** (`/continue`) → redirect to `/home` if session exists.
+- **Auth route** (`/continue`) → redirect to `/home` if session exists, unless the
+  URL carries `signedOut=1`. Sign-out appends that flag because `refreshToken` is
+  HttpOnly and only the backend can clear it — a failed clear would otherwise
+  leave the user bounced back into the app with no route to the login page.
+  `clearCookiesAndRedirect` also waits for the logout response (capped at 2s)
+  before navigating, so the cookie is normally gone by the time the guard runs.
 
 ### 2. Client-Side Token Refresh (`src/lib/fetch.ts`)
 The `apiFetch()` wrapper intercepts 401 responses:

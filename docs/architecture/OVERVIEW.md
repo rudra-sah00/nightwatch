@@ -28,7 +28,7 @@ It performs an **optimistic** check only: it reads the durable `refreshToken` co
 
 *   **Deny by default.** Everything is protected unless listed in `PUBLIC_PATHS` (`/`, `/continue`, `/privacy`, `/terms`) or matched by `PUBLIC_PREFIXES` (`/auth/`, `/clip/share/`, `/user/`, `/watch-party/`). A newly added route is guarded automatically.
 *   **Destination preservation.** Unauthenticated requests redirect to `/continue?from=<path>`; `ContinueClient` re-validates that value before navigating.
-*   **Signed-in users** hitting `/continue` are redirected to `/home`.
+*   **Signed-in users** hitting `/continue` are redirected to `/home` — unless the URL carries `signedOut`, which the sign-out path appends. The session cookie is HttpOnly, so only the backend can clear it; if that request fails the cookie outlives the sign-out and this redirect would otherwise make the login page unreachable.
 *   **Matcher** `['/((?!api|_next|.*\\.[\\w]+$).*)']` skips `/api`, Next internals, and any path with a file extension, which keeps `sw.js`, `firebase-messaging-sw.js`, `manifest.json`, and `public/` assets reachable while signed out — both the service worker and PWA install require this.
 
 `accessToken` is deliberately not the signal: it expires every 15 minutes, so its absence does not mean the user is signed out.

@@ -112,6 +112,28 @@ describe('proxy — signed-in visitors', () => {
     expect(redirectTarget(res)?.pathname).toBe('/home');
   });
 
+  /**
+   * The session cookie is HttpOnly, so a sign-out that failed to reach the
+   * backend leaves it in place. Without this escape hatch the redirect above
+   * sends the user back into the app and the login page is unreachable.
+   */
+  it('renders the login page when the client signals it just signed out', () => {
+    const res = proxy(request('/continue?signedOut=1', { session: true }));
+    expect(res.headers.get('location')).toBeNull();
+  });
+
+  it('accepts the signed-out flag alongside other query params', () => {
+    const res = proxy(
+      request('/continue?signedOut=1&from=%2Fhome', { session: true }),
+    );
+    expect(res.headers.get('location')).toBeNull();
+  });
+
+  it('still bounces when the flag is absent but other params are present', () => {
+    const res = proxy(request('/continue?from=%2Fhome', { session: true }));
+    expect(redirectTarget(res)?.pathname).toBe('/home');
+  });
+
   it('still allows the marketing landing page', () => {
     const res = proxy(request('/', { session: true }));
     expect(res.headers.get('location')).toBeNull();

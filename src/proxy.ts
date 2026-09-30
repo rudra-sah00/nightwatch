@@ -68,7 +68,17 @@ export default function proxy(request: NextRequest): NextResponse {
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
 
   // Signed-in users have no reason to see the login page.
-  if (hasSession && pathname === LOGIN_PATH) {
+  //
+  // `signedOut` is the one exception. The session cookie is HttpOnly, so only
+  // the backend can clear it; if that request failed or was aborted the cookie
+  // outlives the sign-out and this redirect would send the user straight back
+  // into the app, with no route to the login page. Honouring the flag costs
+  // nothing — `/continue` is public, and rendering it grants no access.
+  if (
+    hasSession &&
+    pathname === LOGIN_PATH &&
+    !request.nextUrl.searchParams.has('signedOut')
+  ) {
     return NextResponse.redirect(new URL(HOME_PATH, request.nextUrl));
   }
 

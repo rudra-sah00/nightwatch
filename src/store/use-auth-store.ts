@@ -68,6 +68,16 @@ export interface AuthFlash {
 
 export const AUTH_FLASH_KEY = 'auth_flash';
 
+/** Login route signed-out users land on. Mirrors `LOGIN_PATH` in `proxy.ts`. */
+const LOGIN_PATH = '/continue';
+
+/**
+ * How long to wait for the backend to clear the session cookie before
+ * redirecting anyway. Long enough for a normal round trip, short enough that an
+ * offline or hung request still lets the user go.
+ */
+const LOGOUT_WAIT_MS = 2000;
+
 function clearCookiesAndRedirect(flash?: string | AuthFlash) {
   if (flash) {
     try {
@@ -87,8 +97,27 @@ function clearCookiesAndRedirect(flash?: string | AuthFlash) {
   clearStoredUser();
   sessionStorage.removeItem('guest_token');
   sessionStorage.removeItem('guest_refresh_token');
-  logoutUser({ skipRefresh: true } as RequestInit).catch(() => {});
-  if (typeof window !== 'undefined') window.location.href = '/continue';
+
+  // `refreshToken` is HttpOnly, so only the backend can clear it, and the proxy
+  // guard keys off exactly that cookie. Navigating before the logout response
+  // lands leaves the cookie in place, and the guard then bounces /continue
+  // straight back to /home — the user cannot reach the login page at all.
+  // A hard navigation can abort an in-flight request, so wait for logout before
+  // leaving, but cap the wait so a hung or offline request cannot trap anyone.
+  // `signedOut` tells the guard to render the login page even if the cookie did
+  // outlive this call, which keeps a failed clear from becoming a redirect loop.
+  const leave = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = `${LOGIN_PATH}?signedOut=1`;
+    }
+  };
+  const loggedOut = logoutUser({ skipRefresh: true } as RequestInit).catch(
+    () => {},
+  );
+  const deadline = new Promise((resolve) =>
+    setTimeout(resolve, LOGOUT_WAIT_MS),
+  );
+  void Promise.race([loggedOut, deadline]).then(leave, leave);
 }
 
 export interface AuthState {
