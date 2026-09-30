@@ -32,9 +32,6 @@ export function useVideoElement({
   ref,
 }: UseVideoElementOptions) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const pendingErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
 
   const mergedRef = useCallback(
     (el: HTMLVideoElement | null) => {
@@ -52,13 +49,6 @@ export function useVideoElement({
   useEffect(() => {
     const video = videoRef?.current;
     if (!video) return;
-
-    const clearPendingError = () => {
-      if (pendingErrorTimerRef.current) {
-        clearTimeout(pendingErrorTimerRef.current);
-        pendingErrorTimerRef.current = null;
-      }
-    };
 
     const handlePlay = () => dispatch({ type: 'PLAY' });
     const handlePause = () => dispatch({ type: 'PAUSE' });
@@ -91,14 +81,12 @@ export function useVideoElement({
       trackEvent('video_buffer_start');
     };
     const handlePlaying = () => {
-      clearPendingError();
       dispatch({ type: 'SET_LOADING', isLoading: false });
       dispatch({ type: 'SET_BUFFERING', isBuffering: false });
       dispatch({ type: 'SET_ERROR', error: null });
       trackEvent('video_buffer_end');
     };
     const handleCanPlay = () => {
-      clearPendingError();
       dispatch({ type: 'SET_LOADING', isLoading: false });
       dispatch({ type: 'SET_ERROR', error: null });
     };
@@ -107,11 +95,32 @@ export function useVideoElement({
       if (!target?.error) return;
       if (target.error.code !== MediaError.MEDIA_ERR_DECODE) return;
 
-      clearPendingError();
-      pendingErrorTimerRef.current = setTimeout(() => {
-        pendingErrorTimerRef.current = null;
-        dispatch({ type: 'SET_ERROR', error: 'Video playback error' });
-      }, 1200);
+      /*
+        Report, do not decide.
+
+        This handler used to start a 1200 ms timer and then dispatch
+        `SET_ERROR: 'Video playback error'`, which made it a second owner of "playback has
+        failed" racing the engine that was already handling the same event. The engine
+        nearly always lost: `hls.recoverMediaError()` rebuilds the MediaSource and needs at
+        least one fragment fetch, and the `onStreamExpired` path makes a full backend
+        round-trip, so both routinely exceed 1200 ms. `clearPendingError` on
+        `playing`/`canplay` cancelled the toast when recovery was fast, but a reload-based
+        recovery cannot be. The result was an error shown for a failure the player then
+        silently recovered from — and, before the reducer fix, an unrecoverable spinner when
+        `isBuffering` was still set.
+
+        Every engine already owns this: `useHls` handles fatal MEDIA_ERROR for MSE and
+        installs `nativeErrorHandler` for native HLS, `useMp4` and `useDash` have their own
+        error paths. So there is nothing for this handler to add except the signal itself,
+        which is worth keeping because the decode code is the `is_key_frame=0` open-GOP
+        signature described in SEEKING.md.
+      */
+      trackEvent('video_element_decode_error', {
+        mediaErrorCode: target.error.code,
+        mediaErrorMessage: target.error.message,
+        currentTime: Math.round(target.currentTime),
+        readyState: target.readyState,
+      });
     };
     const handleEnded = () => dispatch({ type: 'PAUSE' });
     const handleLoadStart = () => {};
@@ -137,7 +146,6 @@ export function useVideoElement({
     video.addEventListener('abort', handleAbort);
 
     return () => {
-      clearPendingError();
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('timeupdate', handleTimeUpdate);
