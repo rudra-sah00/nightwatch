@@ -132,15 +132,38 @@ export function useSubtitleOverlay({
     handleCueChange();
 
     const textTracks = video.textTracks;
-    const cleanupListeners: (() => void)[] = [];
+    let cleanupListeners: (() => void)[] = [];
 
-    for (let i = 0; i < textTracks.length; i++) {
-      const track = textTracks[i];
-      track.addEventListener('cuechange', handleCueChange);
-      cleanupListeners.push(() =>
-        track.removeEventListener('cuechange', handleCueChange),
-      );
-    }
+    /*
+      Re-bound whenever the track list changes, not captured once.
+
+      The listeners used to be attached to a snapshot of `video.textTracks` taken when the
+      effect ran, with deps `[videoRef, currentTrackId]`. hls.js can replace the underlying
+      `TextTrack` on a level switch or a discontinuity without `currentTrackId` changing, which
+      left every listener on an orphaned track: subtitles simply stopped updating mid-playback
+      until the user toggled them off and on. The 2s safety poll below only covers the first
+      moments after mount, so it did not catch a switch later in the film.
+
+      `addtrack`/`removetrack` on the `TextTrackList` are how the element reports that swap.
+    */
+    const bindCueListeners = () => {
+      for (const remove of cleanupListeners) remove();
+      cleanupListeners = [];
+      for (let i = 0; i < textTracks.length; i++) {
+        const track = textTracks[i];
+        track.addEventListener('cuechange', handleCueChange);
+        cleanupListeners.push(() =>
+          track.removeEventListener('cuechange', handleCueChange),
+        );
+      }
+      // The replacement track may already hold the active cue.
+      handleCueChange();
+    };
+
+    bindCueListeners();
+    textTracks.addEventListener?.('addtrack', bindCueListeners);
+    textTracks.addEventListener?.('removetrack', bindCueListeners);
+    textTracks.addEventListener?.('change', bindCueListeners);
 
     // Safety: poll briefly for cue readiness after a track switch,
     // in case the VTT is still loading and cuechange hasn't fired yet.
@@ -153,9 +176,10 @@ export function useSubtitleOverlay({
 
     return () => {
       clearInterval(pollTimer);
-      cleanupListeners.forEach((remove) => {
-        remove();
-      });
+      textTracks.removeEventListener?.('addtrack', bindCueListeners);
+      textTracks.removeEventListener?.('removetrack', bindCueListeners);
+      textTracks.removeEventListener?.('change', bindCueListeners);
+      for (const remove of cleanupListeners) remove();
     };
   }, [videoRef, currentTrackId]);
 
