@@ -8,6 +8,7 @@ import { trackEvent } from '@/lib/analytics';
 import { env } from '@/lib/env';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
+  checkRoomExists,
   createPartyRoom,
   getPartyStreamToken,
   getRoomDetails,
@@ -27,6 +28,14 @@ interface UseWatchPartyLifecycleProps {
   setError: React.Dispatch<React.SetStateAction<string | null>>;
   setErrorCode: React.Dispatch<React.SetStateAction<string | null>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  /**
+   * Reports the room's host id once it becomes readable.
+   *
+   * A guest's room preview carries no `hostId` before it holds a token, which is why the RTM join
+   * handshake could not be checked for guests. Calling the preview endpoint again after `requestJoin`
+   * has stored the guest token does return it, and that is what this reports.
+   */
+  setResolvedHostId?: (hostId: string) => void;
   setAgoraRtmToken: React.Dispatch<
     React.SetStateAction<{ token: string; appId: string; uid: string } | null>
   >;
@@ -62,6 +71,7 @@ export function useWatchPartyLifecycle({
   roomId,
   rtmSendMessage,
   setAgoraRtmToken,
+  setResolvedHostId,
 }: UseWatchPartyLifecycleProps) {
   const t = useTranslations('common.toasts');
   const tp = useTranslations('party.toasts');
@@ -304,6 +314,23 @@ export function useWatchPartyLifecycle({
           if (response.guestToken && typeof window !== 'undefined') {
             sessionStorage.setItem('guest_token', response.guestToken);
           }
+          /*
+            Learn the host id now, so the inbound `JOIN_APPROVED` can be checked against it.
+
+            This is the only window in which it is both needed and obtainable: `hostId` is withheld
+            from unauthenticated previews, but we now hold a guest token and `apiFetch` sends it, so
+            the same endpoint returns it. Best-effort and deliberately not awaited — a failure, or an
+            approval that arrives before this resolves, leaves the handshake ungated exactly as it was
+            before, rather than delaying a legitimate join.
+          */
+          if (setResolvedHostId) {
+            checkRoomExists(roomId)
+              .then((result) => {
+                const hostId = result.preview?.hostId;
+                if (hostId) setResolvedHostId(hostId);
+              })
+              .catch(() => {});
+          }
           setRequestStatus('pending');
           return { success: true, status: 'pending' };
         }
@@ -342,6 +369,7 @@ export function useWatchPartyLifecycle({
       setRoom,
       setIsConnected,
       normalizeRoomUrls,
+      setResolvedHostId,
       tp,
     ],
   );

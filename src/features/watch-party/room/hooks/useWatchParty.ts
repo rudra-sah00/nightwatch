@@ -46,6 +46,21 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   const router = useRouter();
   const { userId, roomId, expectedHostId } = options;
 
+  /*
+    The host id learned after a join request, once a guest token exists.
+
+    An unauthenticated visitor's room preview carries no `hostId` — the backend withholds it — so
+    `options.expectedHostId` is undefined for exactly the guests the join handshake is aimed at. But a
+    guest holds a guest token from the moment `requestJoin` succeeds, and `apiFetch` sends it, so the
+    same preview endpoint then does return `hostId`. `useWatchPartyLifecycle` fetches it at that point
+    and reports it here, which is what lets the handshake be checked for guests too.
+  */
+  const [resolvedHostId, setResolvedHostId] = useState<string | undefined>(
+    undefined,
+  );
+  /** Lobby-supplied host id for authenticated viewers, else the one resolved after requesting. */
+  const effectiveHostId = expectedHostId ?? resolvedHostId;
+
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
@@ -156,7 +171,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         this keeps the same line out of the live panel, which RTM would otherwise
         deliver without the server ever seeing it.
       */
-      if (!isRtmMessageAllowed(room, senderId, msg, expectedHostId)) return;
+      if (!isRtmMessageAllowed(room, senderId, msg, effectiveHostId)) return;
 
       // Route messages to sub-hooks
       chat.handleIncomingRtmMessage(msg);
@@ -276,6 +291,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     roomId,
     rtmSendMessage,
     setAgoraRtmToken,
+    setResolvedHostId,
   });
 
   // 3. Members Hook
