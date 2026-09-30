@@ -67,7 +67,14 @@ export function normalizeRawUrls(
     captionUrl: normalized.captionUrl ?? null,
     spriteVtt: normalized.spriteVtt,
     qualities: normalized.qualities,
-    subtitleTracks: undefined,
+    // `normalizeWatchUrls` has already proxied each track's `src` through
+    // `wrapInProxy`, exactly as it does for captions and sprites. Returning
+    // `undefined` here threw that away, so the token path — the normal one — started
+    // with no subtitle tracks while the no-token branch above kept them. They were
+    // recovered a moment later by `applySubtitles` once audio-track discovery
+    // responded, which is why this surfaced as subtitles appearing late rather than
+    // never.
+    subtitleTracks: normalized.subtitleTracks,
   };
 }
 
