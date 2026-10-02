@@ -251,6 +251,33 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
             if (typeof window !== 'undefined') {
               sessionStorage.removeItem('guest_token');
             }
+          } else if (msg.targetUserId) {
+            /*
+              Other members must also drop the kicked user from their roster.
+
+              Without this, a KICK removed the member on the host (who called
+              `kickUser`) and on the kicked user themselves, but every other
+              member's `room.members` still contained them — and the 3D theatre
+              kept drawing their avatar in a chair until Agora presence noticed
+              the dropped connection, which can take 10-30 seconds.
+
+              Authenticated members eventually hear the server's Socket.IO
+              `MEMBER_LEFT` for the same departure, and `sonner` deduplicates the
+              toast. Guests never receive the Socket.IO event (their socket is not
+              in `room:<id>`), so this RTM path is the only way they learn about
+              it.
+            */
+            membersHandlerRef.current({
+              type: 'MEMBER_LEFT',
+              userId: msg.targetUserId,
+            });
+            // Then the local event bus, so the 3D theatre despawns the avatar
+            // and frees the seat through the same subscribers an RTM departure
+            // reaches — same pattern as the Socket.IO MEMBER_LEFT handler below.
+            dispatchRtmMessage({
+              type: 'MEMBER_LEFT',
+              userId: msg.targetUserId,
+            });
           }
           break;
         }

@@ -19,6 +19,7 @@ export function useViewModeHotkey(active: boolean) {
   const cycle = useTheatreView((s) => s.cycle);
   const phase = useTheatreView((s) => s.phase);
   const enabled = useTheatreView((s) => s.enabled);
+  const enable = useTheatreView((s) => s.enable);
   const showProgress = useTheatreView((s) => s.showProgress);
 
   useEffect(() => {
@@ -39,8 +40,15 @@ export function useViewModeHotkey(active: boolean) {
       if (phase !== 'ready') {
         e.preventDefault();
         if (!enabled) {
-          toast.info('3D theatre is not enabled', {
-            description: 'Turn it on in watch party settings.',
+          // Auto-enable 3D and start the asset download. Previously this showed
+          // a toast telling the user to find the toggle in settings, which most
+          // joined members never found — they pressed V, saw a brief toast, and
+          // concluded 3D was broken. Enabling directly makes V a one-press
+          // action: the download starts, the progress card appears, and the next
+          // V press after it finishes enters the room.
+          enable();
+          toast.info('Downloading 3D theatre assets…', {
+            description: 'Press V again once ready.',
             id: 'theatre-not-enabled',
           });
         } else if (phase === 'downloading' || phase === 'error') {
@@ -67,5 +75,5 @@ export function useViewModeHotkey(active: boolean) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [active, cycle, phase, enabled, showProgress]);
+  }, [active, cycle, phase, enabled, enable, showProgress]);
 }
