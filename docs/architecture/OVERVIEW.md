@@ -13,7 +13,7 @@ Nightwatch is a **single package**, not a multi-package monorepo. A `pnpm-worksp
 *   **Styling**: Tailwind CSS v4, CSS-native `@theme` configuration, softened neo-brutalist theme. See [UI_GUIDELINES.md](./UI_GUIDELINES.md).
 *   **Server State**: TanStack Query (client-side caching, background revalidation, optimistic updates).
 *   **Client State**: Zustand — two persisted stores (`src/store/use-auth-store.ts`, `src/features/music/store/use-music-store.ts`) plus a small non-persisted theatre view-mode store. The video player uses `useReducer`, not Zustand.
-*   **Real-time Infrastructure**: Agora RTM (watch-party signalling and chat), Agora RTC (WebRTC video/voice), and Socket.IO (`src/lib/socket.ts`) — actively used for presence, friends, voice-call signalling, music device sync, remote control, and watch progress. It is not a legacy fallback.
+*   **Real-time Infrastructure**: Agora RTM (watch-party signalling and chat), Agora RTC (WebRTC video/voice), and Socket.IO (`src/lib/socket.ts`) — actively used for presence, friends, voice-call signalling, music device sync, remote control, watch progress, and as the watch party's backup transport (`watch-party:relay`) when Agora RTM is down.
 *   **Video Engine**: `hls.js` and `dash.js` behind a shared engine abstraction, with dynamic manifest swapping.
 *   **Native Bridges**: `desktopBridge` (`src/lib/electron-bridge.ts`) and `mobileBridge` (`src/lib/mobile-bridge.ts`), both no-ops off-platform.
 *   **Quality Config**: `biome.json` (lint + format, replacing ESLint/Prettier), Vitest (unit/component), Playwright (E2E).
@@ -75,7 +75,7 @@ There is no `src/features/explore/` — the hub feature replaced it, and `Explor
 
 `watch-party/` is the largest domain and is internally sliced further:
 
-*   **`chat/`**: Messaging hooks and overlays over Agora RTM.
+*   **`chat/`**: Messaging hooks and overlays over the party transport (Agora RTM, with the Socket.IO relay as backup).
 *   **`components/`**: Room UI, participant tiles, overlays.
 *   **`hooks/`**: Shared UI state — fullscreen detection, media controls, floating tiles.
 *   **`interactions/`**: `useGestureDetection.ts` (camera hand tracking), `useSoundboard.ts`, `SketchContext.tsx` (drawing over the video).

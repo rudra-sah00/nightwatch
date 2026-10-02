@@ -61,7 +61,7 @@ Last synced with the code: 2026-09-23.
 | Canvas + room + seating | `theatre/components/TheatreScene/TheatreRoom/TheatreSeating.tsx` | Room and all ten chairs batched per material |
 | Walking | `theatre/hooks/use-avatar-controls.ts` + `components/LocalPlayer.tsx` | Rapier kinematic controller, WASD + Shift |
 | Collision | `theatre/components/TheatreColliders.tsx` | Static boxes from `layout.ts`, not a trimesh |
-| Networking | `theatre/hooks/use-theatre-network.ts` | Agora RTM, 8 Hz + dead band |
+| Networking | `theatre/hooks/use-theatre-network.ts` | Agora RTM, 8 Hz + dead band; Socket.IO relay at 4 Hz while RTM is down (§6) |
 | Interpolation | `theatre/lib/interpolation.ts` | 160 ms snapshot buffer |
 | Remote avatars | `theatre/components/RemoteAvatar.tsx` | `SkeletonUtils` clone per peer |
 | Animation | `theatre/hooks/use-avatar-animation.ts` + `lib/animation.ts` | Mixer + crossfade state machine |
@@ -657,18 +657,19 @@ worse than a stale avatar, because the deterministic rule makes it
 **untakeable** — a ghost claim carries an early timestamp, so every later claim
 on that chair loses to it and the seat stays reserved for somebody who left.
 
-There are now three independent signals that someone has gone, because no single
+There are now several independent signals that someone has gone, because no single
 one of them is reliable:
 
 | Signal | Who it covers | Weakness |
 |---|---|---|
-| RTM `MEMBER_LEFT`, broadcast by the leaver in `useWatchPartyLifecycle.leaveRoom` | everyone, including guests | fire-and-forget, and sent while the client is navigating away |
-| Socket.IO `MEMBER_LEFT` / `MEMBERS_UPDATED` from `MembershipService` | authenticated members | a guest's socket is not in `room:<id>`, so it never reaches them |
+| `MEMBER_LEFT` broadcast by the leaver in `useWatchPartyLifecycle.leaveRoom`, over RTM and the Socket.IO relay | everyone, including guests | sent while the client is navigating away |
+| Socket.IO `MEMBER_LEFT` / `MEMBERS_UPDATED` from `MembershipService` | every member, guests included since their socket joins `room:<id>` | a closed tab never calls the leave endpoint |
+| `KICK` from the host | every member drops the kicked id, despawning the avatar at once | — |
 | Agora presence `REMOTE_LEAVE` / `REMOTE_TIMEOUT` | everyone | only sets `disconnected`; a dropped socket surfaces as a timeout, whenever Agora notices |
 
 Until 2026-09-23 only the third existed: nothing in the frontend emitted
 `MEMBER_LEFT` and nothing listened for the backend's socket events, so a guest
-pressing Leave left a body sitting in a chair. All three paths are idempotent and
+pressing Leave left a body sitting in a chair. All paths are idempotent and
 converge on the same result, so arriving together costs nothing. The socket path
 folds the server's roster in with `mergeMembers`, which keeps local
 `disconnected` flags — replacing the list verbatim would resurrect a dead tab as
@@ -697,8 +698,25 @@ Seated view on sit. Smooth interpolated transition both ways.
 
 ## 6. Network Protocol
 
-Rides on the existing Agora RTM channel. Extends the `RTMMessage` discriminated
-union in `room/types/rtm-messages.ts`.
+Rides on the party's transport (`useWatchPartyTransport`). Extends the `RTMMessage`
+discriminated union in `room/types/rtm-messages.ts`.
+
+The two theatre messages are routed differently, because they differ by orders of
+magnitude in rate:
+
+- **`SEAT_CLAIM`** is control traffic: sent over Agora RTM **and** the Socket.IO
+  relay through our server, de-duplicated on receipt. A claim lost to an RTM outage
+  would leave a chair looking free on some clients and taken on others, which the
+  deterministic rule cannot repair because the claim never arrived.
+- **`AVATAR_TRANSFORM`** stays on RTM while it is up. While RTM is down it falls back
+  to the relay with a trailing throttle of 4 Hz — half the normal rate, and still
+  above the 2 s heartbeat that keeps an idle avatar alive. The interpolation buffer
+  absorbs the lower rate. The relay overwrites `userId` with the authenticated
+  sender, so a pose cannot be published on someone else's behalf.
+
+Known gap: poses are relayed only by a sender whose *own* RTM is down. A member
+whose RTM alone has failed sees remote avatars freeze until it recovers; seats,
+chat and playback still reach it.
 
 ### New message types
 

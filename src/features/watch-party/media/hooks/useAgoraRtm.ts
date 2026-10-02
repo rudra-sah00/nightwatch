@@ -66,6 +66,21 @@ export function mapLinkStateToConnectionState(
 export type { RTMMessage };
 
 /**
+ * Delay before RTM login attempt number `failures + 1`.
+ *
+ * Exponential from 1 s, capped at 30 s — the cadence the SDK itself uses once
+ * SUSPENDED — with up to 25% jitter so a party whose members all failed together
+ * does not retry in lockstep against the same Agora edge.
+ */
+export function rtmRetryDelayMs(
+  failures: number,
+  random = Math.random,
+): number {
+  const base = Math.min(30_000, 1000 * 2 ** Math.max(0, failures));
+  return Math.round(base * (1 + 0.25 * random()));
+}
+
+/**
  * Options passed into `useAgoraRtm`.
  */
 interface UseAgoraRtmOptions {
@@ -126,6 +141,21 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
     useState<RtmConnectionState>('DISCONNECTED');
   const [isConnected, setIsConnected] = useState(false);
 
+  /*
+    Recovery.
+
+    The SDK recovers from DISCONNECTED and SUSPENDED by itself, but not from a
+    failed first login (network blip, Agora edge unreachable) and not from FAILED
+    (expired or rejected token) — both need `login` again. Previously neither was
+    retried: one toast, and the party ran without signalling for the rest of the
+    session. Bumping `retryNonce` re-runs the connection effect from scratch.
+
+    `failuresRef` drives the backoff and is a ref, not state, so that resetting it
+    on success does not itself re-run the effect.
+  */
+  const [retryNonce, setRetryNonce] = useState(0);
+  const failuresRef = useRef(0);
+
   /**
    * Send a typed RTM message to all participants in the current channel.
    * Message is serialised to JSON before transmission.
@@ -176,6 +206,17 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
     let cleaned = false;
     let client: typeof AgoraRTMType.RTM.prototype | null = null;
     let fallbackCleanup = () => {};
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+    /** Tear this attempt down and start a fresh one after a backoff. Once per attempt. */
+    const scheduleRetry = () => {
+      if (cleaned || retryTimer) return;
+      const delay = rtmRetryDelayMs(failuresRef.current);
+      failuresRef.current += 1;
+      retryTimer = setTimeout(() => {
+        if (!cleaned) setRetryNonce((n) => n + 1);
+      }, delay);
+    };
 
     // IIFE to dynamically import client and login to handle SSR environment safely
     (async () => {
@@ -236,9 +277,15 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
           } else if (event.currentState === 'FAILED') {
             // Only FAILED is a real error the user must know about. IDLE is
             // the normal resting state before login and after logout.
-            toast.error(tp('disconnectedSignaling'), {
-              id: 'rtm-connection',
-            });
+            //
+            // The SDK does not retry FAILED; we do, with a fresh token, since an
+            // expired or rejected token is the usual cause.
+            if (failuresRef.current === 0) {
+              toast.error(tp('disconnectedSignaling'), {
+                id: 'rtm-connection',
+              });
+            }
+            scheduleRetry();
           }
         };
 
@@ -317,7 +364,30 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
         }
 
         setConnectionState('CONNECTING');
-        await client.login({ token });
+
+        // A retry cannot assume the token it was handed still works — expiry is
+        // the commonest reason to be here at all — so fetch a fresh one. Falls
+        // back to the original if the fetch fails; the attempt just fails again.
+        let loginToken = token;
+        if (retryNonce > 0) {
+          try {
+            const { getAgoraRtmToken } = await import('../services/agora.api');
+            const fresh = await getAgoraRtmToken({
+              channelName: channel,
+              guestId: userId,
+              guestName: userId,
+            });
+            if (fresh?.token) loginToken = fresh.token;
+          } catch {
+            // keep the original token
+          }
+          if (cleaned) {
+            fallbackCleanup();
+            return;
+          }
+        }
+
+        await client.login({ token: loginToken });
 
         // Brief delay to let the presence service connect after login.
         // Agora's presence sub-service initializes asynchronously and
@@ -349,22 +419,30 @@ export function useAgoraRtm(options: UseAgoraRtmOptions) {
 
         setConnectionState('CONNECTED');
         setIsConnected(true);
+        failuresRef.current = 0;
+        toast.dismiss('rtm-connection');
       } catch {
         if (!cleaned) {
-          toast.error(tp('failedConnectSignaling'));
+          // Only the first failure is announced. Later ones are the retry loop
+          // working, and the party keeps running over the Socket.IO relay.
+          if (failuresRef.current === 0) {
+            toast.error(tp('failedConnectSignaling'), { id: 'rtm-connection' });
+          }
           setConnectionState('DISCONNECTED');
           setIsConnected(false);
+          scheduleRetry();
         }
       }
     })();
 
     return () => {
       cleaned = true;
+      if (retryTimer) clearTimeout(retryTimer);
       setConnectionState('DISCONNECTING');
       setIsConnected(false);
       fallbackCleanup();
     };
-  }, [token, appId, channel, userId, tp]);
+  }, [token, appId, channel, userId, tp, retryNonce]);
 
   return {
     /** Send a channel message to all watch party participants */

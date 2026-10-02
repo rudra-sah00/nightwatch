@@ -11,8 +11,8 @@ The frontend talks to several data planes:
 | Plane | Transport | Used for |
 |-------|-----------|----------|
 | Nightwatch backend | REST over `apiFetch` | Auth, profile, watchlist, search, music, manga, games, clips, livestream, watch progress |
-| Socket.IO (`src/lib/socket.ts`) | WebSocket | Presence, friends, voice-call signalling, music device sync, remote control, watch activity |
-| Agora RTM | SDK | Watch-party signalling, chat, avatar transforms |
+| Socket.IO (`src/lib/socket.ts`) | WebSocket | Presence, friends, voice-call signalling, music device sync, remote control, watch activity, watch-party server events and the `watch-party:relay` backup for Agora RTM |
+| Agora RTM | SDK | Watch-party signalling, chat, avatar transforms. Primary path; `useWatchPartyTransport` falls back to the Socket.IO relay when it is down |
 | Agora RTC | WebRTC | Watch-party video/audio, friend voice calls |
 | Firebase | SDK | Analytics, Crashlytics (native), Cloud Messaging push |
 

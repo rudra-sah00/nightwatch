@@ -47,7 +47,7 @@ Detailed technical documentation lives in [`/docs`](./docs/README.md), organized
 - [Search Engine](./docs/features/search/README.md): debounced URL-parameter driven queries and infinite scroll facets.
 - [Watch Content](./docs/features/watch/README.md): VOD operations, HLS/DASH engines, and progress synchronization.
 - [Watchlist](./docs/features/watchlist/README.md): optimistic UI and TanStack Query caching.
-- [Watch Party](./docs/features/watch-party/README.md): decentralized peer-to-peer event pipelines over Agora RTM.
+- [Watch Party](./docs/features/watch-party/README.md): real-time party signalling over Agora RTM, with a Socket.IO relay through our server as backup.
 - [Watch Party — Live TV](./docs/features/watch-party/LIVE_TV.md): watching a live channel together and blocked-autoplay recovery.
 - [3D Theatre Mode](./docs/features/watch-party/THEATRE_3D.md): opt-in 3D auditorium — R3F scene, Rapier walking, avatar sync.
 - [Livestream Framework](./docs/features/livestream/README.md): IPTV channel browse, categories, and stream resolution.
@@ -70,7 +70,7 @@ Detailed technical documentation lives in [`/docs`](./docs/README.md), organized
 - **Language:** TypeScript (Strict Mode)
 - **Styling:** Tailwind CSS v4 (CSS-native `@theme`, custom neo-brutalist palette)
 - **Internationalization:** next-intl (14 languages, cookie-based)
-- **Real-Time Data:** Agora RTM (watch party signalling and chat), Socket.IO (friends, presence, voice-call signalling, music device sync, remote control)
+- **Real-Time Data:** Agora RTM (watch party signalling and chat), Socket.IO (watch party relay backup, friends, presence, voice-call signalling, music device sync, remote control)
 - **Real-Time Media:** Agora RTC (WebRTC — watch party, voice calls)
 - **Video:** `hls.js` and `dash.js` behind a shared engine abstraction
 - **Server State & Caching:** TanStack Query (`useQuery`, `useMutation`, stale-while-revalidate)

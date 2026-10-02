@@ -156,7 +156,11 @@ describe('useWatchParty — server-authoritative party closure', () => {
   it('puts a non-host member in the server broadcast room', async () => {
     const hook = await joinedAsGuest();
 
-    expect(socketEmit).toHaveBeenCalledWith('watch-party:join_room', 'R1');
+    expect(socketEmit).toHaveBeenCalledWith(
+      'watch-party:join_room',
+      'R1',
+      expect.any(Function),
+    );
 
     hook.unmount();
   });
@@ -201,7 +205,11 @@ describe('useWatchParty — server-authoritative party closure', () => {
       fire('connect');
     });
 
-    expect(socketEmit).toHaveBeenCalledWith('watch-party:join_room', 'R1');
+    expect(socketEmit).toHaveBeenCalledWith(
+      'watch-party:join_room',
+      'R1',
+      expect.any(Function),
+    );
 
     hook.unmount();
   });

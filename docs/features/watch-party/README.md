@@ -1,6 +1,6 @@
 # Watch Party
 
-Decentralized peer-to-peer watch party system built on Agora RTM (Real-Time Messaging) for signaling and Agora RTC for voice/video. The host's playback state is the single source of truth; guests receive state updates via RTM and apply predictive drift correction to stay in sync.
+Watch party system with two signalling paths — Agora RTM (Real-Time Messaging), peer to peer, and a Socket.IO relay through our own server as its backup — plus Agora RTC for voice/video. The host's playback state is the single source of truth; guests receive state updates over whichever path delivers first and apply predictive drift correction to stay in sync. See [Transport](#transport-agora-rtm--socketio-relay).
 
 **Source:** `src/features/watch-party/components/`, `src/features/watch-party/hooks/`, `src/features/watch-party/room/`, `src/features/watch-party/media/`, `src/features/watch-party/chat/`, `src/features/watch-party/interactions/`
 
@@ -26,7 +26,7 @@ Decentralized peer-to-peer watch party system built on Agora RTM (Real-Time Mess
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Signaling layer:** All real-time events (play, pause, seek, chat, sketch, emoji, soundboard) are transmitted as JSON-encoded Agora RTM channel messages. The discriminated union type `RTMMessage` in `room/types/rtm-messages.ts` defines every possible message shape.
+**Signaling layer:** All real-time events (play, pause, seek, chat, sketch, emoji, soundboard, 3D theatre) are JSON messages of the discriminated union `RTMMessage` in `room/types/rtm-messages.ts`. They travel over Agora RTM and, as a backup, over the Socket.IO relay `watch-party:relay`: control messages on both paths, high-frequency ones on the relay only while RTM is down. `useWatchPartyTransport` owns that routing; nothing else in the feature knows which path a message took.
 
 **Backend persistence:** State mutations that require validation (join, approve, kick, content update) use REST calls under `room/services/rest/`, re-exported from `room/services/watch-party.api.ts`. RTM handles the real-time broadcast; REST handles the durable write.
 
@@ -64,6 +64,7 @@ src/features/watch-party/
 ├── room/                 # Room lifecycle & sync
 │   ├── hooks/
 │   │   ├── useWatchParty.ts          # Master orchestrator
+│   │   ├── useWatchPartyTransport.ts # RTM + Socket.IO relay: routing, guest socket auth, dedupe
 │   │   ├── useWatchPartyLifecycle.ts # Create/join/leave/cancel
 │   │   ├── useWatchPartyMembers.ts   # Approve/reject/kick + presence
 │   │   ├── useWatchPartySync.ts      # Host↔guest playback sync
@@ -85,6 +86,8 @@ src/features/watch-party/
 │   ├── types.ts                      # Room, member, state, event types
 │   ├── types/
 │   │   └── rtm-messages.ts           # Full RTM message union type
+│   ├── lib/
+│   │   └── transport.ts              # Pure routing, dedupe, playback ordering, relay throttle
 │   ├── permissions.ts                # canChat / canDraw / canPlaySound + inbound RTM gate
 │   └── utils.ts                      # Room ID generator, host check, URL normalisation
 ├── media/                # Agora RTC/RTM integration
@@ -286,36 +289,133 @@ function of its argument, and React may call it more than once.
 `room/hooks/useWatchParty.ts` — Master orchestrator
 
 Composes all sub-hooks into a single API:
-1. **Agora RTM** — `useAgoraRtm` for channel messaging with `onMessage` router that dispatches to chat, members, and sync handlers.
-2. **Chat** — `useWatchPartyChat` (RTM variant)
-3. **Lifecycle** — `useWatchPartyLifecycle`
-4. **Members** — `useWatchPartyMembers`
-5. **Sync** — `useWatchPartySync`
-6. **Clock** — `useClockSync`
+1. **Agora RTM** — `useAgoraRtm` for channel messaging.
+2. **Transport** — `useWatchPartyTransport` wraps RTM with the Socket.IO relay. Its `send` / `sendToPeer` are what every sub-hook receives as `rtmSendMessage` / `rtmSendMessageToPeer`, and RTM and relay inbound both go to one handler, `handleInbound`, which dispatches to chat, members, and sync.
+3. **Chat** — `useWatchPartyChat` (RTM variant)
+4. **Lifecycle** — `useWatchPartyLifecycle`
+5. **Members** — `useWatchPartyMembers`
+6. **Sync** — `useWatchPartySync`
+7. **Clock** — `useClockSync`
 
-Handles top-level RTM messages: `JOIN_APPROVED`, `JOIN_REJECTED`, `KICK`, `PARTY_CLOSED`. Sends `SYNC_REQUEST` on guest RTM connect. Fetches initial chat messages on join.
+Handles top-level RTM messages: `JOIN_APPROVED`, `JOIN_REJECTED`, `KICK`, `PARTY_CLOSED`. Sends `SYNC_REQUEST` once a guest has *either* path up, and fetches initial chat messages on join under the same condition — both used to wait for RTM alone, so a guest whose RTM never connected never asked for state.
 
 It also owns two things that used to be missing or host-only:
 
 - **The inbound RTM permission gate.** Every message passes
   `isRtmMessageAllowed(room, senderId, msg, expectedHostId)` before any sub-hook or the event bus
   sees it. See [Interaction permissions](#interaction-permissions).
-- **Socket.IO room membership, for every authenticated member.** It emits
-  `watch-party:join_room` on mount and on reconnect, `watch-party:leave_room` on
-  teardown, and handles `watch-party:closed` by tearing the session down and
-  navigating away. Previously the *only* place that joined `room:<id>` was a
-  host-gated effect in `useWatchPartyMembers`, so no other member was in the
-  server's broadcast room and none of the server's party events —
-  `MEMBERS_UPDATED`, `MEMBER_LEFT`, `CONTENT_UPDATED`, `PERMISSIONS_UPDATED`,
-  `watch-party:closed` — could reach them.
+- **The server's party events**, for every member — guests included:
+  `watch-party:closed` tears the session down and navigates away, and
+  `MEMBERS_UPDATED` / `MEMBER_LEFT` fold the server's roster in. Joining
+  `room:<id>` is owned by `useWatchPartyTransport`, which for a guest first
+  authenticates the lobby socket with its guest token. Until that existed guests
+  were never in the server room and these events could not reach them; see
+  [Transport](#transport-agora-rtm--socketio-relay).
 
-  Authenticated members only. A guest's socket is opened by
-  `use-watch-party-client` *before* `requestJoin` has run, so it carries no
-  `guest_token` and the backend cannot verify it is a member of this room —
-  `watch-party:join_room` answers `NOT_A_MEMBER`. Guests still depend on the RTM
-  `PARTY_CLOSED` broadcast. Closing that gap means re-initialising the shared
-  socket with the guest token after approval, which is a change to the socket
-  provider that friends and presence also use.
+## Transport: Agora RTM + Socket.IO relay
+
+`room/hooks/useWatchPartyTransport.ts`, `room/lib/transport.ts`
+
+Every party signal used to ride Agora RTM alone, so RTM was a single point of
+failure for the whole feature. When it failed to connect or dropped, the host's
+play/pause/seek reached nobody and guests ran free, a kicked guest kept watching
+(a kick is enforced by the kicked client), and party closure, permission and
+content changes were lost. Guests had no second channel at all. Sends were dropped
+silently: `sendMessage` returned early when RTM was down, and a failed first login
+or a `FAILED` link state was never retried.
+
+The backup is a relay through our own server, `watch-party:relay` on the backend
+(see the backend's [watch-party architecture](../../../../nightwatch-backend/docs/architecture/watch-party.md#socketio-relay-the-backup-for-agora-rtm)).
+Socket.IO was chosen over a second third-party realtime service because it is
+already deployed and scaled across PM2 instances with the Redis adapter, already
+membership-checks `room:<id>`, redelivers on reconnect, and — unlike RTM — lets
+the server stamp the sender and enforce host authority.
+
+### Routing
+
+| Class | Types | RTM up | RTM down |
+|---|---|---|---|
+| Control | playback (`PLAY_EVENT`…`SYNC`, `SYNC_REQUEST`), membership (`MEMBER_JOINED`/`LEFT`, `KICK`, `PARTY_CLOSED`), `CHAT`, permissions, `CONTENT_UPDATED`, `STREAM_TOKEN`, sketch strokes, `INTERACTION`, `SEAT_CLAIM` | **both** | relay |
+| High-frequency | `AVATAR_TRANSFORM`, `SKETCH_CURSOR_MOVE`, `TYPING_START`/`STOP` | RTM only | relay, throttled |
+| Handshake | `JOIN_APPROVED`, `JOIN_REJECTED` | RTM only | not sent |
+
+Control messages are a handful per minute, so sending them twice costs nothing and
+whichever copy arrives first wins. High-frequency traffic stays off our server
+while RTM works — ten walking avatars at 8 Hz would be ~800 msg/s per room — and
+falls back with a trailing throttle (avatar 4 Hz, cursor 5 Hz). Trailing, not
+leading-edge: dropping the last pose of a walk would leave a stopped avatar frozen
+short of where it stood. The handshake is RTM-only because it goes to a *pending*
+guest, who is not a member and so cannot be reached through the room; the server
+already sends the outcome as `JOIN_RESULT`.
+
+`send` changes identity when connectivity changes, as RTM's own `sendMessage` did.
+The 3D theatre relies on that to re-announce its pose the moment a path comes back.
+
+### Receiving
+
+RTM and relay inbound both go to `handleInbound` in `useWatchParty`, in this order:
+
+1. **Permission gate** — `isRtmMessageAllowed`. For the relay, `senderId` is the
+   server-stamped `from`, an authenticated identity exactly like the Agora
+   publisher id, so the gate means the same thing on either path. The server also
+   refuses host-only types from non-hosts, so this is now enforced twice.
+2. **De-duplication** — each outbound message carries one `_mid`, identical on both
+   paths; the receiver drops an id it has seen (bounded, 2000 ids). Messages with no
+   id — an older client — are always accepted, so a mixed-version party degrades to
+   RTM behaviour rather than silence. Runs *after* the gate so a refused message
+   does not use up its id.
+3. **Playback ordering** — two paths can reorder. A `PLAY` whose fast copy lands
+   after a newer `SEEK` would rewind guests. Host playback events are ordered by
+   their `serverTime` (one host, one clock); a stamp more than 10 s older than the
+   last is treated as a host clock reset rather than a straggler, so a clock
+   adjustment cannot freeze sync.
+
+### Guests on the server room
+
+A guest's shared socket is opened in the lobby, before it holds a guest token, so
+the server knows it only as `guest:<socketId>`. Re-handshaking would tear down the
+socket the lobby, friends and presence share, so instead the transport presents the
+token in-band — `watch-party:guest_auth` — then emits `watch-party:join_room`, and
+repeats both on every reconnect (a reconnect is a fresh handshake that still carries
+the tokenless query). `relayReady` is true only once the join is acknowledged.
+
+### RTM recovery
+
+`useAgoraRtm` now retries a failed first login and logs in again on `FAILED`, with
+exponential backoff from 1 s capped at 30 s plus 25% jitter (`rtmRetryDelayMs`), and
+fetches a fresh RTM token for each retry, since expiry is the usual cause. Only the
+first failure is toasted — later ones are the loop working while the party runs over
+the relay. `DISCONNECTED` and `SUSPENDED` are still left to the SDK, which recovers
+them itself.
+
+### Presence: both sources must agree
+
+`room/lib/presence-merge.ts`
+
+Presence used to come from Agora RTM alone, which the relay made dangerous: a member
+whose RTM drops mid-party is reported LEAVE while still watching over the relay. That
+flagged them `disconnected` (avatar gone, seat freed), had the host auto-kick them
+after two minutes, and — for the host — sent every guest home after sixty seconds.
+
+The server now reports socket presence (`watch-party:presence`, plus an `online`
+snapshot in the `join_room` ack). `createPresenceMerger` combines the two: a member is
+present when **either** source says so and gone only when **both** do, and it emits
+the same JOIN/LEAVE events `useWatchPartySync` and `useWatchPartyMembers` always
+consumed, on changes of that combined state only. Against a backend without socket
+presence it degrades to RTM-only exactly as before.
+
+### Not covered yet
+
+- **One member down while others are up.** High-frequency traffic is relayed only by
+  a sender whose *own* RTM is down. If only the receiver's RTM is down, it gets no
+  avatar poses or cursors until it recovers. Control traffic is unaffected.
+- **Stale socket presence while your own socket is down.** The snapshot is refreshed
+  on rejoin; until then a relay-only member who left stays "present" to you. RTM
+  presence still covers everyone on RTM.
+- **Playback state is not server-authoritative.** A reconnecting client still asks
+  the host (`SYNC_REQUEST`) rather than reading the server. Planned.
+- **Kicks are enforced by the kicked client** plus the relay refusing them as a
+  non-member; their stream session is not revoked server-side. Planned.
 
 ## Interaction permissions
 
@@ -355,9 +455,10 @@ control that could only ever fail and be shown an error for it.
 | `canPlaySound` | No — RTM only | Receiver |
 
 `isRtmMessageAllowed(room, senderId, message, expectedHostId)` is the receiver-side gate, applied
-once in `useWatchParty`'s `onMessage` so it covers both the sub-hook handlers and
-the `rtm-events` bus. `senderId` is the Agora publisher id — the authenticated
-channel identity, not a payload field a sender could edit.
+once in `useWatchParty`'s `handleInbound` so it covers both the sub-hook handlers
+and the `rtm-events` bus, for both transports. `senderId` is the Agora publisher id
+for RTM and the server-stamped `from` for the relay — an authenticated identity in
+both cases, not a payload field a sender could edit.
 
 Gated on `canDraw`: `SKETCH_DRAW`, `SKETCH_UNDO`, `SKETCH_CLEAR`, `SKETCH_MOVE_Z`,
 `SKETCH_CURSOR_MOVE`, `SKETCH_REACTION`, `SKETCH_SYNC_STATE`. Gated on
@@ -442,12 +543,13 @@ Manages room creation, join requests, approval polling (Socket.IO for pending st
 
 ### How a departure propagates
 
-Three independent signals, because no single one of them is reliable:
+Independent signals, because no single one of them is reliable:
 
 | Signal | Covers | Weakness |
 |---|---|---|
-| RTM `MEMBER_LEFT`, from the leaver in `useWatchPartyLifecycle.leaveRoom` | everyone, guests included | fire-and-forget, sent while the client is navigating away |
-| Socket.IO `MEMBER_LEFT` / `MEMBERS_UPDATED`, from `MembershipService` | authenticated members | a guest's socket is not in `room:<id>`, so it never reaches them |
+| `MEMBER_LEFT` from the leaver in `useWatchPartyLifecycle.leaveRoom`, over RTM **and** the relay | everyone, guests included | sent while the client is navigating away |
+| Socket.IO `MEMBER_LEFT` / `MEMBERS_UPDATED`, from `MembershipService` | every member, guests included | none for deliberate leaves and kicks; a closed tab never calls the endpoint |
+| `KICK` from the host, over RTM and the relay | every member drops the kicked id from its roster | — |
 | Agora presence `REMOTE_LEAVE` / `REMOTE_TIMEOUT` / batched `INTERVAL` | everyone | only sets `disconnected`; a dropped socket surfaces as a timeout, whenever Agora notices |
 
 Until 2026-09-23 only the third existed. Nothing in the frontend emitted
@@ -456,7 +558,7 @@ server had been emitting to `room:<id>` all along — so a guest pressing Leave 
 announced only by Agora presence, and in the 3D theatre their avatar stayed sitting
 in its chair while their seat claim outlived them.
 
-All three paths are idempotent and converge on the same roster, so arriving
+All paths are idempotent and converge on the same roster, so arriving
 together costs nothing. The socket path folds the server's list in with
 `mergeMembers`, which keeps local `disconnected` flags: the server does not know
 about that flag, so replacing the list verbatim would resurrect a dead tab as
@@ -473,8 +575,8 @@ Manages membership: approve/reject/kick via REST + RTM broadcast. Features:
 - **Permission updates**: Listens for `LOCAL_PERMISSIONS_UPDATED` and `LOCAL_MEMBER_PERMISSIONS_UPDATED` CustomEvents from the settings panel.
 - **RTM handler**: Processes `MEMBER_JOINED`, `MEMBER_LEFT`, `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`.
 - **Socket.IO**: host-only `PENDING_MEMBERS_UPDATED` only. It no longer emits
-  `watch-party:join_room` / `leave_room` — `useWatchParty` owns the socket room for
-  every authenticated member. Two owners of one join meant this hook's cleanup
+  `watch-party:join_room` / `leave_room` — `useWatchPartyTransport` owns the socket
+  room for every member. Two owners of one join meant this hook's cleanup
   could drop the host out of `room:<id>` while the other effect still believed it
   was in.
 
@@ -585,7 +687,7 @@ failing for live TV:
    touches anything.
 3. **The room's persisted `state`,** which the backend now initialises to
    `isPlaying: true` for live rooms. See
-   [the backend's watch-party doc](../../../nightwatch-backend/docs/architecture/watch-party.md#live-rooms-start-playing).
+   [the backend's watch-party doc](../../../../nightwatch-backend/docs/architecture/watch-party.md#live-rooms-start-playing).
 
 ### Host derivation
 
@@ -904,8 +1006,8 @@ singleton and a set of stateless fetch wrappers have nothing in common but the w
 
 1. Host clicks play → `<video>` fires `play` event
 2. `useWatchPartyHostSync` debounces (100ms) → calls `onPartyEvent({ eventType: 'play', videoTime, playbackRate })`
-3. `useWatchPartySync.emitEvent` broadcasts `PLAY_EVENT` via RTM + persists to backend
-4. Guest's `useAgoraRtm.onMessage` receives the message → routes to `sync.handleIncomingRtmMessage`
+3. `useWatchPartySync.emitEvent` sends `PLAY_EVENT` through the transport — over RTM and the Socket.IO relay — and persists to backend
+4. Guest's `handleInbound` receives whichever copy arrives first (the other is de-duplicated) → routes to `sync.handleIncomingRtmMessage`
 5. `useWatchPartySync` constructs `PartyStateUpdate` → calls `onStateUpdate`
 6. `usePredictiveSync.applyState` calculates expected position, applies drift correction, and calls `video.play()`
 
@@ -1072,4 +1174,8 @@ Socket.IO emit, and it no longer exists. See
 Server-side Socket.IO events (distinct from the RTM channel above):
 `PENDING_MEMBERS_UPDATED`, `MEMBERS_UPDATED`, `MEMBER_LEFT`, `JOIN_RESULT`,
 `CONTENT_UPDATED`, `PERMISSIONS_UPDATED`, `MEMBER_PERMISSIONS_UPDATED`,
-`watch-party:closed`.
+`STATE_UPDATED`, `watch-party:closed`, and `watch-party:relay` — the backup carrier
+for every RTM message type above except the join handshake.
+
+Client → server: `watch-party:guest_auth`, `watch-party:join_room`,
+`watch-party:leave_room`, `watch-party:relay`.

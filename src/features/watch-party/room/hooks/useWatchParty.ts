@@ -10,6 +10,10 @@ import { useSocket } from '@/providers/socket-provider';
 import { useWatchPartyChat } from '../../chat/hooks/useWatchPartyChat';
 import { useAgoraRtm } from '../../media/hooks/useAgoraRtm';
 import { useAgoraRtmToken } from '../../media/hooks/useAgoraRtmToken';
+import {
+  createPresenceMerger,
+  type PresenceChange,
+} from '../lib/presence-merge';
 import { isRtmMessageAllowed } from '../permissions';
 import {
   dispatchRtmMessage,
@@ -17,11 +21,13 @@ import {
   getPartyStreamToken,
 } from '../services/watch-party.api';
 import type { PartyStateUpdate, RoomMember, WatchPartyRoom } from '../types';
+import type { RTMMessage } from '../types/rtm-messages';
 import { isPartyHost, mergeMembers, normalizeRoomUrls } from '../utils';
 import { useClockSync } from './useClockSync';
 import { useWatchPartyLifecycle } from './useWatchPartyLifecycle';
 import { useWatchPartyMembers } from './useWatchPartyMembers';
 import { useWatchPartySync } from './useWatchPartySync';
+import { useWatchPartyTransport } from './useWatchPartyTransport';
 
 interface UseWatchPartyOptions {
   onStateUpdate?: (state: PartyStateUpdate) => void;
@@ -137,122 +143,154 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     initialTokenData: agoraRtmToken || undefined,
   });
 
-  const {
-    isConnected: isRtmConnected,
-    sendMessage: rtmSendMessage,
-    sendMessageToPeer: rtmSendMessageToPeer,
-  } = useAgoraRtm({
-    appId: rtmToken.appId,
-    token: rtmToken.token || '',
-    channel: rtmToken.channel,
-    userId: rtmToken.uid,
-    onMessage: (msg, senderId) => {
-      /*
-        Receiver-side permission enforcement.
+  /*
+    Presence from two sources: Agora RTM and the server's socket presence.
 
-        Sketch and soundboard traffic never touches our backend — it is RTM
-        channel data, peer to peer, which is what makes the overlay feel
-        immediate. That left both permissions enforced only by whether the
-        sender's own UI offered the control: a guest with drawing switched off
-        could still publish `SKETCH_CLEAR mode:'all'` and wipe the host's canvas
-        for the whole party, and a guest barred from the soundboard could still
-        publish an `INTERACTION` that every client dutifully played.
+    A member counts as gone only when BOTH say so. RTM presence alone used to decide,
+    which with the relay in place meant a member whose RTM dropped — still watching
+    over the relay — was flagged disconnected, removed from the 3D room, auto-kicked
+    by the host after two minutes, and, if it was the host, sent every guest home
+    after sixty seconds. See `lib/presence-merge.ts`.
 
-        For data that is never persisted the receiver is the right authority and
-        is as strong as a server check would be: every client already holds the
-        room's authoritative permissions, and a message all receivers drop has
-        left nothing behind. `senderId` is the Agora publisher id, so it is the
-        authenticated channel identity rather than a payload field a sender could
-        edit.
+    The sink is a ref because the handlers it calls (`sync`, `members`) are created
+    further down this hook.
+  */
+  const presenceSinkRef = useRef<(change: PresenceChange) => void>(() => {});
+  const presenceRef = useRef<ReturnType<typeof createPresenceMerger> | null>(
+    null,
+  );
+  if (!presenceRef.current) {
+    presenceRef.current = createPresenceMerger((change) =>
+      presenceSinkRef.current(change),
+    );
+  }
 
-        Chat is gated here too, on top of the server check in
-        `ChatService.addMessage`. The two stop different things: the server keeps a
-        muted guest out of the durable Redis backlog that late joiners read, and
-        this keeps the same line out of the live panel, which RTM would otherwise
-        deliver without the server ever seeing it.
-      */
-      if (!isRtmMessageAllowed(room, senderId, msg, effectiveHostId)) return;
+  // A new party starts with no presence knowledge from the last one. Declared
+  // before the transport so it runs before the transport's join effect in the same
+  // commit — otherwise a fast join ack's snapshot would be wiped straight away.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: room id is the reset trigger
+  useEffect(() => {
+    presenceRef.current?.reset();
+  }, [room?.id]);
 
-      // Route messages to sub-hooks
-      chat.handleIncomingRtmMessage(msg);
-      members.handleIncomingRtmMessage(msg);
-      sync.handleIncomingRtmMessage(msg);
+  /*
+    Every inbound party message, from either path.
 
-      // Calibrate clock if message contains serverTime
-      if ('serverTime' in msg && msg.serverTime) {
-        calibrate(msg.serverTime);
+    Agora RTM and our Socket.IO relay (`useWatchPartyTransport`) both land here.
+    `senderId` is the Agora publisher id for RTM and the server-stamped sender for
+    the relay; both are authenticated identities rather than payload fields, so
+    the permission gate below means the same thing on either path.
+  */
+  const handleInbound = (msg: RTMMessage, senderId: string) => {
+    /*
+      Receiver-side permission enforcement.
+
+      Sketch and soundboard traffic never touches our backend — it is RTM
+      channel data, peer to peer, which is what makes the overlay feel
+      immediate. That left both permissions enforced only by whether the
+      sender's own UI offered the control: a guest with drawing switched off
+      could still publish `SKETCH_CLEAR mode:'all'` and wipe the host's canvas
+      for the whole party, and a guest barred from the soundboard could still
+      publish an `INTERACTION` that every client dutifully played.
+
+      For data that is never persisted the receiver is the right authority and
+      is as strong as a server check would be: every client already holds the
+      room's authoritative permissions, and a message all receivers drop has
+      left nothing behind. `senderId` is the Agora publisher id, so it is the
+      authenticated channel identity rather than a payload field a sender could
+      edit.
+
+      Chat is gated here too, on top of the server check in
+      `ChatService.addMessage`. The two stop different things: the server keeps a
+      muted guest out of the durable Redis backlog that late joiners read, and
+      this keeps the same line out of the live panel, which RTM would otherwise
+      deliver without the server ever seeing it.
+    */
+    if (!isRtmMessageAllowed(room, senderId, msg, effectiveHostId)) return;
+
+    // Control messages travel on both paths; process each one once, in order.
+    if (!transport.accept(msg)) return;
+
+    // Route messages to sub-hooks
+    chat.handleIncomingRtmMessage(msg);
+    members.handleIncomingRtmMessage(msg);
+    sync.handleIncomingRtmMessage(msg);
+
+    // Calibrate clock if message contains serverTime
+    if ('serverTime' in msg && msg.serverTime) {
+      calibrate(msg.serverTime);
+    }
+
+    dispatchRtmMessage(msg);
+
+    // Handle main lifecycle messages
+    switch (msg.type) {
+      case 'JOIN_APPROVED': {
+        const { room: approvedRoom, initialState } = msg;
+
+        getPartyStreamToken(approvedRoom.id)
+          .then((response) => {
+            const token = response.token || msg.streamToken || '';
+            const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+              injectStream: true,
+            });
+
+            setRoom(normalizedRoom);
+            setIsConnected(true);
+            setRequestStatus('joined');
+
+            if (initialState) {
+              // Perform initial clock calibration
+              if (initialState.serverTime) {
+                calibrate(initialState.serverTime);
+              }
+
+              handlePartyStateUpdate({
+                currentTime: initialState.currentTime ?? 0,
+                videoTime:
+                  initialState.videoTime ?? initialState.currentTime ?? 0,
+                isPlaying: initialState.isPlaying,
+                playbackRate: initialState.playbackRate ?? 1,
+                timestamp: initialState.timestamp ?? Date.now(),
+                serverTime: initialState.serverTime || Date.now(),
+                eventType: 'init',
+              });
+            }
+          })
+          .catch(() => {
+            // Fallback: use stream token from the approval message
+            const token = msg.streamToken || '';
+            const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
+              injectStream: true,
+            });
+            setRoom(normalizedRoom);
+            setIsConnected(true);
+            setRequestStatus('joined');
+          });
+        break;
       }
 
-      dispatchRtmMessage(msg);
-
-      // Handle main lifecycle messages
-      switch (msg.type) {
-        case 'JOIN_APPROVED': {
-          const { room: approvedRoom, initialState } = msg;
-
-          getPartyStreamToken(approvedRoom.id)
-            .then((response) => {
-              const token = response.token || msg.streamToken || '';
-              const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
-                injectStream: true,
-              });
-
-              setRoom(normalizedRoom);
-              setIsConnected(true);
-              setRequestStatus('joined');
-
-              if (initialState) {
-                // Perform initial clock calibration
-                if (initialState.serverTime) {
-                  calibrate(initialState.serverTime);
-                }
-
-                handlePartyStateUpdate({
-                  currentTime: initialState.currentTime ?? 0,
-                  videoTime:
-                    initialState.videoTime ?? initialState.currentTime ?? 0,
-                  isPlaying: initialState.isPlaying,
-                  playbackRate: initialState.playbackRate ?? 1,
-                  timestamp: initialState.timestamp ?? Date.now(),
-                  serverTime: initialState.serverTime || Date.now(),
-                  eventType: 'init',
-                });
-              }
-            })
-            .catch(() => {
-              // Fallback: use stream token from the approval message
-              const token = msg.streamToken || '';
-              const normalizedRoom = normalizeRoomUrls(approvedRoom, token, {
-                injectStream: true,
-              });
-              setRoom(normalizedRoom);
-              setIsConnected(true);
-              setRequestStatus('joined');
-            });
-          break;
+      case 'JOIN_REJECTED': {
+        if (requestStatusRef.current === 'pending') {
+          setRequestStatus('rejected');
+          setError(msg.reason || tp('hostRejected'));
+          setRoom(null);
+          setIsConnected(false);
         }
+        break;
+      }
 
-        case 'JOIN_REJECTED': {
-          if (requestStatusRef.current === 'pending') {
-            setRequestStatus('rejected');
-            setError(msg.reason || tp('hostRejected'));
-            setRoom(null);
-            setIsConnected(false);
+      case 'KICK': {
+        if (msg.targetUserId === userId) {
+          toast.error(tp('kicked', { reason: msg.reason }));
+          setRoom(null);
+          setIsConnected(false);
+          setRequestStatus('idle');
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('guest_token');
           }
-          break;
-        }
-
-        case 'KICK': {
-          if (msg.targetUserId === userId) {
-            toast.error(tp('kicked', { reason: msg.reason }));
-            setRoom(null);
-            setIsConnected(false);
-            setRequestStatus('idle');
-            if (typeof window !== 'undefined') {
-              sessionStorage.removeItem('guest_token');
-            }
-          } else if (msg.targetUserId) {
-            /*
+        } else if (msg.targetUserId) {
+          /*
               Other members must also drop the kicked user from their roster.
 
               Without this, a KICK removed the member on the host (who called
@@ -267,32 +305,70 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
               in `room:<id>`), so this RTM path is the only way they learn about
               it.
             */
-            membersHandlerRef.current({
-              type: 'MEMBER_LEFT',
-              userId: msg.targetUserId,
-            });
-            // Then the local event bus, so the 3D theatre despawns the avatar
-            // and frees the seat through the same subscribers an RTM departure
-            // reaches — same pattern as the Socket.IO MEMBER_LEFT handler below.
-            dispatchRtmMessage({
-              type: 'MEMBER_LEFT',
-              userId: msg.targetUserId,
-            });
-          }
-          break;
+          membersHandlerRef.current({
+            type: 'MEMBER_LEFT',
+            userId: msg.targetUserId,
+          });
+          // Then the local event bus, so the 3D theatre despawns the avatar
+          // and frees the seat through the same subscribers an RTM departure
+          // reaches — same pattern as the Socket.IO MEMBER_LEFT handler below.
+          dispatchRtmMessage({
+            type: 'MEMBER_LEFT',
+            userId: msg.targetUserId,
+          });
         }
-
-        case 'PARTY_CLOSED': {
-          closeParty();
-          break;
-        }
+        break;
       }
-    },
+
+      case 'PARTY_CLOSED': {
+        closeParty();
+        break;
+      }
+    }
+  };
+
+  const {
+    isConnected: isRtmConnected,
+    sendMessage: rawRtmSend,
+    sendMessageToPeer: rawRtmSendToPeer,
+  } = useAgoraRtm({
+    appId: rtmToken.appId,
+    token: rtmToken.token || '',
+    channel: rtmToken.channel,
+    userId: rtmToken.uid,
+    onMessage: handleInbound,
     onPresence: (event) => {
-      sync.handlePresenceEvent(event);
-      members.handlePresenceEvent(event);
+      presenceRef.current?.rtm(event.userId, event.action === 'JOIN');
     },
   });
+
+  /*
+    Socket.IO relay through our server, the backup for Agora RTM.
+
+    Everything below that "sends over RTM" sends through this instead: control
+    messages go on both paths, high-frequency ones on RTM and fall back to the relay
+    only while RTM is down. Before this, an RTM outage meant the host's playback
+    reached nobody and guests ran free. See `useWatchPartyTransport`.
+  */
+  const transport = useWatchPartyTransport({
+    socket,
+    roomId: room?.id,
+    userId,
+    rtmConnected: isRtmConnected,
+    rtmSend: rawRtmSend,
+    rtmSendToPeer: rawRtmSendToPeer,
+    onRelayMessage: handleInbound,
+    onSocketPresence: (id, online) => {
+      if (id !== userId) presenceRef.current?.socket(id, online);
+    },
+    onSocketPresenceSnapshot: (ids) => {
+      presenceRef.current?.socketSnapshot(ids.filter((id) => id !== userId));
+    },
+  });
+  const rtmSendMessage = transport.send;
+  const rtmSendMessageToPeer = transport.sendToPeer;
+  /** Either path can carry the party. Effects that used to wait for RTM wait for this. */
+  const isTransportUp = isRtmConnected || transport.relayReady;
 
   // 1. Chat Hook
   const chat = useWatchPartyChat({
@@ -347,6 +423,11 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     videoRef: options.videoRef,
   });
 
+  presenceSinkRef.current = (change) => {
+    sync.handlePresenceEvent(change);
+    members.handlePresenceEvent(change);
+  };
+
   // Clock Synchronization
   const { clockOffset, isCalibrated, calibrate } = useClockSync();
 
@@ -381,28 +462,18 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     `MEMBER_LEFT`, `CONTENT_UPDATED`, `PERMISSIONS_UPDATED`, this one — could
     reach them.
 
-    Authenticated members only. A guest's socket is opened by
-    `use-watch-party-client` before `requestJoin` has run, so it carries no
-    `guest_token` and the backend cannot verify it is a member of this room —
-    `watch-party:join_room` rejects it with `NOT_A_MEMBER`. Guests therefore still
-    depend on the RTM broadcast. Closing that gap means re-initialising the shared
-    socket with the guest token after approval, which is a change to the socket
-    provider used by friends and presence, not to watch party.
+    Authenticated members and guests alike. Joining `room:<id>` now happens in
+    `useWatchPartyTransport`, which first authenticates a guest's lobby socket with
+    its guest token — so guests receive this too, which they did not before.
   */
   useEffect(() => {
-    if (!(socket && syncRoomId && userId) || userId.startsWith('guest')) return;
+    if (!(socket && syncRoomId && userId)) return;
 
-    const join = () => socket.emit('watch-party:join_room', syncRoomId);
     const onClosed = () => closeParty();
-
-    join();
-    socket.on('connect', join);
     socket.on('watch-party:closed', onClosed);
 
     return () => {
-      socket.off('connect', join);
       socket.off('watch-party:closed', onClosed);
-      socket.emit('watch-party:leave_room', syncRoomId);
     };
   }, [socket, syncRoomId, userId, closeParty]);
 
@@ -430,10 +501,8 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
     had died as present, and put their avatar back in a seat. Membership comes from
     the server, liveness stays local.
 
-    Authenticated members only, for the same reason as `watch-party:closed` above:
-    a guest's socket is not in `room:<id>`. Guests are covered by the RTM
-    `MEMBER_LEFT` that `useWatchPartyLifecycle` now broadcasts on leave, and by
-    presence.
+    Guests included: their socket is in `room:<id>` once `useWatchPartyTransport`
+    has authenticated it with the guest token.
   */
   /*
     Held in a ref so the Socket.IO effect below does not depend on its identity.
@@ -448,7 +517,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   membersHandlerRef.current = members.handleIncomingRtmMessage;
 
   useEffect(() => {
-    if (!(socket && syncRoomId && userId) || userId.startsWith('guest')) return;
+    if (!(socket && syncRoomId && userId)) return;
 
     const onMembersUpdated = (payload: { members?: RoomMember[] }) => {
       const incoming = payload?.members;
@@ -528,7 +597,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
   */
   useEffect(() => {
     if (
-      !(isRtmConnected && syncRoomId && userId) ||
+      !(isTransportUp && syncRoomId && userId) ||
       isPartyHost({ hostId: syncHostId ?? '' }, userId)
     ) {
       return;
@@ -560,11 +629,11 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
       clearTimeout(initial);
       clearInterval(interval);
     };
-  }, [isRtmConnected, syncRoomId, syncHostId, userId, rtmSendMessage]);
+  }, [isTransportUp, syncRoomId, syncHostId, userId, rtmSendMessage]);
 
   // On connect/reconnect: fetch initial messages
   useEffect(() => {
-    if (isRtmConnected && requestStatus === 'joined' && room?.id) {
+    if (isTransportUp && requestStatus === 'joined' && room?.id) {
       getPartyMessages(room.id)
         .then((response) => {
           if (response.messages) {
@@ -578,7 +647,7 @@ export function useWatchParty(options: UseWatchPartyOptions = {}) {
         })
         .catch(() => {});
     }
-  }, [isRtmConnected, requestStatus, room?.id, chat.setMessages]);
+  }, [isTransportUp, requestStatus, room?.id, chat.setMessages]);
 
   // Clean up on unmount
   useEffect(() => {
