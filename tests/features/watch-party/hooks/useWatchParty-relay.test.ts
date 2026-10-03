@@ -35,6 +35,9 @@ vi.mock('@/features/watch-party/room/services/watch-party.api', () => ({
   fetchPendingRequests: vi.fn().mockResolvedValue({ pendingMembers: [] }),
   dispatchRtmMessage: vi.fn(),
   getPartyMessages: vi.fn().mockResolvedValue({ messages: [] }),
+  // Chat persists each sent message after relaying it; without this the
+  // 'sends its own control messages' test throws an unhandled rejection.
+  sendPartyMessage: vi.fn().mockResolvedValue({}),
   getPartyStreamToken: vi.fn().mockResolvedValue({ token: 't' }),
   syncPartyState: vi.fn(),
   onPartyInteraction: vi.fn(() => vi.fn()),
