@@ -15,7 +15,6 @@ import {
 import { toast } from 'sonner';
 import { ACESFilmicToneMapping, MathUtils, SRGBColorSpace } from 'three';
 import { usePlayerControls } from '@/features/watch/player/context/PlayerContext';
-import { useLoveSurprise } from '../../love/store';
 import type { RTMMessage } from '../../room/types/rtm-messages';
 import { CAPSULE_CENTRE_TO_FEET } from '../hooks/use-avatar-controls';
 import { useDanceMenu } from '../hooks/use-dance-menu';
@@ -49,7 +48,6 @@ import { PassiveAvatars } from './PassiveAvatars';
 import { RemoteAvatars } from './RemoteAvatar';
 import { TheatreColliders } from './TheatreColliders';
 import { TheatreLighting } from './TheatreLighting';
-import { TheatrePhotoFrames } from './TheatrePhotoFrames';
 import { TheatreRoom } from './TheatreRoom';
 import { TheatreScreen } from './TheatreScreen';
 import { TheatreSeating } from './TheatreSeating';
@@ -373,8 +371,6 @@ export function TheatreScene({
 
         <Suspense fallback={null}>
           <TheatreRoom />
-          {/* TEMPORARY — personal photos in the side-wall panels. */}
-          <TheatrePhotoFrames />
           <TheatreSeating seatMap={seatMap} highlightedSeat={null} />
           <RemoteAvatars
             peerIds={peerIds}
@@ -507,15 +503,6 @@ function SceneInterior({
 }) {
   const lastPoseRef = useRef<Pose>({ x: 0, y: 0, z: 0, r: 0, s: 'idle' });
   const texture = useVideoTexture(videoRef);
-  // TEMPORARY — while the `/my-girl` film plays, the cinema screen shows it.
-  const loveFilm = useLoveSurprise((s) =>
-    s.phase === 'playing' ? s.videoEl : null,
-  );
-  const loveFilmRef = useMemo(
-    () => (loveFilm ? { current: loveFilm } : null),
-    [loveFilm],
-  );
-  const loveTexture = useVideoTexture(loveFilmRef);
   const { seated } = useSitInteraction({
     seatMap,
     mySeat,
@@ -712,10 +699,7 @@ function SceneInterior({
 
   return (
     <>
-      <TheatreScreen
-        texture={loveTexture ?? texture}
-        onTogglePlay={onTogglePlay}
-      />
+      <TheatreScreen texture={texture} onTogglePlay={onTogglePlay} />
       <Physics gravity={[0, 0, 0]} timeStep="vary">
         <TheatreColliders />
         <DanceSpaceProbe

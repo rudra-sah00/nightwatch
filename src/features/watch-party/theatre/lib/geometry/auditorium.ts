@@ -50,7 +50,7 @@ const WALL_FACE = ROOM.width / 2 - WALL_T / 2;
  */
 const SKIRT_FACE = WALL_FACE - 0.1;
 const PILASTER_Z = [1.7, 3.6, 5.5, 7.4] as const;
-export const PANEL_Z = [2.65, 4.55, 6.45] as const;
+const PANEL_Z = [2.65, 4.55, 6.45] as const;
 
 /** Inner face of the rear wall. The Blender equivalent face is its 8.50. */
 const REAR_FACE = ROOM.maxZ - 0.12;
