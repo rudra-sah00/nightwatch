@@ -1,24 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
-const checkPortrait = () =>
-  typeof window !== 'undefined' && window.innerHeight > window.innerWidth;
+const checkPortrait = () => window.innerHeight > window.innerWidth;
+
+function subscribe(onChange: () => void) {
+  window.addEventListener('resize', onChange, { passive: true });
+  window.addEventListener('orientationchange', onChange, { passive: true });
+  return () => {
+    window.removeEventListener('resize', onChange);
+    window.removeEventListener('orientationchange', onChange);
+  };
+}
 
 /**
  * Returns true when the device is in portrait orientation.
  * Updates on resize and orientationchange.
+ *
+ * `useSyncExternalStore` with a `false` server snapshot: the previous `useState`
+ * initializer read `window` during hydration, so portrait clients rendered different
+ * markup from the server and React reported a hydration mismatch.
  */
 export function useMobileOrientation(): boolean {
-  const [isPortrait, setIsPortrait] = useState(checkPortrait);
-
-  useEffect(() => {
-    const handle = () => setIsPortrait(checkPortrait());
-    window.addEventListener('resize', handle, { passive: true });
-    window.addEventListener('orientationchange', handle, { passive: true });
-    return () => {
-      window.removeEventListener('resize', handle);
-      window.removeEventListener('orientationchange', handle);
-    };
-  }, []);
-
-  return isPortrait;
+  return useSyncExternalStore(subscribe, checkPortrait, () => false);
 }

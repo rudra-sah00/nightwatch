@@ -273,14 +273,15 @@ function VODPlayerState({ hideBackButton }: { hideBackButton?: boolean }) {
             </div>
             <Player.Fullscreen />
           </Player.ControlRow>
-          {/* Mobile layout: fullscreen bottom-right, then seekbar pinned to bottom */}
-          <Player.MobileBottomRight>
-            <Player.Fullscreen />
-          </Player.MobileBottomRight>
+          {/* Mobile bottom (YouTube-style): time left, fullscreen right, seekbar
+              underneath. One row, so fullscreen no longer sits on the seek touch target. */}
           <div className="hidden touch-ui:block">
-            <Player.MobileSeekBar />
+            <Player.MobileSeekBar>
+              <Player.Fullscreen />
+            </Player.MobileSeekBar>
           </div>
         </Player.Controls>
+        <Player.MobileProgressLine />
 
         {/* Episode overlay — renders OUTSIDE controls, covers entire player */}
         <Player.EpisodePanelOverlay />

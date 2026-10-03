@@ -29,7 +29,12 @@ export function PlayerControls({ children }: { children: React.ReactNode }) {
           ? 'opacity-0 pointer-events-none'
           : state.showControls || state.isLoading
             ? 'opacity-100'
-            : 'opacity-0',
+            : // Touch: hidden controls are only transparent, and their children opt back
+              // into pointer events — so the first tap meant to *reveal* the controls
+              // instead hit an invisible play button (pausing) or seekbar (seeking).
+              // Disable every descendant so that tap falls through to the root, which
+              // shows the controls, as on YouTube.
+              'opacity-0 touch-ui:[&_*]:pointer-events-none!',
       )}
     >
       {children}

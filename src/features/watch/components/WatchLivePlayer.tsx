@@ -242,12 +242,11 @@ function LivePlayerState({ streamUrl }: { streamUrl: string | null }) {
           </div>
           <Player.Fullscreen />
         </Player.ControlRow>
-        {/* Mobile: fullscreen bottom-right, then seekbar */}
-        <Player.MobileBottomRight>
-          <Player.Fullscreen />
-        </Player.MobileBottomRight>
+        {/* Mobile: fullscreen on the right of the bottom row, seekbar underneath */}
         <div className="hidden touch-ui:block">
-          <Player.MobileSeekBar />
+          <Player.MobileSeekBar>
+            <Player.Fullscreen />
+          </Player.MobileSeekBar>
         </div>
       </Player.Controls>
 

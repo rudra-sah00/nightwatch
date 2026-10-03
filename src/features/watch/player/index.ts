@@ -34,7 +34,10 @@ import {
 import { PlayerFullscreen } from './ui/compound/PlayerFullscreen';
 import { PlayerHeader } from './ui/compound/PlayerHeader';
 import { PlayerLiveBadge } from './ui/compound/PlayerLiveBadge';
-import { PlayerMobileSeekBar } from './ui/compound/PlayerMobileSeekBar';
+import {
+  PlayerMobileProgressLine,
+  PlayerMobileSeekBar,
+} from './ui/compound/PlayerMobileSeekBar';
 import { PlayerPlayPause } from './ui/compound/PlayerPlayPause';
 import { PlayerRoot } from './ui/compound/PlayerRoot';
 import { PlayerSeekBar } from './ui/compound/PlayerSeekBar';
@@ -59,6 +62,7 @@ export const Player = {
   PlayPause: PlayerPlayPause,
   SeekBar: PlayerSeekBar,
   MobileSeekBar: PlayerMobileSeekBar,
+  MobileProgressLine: PlayerMobileProgressLine,
   Volume: PlayerVolume,
   TimeDisplay: PlayerTimeDisplay,
   Fullscreen: PlayerFullscreen,

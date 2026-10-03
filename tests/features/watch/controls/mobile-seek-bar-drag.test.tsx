@@ -13,16 +13,27 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockSeek = vi.fn();
+const mockHandleInteraction = vi.fn();
 let isPortrait = false;
 let readOnly = false;
+let duration = 100;
 
 const mockPlayerContext = {
-  state: { currentTime: 10, duration: 100, buffered: 50 },
-  playerHandlers: { seek: mockSeek },
+  get state() {
+    return { currentTime: 10, duration, buffered: 50 };
+  },
+  playerHandlers: { seek: mockSeek, handleInteraction: mockHandleInteraction },
+  metadata: { type: 'movie' },
+  spriteSheet: undefined,
+  spriteVtt: undefined,
   get readOnly() {
     return readOnly;
   },
 };
+
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => key,
+}));
 
 vi.mock('@/features/watch/player/context/PlayerContext', () => ({
   usePlayerContext: () => mockPlayerContext,
@@ -38,6 +49,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   isPortrait = false;
   readOnly = false;
+  duration = 100;
   Element.prototype.setPointerCapture = vi.fn();
   Element.prototype.releasePointerCapture = vi.fn();
   vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
@@ -125,13 +137,70 @@ describe('PlayerMobileSeekBar drag commits once (PLAYER_AUDIT H8)', () => {
     );
   });
 
-  /** Portrait is display-only, matching YouTube's mobile portrait UX. */
-  it('renders no interactive slider in portrait', () => {
+  /**
+   * Portrait used to be display-only, which left portrait users no way to scrub.
+   * YouTube's portrait bar is seekable, and so is ours now.
+   */
+  it('seeks by drag in portrait too', () => {
     isPortrait = true;
-
     render(<PlayerMobileSeekBar />);
 
-    expect(screen.queryByRole('slider')).toBeNull();
+    drag(screen.getByRole('slider'), 20, 160);
+
+    expect(mockSeek).toHaveBeenCalledTimes(1);
+    expect(mockSeek).toHaveBeenCalledWith(80);
+  });
+
+  it('keeps controls visible for the duration of a drag', () => {
+    render(<PlayerMobileSeekBar />);
+    const bar = screen.getByRole('slider');
+
+    fireEvent.pointerDown(bar, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 20,
+    });
+    expect(mockHandleInteraction).toHaveBeenLastCalledWith(true);
+
+    fireEvent.pointerUp(bar, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 60,
+    });
+    expect(mockHandleInteraction).toHaveBeenLastCalledWith(false);
+  });
+
+  it('shows current time / duration, following the finger while dragging', () => {
+    render(<PlayerMobileSeekBar />);
+    expect(screen.getByText('0:10')).toBeTruthy();
+    expect(screen.getByText('/ 1:40')).toBeTruthy();
+
+    const bar = screen.getByRole('slider');
+    fireEvent.pointerDown(bar, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 100,
+    });
+    // Readout and drag bubble both show the 50s target.
+    expect(screen.getAllByText('0:50').length).toBe(2);
+  });
+
+  it('renders trailing controls in the bottom row', () => {
+    render(
+      <PlayerMobileSeekBar>
+        <button type="button">fullscreen</button>
+      </PlayerMobileSeekBar>,
+    );
+    expect(screen.getByRole('button', { name: 'fullscreen' })).toBeTruthy();
+  });
+
+  it('does not seek when duration is not finite (live)', () => {
+    duration = Number.POSITIVE_INFINITY;
+    render(<PlayerMobileSeekBar />);
+
+    drag(screen.getByRole('slider'), 20, 160);
+
+    expect(mockSeek).not.toHaveBeenCalled();
   });
 
   it('does not seek for watch-party guests', () => {
