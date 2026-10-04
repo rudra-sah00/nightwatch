@@ -15,7 +15,6 @@ import { checkIsMobile } from '@/lib/electron-bridge';
 import { useAuth } from '@/providers/auth-provider';
 import { usePlayerOverlays } from '../hooks/use-player-overlays';
 import { useWatchPartyVideoArea } from '../hooks/use-watch-party-video-area';
-import { LoveSurprise } from '../love/LoveSurprise';
 import type { RTMMessage } from '../media/hooks/useAgoraRtm';
 import {
   PARTY_PLAYBACK_BLOCKED_EVENT,
@@ -490,14 +489,6 @@ export function WatchPartyVideoArea({
           />
         </div>
       ) : null}
-
-      {/* TEMPORARY — `/my-girl` surprise film + question card. */}
-      <LoveSurprise
-        userId={userId}
-        userName={currentUserName || user?.name}
-        rtmSendMessage={rtmSendMessage}
-        is3D={is3D}
-      />
     </Player.Root>
   );
 }
