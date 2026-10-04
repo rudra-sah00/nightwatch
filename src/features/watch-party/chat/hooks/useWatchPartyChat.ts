@@ -204,6 +204,10 @@ export function useWatchPartyChat({
         rtmSendMessage?.({ type: 'LOVE_SURPRISE', userId, at: Date.now() });
         if (useTheatreView.getState().mode !== '2d') {
           useLoveSurprise.getState().start(userId);
+        } else {
+          toast('Switch to 3D to see it 💗', {
+            description: 'Press V to enter the theatre.',
+          });
         }
         return;
       }
