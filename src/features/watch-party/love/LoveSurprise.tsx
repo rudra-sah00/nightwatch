@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { usePlayerControls } from '@/features/watch/player/context/PlayerContext';
 import { onLoveAnswer, onLoveSurprise } from '../room/services/watch-party.api';
 import type { RTMMessage } from '../room/types/rtm-messages';
@@ -102,16 +102,6 @@ export function LoveSurprise({
     };
   }, [active, videoRef]);
 
-  /*
-    Whether the film is actually rolling. Until it is, a loading screen covers
-    the theatre — otherwise typing the command looks like nothing happened while
-    a 24 MB file downloads and the screen keeps showing the paused movie.
-  */
-  const [filmRolling, setFilmRolling] = useState(false);
-  useEffect(() => {
-    if (phase !== 'playing') setFilmRolling(false);
-  }, [phase]);
-
   // Start (or restart) the film each time the surprise begins.
   useEffect(() => {
     if (phase !== 'playing') return;
@@ -179,7 +169,6 @@ export function LoveSurprise({
           onEnded={toQuestion}
           // Missing file (e.g. a deploy without the media) — go straight to the card.
           onError={toQuestion}
-          onPlaying={() => setFilmRolling(true)}
           aria-label="A short film made for you"
           className="pointer-events-none absolute inset-0 z-0 h-full w-full object-contain"
         />
@@ -193,22 +182,6 @@ export function LoveSurprise({
         >
           Close ✕
         </button>
-      ) : null}
-
-      {phase === 'playing' && !filmRolling ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-gradient-to-b from-[#1a0710] to-black"
-        >
-          <div
-            aria-hidden
-            className="h-12 w-12 animate-spin rounded-full border-4 border-pink-300/20 border-t-pink-400"
-          />
-          <p className="font-serif text-2xl italic text-pink-50">
-            Loading something special… 💗
-          </p>
-        </div>
       ) : null}
 
       {phase === 'question' ? (
