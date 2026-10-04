@@ -12,9 +12,9 @@ import { LOVE_VIDEO_URL, type LoveAnswer, useLoveSurprise } from './store';
  * Plays the film for everyone in the party, then asks a question with two
  * buttons. Whoever answers is announced to the whole room live.
  *
- * In 2D the film covers the player. In 3D the <video> stays invisible here and
- * the theatre screen textures from it instead (see `SceneInterior`), so it plays
- * on the cinema screen and the room lights follow it.
+ * 3D only. The film plays on the cinema screen (`SceneInterior` textures from
+ * the <video> here) and the room lights follow it. A viewer in 2D sees nothing,
+ * and leaving 3D ends it for them.
  *
  * The party's own movie or live stream is paused for the duration and resumed
  * afterwards — see the pause effect below.
@@ -36,24 +36,34 @@ export function LoveSurprise({
   is3D,
 }: LoveSurpriseProps) {
   const phase = useLoveSurprise((s) => s.phase);
-  const initiatorId = useLoveSurprise((s) => s.initiatorId);
   const answer = useLoveSurprise((s) => s.answer);
   const { start, toQuestion, setAnswer, reset, setVideoEl } =
     useLoveSurprise.getState();
   const { videoRef } = usePlayerControls();
   const filmRef = useRef<HTMLVideoElement | null>(null);
 
-  // Peers triggering or answering.
+  // Read inside the RTM callback, which is bound once.
+  const is3DRef = useRef(is3D);
+  is3DRef.current = is3D;
+
+  // Peers triggering or answering. 3D only — a 2D viewer sees nothing.
   useEffect(() => {
-    const offStart = onLoveSurprise(({ userId: from }) => start(from));
-    const offAnswer = onLoveAnswer(({ userName: name, answer: a }) =>
-      setAnswer(name || 'Someone', a),
-    );
+    const offStart = onLoveSurprise(({ userId: from }) => {
+      if (is3DRef.current) start(from);
+    });
+    const offAnswer = onLoveAnswer(({ userName: name, answer: a }) => {
+      if (is3DRef.current) setAnswer(name || 'Someone', a);
+    });
     return () => {
       offStart();
       offAnswer();
     };
   }, [start, setAnswer]);
+
+  // Leaving 3D ends the surprise for this viewer.
+  useEffect(() => {
+    if (!is3D) reset();
+  }, [is3D, reset]);
 
   // Never leave the store pointing at a <video> that has unmounted.
   useEffect(() => () => reset(), [reset]);
@@ -67,14 +77,20 @@ export function LoveSurprise({
     pause through `useWatchPartyHostSync` (it listens to the element's events),
     and the host's resume broadcasts a play, so the party stays in step. A live
     stream jumps back to the live edge rather than resuming minutes behind.
+
+    Also muted, in case the host is in 2D and their sync resumes this copy
+    mid-film — the film should never be talked over.
   */
   useEffect(() => {
     if (!active) return;
     const party = videoRef.current;
     if (!party) return;
     const wasPlaying = !party.paused;
+    const wasMuted = party.muted;
     party.pause();
+    party.muted = true;
     return () => {
+      party.muted = wasMuted;
       if (!wasPlaying) return;
       const live = !Number.isFinite(party.duration);
       if (live && party.seekable.length > 0) {
@@ -135,32 +151,28 @@ export function LoveSurprise({
     [userId, userName, rtmSendMessage, setAnswer],
   );
 
-  const isInitiator = Boolean(userId) && initiatorId === userId;
-  const showFilm = phase === 'playing' && !is3D;
-
   return (
     <>
       {/*
-        Always mounted, so the 3D screen has an element to texture from the
-        moment the surprise starts. Hidden with opacity rather than display:none,
-        which can stop some browsers decoding frames.
+        3D only, and full size BENEATH the opaque theatre canvas — the same trick
+        the party's own <video> relies on. A 1px or opacity-0 element can stop
+        the browser compositing frames, and VideoTexture only updates on frames
+        that were composited, so the cinema screen would freeze.
       */}
-      <video
-        ref={bindFilm}
-        src={LOVE_VIDEO_URL}
-        muted
-        playsInline
-        preload="auto"
-        onEnded={toQuestion}
-        // Missing file (e.g. a deploy without the media) — go straight to the card.
-        onError={toQuestion}
-        aria-label="A short film made for you"
-        className={
-          showFilm
-            ? 'absolute inset-0 z-50 h-full w-full bg-black object-contain'
-            : 'pointer-events-none absolute h-px w-px opacity-0'
-        }
-      />
+      {is3D ? (
+        <video
+          ref={bindFilm}
+          src={LOVE_VIDEO_URL}
+          muted
+          playsInline
+          preload="auto"
+          onEnded={toQuestion}
+          // Missing file (e.g. a deploy without the media) — go straight to the card.
+          onError={toQuestion}
+          aria-label="A short film made for you"
+          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-contain"
+        />
+      ) : null}
 
       {active ? (
         <button
@@ -189,28 +201,22 @@ export function LoveSurprise({
             >
               Will you watch every movie with me forever?
             </h2>
-            {isInitiator ? (
-              <p className="mt-8 animate-pulse text-sm text-pink-200/80">
-                Waiting for her answer… 💗
-              </p>
-            ) : (
-              <div className="mt-8 flex justify-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => respond('yes')}
-                  className="rounded-full bg-pink-500 px-7 py-2.5 font-semibold text-white shadow-lg shadow-pink-500/40 transition hover:scale-105 hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink-200"
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => respond('also-yes')}
-                  className="rounded-full bg-rose-600 px-7 py-2.5 font-semibold text-white shadow-lg shadow-rose-600/40 transition hover:scale-105 hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink-200"
-                >
-                  Also yes
-                </button>
-              </div>
-            )}
+            <div className="mt-8 flex justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => respond('yes')}
+                className="rounded-full bg-pink-500 px-7 py-2.5 font-semibold text-white shadow-lg shadow-pink-500/40 transition hover:scale-105 hover:bg-pink-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink-200"
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => respond('also-yes')}
+                className="rounded-full bg-rose-600 px-7 py-2.5 font-semibold text-white shadow-lg shadow-rose-600/40 transition hover:scale-105 hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pink-200"
+              >
+                Also yes
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
