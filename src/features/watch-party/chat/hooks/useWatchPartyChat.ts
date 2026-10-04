@@ -11,7 +11,6 @@ import {
   sendPartyMessage,
 } from '../../room/services/watch-party.api';
 import type { ChatMessage, WatchPartyRoom } from '../../room/types';
-import { useTheatreView } from '../../theatre/lib/view-mode';
 
 /**
  * One `Audio` for the whole tab, reused.
@@ -199,12 +198,9 @@ export function useWatchPartyChat({
       if (!room?.id || !userId || !currentUserName) return;
 
       // TEMPORARY — `/my-girl` plays the surprise film instead of posting a line.
-      // It shows only in 3D; typed from 2D it still plays for 3D viewers.
       if (isLoveCommand(content)) {
         rtmSendMessage?.({ type: 'LOVE_SURPRISE', userId, at: Date.now() });
-        if (useTheatreView.getState().mode !== '2d') {
-          useLoveSurprise.getState().start(userId);
-        }
+        useLoveSurprise.getState().start(userId);
         return;
       }
 
