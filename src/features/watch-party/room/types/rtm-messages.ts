@@ -306,6 +306,21 @@ export interface RtmSeatClaim {
   at: number;
 }
 
+/** TEMPORARY — `/my-girl` chat command: play the surprise film for everyone. */
+export interface RtmLoveSurprise {
+  type: 'LOVE_SURPRISE';
+  userId: string;
+  at: number;
+}
+
+/** TEMPORARY — an answer to the question card shown after the surprise film. */
+export interface RtmLoveAnswer {
+  type: 'LOVE_ANSWER';
+  userId: string;
+  userName: string;
+  answer: 'yes' | 'also-yes';
+}
+
 export type RTMMessage =
   | RtmPlayEvent
   | RtmPauseEvent
@@ -338,4 +353,6 @@ export type RTMMessage =
   | RtmContentUpdated
   | RtmStreamToken
   | RtmAvatarTransform
-  | RtmSeatClaim;
+  | RtmSeatClaim
+  | RtmLoveSurprise
+  | RtmLoveAnswer;

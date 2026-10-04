@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { trackEvent } from '@/lib/analytics';
+import { isLoveCommand, useLoveSurprise } from '../../love/store';
 import type { RTMMessage } from '../../media/hooks/useAgoraRtm';
 import {
   getPartyMessages,
@@ -195,6 +196,13 @@ export function useWatchPartyChat({
   const sendMessage = useCallback(
     async (content: string) => {
       if (!room?.id || !userId || !currentUserName) return;
+
+      // TEMPORARY — `/my-girl` plays the surprise film instead of posting a line.
+      if (isLoveCommand(content)) {
+        rtmSendMessage?.({ type: 'LOVE_SURPRISE', userId, at: Date.now() });
+        useLoveSurprise.getState().start(userId);
+        return;
+      }
 
       const now = Date.now();
       if (now - lastSendTimeRef.current < SEND_RATE_LIMIT_MS) return;

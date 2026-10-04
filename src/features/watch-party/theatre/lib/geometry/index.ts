@@ -13,6 +13,7 @@
 export {
   AUDITORIUM_METRICS,
   buildAuditorium,
+  PANEL_Z,
   REAR_DETAIL_FACE_Z,
 } from './auditorium';
 export {

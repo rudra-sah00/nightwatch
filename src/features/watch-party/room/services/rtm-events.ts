@@ -120,6 +120,31 @@ export const onSeatClaim = (
     }),
   );
 
+/* ───────────── TEMPORARY: `/my-girl` surprise ───────────── */
+
+export const onLoveSurprise = (callback: (c: { userId: string }) => void) =>
+  subscribe('LOVE_SURPRISE', (msg) => {
+    if (typeof msg.userId !== 'string' || !msg.userId) return;
+    callback({ userId: msg.userId });
+  });
+
+export const onLoveAnswer = (
+  callback: (a: {
+    userId: string;
+    userName: string;
+    answer: 'yes' | 'also-yes';
+  }) => void,
+) =>
+  subscribe('LOVE_ANSWER', (msg) => {
+    if (typeof msg.userId !== 'string' || !msg.userId) return;
+    if (msg.answer !== 'yes' && msg.answer !== 'also-yes') return;
+    callback({
+      userId: msg.userId,
+      userName: typeof msg.userName === 'string' ? msg.userName : '',
+      answer: msg.answer,
+    });
+  });
+
 /**
  * Party roster changes, used to spawn and despawn 3D avatars.
  *
