@@ -157,6 +157,20 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Enable cross-origin isolation for GTA V game page (SharedArrayBuffer)
+        source: '/games/gta-v',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'credentialless',
+          },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           {
