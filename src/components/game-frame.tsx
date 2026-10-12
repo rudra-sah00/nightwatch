@@ -127,7 +127,7 @@ export function GameFrame({
         ref={iframeRef}
         src={gameUrl}
         className="w-full h-full"
-        allow="autoplay; fullscreen; gamepad; cross-origin-isolated"
+        allow="autoplay; fullscreen; gamepad; cross-origin-isolated; pointer-lock; keyboard-map; focus-without-user-activation"
         allowFullScreen
         // @ts-expect-error -- credentialless is a valid HTML attribute but not yet in React's types
         credentialless="true"
