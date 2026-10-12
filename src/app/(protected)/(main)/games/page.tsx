@@ -63,7 +63,9 @@ export default function GamesPage() {
     <div className="min-h-full pb-32 overflow-x-hidden">
       <PageTitle title={navT('games')} href="/games" />
       {/* Hero with featured game showcase */}
-      <div className="mb-8 relative overflow-hidden rounded-2xl border-[3px] border-border">
+      <div
+        className={`mb-8 relative overflow-hidden rounded-2xl ${showShowcase && featured ? '' : 'border-[3px] border-border'}`}
+      >
         {/* Default banner — stays as base layer */}
         <div
           className={`bg-neo-green relative transition-opacity duration-700 ${showShowcase && featured ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
@@ -89,13 +91,17 @@ export default function GamesPage() {
           <div
             className={`absolute inset-0 transition-opacity duration-700 ${showShowcase ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
           >
-            {/* Video background */}
+            {/* Video background — preloaded immediately, plays on showcase */}
             <video
               ref={videoRef}
               src={featured.video}
+              preload="auto"
               muted
               loop
               playsInline
+              onCanPlayThrough={() => {
+                if (showShowcase) videoRef.current?.play().catch(() => {});
+              }}
               className="absolute inset-0 w-full h-full object-cover"
             />
             {/* Dark gradient overlay */}
