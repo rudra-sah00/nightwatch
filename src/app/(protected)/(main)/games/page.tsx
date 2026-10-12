@@ -1,17 +1,18 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Play } from 'lucide-react';
+import { Play, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageTitle } from '@/components/layout/page-title';
 import { NeoSearchBar } from '@/components/ui/neo-search-bar';
 import { AppSkeletonTheme, Skeleton } from '@/components/ui/skeleton-theme';
 import { getGames } from '@/features/games/api';
 
 const FEATURED_SLUG = 'gta-v';
-const SHOWCASE_DELAY = 2000; // ms before transitioning to video
+const SHOWCASE_DELAY = 2000;
+const MUTE_STORAGE_KEY = 'nw:games:showcase-muted';
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -22,12 +23,26 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function getStoredMute(): boolean {
+  if (typeof window === 'undefined') return true;
+  const stored = localStorage.getItem(MUTE_STORAGE_KEY);
+  // Default to muted if no preference saved
+  return stored === null ? true : stored === 'true';
+}
+
 export default function GamesPage() {
   const t = useTranslations('common.gamesPage');
   const navT = useTranslations('common.nav');
   const [search, setSearch] = useState('');
   const [showShowcase, setShowShowcase] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Load mute preference from localStorage on mount
+  useEffect(() => {
+    setIsMuted(getStoredMute());
+  }, []);
 
   const { data: games = [], isLoading: loading } = useQuery({
     queryKey: ['games'],
@@ -36,7 +51,6 @@ export default function GamesPage() {
 
   const featured = games.find((g) => g.slug === FEATURED_SLUG);
 
-  // Shuffle once when games data changes (new fetch), not on every render
   const shuffled = useMemo(() => shuffle(games), [games]);
 
   const filtered = shuffled.filter(
@@ -45,30 +59,48 @@ export default function GamesPage() {
       g.description.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // Transition to showcase after delay
+  // Start timer for showcase transition
   useEffect(() => {
     if (!featured) return;
     const timer = setTimeout(() => setShowShowcase(true), SHOWCASE_DELAY);
     return () => clearTimeout(timer);
   }, [featured]);
 
-  // Auto-play video when showcase appears
+  // Only show showcase when both timer elapsed AND video is buffered
+  const showcaseVisible = showShowcase && videoReady;
+
+  // Auto-play when showcase becomes visible
   useEffect(() => {
-    if (showShowcase && videoRef.current) {
+    if (showcaseVisible && videoRef.current) {
       videoRef.current.play().catch(() => {});
     }
-  }, [showShowcase]);
+  }, [showcaseVisible]);
+
+  // Sync mute state to video element
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      localStorage.setItem(MUTE_STORAGE_KEY, String(next));
+      return next;
+    });
+  }, []);
 
   return (
     <div className="min-h-full pb-32 overflow-x-hidden">
       <PageTitle title={navT('games')} href="/games" />
       {/* Hero with featured game showcase */}
       <div
-        className={`mb-8 relative overflow-hidden rounded-2xl ${showShowcase && featured ? '' : 'border-[3px] border-border'}`}
+        className={`mb-8 relative overflow-hidden rounded-2xl ${showcaseVisible && featured ? '' : 'border-[3px] border-border'}`}
       >
         {/* Default banner — stays as base layer */}
         <div
-          className={`bg-neo-green relative transition-opacity duration-700 ${showShowcase && featured ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          className={`bg-neo-green relative transition-opacity duration-700 ${showcaseVisible && featured ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         >
           <div className="absolute -top-10 -right-10 w-64 h-64 border-[4px] border-border rounded-full opacity-10" />
           <div className="absolute top-10 left-1/4 w-24 h-24 bg-neo-yellow border-[4px] border-border opacity-20 rotate-12" />
@@ -86,27 +118,39 @@ export default function GamesPage() {
           </div>
         </div>
 
-        {/* Featured game showcase — fades in on top */}
+        {/* Featured game showcase — fades in only when video is ready */}
         {featured && (
           <div
-            className={`absolute inset-0 transition-opacity duration-700 ${showShowcase ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            className={`absolute inset-0 transition-opacity duration-700 ${showcaseVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
           >
-            {/* Video background — preloaded immediately, plays on showcase */}
+            {/* Video background — preloaded immediately */}
             <video
               ref={videoRef}
               src={featured.video}
               preload="auto"
-              muted
+              muted={isMuted}
               loop
               playsInline
-              onCanPlayThrough={() => {
-                if (showShowcase) videoRef.current?.play().catch(() => {});
-              }}
+              onCanPlayThrough={() => setVideoReady(true)}
               className="absolute inset-0 w-full h-full object-cover"
             />
             {/* Dark gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+
+            {/* Mute/unmute button — top right */}
+            <button
+              type="button"
+              onClick={toggleMute}
+              className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2.5 rounded-full backdrop-blur-sm transition-colors"
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? (
+                <VolumeX className="w-4 h-4" />
+              ) : (
+                <Volume2 className="w-4 h-4" />
+              )}
+            </button>
 
             {/* Content overlay */}
             <div className="relative z-10 h-full flex flex-col justify-end container mx-auto px-6 md:px-10 py-8 md:py-12">
